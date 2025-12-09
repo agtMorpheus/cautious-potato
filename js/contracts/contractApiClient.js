@@ -370,6 +370,238 @@ export class ContractApiClient {
     clearQueue() {
         this.offlineQueue = [];
     }
+
+    // ============================================================
+    // Analytics Endpoints (Phase 6)
+    // ============================================================
+
+    /**
+     * Get analytics dashboard data
+     * @returns {Promise<Object>} Dashboard data
+     */
+    async getDashboard() {
+        return this.request('GET', '/analytics/dashboard');
+    }
+
+    /**
+     * Get contract trends over time
+     * @param {number} days - Number of days (default: 30)
+     * @returns {Promise<Object>} Trends data
+     */
+    async getContractTrends(days = 30) {
+        return this.request('GET', `/analytics/trends?days=${days}`);
+    }
+
+    /**
+     * Get bottleneck analysis
+     * @param {number} thresholdDays - Days threshold for stuck contracts
+     * @returns {Promise<Object>} Bottleneck data
+     */
+    async getBottlenecks(thresholdDays = 30) {
+        return this.request('GET', `/analytics/bottlenecks?threshold_days=${thresholdDays}`);
+    }
+
+    /**
+     * Get SLA status summary
+     * @returns {Promise<Object>} SLA status data
+     */
+    async getSlaStatus() {
+        return this.request('GET', '/analytics/sla-status');
+    }
+
+    /**
+     * Trigger metrics calculation
+     * @param {string} date - Date to calculate metrics for (YYYY-MM-DD)
+     * @returns {Promise<Object>} Calculation result
+     */
+    async calculateMetrics(date = null) {
+        return this.request('POST', '/analytics/calculate-metrics', { date });
+    }
+
+    // ============================================================
+    // Workflow Endpoints (Phase 6)
+    // ============================================================
+
+    /**
+     * Transition contract status
+     * @param {string} contractId - Contract UUID
+     * @param {string} newStatus - Target status
+     * @param {string} reason - Optional reason
+     * @returns {Promise<Object>} Updated contract
+     */
+    async transitionContract(contractId, newStatus, reason = null) {
+        return this.request('POST', `/contracts/${contractId}/transition`, {
+            status: newStatus,
+            reason
+        });
+    }
+
+    /**
+     * Request approval for a contract
+     * @param {string} contractId - Contract UUID
+     * @param {number} approverId - Approver user ID
+     * @param {string} note - Optional note
+     * @returns {Promise<Object>} Approval request
+     */
+    async requestApproval(contractId, approverId, note = null) {
+        return this.request('POST', `/contracts/${contractId}/request-approval`, {
+            approver_id: approverId,
+            note
+        });
+    }
+
+    /**
+     * Process approval (approve or reject)
+     * @param {string} contractId - Contract UUID
+     * @param {boolean} approve - True to approve, false to reject
+     * @param {string} comments - Optional comments
+     * @returns {Promise<Object>} Approval result
+     */
+    async processApproval(contractId, approve, comments = null) {
+        return this.request('POST', `/contracts/${contractId}/process-approval`, {
+            approve,
+            comments
+        });
+    }
+
+    /**
+     * Get pending approvals for current user
+     * @returns {Promise<Array>} List of pending approvals
+     */
+    async getPendingApprovals() {
+        return this.request('GET', '/approvals/pending');
+    }
+
+    /**
+     * Get workflow history for a contract
+     * @param {string} contractId - Contract UUID
+     * @returns {Promise<Array>} Workflow transitions
+     */
+    async getWorkflowHistory(contractId) {
+        return this.request('GET', `/contracts/${contractId}/workflow-history`);
+    }
+
+    // ============================================================
+    // Data Quality Endpoints (Phase 6)
+    // ============================================================
+
+    /**
+     * Detect duplicate contracts
+     * @param {number} threshold - Similarity threshold (0-1)
+     * @returns {Promise<Array>} List of potential duplicates
+     */
+    async detectDuplicates(threshold = 0.8) {
+        return this.request('GET', `/contracts/duplicates?threshold=${threshold}`);
+    }
+
+    /**
+     * Find duplicates for a specific contract
+     * @param {string} contractId - Contract UUID
+     * @returns {Promise<Array>} List of potential duplicates
+     */
+    async findDuplicatesFor(contractId) {
+        return this.request('GET', `/contracts/${contractId}/duplicates`);
+    }
+
+    /**
+     * Merge two duplicate contracts
+     * @param {string} keepId - Contract ID to keep
+     * @param {string} deleteId - Contract ID to delete
+     * @returns {Promise<Object>} Merged contract
+     */
+    async mergeDuplicates(keepId, deleteId) {
+        return this.request('POST', '/contracts/merge', {
+            keep_id: keepId,
+            delete_id: deleteId
+        });
+    }
+
+    /**
+     * Dismiss duplicate pair
+     * @param {string} contract1Id - First contract ID
+     * @param {string} contract2Id - Second contract ID
+     * @returns {Promise<Object>} Dismissal result
+     */
+    async dismissDuplicate(contract1Id, contract2Id) {
+        return this.request('POST', '/contracts/duplicates/dismiss', {
+            contract1_id: contract1Id,
+            contract2_id: contract2Id
+        });
+    }
+
+    /**
+     * Validate contract data
+     * @param {Object} data - Contract data to validate
+     * @returns {Promise<Object>} Validation result
+     */
+    async validateContract(data) {
+        return this.request('POST', '/contracts/validate', data);
+    }
+
+    // ============================================================
+    // Notifications Endpoints (Phase 6)
+    // ============================================================
+
+    /**
+     * Get user notifications
+     * @param {boolean} unreadOnly - Only get unread notifications
+     * @returns {Promise<Array>} List of notifications
+     */
+    async getNotifications(unreadOnly = false) {
+        return this.request('GET', `/notifications${unreadOnly ? '?unread=true' : ''}`);
+    }
+
+    /**
+     * Mark notification as read
+     * @param {number} notificationId - Notification ID
+     * @returns {Promise<Object>} Updated notification
+     */
+    async markNotificationRead(notificationId) {
+        return this.request('PUT', `/notifications/${notificationId}/read`);
+    }
+
+    /**
+     * Mark all notifications as read
+     * @returns {Promise<Object>} Result
+     */
+    async markAllNotificationsRead() {
+        return this.request('PUT', '/notifications/read-all');
+    }
+
+    // ============================================================
+    // Compliance Endpoints (Phase 6)
+    // ============================================================
+
+    /**
+     * Get data retention report
+     * @returns {Promise<Object>} Retention report
+     */
+    async getRetentionReport() {
+        return this.request('GET', '/compliance/retention');
+    }
+
+    /**
+     * Get GDPR compliance report
+     * @returns {Promise<Object>} Compliance report
+     */
+    async getComplianceReport() {
+        return this.request('GET', '/compliance/report');
+    }
+
+    /**
+     * Create deletion request
+     * @param {string} type - Request type ('user_data', 'contract', 'all_data')
+     * @param {string} targetId - Target ID
+     * @param {string} reason - Reason for deletion
+     * @returns {Promise<Object>} Deletion request
+     */
+    async createDeletionRequest(type, targetId, reason = null) {
+        return this.request('POST', '/compliance/deletion-request', {
+            type,
+            target_id: targetId,
+            reason
+        });
+    }
 }
 
 /**
