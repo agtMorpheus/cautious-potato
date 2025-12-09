@@ -4,7 +4,7 @@
  * Handles user interactions and coordinates between UI, state, and utilities
  */
 
-import { getState, setState } from './state.js';
+import { getState, setState, clearState } from './state.js';
 import * as utils from './utils.js';
 
 /**
@@ -174,10 +174,9 @@ export function handleExportAbrechnung() {
 /**
  * Handle application reset
  */
-export async function handleReset() {
+export function handleReset() {
     if (confirm('Möchten Sie wirklich alle Daten löschen und die Anwendung zurücksetzen?')) {
         // Clear state
-        const { clearState } = await import('./state.js');
         clearState();
         
         // Reset UI

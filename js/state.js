@@ -114,6 +114,7 @@ export function loadState() {
                 appState = {
                     protokollData: parsed.protokollData,
                     abrechnungData: parsed.abrechnungData,
+                    selectedFile: null, // Don't restore file objects from localStorage
                     status: parsed.status || 'ready'
                 };
                 

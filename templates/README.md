@@ -12,7 +12,7 @@ This folder should contain the following Excel template files:
   - T10: Einsatzort
   - T7: Firma
   - A5: Auftraggeber
-  - Rows 30-325: Position data in columns A (Pos.Nr.) and B/X (Menge)
+  - Rows 30-325: Position data in columns A (Pos.Nr.) and quantity in columns X, B, or C (checked in that order)
 
 ## abrechnung.xlsx
 - **Purpose**: Template for generated billing documents

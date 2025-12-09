@@ -21,11 +21,6 @@ export async function readExcelFile(file) {
         }
         
         // Validate file type
-        const validTypes = [
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-excel'
-        ];
-        
         if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
             reject(new Error('Ungültiges Dateiformat. Bitte wählen Sie eine .xlsx Datei.'));
             return;
