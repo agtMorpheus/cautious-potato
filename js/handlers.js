@@ -604,7 +604,7 @@ export function updateImportUI(state) {
     }
     
     // Update summary display
-    if (importSummary && protokollData && protokollData.metadata) {
+    if (importSummary && protokollData && protokollData.metadata && protokollData.positionen.length > 0) {
         const { metadata, positionen } = protokollData;
         
         importSummary.innerHTML = `
@@ -685,7 +685,7 @@ export function updateGenerateUI(state) {
     }
     
     // Update generation summary
-    if (generateSummary && abrechnungData && abrechnungData.header) {
+    if (generateSummary && abrechnungData && abrechnungData.header && Object.keys(abrechnungData.positionen || {}).length > 0) {
         const { header, positionen } = abrechnungData;
         const totalQuantity = Object.values(positionen).reduce((sum, q) => sum + q, 0);
         
