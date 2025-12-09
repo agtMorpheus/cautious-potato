@@ -82,6 +82,14 @@ const initialState = {
       message: '',
       errors: [],
       warnings: []
+    },
+    // Phase 3: Last import result for preview before saving
+    lastImportResult: null,    // { contracts, errors, warnings, summary }
+    // Phase 3: UI state for contract manager
+    ui: {
+      activeTab: 'import',     // 'import' | 'preview' | 'list'
+      sortKey: 'contractId',
+      sortDir: 'asc'
     }
   },
   ui: {
@@ -564,6 +572,43 @@ export function clearContracts() {
         message: '',
         errors: [],
         warnings: []
+      },
+      lastImportResult: null,
+      ui: {
+        activeTab: 'import',
+        sortKey: 'contractId',
+        sortDir: 'asc'
+      }
+    }
+  });
+}
+
+/**
+ * Set last import result for preview (Phase 3)
+ * @param {Object} result - Import result { contracts, errors, warnings, summary }
+ * @returns {Object} New state snapshot
+ */
+export function setLastImportResult(result) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      lastImportResult: result
+    }
+  });
+}
+
+/**
+ * Set contract UI state (Phase 3)
+ * @param {Object} uiState - UI state updates { activeTab, sortKey, sortDir }
+ * @returns {Object} New state snapshot
+ */
+export function setContractUIState(uiState) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      ui: {
+        ...(currentState.contracts?.ui || {}),
+        ...uiState
       }
     }
   });

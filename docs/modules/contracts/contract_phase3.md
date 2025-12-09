@@ -1,7 +1,7 @@
 # Contract Manager Module – Phase 3: UI, Interaction & Local DB Integration
 
 **Duration:** Weeks 5–6  
-**Status:** Planned  
+**Status:** Implemented  
 **Last Updated:** December 9, 2025
 
 ---
@@ -868,32 +868,32 @@ export function initializeApp() {
 
 ### UI Components
 
-- [ ] Contract Manager section in `index.html`
-- [ ] Import panel (file input, sheet selector, status)
-- [ ] Mapping table with editable column selection
-- [ ] Preview table with summary and error list
-- [ ] Contract list with filters, search, sorting, and actions
+- [x] Contract Manager section in `index.html`
+- [x] Import panel (file input, sheet selector, status)
+- [x] Mapping table with editable column selection
+- [x] Preview table with summary and error list
+- [x] Contract list with filters, search, sorting, and actions
 
 ### JavaScript Modules
 
-- [ ] `contracts/contractRenderer.js` implemented
-- [ ] `contracts/contractHandlers.js` implemented
-- [ ] `contracts/contractRepository.js` integrated
-- [ ] `main.js` initialization updated
+- [x] `contracts/contractRenderer.js` implemented
+- [x] `contracts/contractHandlers.js` implemented
+- [x] `contracts/contractRepository.js` integrated
+- [x] `main.js` initialization updated
 
 ### State Integration
 
-- [ ] `contracts.lastImportResult` managed correctly
-- [ ] `contracts.filters` and `contracts.ui` handled by state
-- [ ] All UI renders based only on state (no hidden local logic)
+- [x] `contracts.lastImportResult` managed correctly
+- [x] `contracts.filters` and `contracts.ui` handled by state
+- [x] All UI renders based only on state (no hidden local logic)
 
 ### Testing
 
-- [ ] Happy path import works end-to-end
-- [ ] Mapping correction scenario tested
-- [ ] Filters, search, sorting tested
-- [ ] Inline edit scenario tested (if included in this phase)
-- [ ] Abrechnung regression tests passed
+- [x] Happy path import works end-to-end
+- [x] Mapping correction scenario tested
+- [x] Filters, search, sorting tested
+- [x] Inline edit scenario tested (if included in this phase)
+- [x] Abrechnung regression tests passed
 
 ---
 

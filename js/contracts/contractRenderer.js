@@ -1,5 +1,5 @@
 /**
- * Contract Renderer Module (Phase 1)
+ * Contract Renderer Module (Phase 1 & Phase 3)
  * 
  * Handles UI rendering for the Contract Manager module
  * Provides functions to render contract lists, tables, and summaries
@@ -10,12 +10,19 @@
  * - Import preview table rendering
  * - Contract list rendering (placeholder)
  * - Status indicators and progress
+ * 
+ * Phase 3 implements:
+ * - Enhanced import panel with progress display
+ * - Mapping table with editable column selection and hints
+ * - Preview table with summary, errors, and row highlighting
+ * - Contract list with search, filters, sorting, and actions
+ * - Inline editing support
  */
 
-import { getState, subscribe } from '../state.js';
+import { getState, subscribe, setContractFilters } from '../state.js';
 import { escapeHtml } from '../handlers.js';
-import { getFilteredContracts, getContractStatistics, getUniqueFieldValues } from './contractRepository.js';
-import { normalizeStatus, VALID_STATUS_VALUES } from './contractUtils.js';
+import { getFilteredContracts, getContractStatistics, getUniqueFieldValues, sortContracts } from './contractRepository.js';
+import { normalizeStatus, VALID_STATUS_VALUES, getContractSummary } from './contractUtils.js';
 
 /**
  * Initialize contract UI and subscribe to state changes
@@ -55,11 +62,14 @@ function updateContractUI(state) {
     // Update mapping editor
     updateMappingEditor(contractState);
     
+    // Update preview section (Phase 3)
+    renderContractPreview(contractState);
+    
     // Update statistics
     updateContractStatistics(contractState);
     
-    // Update contract list
-    updateContractList(contractState);
+    // Update contract list with filters and sorting (Phase 3)
+    renderContractList(contractState);
 }
 
 /**
@@ -265,17 +275,208 @@ function updateContractStatistics(contractState) {
 }
 
 /**
- * Update the contract list/table
+ * Render contract preview table (Phase 3)
+ * Shows imported contracts before final save with error highlighting
  * @param {Object} contractState - Contracts state slice
  */
-function updateContractList(contractState) {
+export function renderContractPreview(contractState) {
+    const previewContainer = document.getElementById('contract-preview-container');
+    const previewCard = document.getElementById('contract-preview-card');
+    
+    if (!previewContainer) {
+        return;
+    }
+    
+    const preview = contractState.lastImportResult;
+    
+    if (!preview) {
+        previewContainer.style.display = 'none';
+        if (previewCard) {
+            previewCard.style.display = 'none';
+        }
+        return;
+    }
+    
+    previewContainer.style.display = 'block';
+    if (previewCard) {
+        previewCard.style.display = 'block';
+    }
+    
+    const { contracts, errors, warnings, summary } = preview;
+    
+    // Build summary section
+    const summaryHtml = `
+        <div class="cm-preview-summary">
+            <span class="cm-summary-item cm-summary-total">
+                <strong>${summary?.successCount || contracts.length}</strong> von ${summary?.totalRows || contracts.length} Verträge
+            </span>
+            <span class="cm-summary-item cm-summary-errors ${errors.length > 0 ? 'has-errors' : ''}">
+                <strong>${errors.length}</strong> Fehler
+            </span>
+            <span class="cm-summary-item cm-summary-warnings ${warnings.length > 0 ? 'has-warnings' : ''}">
+                <strong>${warnings.length}</strong> Hinweise
+            </span>
+        </div>
+    `;
+    
+    // Build preview table (limit to 100 rows for performance)
+    const maxPreviewRows = 100;
+    const previewRows = contracts.slice(0, maxPreviewRows);
+    
+    let tableHtml = '';
+    if (previewRows.length === 0) {
+        tableHtml = `
+            <div class="cm-preview-empty">
+                <p>Keine gültigen Verträge gefunden.</p>
+            </div>
+        `;
+    } else {
+        tableHtml = `
+            <div class="data-table-container cm-preview-table-wrapper">
+                <table class="data-table cm-preview-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Auftrag</th>
+                            <th>Titel</th>
+                            <th>Standort</th>
+                            <th>Säule/Raum</th>
+                            <th>Anlage</th>
+                            <th>Status</th>
+                            <th>Sollstart</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${previewRows.map((c, index) => {
+                            const statusClass = getStatusClass(c.status);
+                            const rowIndex = c.sourceFile?.rowIndex || index + 2;
+                            return `
+                                <tr data-row-index="${rowIndex}">
+                                    <td>${index + 1}</td>
+                                    <td>${escapeHtml(c.contractId || '-')}</td>
+                                    <td>${escapeHtml(c.contractTitle || '-')}</td>
+                                    <td>${escapeHtml(c.location || '-')}</td>
+                                    <td>${escapeHtml(c.roomArea || '-')}</td>
+                                    <td>${escapeHtml(c.equipmentId || '-')}</td>
+                                    <td><span class="status-badge ${statusClass}">${escapeHtml(c.status || '-')}</span></td>
+                                    <td>${escapeHtml(c.plannedStart || '-')}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        if (contracts.length > maxPreviewRows) {
+            tableHtml += `<p class="table-footer">Zeige ${maxPreviewRows} von ${contracts.length} Verträgen</p>`;
+        }
+    }
+    
+    // Build error list
+    let errorListHtml = '';
+    if (errors.length > 0) {
+        errorListHtml = `
+            <div class="cm-error-list">
+                <h4>Fehler (${errors.length}):</h4>
+                <ul>
+                    ${errors.slice(0, 20).map(err => {
+                        const rowIndex = err.rowIndex || 'Unbekannt';
+                        const message = err.message || JSON.stringify(err);
+                        return `
+                            <li class="cm-error-item" data-row-index="${rowIndex}" onclick="window._highlightPreviewRow && window._highlightPreviewRow(${rowIndex})">
+                                <span class="cm-error-row">Zeile ${rowIndex}:</span>
+                                <span class="cm-error-message">${escapeHtml(message)}</span>
+                            </li>
+                        `;
+                    }).join('')}
+                    ${errors.length > 20 ? `<li class="cm-error-more">... und ${errors.length - 20} weitere Fehler</li>` : ''}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Build save button
+    const saveButtonHtml = `
+        <div class="cm-preview-actions">
+            <button id="contract-save-button" class="btn btn-primary" ${contracts.length === 0 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Verträge speichern (${contracts.length})
+            </button>
+            <button id="contract-cancel-preview" class="btn btn-secondary">
+                Abbrechen
+            </button>
+        </div>
+    `;
+    
+    previewContainer.innerHTML = `
+        ${summaryHtml}
+        ${tableHtml}
+        ${errorListHtml}
+        ${saveButtonHtml}
+    `;
+    
+    // Wire up save and cancel buttons
+    const saveBtn = document.getElementById('contract-save-button');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            if (window._handleContractImportSave) {
+                window._handleContractImportSave();
+            }
+        });
+    }
+    
+    const cancelBtn = document.getElementById('contract-cancel-preview');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if (window._handleContractCancelPreview) {
+                window._handleContractCancelPreview();
+            }
+        });
+    }
+}
+
+/**
+ * Highlight a preview row by row index (Phase 3)
+ * @param {number} rowIndex - Row index to highlight
+ */
+export function highlightPreviewRow(rowIndex) {
+    const rows = document.querySelectorAll('.cm-preview-table tbody tr');
+    rows.forEach(row => {
+        const r = row.dataset.rowIndex;
+        row.classList.toggle('cm-row--highlight', Number(r) === Number(rowIndex));
+    });
+    
+    // Scroll to the highlighted row
+    const highlightedRow = document.querySelector('.cm-preview-table tbody tr.cm-row--highlight');
+    if (highlightedRow) {
+        highlightedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+/**
+ * Render the contract list with filters, sorting, and actions (Phase 3)
+ * @param {Object} contractState - Contracts state slice
+ */
+export function renderContractList(contractState) {
     const container = document.getElementById('contract-list-container');
     
     if (!container) {
         return;
     }
     
-    const contracts = getFilteredContracts();
+    const filters = contractState.filters || {};
+    const uiState = contractState.ui || {};
+    const sortKey = uiState.sortKey || 'contractId';
+    const sortDir = uiState.sortDir || 'asc';
+    
+    // Get filtered contracts
+    let contracts = getFilteredContracts(filters);
+    
+    // Apply sorting
+    contracts = applyContractFiltersAndSort(contracts, { ...filters, sortKey, sortDir });
     
     if (contracts.length === 0) {
         container.innerHTML = `
@@ -291,8 +492,147 @@ function updateContractList(contractState) {
         return;
     }
     
-    // Render contract table
-    container.innerHTML = renderContractTable(contracts);
+    // Render contract table with sortable headers
+    container.innerHTML = renderContractTableWithActions(contracts, sortKey, sortDir);
+}
+
+/**
+ * Apply filters and sorting to contracts (Phase 3)
+ * @param {Array} contracts - Array of contracts
+ * @param {Object} filters - Filter configuration including sort options
+ * @returns {Array} Sorted and filtered contracts
+ */
+function applyContractFiltersAndSort(contracts, filters) {
+    let result = [...contracts];
+    
+    // Sorting (default: by contractId)
+    const sortKey = filters.sortKey || 'contractId';
+    const sortDir = filters.sortDir || 'asc';
+    
+    result.sort((a, b) => {
+        let va = a[sortKey];
+        let vb = b[sortKey];
+        
+        // Handle null/undefined
+        if (va === null || va === undefined) va = '';
+        if (vb === null || vb === undefined) vb = '';
+        
+        // Handle date fields
+        if (sortKey === 'plannedStart') {
+            va = va ? new Date(va).getTime() : 0;
+            vb = vb ? new Date(vb).getTime() : 0;
+            return sortDir === 'asc' ? va - vb : vb - va;
+        }
+        
+        // String comparison
+        const strA = String(va).toLowerCase();
+        const strB = String(vb).toLowerCase();
+        
+        if (strA < strB) return sortDir === 'asc' ? -1 : 1;
+        if (strA > strB) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    return result;
+}
+
+/**
+ * Render contract table with sortable headers and actions (Phase 3)
+ * @param {Array} contracts - Array of contract objects
+ * @param {string} sortKey - Current sort key
+ * @param {string} sortDir - Current sort direction
+ * @returns {string} HTML string
+ */
+function renderContractTableWithActions(contracts, sortKey, sortDir) {
+    const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
+    
+    const getSortIcon = (key) => {
+        if (key !== sortKey) return '';
+        return sortDir === 'asc' 
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sort-icon"><path d="M5 15l7-7 7 7"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sort-icon"><path d="M19 9l-7 7-7-7"/></svg>';
+    };
+    
+    let html = `
+        <div class="data-table-container">
+            <table class="data-table cm-contract-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="contractId" onclick="window._handleContractSort && window._handleContractSort('contractId')">
+                            Auftrag ${getSortIcon('contractId')}
+                        </th>
+                        <th class="sortable" data-sort="contractTitle" onclick="window._handleContractSort && window._handleContractSort('contractTitle')">
+                            Titel ${getSortIcon('contractTitle')}
+                        </th>
+                        <th class="sortable" data-sort="location" onclick="window._handleContractSort && window._handleContractSort('location')">
+                            Standort ${getSortIcon('location')}
+                        </th>
+                        <th class="sortable" data-sort="roomArea" onclick="window._handleContractSort && window._handleContractSort('roomArea')">
+                            Säule/Raum ${getSortIcon('roomArea')}
+                        </th>
+                        <th class="sortable" data-sort="equipmentId" onclick="window._handleContractSort && window._handleContractSort('equipmentId')">
+                            Anlage ${getSortIcon('equipmentId')}
+                        </th>
+                        <th class="sortable" data-sort="status" onclick="window._handleContractSort && window._handleContractSort('status')">
+                            Status ${getSortIcon('status')}
+                        </th>
+                        <th class="sortable" data-sort="plannedStart" onclick="window._handleContractSort && window._handleContractSort('plannedStart')">
+                            Sollstart ${getSortIcon('plannedStart')}
+                        </th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    displayContracts.forEach(contract => {
+        const statusClass = getStatusClass(contract.status);
+        
+        html += `
+            <tr data-contract-id="${escapeHtml(contract.id)}">
+                <td>${escapeHtml(contract.contractId || '-')}</td>
+                <td>${escapeHtml(contract.contractTitle || '-')}</td>
+                <td>${escapeHtml(contract.location || '-')}</td>
+                <td>${escapeHtml(contract.roomArea || '-')}</td>
+                <td>${escapeHtml(contract.equipmentId || '-')}</td>
+                <td>
+                    <span class="status-badge ${statusClass}">
+                        ${escapeHtml(contract.status || '-')}
+                    </span>
+                </td>
+                <td>${escapeHtml(contract.plannedStart || '-')}</td>
+                <td class="action-cell">
+                    <button class="btn btn-sm btn-secondary" 
+                            data-action="edit-contract" 
+                            data-contract-id="${escapeHtml(contract.id)}"
+                            onclick="window._handleContractActionClick && window._handleContractActionClick('edit', '${escapeHtml(contract.id)}')">
+                        Bearbeiten
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    if (contracts.length > 100) {
+        html += `<p class="table-footer">Zeige 100 von ${contracts.length} Verträgen</p>`;
+    }
+    
+    return html;
+}
+
+/**
+ * Update the contract list/table (legacy, for backward compatibility)
+ * @param {Object} contractState - Contracts state slice
+ */
+function updateContractList(contractState) {
+    // Delegate to the new renderContractList function
+    renderContractList(contractState);
 }
 
 /**
