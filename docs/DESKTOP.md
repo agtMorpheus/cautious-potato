@@ -73,13 +73,11 @@ Built files are placed in the `dist/` directory.
 ```
 abrechnung-app/
 ├── electron/
-│   ├── main.js      # Electron main process
-│   └── preload.js   # Secure renderer bridge
+│   ├── main.cjs     # Electron main process
+│   └── preload.cjs  # Secure renderer bridge
 ├── assets/
 │   ├── icon.svg     # Source icon
-│   ├── icon.png     # Linux icon
-│   ├── icon.ico     # Windows icon
-│   └── icon.icns    # macOS icon
+│   └── README.md    # Icon generation instructions
 ├── index.html       # Application UI
 ├── js/              # Application modules
 ├── css/             # Stylesheets
@@ -127,7 +125,7 @@ The desktop application includes several security measures:
 
 ## 📝 Development Notes
 
-### Main Process (`electron/main.js`)
+### Main Process (`electron/main.cjs`)
 
 The main process handles:
 - Window creation and management
@@ -135,7 +133,7 @@ The main process handles:
 - Native menu creation
 - Security policies
 
-### Preload Script (`electron/preload.js`)
+### Preload Script (`electron/preload.cjs`)
 
 The preload script:
 - Runs in the renderer context

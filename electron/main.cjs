@@ -5,11 +5,18 @@
  * Manages window creation and application lifecycle
  */
 
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
+
+// Get application version from package.json
+const packageJson = require('../package.json');
+const appVersion = packageJson.version || '1.0.0';
 
 // Keep a global reference of the window object
 let mainWindow;
+
+// IPC handler for getting app version
+ipcMain.handle('get-app-version', () => appVersion);
 
 /**
  * Create the main application window
@@ -25,11 +32,10 @@ function createWindow() {
             // Enable security features
             nodeIntegration: false,
             contextIsolation: true,
-            enableRemoteModule: false,
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.cjs')
         },
         // Window appearance
-        icon: path.join(__dirname, '..', 'assets', 'icon.png'),
+        icon: path.join(__dirname, '..', 'assets', 'icon.svg'),
         title: 'Abrechnung aus Prüfprotokoll',
         // Show window when ready to prevent visual flash
         show: false
@@ -123,7 +129,7 @@ function createMenu() {
                             type: 'info',
                             title: 'Über Abrechnung App',
                             message: 'Abrechnung aus Prüfprotokoll',
-                            detail: 'Version 1.0.0\n\nExcel-basierte Abrechnungserstellung aus protokoll.xlsx\n\n© 2025'
+                            detail: `Version ${appVersion}\n\nExcel-basierte Abrechnungserstellung aus protokoll.xlsx\n\n© 2025`
                         });
                     }
                 },

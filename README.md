@@ -150,8 +150,8 @@ Nach dem Setup sollte die Struktur wie folgt aussehen:
 ├── css/
 │   └── styles.css
 ├── electron/
-│   ├── main.js           (Electron Hauptprozess)
-│   └── preload.js        (Sicherheits-Bridge)
+│   ├── main.cjs          (Electron Hauptprozess)
+│   └── preload.cjs       (Sicherheits-Bridge)
 ├── js/
 │   ├── state.js
 │   ├── utils.js
