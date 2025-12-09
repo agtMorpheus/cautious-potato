@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abrechnung Generator</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Abrechnung Generator</h1>
+            <p class="subtitle">Automatische Erstellung von Abrechnungsdokumenten aus Prüfprotokollen</p>
+        </header>
+
+        <main>
+            <!-- Status Display -->
+            <div id="statusDisplay" class="status-display">
+                <span class="status-badge" id="statusBadge">Bereit</span>
+            </div>
+
+            <!-- Import Section -->
+            <section class="panel" id="importSection">
+                <div class="panel-header">
+                    <h2>📁 1. Protokoll importieren</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" accept=".xlsx" aria-label="Protokoll-Datei auswählen">
+                        <label for="fileInput" class="file-label">Datei auswählen</label>
+                        <span id="fileName" class="file-name">Keine Datei ausgewählt</span>
+                    </div>
+                    <button id="importBtn" class="btn btn-primary" disabled>Protokoll importieren</button>
+                    <div id="importStatus" class="status-message"></div>
+                    <div id="importPreview" class="data-preview"></div>
+                </div>
+            </section>
+
+            <!-- Generate Section -->
+            <section class="panel" id="generateSection">
+                <div class="panel-header">
+                    <h2>🔧 2. Abrechnung generieren</h2>
+                </div>
+                <div class="panel-body">
+                    <button id="generateBtn" class="btn btn-primary" disabled>Abrechnung erzeugen</button>
+                    <div id="generateStatus" class="status-message"></div>
+                    <div id="generatePreview" class="data-preview"></div>
+                </div>
+            </section>
+
+            <!-- Export Section -->
+            <section class="panel" id="exportSection">
+                <div class="panel-header">
+                    <h2>💾 3. Abrechnung exportieren</h2>
+                </div>
+                <div class="panel-body">
+                    <button id="exportBtn" class="btn btn-primary" disabled>Abrechnung herunterladen</button>
+                    <div id="exportStatus" class="status-message"></div>
+                </div>
+            </section>
+
+            <!-- Reset Section -->
+            <section class="reset-section">
+                <button id="resetBtn" class="btn btn-secondary">🔄 Anwendung zurücksetzen</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Abrechnung Generator | Lokale Verarbeitung - Keine Datenübertragung</p>
+        </footer>
+    </div>
+
+    <!-- Load SheetJS library -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Load application modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
