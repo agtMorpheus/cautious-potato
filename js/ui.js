@@ -161,7 +161,7 @@ export function updateGenerateUI(state) {
                 </div>
                 <div class="summary-item">
                     <dt>Generierungszeit</dt>
-                    <dd>${generateState.generationTimeMs}ms</dd>
+                    <dd>${generateState.generationTimeMs || 0}ms</dd>
                 </div>
             </dl>
         `;
@@ -223,7 +223,7 @@ export function updateExportUI(state) {
     if (exportSummary && exportState.lastExportAt) {
         const exportDate = new Date(exportState.lastExportAt);
         const dateStr = exportDate.toLocaleString('de-DE');
-        const sizeKB = exportState.lastExportSize > 0 
+        const sizeKB = (exportState.lastExportSize && exportState.lastExportSize > 0)
             ? (exportState.lastExportSize / 1024).toFixed(2) + ' KB'
             : '–';
         
