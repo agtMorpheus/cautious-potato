@@ -4,6 +4,15 @@ Eine Web-Anwendung zur automatisierten Erstellung von Abrechnungsdokumenten aus 
 
 Die Anwendung liest Excel-basierte Prüfprotokolle (`protokoll.xlsx`), aggregiert die enthaltenen Mengen nach Positionsnummern und füllt automatisch ein Abrechnungs-Template (`abrechnung.xlsx`). Alle Prozesse laufen lokal im Browser ab, ohne dass Daten auf einen externen Server hochgeladen werden.
 
+## 📚 Documentation
+
+For comprehensive documentation, see:
+- **[Architecture Overview](docs/ARCHITECTURE.md)** - System design and module structure
+- **[API Reference](docs/API.md)** - Complete API documentation
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Security Review](docs/SECURITY.md)** - Security assessment and recommendations
+- **[Accessibility Audit](docs/ACCESSIBILITY.md)** - WCAG 2.1 compliance review
+
 ## 🚀 Features
 
 - **Import**: Einlesen von `protokoll.xlsx` Dateien via Dateiauswahl

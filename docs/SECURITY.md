@@ -245,17 +245,24 @@ Add SRI hash to SheetJS script tag:
 ```html
 <script 
   src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"
-  integrity="sha384-[HASH_HERE]"
+  integrity="sha384-[GENERATE_HASH_USING_COMMAND_BELOW]"
   crossorigin="anonymous">
 </script>
 ```
 
-Generate hash:
+Generate hash using one of these methods:
+
+**Method 1: Using curl and openssl**:
 ```bash
 curl -s https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js | \
   openssl dgst -sha384 -binary | \
   openssl base64 -A
 ```
+
+**Method 2: Using online SRI generator**:
+Visit https://www.srihash.org/ and paste the CDN URL
+
+**Note**: The actual hash depends on the exact file version from the CDN. Always verify the hash matches the file you're loading. For maximum security, consider downloading SheetJS locally (see Recommendation 4).
 
 **Risk**: Medium  
 **Priority**: High
