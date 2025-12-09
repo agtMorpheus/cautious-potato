@@ -386,6 +386,9 @@ function setupProtokollExportHandlers() {
             }
         }));
     });
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
