@@ -1,5 +1,5 @@
 /**
- * Contract Utilities Module (Phase 1)
+ * Contract Utilities Module (Phase 1 & 2)
  * 
  * Provides utility functions for contract parsing, normalization, and validation
  * Uses SheetJS (xlsx) library for Excel operations
@@ -9,7 +9,28 @@
  * - Column mapping suggestions (auto-mapping)
  * - Contract extraction and normalization
  * - Data validation and cleanup
+ * 
+ * Phase 2 adds:
+ * - File reading and workbook parsing
+ * - High-level import workflow
+ * - Enhanced extraction with async support
  */
+
+// Re-export Phase 2 modules for convenience
+export { 
+    discoverContractSheets as discoverContractSheetsV2,
+    suggestContractColumnMapping as suggestContractColumnMappingV2,
+    inferColumnType 
+} from './contractColumnMapper.js';
+
+export {
+    parseExcelDate,
+    parseRowWithMapping,
+    validateContractRow,
+    normalizeContractData,
+    createContractObject,
+    processContractRow
+} from './contractNormalizer.js';
 
 // Default column mapping configuration
 // Maps contract object fields to expected Excel columns
@@ -617,4 +638,359 @@ export function getContractSummary(contracts) {
             latest: latestDate ? latestDate.toISOString().split('T')[0] : null
         }
     };
+}
+
+// ============================================================
+// Phase 2: File I/O and High-Level Import Functions
+// ============================================================
+
+/**
+ * Read an uploaded Excel file and return a SheetJS workbook object
+ * 
+ * @param {File} file - File object from file input
+ * @returns {Promise<Object>} SheetJS workbook object
+ * @throws {Error} If file is invalid or cannot be parsed
+ */
+export async function readContractWorkbook(file) {
+    return new Promise((resolve, reject) => {
+        // Validate file type
+        if (!file || !file.name) {
+            reject(new Error('Keine Datei ausgewählt'));
+            return;
+        }
+        
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+            reject(new Error('Datei muss im .xlsx oder .xls Format sein'));
+            return;
+        }
+        
+        // Validate file size (10 MB limit)
+        const MAX_FILE_SIZE = 10 * 1024 * 1024;
+        if (file.size > MAX_FILE_SIZE) {
+            reject(new Error('Datei überschreitet die maximale Größe von 10 MB'));
+            return;
+        }
+        
+        // Read file
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+            try {
+                const data = event.target.result;
+                // XLSX is expected to be available globally (loaded via script tag)
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // Attach file metadata to workbook
+                workbook.fileName = file.name;
+                workbook.fileSize = file.size;
+                
+                resolve(workbook);
+            } catch (err) {
+                reject(new Error(`Fehler beim Parsen der Excel-Datei: ${err.message}`));
+            }
+        };
+        
+        reader.onerror = () => {
+            reject(new Error('Fehler beim Lesen der Datei'));
+        };
+        
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+/**
+ * Extract contracts from a worksheet using enhanced Phase 2 extraction
+ * Async version with progress callback support
+ * 
+ * @param {Object} workbook - SheetJS workbook object
+ * @param {string} sheetName - Name of the sheet to extract from
+ * @param {Object} mapping - Column mapping configuration
+ * @param {Object} options - Options { skipInvalidRows, maxRows, onProgress }
+ * @returns {Promise<Object>} { contracts, errors, warnings, summary }
+ */
+export async function extractContractsFromSheetAsync(workbook, sheetName, mapping, options = {}) {
+    const {
+        skipInvalidRows = true,
+        maxRows = null,
+        onProgress = null
+    } = options;
+    
+    const startTime = performance.now();
+    const contracts = [];
+    const errors = [];
+    const warnings = [];
+    const seen = new Set(); // For deduplication
+    
+    try {
+        const worksheet = workbook.Sheets[sheetName];
+        if (!worksheet) {
+            throw new Error(`Arbeitsblatt "${sheetName}" nicht gefunden`);
+        }
+        
+        // Get worksheet range
+        const range = worksheet['!ref'];
+        if (!range) {
+            throw new Error('Arbeitsblatt ist leer');
+        }
+        
+        // Parse range
+        const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
+        if (!rangeMatch) {
+            throw new Error('Ungültiger Bereich im Arbeitsblatt');
+        }
+        
+        const endRow = parseInt(rangeMatch[4], 10);
+        const startRow = 2; // Skip header row
+        
+        // Read all rows as array of arrays
+        const allRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (allRows.length < 2) {
+            throw new Error('Arbeitsblatt enthält keine Datenzeilen (nur Kopfzeile)');
+        }
+        
+        const dataRows = allRows.slice(1); // Skip header
+        const limitedRows = maxRows ? dataRows.slice(0, maxRows) : dataRows;
+        const totalRows = limitedRows.length;
+        
+        // Process each row
+        for (let i = 0; i < totalRows; i++) {
+            const row = limitedRows[i];
+            const excelRowNumber = i + 2; // +2: header row + 0-index
+            
+            // Report progress every 100 rows
+            if (onProgress && i % 100 === 0) {
+                onProgress({ processed: i, total: totalRows });
+            }
+            
+            try {
+                // Check if row is empty
+                const hasData = row.some(cell => cell !== null && cell !== undefined && cell !== '');
+                if (!hasData) {
+                    continue; // Skip empty rows
+                }
+                
+                // Parse row using mapping
+                const rowData = {};
+                Object.entries(mapping).forEach(([fieldName, columnInfo]) => {
+                    const colLetter = columnInfo.excelColumn || columnInfo;
+                    const colIndex = columnLetterToIndex(typeof colLetter === 'string' ? colLetter : colLetter.excelColumn);
+                    const rawValue = colIndex >= 0 && colIndex < row.length ? row[colIndex] : null;
+                    
+                    rowData[fieldName] = {
+                        raw: rawValue !== undefined ? rawValue : null,
+                        type: columnInfo.type || 'string'
+                    };
+                });
+                
+                // Validate required fields
+                const missingFields = [];
+                ['contractId', 'contractTitle', 'status'].forEach(field => {
+                    const value = rowData[field]?.raw;
+                    if (value === null || value === undefined || String(value).trim() === '') {
+                        missingFields.push(field);
+                    }
+                });
+                
+                if (missingFields.length > 0) {
+                    errors.push({
+                        rowIndex: excelRowNumber,
+                        contractId: rowData.contractId?.raw || '(unbekannt)',
+                        type: 'missing_required_field',
+                        missingFields,
+                        message: `Fehlende Pflichtfelder: ${missingFields.join(', ')}`
+                    });
+                    
+                    if (skipInvalidRows) continue;
+                }
+                
+                // Normalize and convert values
+                const normalized = {};
+                Object.entries(rowData).forEach(([field, data]) => {
+                    const { raw, type } = data;
+                    
+                    if (type === 'date') {
+                        // Convert Excel date
+                        if (typeof raw === 'number') {
+                            const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                            const date = new Date(excelEpoch.getTime() + raw * 24 * 60 * 60 * 1000);
+                            normalized[field] = !isNaN(date.getTime()) 
+                                ? date.toISOString().split('T')[0] 
+                                : null;
+                        } else if (raw) {
+                            normalized[field] = String(raw).trim() || null;
+                        } else {
+                            normalized[field] = null;
+                        }
+                    } else if (type === 'number') {
+                        normalized[field] = raw !== null && raw !== '' ? Number(raw) : null;
+                        if (isNaN(normalized[field])) normalized[field] = null;
+                    } else {
+                        normalized[field] = raw !== null && raw !== undefined 
+                            ? String(raw).trim() || null 
+                            : null;
+                    }
+                });
+                
+                // Create contract object
+                const contract = {
+                    id: generateUUID(),
+                    internalKey: `${normalized.contractId || 'unknown'}_row_${excelRowNumber}`,
+                    
+                    // Core fields
+                    contractId: normalized.contractId,
+                    contractTitle: normalized.contractTitle,
+                    taskId: normalized.taskId || null,
+                    taskType: normalized.taskType || null,
+                    description: normalized.description || null,
+                    
+                    // Location & equipment
+                    location: normalized.location || null,
+                    roomArea: normalized.roomArea || null,
+                    equipmentId: normalized.equipmentId || null,
+                    equipmentDescription: normalized.equipmentDescription || null,
+                    serialNumber: normalized.serialNumber || null,
+                    
+                    // Management
+                    status: normalized.status ? String(normalized.status).toLowerCase() : null,
+                    workorderCode: normalized.workorderCode || null,
+                    reportedBy: normalized.reportedBy || null,
+                    plannedStart: normalized.plannedStart || null,
+                    
+                    // Metadata
+                    sourceFile: {
+                        fileName: workbook.fileName || 'unknown.xlsx',
+                        sheet: sheetName,
+                        rowIndex: excelRowNumber,
+                        importedAt: new Date().toISOString()
+                    },
+                    
+                    // Audit
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    importVersion: 1,
+                    // Contract is "complete" if at least 2 of 3 recommended fields are present
+                    isComplete: [normalized.location, normalized.equipmentId, normalized.plannedStart]
+                        .filter(v => v !== null && v !== undefined).length >= 2
+                };
+                
+                // Check for duplicates
+                if (seen.has(contract.internalKey)) {
+                    warnings.push({
+                        rowIndex: excelRowNumber,
+                        contractId: contract.contractId,
+                        type: 'duplicate_record',
+                        message: 'Doppelter Datensatz (gleiche contractId); übersprungen'
+                    });
+                    continue;
+                }
+                
+                seen.add(contract.internalKey);
+                contracts.push(contract);
+                
+            } catch (rowError) {
+                errors.push({
+                    rowIndex: excelRowNumber,
+                    type: 'parse_error',
+                    message: rowError.message
+                });
+            }
+        }
+        
+        const endTime = performance.now();
+        const summary = {
+            totalRows: totalRows,
+            successCount: contracts.length,
+            errorCount: errors.length,
+            warningCount: warnings.length,
+            duplicateCount: warnings.filter(w => w.type === 'duplicate_record').length,
+            importDuration: Math.round(endTime - startTime)
+        };
+        
+        return { contracts, errors, warnings, summary };
+        
+    } catch (err) {
+        return {
+            contracts: [],
+            errors: [{
+                type: 'fatal_error',
+                message: err.message
+            }],
+            warnings: [],
+            summary: { 
+                totalRows: 0, 
+                successCount: 0, 
+                errorCount: 1, 
+                warningCount: 0, 
+                duplicateCount: 0,
+                importDuration: 0
+            }
+        };
+    }
+}
+
+/**
+ * High-level import function combining discovery, mapping, and extraction
+ * 
+ * @param {File} file - File object from file input
+ * @param {Object|null} userMappingOverrides - Optional user-provided mapping overrides
+ * @param {Object} options - Import options { skipInvalidRows, maxRows, onProgress }
+ * @returns {Promise<Object>} Complete import result
+ */
+export async function importContractFile(file, userMappingOverrides = null, options = {}) {
+    try {
+        // Step 1: Read workbook
+        const workbook = await readContractWorkbook(file);
+        
+        // Step 2: Discover sheets and columns
+        const discoveredSheets = discoverContractSheets(workbook);
+        
+        // Step 3: Suggest mapping (use first sheet)
+        // Note: discoveredSheets has { sheets: [...] } format (Phase 2)
+        if (!discoveredSheets.sheets || discoveredSheets.sheets.length === 0) {
+            throw new Error('Keine Arbeitsblätter gefunden');
+        }
+        
+        const firstSheetInfo = discoveredSheets.sheets[0];
+        const firstSheet = firstSheetInfo.name;
+        const suggested = suggestContractColumnMapping(discoveredSheets);
+        
+        // Step 4: Apply user overrides if provided
+        const finalMapping = userMappingOverrides || suggested.mapping;
+        
+        // Step 5: Extract contracts
+        const extractResult = await extractContractsFromSheetAsync(
+            workbook,
+            firstSheet,
+            finalMapping,
+            options
+        );
+        
+        return {
+            fileName: file.name,
+            fileSize: file.size,
+            discoveredSheets,
+            suggestedMapping: suggested,
+            finalMapping,
+            selectedSheet: firstSheet,
+            ...extractResult
+        };
+        
+    } catch (err) {
+        return {
+            fileName: file.name,
+            errors: [{ type: 'import_error', message: err.message }],
+            contracts: [],
+            warnings: [],
+            summary: {
+                totalRows: 0,
+                successCount: 0,
+                errorCount: 1,
+                warningCount: 0,
+                duplicateCount: 0,
+                importDuration: 0
+            }
+        };
+    }
 }

@@ -241,6 +241,62 @@ export function addContract(contract) {
 }
 
 /**
+ * Add multiple contract records in bulk
+ * More efficient than calling addContract for each record
+ * 
+ * @param {Array} contracts - Array of contract objects to add
+ * @param {Object} importMetadata - Optional import metadata { fileName, importedAt, recordsImported, recordsWithErrors }
+ * @returns {Object} Result { addedCount, contracts }
+ */
+export function addContracts(contracts, importMetadata = null) {
+    if (!Array.isArray(contracts) || contracts.length === 0) {
+        return { addedCount: 0, contracts: [] };
+    }
+    
+    const state = getState();
+    const existingRecords = state.contracts?.records || [];
+    const existingFiles = state.contracts?.importedFiles || [];
+    
+    const now = new Date().toISOString();
+    
+    // Process all contracts
+    const newContracts = contracts.map(contract => ({
+        ...contract,
+        id: contract.id || generateUUID(),
+        createdAt: contract.createdAt || now,
+        updatedAt: now
+    }));
+    
+    // Build updated state
+    const updatedState = {
+        contracts: {
+            ...state.contracts,
+            records: [...existingRecords, ...newContracts]
+        }
+    };
+    
+    // Add import metadata if provided
+    if (importMetadata) {
+        const newFileEntry = {
+            fileName: importMetadata.fileName || 'unknown',
+            size: importMetadata.size || 0,
+            importedAt: importMetadata.importedAt || now,
+            recordsImported: importMetadata.recordsImported || newContracts.length,
+            recordsWithErrors: importMetadata.recordsWithErrors || 0
+        };
+        
+        updatedState.contracts.importedFiles = [...existingFiles, newFileEntry];
+    }
+    
+    setState(updatedState);
+    
+    return {
+        addedCount: newContracts.length,
+        contracts: newContracts
+    };
+}
+
+/**
  * Update an existing contract record
  * @param {string} id - Contract UUID
  * @param {Object} updates - Partial updates to apply
