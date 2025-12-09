@@ -980,38 +980,43 @@ function attachFieldListeners() {
 }
 
 /**
- * Attach position-specific event listeners
+ * Attach position-specific event listeners using event delegation
  * @returns {void}
  */
 function attachPositionListeners() {
-  document.querySelectorAll('[data-action="delete-position"]').forEach(btn => {
-    // Remove existing listener to avoid duplicates
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    
-    newBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const posNr = newBtn.getAttribute('data-pos-nr');
-      if (posNr) {
-        handlers.handleDeletePosition(posNr);
-      }
-    });
-  });
+  const tbody = document.getElementById('positionsTableBody');
+  if (!tbody) return;
 
-  document.querySelectorAll('[data-action="edit-position"]').forEach(btn => {
-    // Remove existing listener to avoid duplicates
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    
-    newBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const posNr = newBtn.getAttribute('data-pos-nr');
-      if (posNr) {
+  // Remove any existing delegated listener by using a named handler
+  // We store the handler reference on the element to allow removal
+  if (tbody._positionClickHandler) {
+    tbody.removeEventListener('click', tbody._positionClickHandler);
+  }
+
+  // Create a delegated event handler
+  tbody._positionClickHandler = function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+
+    const action = btn.getAttribute('data-action');
+    const posNr = btn.getAttribute('data-pos-nr');
+
+    if (!posNr) return;
+
+    e.preventDefault();
+
+    switch (action) {
+      case 'delete-position':
+        handlers.handleDeletePosition(posNr);
+        break;
+      case 'edit-position':
         // For now, log - edit functionality can be expanded
         console.log('Edit position:', posNr);
-      }
-    });
-  });
+        break;
+    }
+  };
+
+  tbody.addEventListener('click', tbody._positionClickHandler);
 }
 
 /**
