@@ -5,6 +5,9 @@
  * Uses SheetJS (xlsx) library for Excel operations
  */
 
+// Configuration constants
+const QUANTITY_COLUMN_FALLBACKS = ['X', 'B', 'C']; // Columns to check for quantity values
+
 /**
  * Read Excel file from File object
  * @param {File} file - Excel file to read
@@ -100,10 +103,14 @@ export function extractPositions(workbook) {
     for (let row = 30; row <= 325; row++) {
         const posNr = getCellValue(worksheet, `A${row}`);
         
-        // Try multiple columns for quantity (X is mentioned in docs, but may vary)
-        let menge = getCellValue(worksheet, `X${row}`) || 
-                    getCellValue(worksheet, `B${row}`) ||
-                    getCellValue(worksheet, `C${row}`);
+        // Try configured columns for quantity
+        let menge = null;
+        for (const col of QUANTITY_COLUMN_FALLBACKS) {
+            menge = getCellValue(worksheet, `${col}${row}`);
+            if (menge && !isNaN(menge)) {
+                break;
+            }
+        }
         
         // Only include valid entries
         if (posNr && menge && !isNaN(menge)) {
@@ -146,11 +153,25 @@ export function sumByPosition(positionen) {
 export async function loadAbrechnungTemplate() {
     try {
         const response = await fetch('templates/abrechnung.xlsx');
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Abrechnung-Template nicht gefunden. Bitte stellen Sie sicher, dass templates/abrechnung.xlsx existiert.');
+            } else if (response.status >= 500) {
+                throw new Error('Server-Fehler beim Laden des Templates. Bitte versuchen Sie es später erneut.');
+            } else {
+                throw new Error(`HTTP Fehler ${response.status}: ${response.statusText}`);
+            }
+        }
+        
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         return workbook;
     } catch (error) {
-        throw new Error('Fehler beim Laden des Abrechnung-Templates: ' + error.message);
+        if (error.message.includes('Failed to fetch') || error instanceof TypeError) {
+            throw new Error('Netzwerkfehler: Konnte Template nicht laden. Stellen Sie sicher, dass der Server läuft und die Datei existiert.');
+        }
+        throw error;
     }
 }
 

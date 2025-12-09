@@ -9,6 +9,7 @@
 let appState = {
     protokollData: null,
     abrechnungData: null,
+    selectedFile: null, // Currently selected file for import
     status: 'ready' // ready, importing, imported, generating, generated, error
 };
 

@@ -20,12 +20,12 @@ export function handleFileSelect(event) {
         fileNameDisplay.textContent = file.name;
         importBtn.disabled = false;
         
-        // Store file reference for import
-        window._selectedFile = file;
+        // Store file reference in state
+        setState({ selectedFile: file });
     } else {
         fileNameDisplay.textContent = 'Keine Datei ausgewählt';
         importBtn.disabled = true;
-        window._selectedFile = null;
+        setState({ selectedFile: null });
     }
 }
 
@@ -33,7 +33,8 @@ export function handleFileSelect(event) {
  * Handle protokoll import
  */
 export async function handleImportProtokoll() {
-    const file = window._selectedFile;
+    const state = getState();
+    const file = state.selectedFile;
     const statusElement = document.getElementById('importStatus');
     const previewElement = document.getElementById('importPreview');
     
@@ -191,8 +192,6 @@ export async function handleReset() {
         document.getElementById('generatePreview').classList.remove('show');
         document.getElementById('exportStatus').textContent = '';
         document.getElementById('exportStatus').classList.remove('show', 'success', 'error', 'info');
-        
-        window._selectedFile = null;
         
         alert('Anwendung wurde zurückgesetzt');
     }
