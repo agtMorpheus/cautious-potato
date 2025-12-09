@@ -1237,6 +1237,10 @@ button.secondary:hover:not(:disabled) {
 }
 
 @media (max-width: 768px) {
+    .app-container {
+        display: block;
+    }
+    
     .sidebar {
         position: fixed;
         width: 280px;
@@ -1244,6 +1248,9 @@ button.secondary:hover:not(:disabled) {
         transform: translateX(-100%);
         transition: transform var(--transition-slow);
         background: var(--bg-panel);
+        height: 100vh;
+        top: 0;
+        left: 0;
     }
     
     .sidebar.open {
@@ -1258,6 +1265,14 @@ button.secondary:hover:not(:disabled) {
         grid-template-columns: 1fr;
     }
     
+    .content-scroll {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
     .quick-actions {
         flex-direction: column;
     }
