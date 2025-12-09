@@ -20,7 +20,8 @@ const QUANTITY_COLUMN_FALLBACKS = ['X', 'B', 'C']; // Columns to check for quant
 const POSITION_NUMBER_PATTERN = /^\d{2}\.\d{2}\.\d{4}/;
 
 // Template cache for performance optimization
-let cachedAbrechnungTemplate = null;
+// Cache the raw ArrayBuffer instead of parsed workbook to preserve formatting on clone
+let cachedAbrechnungTemplateBuffer = null;
 
 /**
  * Read Excel file from File object
@@ -280,43 +281,45 @@ export function getPositionSummary(positionMap) {
 
 /**
  * Load abrechnung template from file with caching
- * Template is cached in memory to avoid repeated file reads
+ * Template ArrayBuffer is cached in memory to avoid repeated file fetches.
+ * The workbook is re-parsed from the ArrayBuffer each time to preserve
+ * all Excel formatting (styles, merged cells, colors, etc.) that would be
+ * lost with JSON serialization.
  * @returns {Promise<Object>} SheetJS workbook object
  * @throws {Error} If template cannot be loaded
  */
 export async function loadAbrechnungTemplate() {
-    // Return cached template if available
-    if (cachedAbrechnungTemplate) {
-        console.log('Using cached abrechnung template');
-        // Return a deep clone to prevent modification of cached template
-        return XLSX.utils.book_new_from_existing ?
-            XLSX.utils.book_new_from_existing(cachedAbrechnungTemplate) :
-            JSON.parse(JSON.stringify(cachedAbrechnungTemplate));
-    }
-    
     try {
-        const response = await fetch('templates/abrechnung.xlsx');
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('Abrechnung-Template nicht gefunden. Bitte stellen Sie sicher, dass templates/abrechnung.xlsx existiert.');
-            } else if (response.status >= 500) {
-                throw new Error('Server-Fehler beim Laden des Templates. Bitte versuchen Sie es später erneut.');
-            } else {
-                throw new Error(`HTTP Fehler ${response.status}: ${response.statusText}`);
+        // Fetch and cache the ArrayBuffer if not already cached
+        if (!cachedAbrechnungTemplateBuffer) {
+            const response = await fetch('templates/abrechnung.xlsx');
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Abrechnung-Template nicht gefunden. Bitte stellen Sie sicher, dass templates/abrechnung.xlsx existiert.');
+                } else if (response.status >= 500) {
+                    throw new Error('Server-Fehler beim Laden des Templates. Bitte versuchen Sie es später erneut.');
+                } else {
+                    throw new Error(`HTTP Fehler ${response.status}: ${response.statusText}`);
+                }
             }
+            
+            cachedAbrechnungTemplateBuffer = await response.arrayBuffer();
+            console.log('Abrechnung template ArrayBuffer loaded and cached');
+        } else {
+            console.log('Using cached abrechnung template ArrayBuffer');
         }
         
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        // Parse a fresh workbook from the cached ArrayBuffer each time
+        // to preserve all Excel formatting (cellStyles: true includes styles)
+        const workbook = XLSX.read(cachedAbrechnungTemplateBuffer, { 
+            type: 'array',
+            cellStyles: true
+        });
         
         if (!workbook || !workbook.SheetNames.includes('EAW')) {
             throw new Error('Template-Arbeitsmappe fehlt "EAW" Arbeitsblatt');
         }
-        
-        // Cache the template
-        cachedAbrechnungTemplate = workbook;
-        console.log('Abrechnung template loaded and cached');
         
         return workbook;
     } catch (error) {
@@ -331,7 +334,7 @@ export async function loadAbrechnungTemplate() {
  * Clear the cached template (useful for testing or when template changes)
  */
 export function clearAbrechnungTemplateCache() {
-    cachedAbrechnungTemplate = null;
+    cachedAbrechnungTemplateBuffer = null;
     console.log('Abrechnung template cache cleared');
 }
 
