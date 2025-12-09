@@ -83,8 +83,9 @@ export async function handleImportProtokoll() {
         showStatus(statusElement, 'Protokoll wird importiert...', 'info');
         previewElement.classList.remove('show');
         
-        // Read Excel file
-        const workbook = await utils.readExcelFile(selectedFile);
+        // Read Excel file (Phase 3 returns { workbook, metadata: fileMetadata })
+        const result = await utils.readExcelFile(selectedFile);
+        const workbook = result.workbook;
         
         // Parse metadata
         const metadata = utils.parseProtokollMetadata(workbook);
