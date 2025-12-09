@@ -110,11 +110,6 @@ export function updateImportUI(state) {
             ? 'Importiere...'
             : 'Datei importieren';
     }
-    
-    // Enable/disable generate button based on successful import
-    if (generateButton) {
-        generateButton.disabled = !protokollData || !protokollData.metadata || protokollData.positionen.length === 0;
-    }
 }
 
 /**
@@ -176,16 +171,21 @@ export function updateGenerateUI(state) {
     }
     
     // Update button states
+    // Button should be disabled if: (1) generation is pending, OR (2) there's no valid imported data
     if (generateButton) {
-        generateButton.disabled = generateState.status === 'pending';
-        generateButton.textContent = generateState.status === 'pending'
+        const isPending = generateState.status === 'pending';
+        // Check if we have valid protokollData from state
+        const protokollData = state.protokollData;
+        const hasValidInput = protokollData && 
+                            protokollData.metadata && 
+                            protokollData.metadata.orderNumber && 
+                            protokollData.positionen && 
+                            protokollData.positionen.length > 0;
+        
+        generateButton.disabled = isPending || !hasValidInput;
+        generateButton.textContent = isPending
             ? 'Erzeuge...'
             : 'Abrechnung erzeugen';
-    }
-    
-    // Enable/disable export button based on successful generation
-    if (exportButton) {
-        exportButton.disabled = !abrechnungData || !abrechnungData.header || Object.keys(abrechnungData.positionen || {}).length === 0;
     }
 }
 
@@ -244,9 +244,19 @@ export function updateExportUI(state) {
     }
     
     // Update button state
+    // Button should be disabled if: (1) export is pending, OR (2) there's no valid abrechnung data
     if (exportButton) {
-        exportButton.disabled = exportState.status === 'pending';
-        exportButton.textContent = exportState.status === 'pending'
+        const isPending = exportState.status === 'pending';
+        // Check if we have valid abrechnungData from state
+        const abrechnungData = state.abrechnungData;
+        const hasValidAbrechnung = abrechnungData && 
+                                  abrechnungData.header && 
+                                  abrechnungData.header.orderNumber &&
+                                  abrechnungData.positionen && 
+                                  Object.keys(abrechnungData.positionen).length > 0;
+        
+        exportButton.disabled = isPending || !hasValidAbrechnung;
+        exportButton.textContent = isPending
             ? 'Exportiere...'
             : 'Abrechnung herunterladen';
     }
