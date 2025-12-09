@@ -1,0 +1,799 @@
+/**
+ * Protokoll Module CSS
+ * 
+ * Phase 3 - UI Rendering Styles
+ * Follows existing dark theme and design tokens from styles.css
+ */
+
+/* ============================================
+   FORM BASE STYLING
+   ============================================ */
+
+.protokoll-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.protokoll-form fieldset {
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1.5rem;
+  background-color: var(--bg-card, #0f172a);
+}
+
+.protokoll-form legend {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-main, #f8fafc);
+  padding: 0 0.5rem;
+}
+
+/* ============================================
+   FORM GROUP STYLING
+   ============================================ */
+
+.protokoll-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.protokoll-form .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.protokoll-form .form-group label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.protokoll-form .form-control {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border-highlight, #334155);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.875rem;
+  font-family: inherit;
+  background-color: var(--bg-surface, #1e293b);
+  color: var(--text-main, #f8fafc);
+  transition: border-color var(--duration-fast, 150ms), box-shadow var(--duration-fast, 150ms);
+}
+
+.protokoll-form .form-control:focus {
+  outline: none;
+  border-color: var(--c-brand-500, #3b82f6);
+  box-shadow: 0 0 0 3px var(--c-brand-glow, rgba(59, 130, 246, 0.25));
+}
+
+.protokoll-form .form-control.error {
+  border-color: var(--c-danger, #ef4444);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.protokoll-form .form-control::placeholder {
+  color: var(--text-dim, #475569);
+}
+
+/* Textarea specific */
+.protokoll-form textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Select specific */
+.protokoll-form select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 12 12'%3E%3Cpath d='M6 8.25L2.25 4.5h7.5L6 8.25z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+
+/* ============================================
+   FORM ROW (Multi-column layout)
+   ============================================ */
+
+.protokoll-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* ============================================
+   REQUIRED FIELD INDICATOR
+   ============================================ */
+
+.protokoll-form .required {
+  color: var(--c-danger, #ef4444);
+  font-weight: 400;
+}
+
+/* ============================================
+   CHECKBOX & RADIO GROUPS
+   ============================================ */
+
+.protokoll-form .checkbox-group,
+.protokoll-form .radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.protokoll-form .checkbox-group-item,
+.protokoll-form .radio-group-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.protokoll-form .form-checkbox,
+.protokoll-form .form-radio {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--c-brand-500, #3b82f6);
+  cursor: pointer;
+}
+
+.protokoll-form .checkbox-group-item label,
+.protokoll-form .radio-group-item label {
+  font-weight: 400;
+  color: var(--text-main, #f8fafc);
+  cursor: pointer;
+}
+
+/* ============================================
+   PROGRESS INDICATOR
+   ============================================ */
+
+.progress-indicator {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+}
+
+.progress-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  border-radius: var(--radius-md, 6px);
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-dim, #475569);
+  background-color: var(--bg-surface, #1e293b);
+  cursor: pointer;
+  transition: all var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  border: 1px solid transparent;
+}
+
+.progress-step:hover {
+  color: var(--text-muted, #94a3b8);
+  background-color: var(--c-slate-800, #1e293b);
+  border-color: var(--border-highlight, #334155);
+}
+
+.progress-step:focus-visible {
+  outline: 2px solid var(--c-brand-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+.progress-step .step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--c-slate-700, #334155);
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--duration-fast, 150ms);
+}
+
+.progress-step .step-label {
+  white-space: nowrap;
+}
+
+.progress-step.active {
+  color: white;
+  background-color: var(--c-brand-500, #3b82f6);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.3));
+}
+
+.progress-step.active .step-number {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.progress-step.completed {
+  color: white;
+  background-color: var(--c-success, #22c55e);
+}
+
+.progress-step.completed .step-number {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ============================================
+   POSITIONS TABLE
+   ============================================ */
+
+.positions-section {
+  margin-bottom: 1rem;
+}
+
+.positions-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 1rem;
+}
+
+.positions-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-lg, 8px);
+  margin-bottom: 1rem;
+}
+
+.positions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.positions-table th {
+  background-color: var(--c-slate-800, #1e293b);
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  border-bottom: 2px solid var(--border-base, #1e293b);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.positions-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+  color: var(--text-main, #f8fafc);
+}
+
+.positions-table tr:last-child td {
+  border-bottom: none;
+}
+
+.positions-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.position-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md, 6px);
+  background-color: var(--bg-surface, #1e293b);
+  color: var(--text-muted, #94a3b8);
+  border: 1px solid var(--border-highlight, #334155);
+  cursor: pointer;
+  transition: all var(--duration-fast, 150ms);
+  font-size: 0.875rem;
+}
+
+.btn-icon:hover {
+  background-color: var(--c-slate-700, #334155);
+  color: var(--text-main, #f8fafc);
+}
+
+.btn-icon.btn-danger:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--c-danger, #ef4444);
+}
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-ok,
+.status-passed {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--c-success, #22c55e);
+}
+
+.status-mängel,
+.status-failed,
+.status-error {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--c-danger, #ef4444);
+}
+
+.status-nicht-geprüft,
+.status-pending {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: var(--text-muted, #94a3b8);
+}
+
+.status-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--c-warning, #f59e0b);
+}
+
+/* ============================================
+   ERROR MESSAGES
+   ============================================ */
+
+.field-error {
+  display: none;
+  color: var(--c-danger, #ef4444);
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   FORM NAVIGATION
+   ============================================ */
+
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-base, #1e293b);
+  margin-top: 1rem;
+}
+
+/* ============================================
+   REVIEW FORM
+   ============================================ */
+
+.review-section {
+  margin-bottom: 2rem;
+}
+
+.review-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 1.5rem;
+}
+
+.review-block {
+  background-color: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-block h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+}
+
+.review-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.review-dl dt {
+  font-weight: 500;
+  color: var(--text-muted, #94a3b8);
+}
+
+.review-dl dd {
+  color: var(--text-main, #f8fafc);
+  margin: 0;
+}
+
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.review-table th {
+  background-color: var(--bg-surface, #1e293b);
+  padding: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  text-align: left;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+}
+
+.review-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+  color: var(--text-main, #f8fafc);
+}
+
+.review-table tr:last-child td {
+  border-bottom: none;
+}
+
+.no-positions {
+  color: var(--text-muted, #94a3b8);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ============================================
+   EXPORT SECTION
+   ============================================ */
+
+.export-section {
+  background-color: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.export-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 1rem;
+}
+
+.export-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ============================================
+   BUTTON STYLES (extends base .btn)
+   ============================================ */
+
+.protokoll-form .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md, 6px);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--duration-fast, 150ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  white-space: nowrap;
+  border: none;
+}
+
+.protokoll-form .btn-primary {
+  background-color: var(--c-brand-500, #3b82f6);
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.protokoll-form .btn-primary:hover:not(:disabled) {
+  background-color: var(--c-brand-600, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+.protokoll-form .btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--border-highlight, #334155);
+  color: var(--text-main, #f8fafc);
+}
+
+.protokoll-form .btn-secondary:hover:not(:disabled) {
+  background-color: var(--c-slate-800, #1e293b);
+  border-color: var(--c-slate-600, #475569);
+}
+
+.protokoll-form .btn-success {
+  background-color: var(--c-success, #22c55e);
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.protokoll-form .btn-success:hover:not(:disabled) {
+  background-color: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+}
+
+.protokoll-form .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.protokoll-form .btn:focus-visible {
+  outline: 2px solid var(--c-brand-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   MESSAGE CONTAINER
+   ============================================ */
+
+.message-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+}
+
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background-color: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-highlight, #334155);
+  border-left: 4px solid var(--c-info, #0ea5e9);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md, 6px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
+  animation: slideInRight 0.3s ease-out;
+}
+
+.message-success {
+  border-left-color: var(--c-success, #22c55e);
+}
+
+.message-error {
+  border-left-color: var(--c-danger, #ef4444);
+}
+
+.message-warning {
+  border-left-color: var(--c-warning, #f59e0b);
+}
+
+.message-text {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-main, #f8fafc);
+}
+
+.message-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: color var(--duration-fast, 150ms);
+}
+
+.message-close:hover {
+  color: var(--text-main, #f8fafc);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .protokoll-form {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  .protokoll-form fieldset {
+    padding: 1rem;
+  }
+
+  .progress-indicator {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .progress-step {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+  }
+
+  .progress-step .step-number {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .protokoll-form .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .positions-table {
+    font-size: 0.75rem;
+  }
+
+  .positions-table th,
+  .positions-table td {
+    padding: 0.625rem 0.5rem;
+  }
+
+  .form-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-navigation .btn {
+    width: 100%;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-buttons .btn {
+    width: 100%;
+  }
+
+  .review-dl {
+    grid-template-columns: 1fr;
+  }
+
+  .review-dl dt {
+    margin-bottom: 0.25rem;
+  }
+
+  .review-dl dd {
+    margin-bottom: 0.75rem;
+  }
+
+  .message-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .protokoll-form .form-group label {
+    font-size: 0.8125rem;
+  }
+
+  .protokoll-form .form-control {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .positions-table-wrapper {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .checkbox-group,
+  .radio-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.protokoll-form .form-control:focus-visible {
+  outline: 2px solid var(--c-brand-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+.protokoll-form .form-checkbox:focus-visible,
+.protokoll-form .form-radio:focus-visible {
+  outline: 2px solid var(--c-brand-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .progress-step,
+  .protokoll-form .btn,
+  .protokoll-form .form-control,
+  .message {
+    transition: none;
+  }
+
+  .progress-step.active {
+    transform: none;
+  }
+
+  .protokoll-form .btn:hover {
+    transform: none;
+  }
+
+  .message {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .protokoll-form .form-control {
+    border-width: 2px;
+  }
+
+  .protokoll-form .form-control.error {
+    border-width: 2px;
+  }
+
+  .status-badge {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Print styles */
+@media print {
+  .progress-indicator,
+  .form-navigation,
+  .export-section,
+  .position-actions,
+  .message-container {
+    display: none;
+  }
+
+  .protokoll-form {
+    padding: 0;
+    max-width: none;
+  }
+
+  .protokoll-form fieldset {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
