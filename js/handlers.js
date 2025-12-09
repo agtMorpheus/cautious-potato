@@ -30,17 +30,18 @@ let selectedFile = null;
 window._currentWorkbook = null;
 
 /**
- * Handle file input change (Phase 4)
+ * Handle file input change (Phase 5)
  * @param {Event} event - File input change event
  */
 export function handleFileSelect(event) {
     const file = event.target.files[0];
-    const fileNameDisplay = document.getElementById('fileName');
     const importBtn = document.getElementById('import-button');
     
     if (file) {
-        fileNameDisplay.textContent = file.name;
-        importBtn.disabled = false;
+        // Enable import button
+        if (importBtn) {
+            importBtn.disabled = false;
+        }
         
         // Store file reference locally (not in state - files can't be serialized)
         selectedFile = file;
@@ -53,8 +54,10 @@ export function handleFileSelect(event) {
             message: ''
         });
     } else {
-        fileNameDisplay.textContent = 'Keine Datei ausgewählt';
-        importBtn.disabled = true;
+        // Disable import button
+        if (importBtn) {
+            importBtn.disabled = true;
+        }
         selectedFile = null;
         
         setImportStatus({
@@ -571,256 +574,24 @@ export function formatFileSize(bytes) {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
-// ==================== Phase 4.2: UI Update Handlers ====================
+// ==================== Phase 4.3 / Phase 5: Event Binding & Initialization ====================
 
 /**
- * Update import section UI based on state - Phase 4.2.1
- * @param {Object} state - Current application state
+ * Initialize all event listeners for user interactions and state changes
+ * Phase 5: Accepts optional handlers object for flexibility
+ * @param {Object} handlers - Optional object containing handler functions
  * @returns {void}
  */
-export function updateImportUI(state) {
-    const {
-        ui: { import: importState },
-        protokollData
-    } = state;
-    
-    // Select DOM elements
-    const fileInput = document.querySelector('#file-input');
-    const importButton = document.querySelector('#import-button');
-    const importStatus = document.querySelector('#import-status');
-    const importMessage = document.querySelector('#import-message');
-    const importSummary = document.querySelector('#import-summary');
-    const generateButton = document.querySelector('#generate-button');
-    
-    if (!fileInput || !importStatus) {
-        console.warn('Import UI elements not found in DOM');
-        return;
-    }
-    
-    // Update status indicator
-    updateStatusIndicator(importStatus, importState.status);
-    
-    // Update message
-    if (importMessage) {
-        importMessage.textContent = importState.message;
-        importMessage.className = `import-message status-${importState.status}`;
-    }
-    
-    // Update summary display
-    if (importSummary && protokollData && protokollData.metadata && protokollData.positionen.length > 0) {
-        const { metadata, positionen } = protokollData;
-        
-        importSummary.innerHTML = `
-            <div class="summary-item">
-                <span class="label">Order Number:</span>
-                <span class="value">${escapeHtml(metadata.orderNumber || 'N/A')}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Protocol Number:</span>
-                <span class="value">${escapeHtml(metadata.protocolNumber || 'N/A')}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Plant (Anlage):</span>
-                <span class="value">${escapeHtml(metadata.plant || 'N/A')}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Location (Einsatzort):</span>
-                <span class="value">${escapeHtml(metadata.location || 'N/A')}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Date:</span>
-                <span class="value">${escapeHtml(metadata.date || 'N/A')}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Positions Extracted:</span>
-                <span class="value">${positionen.length}</span>
-            </div>
-        `;
-        importSummary.style.display = 'block';
-    } else if (importSummary) {
-        importSummary.style.display = 'none';
-    }
-    
-    // Update button states
-    if (importButton) {
-        importButton.disabled = importState.status === 'pending';
-        importButton.textContent = importState.status === 'pending'
-            ? 'Processing...'
-            : 'Import File';
-    }
-    
-    // Enable/disable generate button based on successful import
-    if (generateButton) {
-        generateButton.disabled = !protokollData || !protokollData.metadata;
-    }
-}
-
-/**
- * Update generate section UI based on state - Phase 4.2.2
- * @param {Object} state - Current application state
- * @returns {void}
- */
-export function updateGenerateUI(state) {
-    const {
-        ui: { generate: generateState },
-        abrechnungData
-    } = state;
-    
-    // Select DOM elements
-    const generateButton = document.querySelector('#generate-button');
-    const generateStatus = document.querySelector('#generate-status');
-    const generateMessage = document.querySelector('#generate-message');
-    const generateSummary = document.querySelector('#generate-summary');
-    const exportButton = document.querySelector('#export-button');
-    
-    if (!generateButton || !generateStatus) {
-        console.warn('Generate UI elements not found in DOM');
-        return;
-    }
-    
-    // Update status indicator
-    updateStatusIndicator(generateStatus, generateState.status);
-    
-    // Update message
-    if (generateMessage) {
-        generateMessage.textContent = generateState.message;
-        generateMessage.className = `generate-message status-${generateState.status}`;
-    }
-    
-    // Update generation summary
-    if (generateSummary && abrechnungData && abrechnungData.header && Object.keys(abrechnungData.positionen || {}).length > 0) {
-        const { header, positionen } = abrechnungData;
-        const totalQuantity = Object.values(positionen).reduce((sum, q) => sum + q, 0);
-        
-        generateSummary.innerHTML = `
-            <div class="summary-item">
-                <span class="label">Unique Positions:</span>
-                <span class="value">${Object.keys(positionen).length}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Total Quantity:</span>
-                <span class="value">${totalQuantity.toFixed(2)}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Generation Time:</span>
-                <span class="value">${generateState.generationTimeMs}ms</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Status:</span>
-                <span class="value status-${generateState.status}">${generateState.status}</span>
-            </div>
-        `;
-        generateSummary.style.display = 'block';
-    } else if (generateSummary) {
-        generateSummary.style.display = 'none';
-    }
-    
-    // Update button states
-    if (generateButton) {
-        generateButton.disabled = generateState.status === 'pending';
-        generateButton.textContent = generateState.status === 'pending'
-            ? 'Generating...'
-            : 'Generate Abrechnung';
-    }
-    
-    // Enable/disable export button based on successful generation
-    if (exportButton) {
-        exportButton.disabled = !abrechnungData || !abrechnungData.header;
-    }
-}
-
-/**
- * Update export section UI based on state - Phase 4.2.3
- * @param {Object} state - Current application state
- * @returns {void}
- */
-export function updateExportUI(state) {
-    const {
-        ui: { export: exportState }
-    } = state;
-    
-    // Select DOM elements
-    const exportButton = document.querySelector('#export-button');
-    const exportStatus = document.querySelector('#export-status');
-    const exportMessage = document.querySelector('#export-message');
-    const exportHistory = document.querySelector('#export-history');
-    
-    if (!exportButton || !exportStatus) {
-        console.warn('Export UI elements not found in DOM');
-        return;
-    }
-    
-    // Update status indicator
-    updateStatusIndicator(exportStatus, exportState.status);
-    
-    // Update message
-    if (exportMessage) {
-        exportMessage.textContent = exportState.message;
-        exportMessage.className = `export-message status-${exportState.status}`;
-    }
-    
-    // Update export history
-    if (exportHistory && exportState.lastExportAt) {
-        const exportDate = new Date(exportState.lastExportAt);
-        const dateStr = exportDate.toLocaleString();
-        const sizeKB = (exportState.lastExportSize / 1024).toFixed(2);
-        
-        exportHistory.innerHTML = `
-            <div class="export-item">
-                <span class="label">Last Export:</span>
-                <span class="value">${dateStr}</span>
-            </div>
-            <div class="export-item">
-                <span class="label">File Size:</span>
-                <span class="value">${sizeKB} KB</span>
-            </div>
-        `;
-        exportHistory.style.display = 'block';
-    } else if (exportHistory) {
-        exportHistory.style.display = 'none';
-    }
-    
-    // Update button state
-    if (exportButton) {
-        exportButton.disabled = exportState.status === 'pending';
-        exportButton.textContent = exportState.status === 'pending'
-            ? 'Exporting...'
-            : 'Export to Excel';
-    }
-}
-
-/**
- * Helper to update status indicator element - Phase 4.2
- * @param {HTMLElement} element - Status element to update
- * @param {string} status - Status value ('idle', 'pending', 'success', 'error')
- */
-function updateStatusIndicator(element, status) {
-    // Remove all status classes
-    element.className = 'status-indicator';
-    
-    // Add current status class
-    element.classList.add(`status-${status}`);
-    
-    // Set indicator text
-    const statusText = {
-        idle: '○',
-        pending: '⟳',
-        success: '✓',
-        error: '✕'
-    };
-    
-    element.textContent = statusText[status] || '○';
-    element.title = status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-// ==================== Phase 4.3: Event Binding & Initialization ====================
-
-/**
- * Initialize all event listeners for user interactions and state changes - Phase 4.3.1
- * @returns {void}
- */
-export function initializeEventListeners() {
+export function initializeEventListeners(handlers = {}) {
     console.log('Initializing event listeners...');
+    
+    // Use provided handlers or fall back to module functions
+    const {
+        onImport = handleImportFile,
+        onGenerate = handleGenerateAbrechnung,
+        onExport = handleExportAbrechnung,
+        onReset = handleResetApplication
+    } = handlers;
     
     // File input handler
     const fileInput = document.querySelector('#file-input');
@@ -831,10 +602,19 @@ export function initializeEventListeners() {
         console.warn('File input (#file-input) not found in DOM');
     }
     
+    // Import button handler
+    const importButton = document.querySelector('#import-button');
+    if (importButton) {
+        importButton.addEventListener('click', onImport);
+        console.log('✓ Import button listener bound');
+    } else {
+        console.warn('Import button (#import-button) not found in DOM');
+    }
+    
     // Generate button handler
     const generateButton = document.querySelector('#generate-button');
     if (generateButton) {
-        generateButton.addEventListener('click', handleGenerateAbrechnung);
+        generateButton.addEventListener('click', onGenerate);
         console.log('✓ Generate button listener bound');
     } else {
         console.warn('Generate button (#generate-button) not found in DOM');
@@ -843,33 +623,20 @@ export function initializeEventListeners() {
     // Export button handler
     const exportButton = document.querySelector('#export-button');
     if (exportButton) {
-        exportButton.addEventListener('click', handleExportAbrechnung);
+        exportButton.addEventListener('click', onExport);
         console.log('✓ Export button listener bound');
     } else {
         console.warn('Export button (#export-button) not found in DOM');
     }
     
-    // Reset button handler (optional)
+    // Reset button handler
     const resetButton = document.querySelector('#reset-button');
     if (resetButton) {
-        resetButton.addEventListener('click', handleResetApplication);
+        resetButton.addEventListener('click', onReset);
         console.log('✓ Reset button listener bound');
+    } else {
+        console.warn('Reset button (#reset-button) not found in DOM');
     }
-    
-    // Import button handler - trigger import when button is clicked
-    const importButton = document.querySelector('#import-button');
-    if (importButton) {
-        importButton.addEventListener('click', handleImportFile);
-        console.log('✓ Import button listener bound');
-    }
-    
-    // State change listener - updates UI reactively
-    subscribe((state) => {
-        console.log('State changed - updating UI');
-        updateImportUI(state);
-        updateGenerateUI(state);
-        updateExportUI(state);
-    });
     
     console.log('Event listeners initialized');
 }

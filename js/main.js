@@ -1,163 +1,85 @@
 /**
- * Main Application Module (Phase 4)
+ * Main Application Module (Phase 5)
  * 
  * Application initialization and event listener setup
- * Implements Phase 4 event handlers and reactive UI updates
+ * Implements Phase 5 integration requirements
  */
 
 import { getState, subscribe, loadStateFromStorage } from './state.js';
-import * as handlers from './handlers.js';
+import {
+    handleImportFile,
+    handleGenerateAbrechnung,
+    handleExportAbrechnung,
+    handleResetApplication,
+    initializeEventListeners
+} from './handlers.js';
+import {
+    updateImportUI,
+    updateGenerateUI,
+    updateExportUI,
+    initializeStaticUI
+} from './ui.js';
 
 /**
- * Initialize the application
+ * Initialize the application (Phase 5.1.4)
  */
-function initializeApp() {
-    console.log('=== Abrechnung Application Initializing (Phase 4) ===');
+async function initializeApp() {
+    console.log('Abrechnung Application – Initializing (Phase 5)');
     
-    // 1. Load persisted state from localStorage
+    // 1. Load persisted state (if any)
     const initialState = loadStateFromStorage();
-    console.log('Initial state:', initialState);
+    console.log('Initial state loaded', initialState);
     
-    // 2. Set up event listeners using Phase 4 initialization
-    handlers.initializeEventListeners();
+    // 2. Initialize static UI (non-dynamic DOM tweaks, ARIA, etc.)
+    initializeStaticUI();
     
-    // 3. Initial UI update based on loaded state
-    updateUI(getState());
-    
-    // 4. Subscribe to state changes for debugging (development only)
-    subscribe((nextState) => {
-        console.log('State changed:', nextState);
+    // 3. Bind event listeners once
+    initializeEventListeners({
+        onImport: handleImportFile,
+        onGenerate: handleGenerateAbrechnung,
+        onExport: handleExportAbrechnung,
+        onReset: handleResetApplication
     });
     
-    console.log('=== Abrechnung Generator initialized successfully (Phase 4) ===');
+    // 4. Subscribe to state changes to keep UI reactive
+    subscribe((nextState) => {
+        updateImportUI(nextState);
+        updateGenerateUI(nextState);
+        updateExportUI(nextState);
+    });
+    
+    // 5. Perform initial render based on loaded state
+    const state = getState();
+    updateImportUI(state);
+    updateGenerateUI(state);
+    updateExportUI(state);
+    
+    console.log('Abrechnung Application – Initialization complete');
 }
 
 /**
- * Set up all event listeners (Phase 4 - Delegated to handlers.js)
+ * Cleanup & Testing Helper (Phase 5.1.5)
+ * For testing or hot-reload scenarios
  */
-function setupEventListeners() {
-    // This is now handled by handlers.initializeEventListeners()
-    // Keeping this function for backward compatibility
-    handlers.initializeEventListeners();
-}
-
-/**
- * Update UI based on current state (Phase 4)
- * @param {Object} state - Current application state
- */
-function updateUI(state) {
-    // Update status badge based on new UI state structure
-    updateStatusBadge(state);
-    
-    // Phase 4: UI updates are now handled by handlers module
-    // through state subscription
-    handlers.updateImportUI(state);
-    handlers.updateGenerateUI(state);
-    handlers.updateExportUI(state);
-}
-
-/**
- * Update status badge display (Phase 2)
- * Derives overall status from ui section statuses
- * @param {Object} state - Current application state
- */
-function updateStatusBadge(state) {
-    const statusBadge = document.getElementById('statusBadge');
-    if (!statusBadge) return;
-    
-    // Remove all status classes
-    statusBadge.classList.remove('importing', 'generating', 'ready', 'error');
-    
-    const ui = state.ui;
-    
-    // Determine status based on UI section statuses (Phase 2 structure)
-    // Check for errors first
-    if (ui.import.status === 'error' || ui.generate.status === 'error' || ui.export.status === 'error') {
-        statusBadge.textContent = 'Fehler';
-        statusBadge.classList.add('error');
-        return;
-    }
-    
-    // Check for pending operations
-    if (ui.import.status === 'pending') {
-        statusBadge.textContent = 'Importiere...';
-        statusBadge.classList.add('importing');
-        return;
-    }
-    
-    if (ui.generate.status === 'pending') {
-        statusBadge.textContent = 'Generiere...';
-        statusBadge.classList.add('generating');
-        return;
-    }
-    
-    if (ui.export.status === 'pending') {
-        statusBadge.textContent = 'Exportiere...';
-        statusBadge.classList.add('generating');
-        return;
-    }
-    
-    // Check for successful completion states
-    if (ui.generate.status === 'success') {
-        statusBadge.textContent = 'Abrechnung bereit';
-        statusBadge.classList.add('ready');
-        return;
-    }
-    
-    if (ui.import.status === 'success') {
-        statusBadge.textContent = 'Protokoll importiert';
-        statusBadge.classList.add('ready');
-        return;
-    }
-    
-    // Default idle state
-    statusBadge.textContent = 'Bereit';
-    statusBadge.classList.add('ready');
-}
-
-/**
- * Update button enabled/disabled states (Phase 2)
- * @param {Object} state - Current application state
- */
-function updateButtonStates(state) {
-    const generateBtn = document.getElementById('generateBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    
-    // Check if protokollData has positions (Phase 2 structure)
-    const hasProtokollData = state.protokollData?.positionen?.length > 0;
-    const hasAbrechnungData = Object.keys(state.abrechnungData?.positionen || {}).length > 0;
-    
-    // Generate button - enabled if protokoll is imported and not currently importing
-    if (generateBtn) {
-        generateBtn.disabled = !hasProtokollData || state.ui.import.status === 'pending';
-    }
-    
-    // Export button - enabled if abrechnung is generated and not currently generating
-    if (exportBtn) {
-        exportBtn.disabled = !hasAbrechnungData || state.ui.generate.status === 'pending';
-    }
-}
-
-/**
- * Handle errors globally
- * @param {Error} error - Error object
- */
-function handleError(error) {
-    console.error('Application error:', error);
-    alert(`Fehler: ${error.message}`);
+function destroyApp() {
+    // Future-proof hook: remove listeners, timers, etc.
+    // For now, you can track and remove any custom listeners if you add them.
+    console.log('Abrechnung Application – Destroyed');
 }
 
 // Set up global error handler
 window.addEventListener('error', (event) => {
-    handleError(event.error);
+    console.error('Application error:', event.error);
+    alert(`Fehler: ${event.error?.message || 'Ein unbekannter Fehler ist aufgetreten'}`);
 });
 
 // Set up unhandled promise rejection handler
 window.addEventListener('unhandledrejection', (event) => {
-    handleError(event.reason);
+    console.error('Unhandled promise rejection:', event.reason);
+    alert(`Fehler: ${event.reason?.message || 'Ein unbekannter Fehler ist aufgetreten'}`);
 });
 
-// Initialize app when DOM is ready
+// Initialize app when DOM is ready (Phase 5.1.4)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
@@ -165,4 +87,4 @@ if (document.readyState === 'loading') {
 }
 
 // Export for testing purposes
-export { initializeApp, updateUI };
+export { initializeApp, destroyApp };
