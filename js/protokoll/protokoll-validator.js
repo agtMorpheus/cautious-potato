@@ -424,9 +424,10 @@ export function validateMeasurements(measurements) {
     warnings.push('Differential current very low - verify measurement');
   }
 
-  // Check for measurement consistency
+  // Check for measurement consistency using actual voltage if provided
   if (measurements.riso && measurements.differenzstrom) {
-    const expectedCurrent = 230 / measurements.riso; // Basic Ohm's law
+    const voltage = measurements.voltage || 230; // Use provided voltage or default to 230V
+    const expectedCurrent = voltage / measurements.riso; // Basic Ohm's law
     if (Math.abs(expectedCurrent - measurements.differenzstrom) > 10) {
       warnings.push('Measurements may be inconsistent - verify values');
     }

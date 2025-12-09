@@ -89,7 +89,8 @@ describe('Protokoll Validator', () => {
     });
 
     test('validates future date requirement', () => {
-      const pastDate = new Date(Date.now() - 86400000).toISOString();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+      const pastDate = new Date(Date.now() - ONE_DAY_MS).toISOString();
       const result = validator.validateField('prüfungsergebnis.nächsterPrüfungstermin', pastDate);
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('future');

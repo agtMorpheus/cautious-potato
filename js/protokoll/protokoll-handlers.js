@@ -520,15 +520,32 @@ function setNestedValue(obj, path, value) {
   const keys = path.split('.');
   let current = obj;
 
+  // Guard against prototype pollution
+  const forbiddenKeys = ['__proto__', 'constructor', 'prototype'];
+
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    
+    // Prevent prototype pollution
+    if (forbiddenKeys.includes(key)) {
+      console.error(`Invalid path key: ${key}`);
+      return;
+    }
+    
     if (!(key in current)) {
       current[key] = {};
     }
     current = current[key];
   }
 
-  current[keys[keys.length - 1]] = value;
+  // Guard final key against prototype pollution
+  const finalKey = keys[keys.length - 1];
+  if (forbiddenKeys.includes(finalKey)) {
+    console.error(`Invalid path key: ${finalKey}`);
+    return;
+  }
+
+  current[finalKey] = value;
 }
 
 console.log('✓ Protokoll Handlers module loaded');

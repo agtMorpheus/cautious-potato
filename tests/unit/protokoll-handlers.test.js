@@ -175,7 +175,8 @@ describe('Protokoll Handlers', () => {
     });
 
     test('sets validation error for invalid results', () => {
-      const pastDate = new Date(Date.now() - 86400000).toISOString();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+      const pastDate = new Date(Date.now() - ONE_DAY_MS).toISOString();
       
       handlers.handleResultsChange('results.nächsterPrüfungstermin', pastDate);
       
