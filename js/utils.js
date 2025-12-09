@@ -1,17 +1,33 @@
 /**
- * Utility Functions Module
+ * Utility Functions Module (Phase 3)
  * 
  * Excel reading, writing, and data manipulation utilities
  * Uses SheetJS (xlsx) library for Excel operations
+ * 
+ * Phase 3 implements:
+ * - Excel file reading with metadata
+ * - Protokoll parsing and validation
+ * - Position extraction and aggregation
+ * - Template caching for performance
+ * - Export workbook creation
+ * - Comprehensive error handling
  */
 
 // Configuration constants
 const QUANTITY_COLUMN_FALLBACKS = ['X', 'B', 'C']; // Columns to check for quantity values
 
+// Position number format pattern: DD.DD.DDDD (e.g., "01.01.0010")
+const POSITION_NUMBER_PATTERN = /^\d{2}\.\d{2}\.\d{4}/;
+
+// Template cache for performance optimization
+let cachedAbrechnungTemplate = null;
+
 /**
  * Read Excel file from File object
+ * Returns workbook object with file metadata for Phase 3 compatibility
  * @param {File} file - Excel file to read
- * @returns {Promise<Object>} SheetJS workbook object
+ * @returns {Promise<Object>} Object containing workbook and metadata
+ * @throws {Error} If file is not valid Excel or cannot be read
  */
 export async function readExcelFile(file) {
     return new Promise((resolve, reject) => {
@@ -20,8 +36,13 @@ export async function readExcelFile(file) {
             return;
         }
         
-        // Validate file type
-        if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        const fileName = file.name;
+        
+        // Validate file type - accept .xlsx files
+        const validExtensions = ['.xlsx', '.xls'];
+        const hasValidExtension = validExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+        
+        if (!hasValidExtension) {
             reject(new Error('Ungültiges Dateiformat. Bitte wählen Sie eine .xlsx Datei.'));
             return;
         }
@@ -32,7 +53,20 @@ export async function readExcelFile(file) {
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                resolve(workbook);
+                
+                if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+                    throw new Error('Arbeitsmappe enthält keine Arbeitsblätter');
+                }
+                
+                // Return object with workbook and metadata (Phase 3 structure)
+                resolve({
+                    workbook,
+                    metadata: {
+                        fileName,
+                        fileSize: file.size,
+                        readAt: new Date().toISOString()
+                    }
+                });
             } catch (error) {
                 reject(new Error('Fehler beim Lesen der Excel-Datei: ' + error.message));
             }
@@ -121,31 +155,145 @@ export function extractPositions(workbook) {
 }
 
 /**
- * Sum positions by position number
+ * Sum positions by position number.
+ * 
+ * Note: This function throws errors for invalid input that prevents processing,
+ * in contrast to validateExtractedPositions() which collects validation issues
+ * for reporting. Use validateExtractedPositions() before this function to get
+ * user-friendly validation feedback, or use safeReadAndParseProtokoll() for
+ * complete error handling.
+ * 
  * @param {Array} positionen - Array of position objects
  * @returns {Object} Object with summed quantities by position number
+ * @throws {Error} If positionen is not an array or contains invalid objects
  */
 export function sumByPosition(positionen) {
+    if (!Array.isArray(positionen)) {
+        throw new Error('Positionen muss ein Array sein');
+    }
+    
     const summed = {};
     
     positionen.forEach(pos => {
-        const key = pos.posNr;
-        
-        if (!summed[key]) {
-            summed[key] = 0;
+        if (!pos || typeof pos !== 'object') {
+            throw new Error('Ungültiges Positionsobjekt im Array');
         }
         
-        summed[key] += pos.menge;
+        const { posNr, menge } = pos;
+        
+        if (!posNr || typeof posNr !== 'string') {
+            throw new Error(`Ungültige Positionsnummer: ${posNr}`);
+        }
+        
+        if (typeof menge !== 'number' || Number.isNaN(menge)) {
+            throw new Error(`Ungültige Menge für Position ${posNr}: ${menge}`);
+        }
+        
+        if (!summed[posNr]) {
+            summed[posNr] = 0;
+        }
+        
+        summed[posNr] += menge;
     });
     
     return summed;
 }
 
 /**
- * Load abrechnung template from file
+ * Validate extracted positions for common issues
+ * @param {Array} positionen - Array of position objects
+ * @returns {Object} { valid: boolean, errors: Array, warnings: Array }
+ */
+export function validateExtractedPositions(positionen) {
+    const errors = [];
+    const warnings = [];
+    
+    if (!Array.isArray(positionen)) {
+        return {
+            valid: false,
+            errors: ['Positionen ist kein Array'],
+            warnings: []
+        };
+    }
+    
+    if (positionen.length === 0) {
+        warnings.push('Keine Positionen wurden aus dem Protokoll extrahiert');
+    }
+    
+    const posNrMap = new Map();
+    
+    positionen.forEach((pos, index) => {
+        if (!pos || typeof pos !== 'object') {
+            errors.push(`Position an Index ${index} ist kein Objekt`);
+            return;
+        }
+        
+        // Check for duplicate Pos.Nr.
+        if (posNrMap.has(pos.posNr)) {
+            warnings.push(`Position ${pos.posNr} erscheint mehrfach (Zeilen ${posNrMap.get(pos.posNr)} und ${pos.row})`);
+        } else {
+            posNrMap.set(pos.posNr, pos.row);
+        }
+        
+        // Check for invalid Pos.Nr. format using named constant
+        if (!POSITION_NUMBER_PATTERN.test(pos.posNr)) {
+            warnings.push(`Position ${pos.posNr} in Zeile ${pos.row} hat unerwartetes Format`);
+        }
+        
+        // Check for negative quantities
+        if (pos.menge < 0) {
+            errors.push(`Position ${pos.posNr} hat negative Menge (${pos.menge})`);
+        }
+    });
+    
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings
+    };
+}
+
+/**
+ * Compute summary statistics for position sums
+ * @param {Object} positionMap - Map of posNr → totalMenge
+ * @returns {Object} { totalQuantity, uniquePositions, minQuantity, maxQuantity }
+ */
+export function getPositionSummary(positionMap) {
+    if (!positionMap || typeof positionMap !== 'object') {
+        return {
+            totalQuantity: 0,
+            uniquePositions: 0,
+            minQuantity: 0,
+            maxQuantity: 0
+        };
+    }
+    
+    const quantities = Object.values(positionMap).filter(q => typeof q === 'number');
+    
+    return {
+        totalQuantity: quantities.reduce((sum, q) => sum + q, 0),
+        uniquePositions: Object.keys(positionMap).length,
+        minQuantity: quantities.length > 0 ? Math.min(...quantities) : 0,
+        maxQuantity: quantities.length > 0 ? Math.max(...quantities) : 0
+    };
+}
+
+/**
+ * Load abrechnung template from file with caching
+ * Template is cached in memory to avoid repeated file reads
  * @returns {Promise<Object>} SheetJS workbook object
+ * @throws {Error} If template cannot be loaded
  */
 export async function loadAbrechnungTemplate() {
+    // Return cached template if available
+    if (cachedAbrechnungTemplate) {
+        console.log('Using cached abrechnung template');
+        // Return a deep clone to prevent modification of cached template
+        return XLSX.utils.book_new_from_existing ?
+            XLSX.utils.book_new_from_existing(cachedAbrechnungTemplate) :
+            JSON.parse(JSON.stringify(cachedAbrechnungTemplate));
+    }
+    
     try {
         const response = await fetch('templates/abrechnung.xlsx');
         
@@ -161,6 +309,15 @@ export async function loadAbrechnungTemplate() {
         
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        if (!workbook || !workbook.SheetNames.includes('EAW')) {
+            throw new Error('Template-Arbeitsmappe fehlt "EAW" Arbeitsblatt');
+        }
+        
+        // Cache the template
+        cachedAbrechnungTemplate = workbook;
+        console.log('Abrechnung template loaded and cached');
+        
         return workbook;
     } catch (error) {
         if (error.message.includes('Failed to fetch') || error instanceof TypeError) {
@@ -168,6 +325,14 @@ export async function loadAbrechnungTemplate() {
         }
         throw error;
     }
+}
+
+/**
+ * Clear the cached template (useful for testing or when template changes)
+ */
+export function clearAbrechnungTemplateCache() {
+    cachedAbrechnungTemplate = null;
+    console.log('Abrechnung template cache cleared');
 }
 
 /**
@@ -205,19 +370,189 @@ export function fillAbrechnungPositions(workbook, positionSums) {
     
     const worksheet = workbook.Sheets['EAW'];
     let filledCount = 0;
+    let skippedCount = 0;
     
     // Scan template for position numbers and fill quantities
     for (let row = 9; row <= 500; row++) {
         const posNr = getCellValue(worksheet, `A${row}`);
         
-        if (posNr && positionSums[posNr]) {
+        if (posNr && Object.prototype.hasOwnProperty.call(positionSums, posNr)) {
             setCellValue(worksheet, `B${row}`, positionSums[posNr]);
             filledCount++;
+        } else if (posNr) {
+            skippedCount++;
         }
     }
     
-    console.log(`Filled ${filledCount} positions in abrechnung`);
+    console.log(`Filled ${filledCount} positions, skipped ${skippedCount} template positions`);
     return workbook;
+}
+
+/**
+ * Validate that quantities have been properly written to abrechnung
+ * @param {Object} workbook - SheetJS workbook object
+ * @returns {Object} { filledCount, emptyCount, errors, isValid }
+ */
+export function validateFilledPositions(workbook) {
+    const sheetName = 'EAW';
+    
+    if (!workbook.Sheets[sheetName]) {
+        return {
+            filledCount: 0,
+            emptyCount: 0,
+            errors: ['Arbeitsblatt "EAW" nicht gefunden'],
+            isValid: false
+        };
+    }
+    
+    const worksheet = workbook.Sheets[sheetName];
+    const errors = [];
+    let filledCount = 0;
+    let emptyCount = 0;
+    
+    for (let rowIndex = 9; rowIndex <= 500; rowIndex++) {
+        const cellAddress = `A${rowIndex}`;
+        const cell = worksheet[cellAddress];
+        
+        if (cell && cell.v) {
+            const quantityCell = worksheet[`B${rowIndex}`];
+            
+            if (quantityCell && quantityCell.v !== undefined && quantityCell.v !== null) {
+                filledCount++;
+            } else {
+                emptyCount++;
+            }
+        }
+    }
+    
+    return {
+        filledCount,
+        emptyCount,
+        errors,
+        isValid: errors.length === 0
+    };
+}
+
+/**
+ * Create a complete abrechnung workbook ready for export
+ * @param {Object} abrechnungData - Combined data object { header, positionen }
+ * @returns {Promise<Object>} Final workbook ready to write
+ * @throws {Error} If data is invalid or template cannot be loaded
+ */
+export async function createExportWorkbook(abrechnungData) {
+    if (!abrechnungData || typeof abrechnungData !== 'object') {
+        throw new Error('Ungültige abrechnungData');
+    }
+    
+    const { header, positionen } = abrechnungData;
+    
+    if (!header || !positionen) {
+        throw new Error('Header oder Positionen fehlen in abrechnungData');
+    }
+    
+    try {
+        // Load template (may use cache)
+        const workbook = await loadAbrechnungTemplate();
+        
+        // Create legacy metadata format for fillAbrechnungHeader
+        const legacyMetadata = {
+            datum: header.date,
+            auftragsNr: header.orderNumber,
+            anlage: header.plant,
+            einsatzort: header.location
+        };
+        
+        // Fill header
+        fillAbrechnungHeader(workbook, legacyMetadata);
+        
+        // Fill positions
+        fillAbrechnungPositions(workbook, positionen);
+        
+        // Validate
+        const validation = validateFilledPositions(workbook);
+        if (!validation.isValid) {
+            console.warn('Position validation warnings:', validation.errors);
+        }
+        
+        console.log('Export workbook created successfully');
+        return workbook;
+    } catch (error) {
+        throw new Error(`Fehler beim Erstellen des Export-Workbooks: ${error.message}`);
+    }
+}
+
+/**
+ * Wrap utility calls with standardized error handling for safe protokoll reading
+ * @param {File} file - Excel file to read
+ * @returns {Promise<Object>} { success, metadata, positionen, positionSums, errors, warnings }
+ */
+export async function safeReadAndParseProtokoll(file) {
+    const errors = [];
+    const warnings = [];
+    
+    try {
+        // Step 1: Read file
+        let result;
+        try {
+            result = await readExcelFile(file);
+        } catch (e) {
+            errors.push(`Datei-Lesefehler: ${e.message}`);
+            throw e;
+        }
+        
+        const { workbook } = result;
+        
+        // Step 2: Parse metadata
+        let metadata;
+        try {
+            metadata = parseProtokollMetadata(workbook);
+        } catch (e) {
+            errors.push(`Metadaten-Parsefehler: ${e.message}`);
+            if (e.details) {
+                errors.push(...e.details);
+            }
+            throw e;
+        }
+        
+        // Step 3: Extract positions
+        let positionen;
+        try {
+            positionen = extractPositions(workbook);
+        } catch (e) {
+            errors.push(`Positions-Extraktionsfehler: ${e.message}`);
+            throw e;
+        }
+        
+        // Step 4: Validate positions
+        const validation = validateExtractedPositions(positionen);
+        if (!validation.valid) {
+            errors.push(...validation.errors);
+        }
+        if (validation.warnings.length > 0) {
+            warnings.push(...validation.warnings);
+        }
+        
+        // Step 5: Aggregate
+        const positionSums = sumByPosition(positionen);
+        
+        return {
+            success: errors.length === 0,
+            metadata,
+            positionen,
+            positionSums,
+            errors,
+            warnings
+        };
+    } catch (error) {
+        return {
+            success: false,
+            metadata: null,
+            positionen: [],
+            positionSums: {},
+            errors: errors.length > 0 ? errors : [error.message],
+            warnings
+        };
+    }
 }
 
 /**
