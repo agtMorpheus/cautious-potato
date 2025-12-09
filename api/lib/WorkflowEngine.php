@@ -10,14 +10,14 @@ class WorkflowEngine {
     
     /**
      * Define valid status transitions
+     * Note: Base workflow uses 'offen', 'inbearb', 'fertig'.
+     * The 'review', 'approved', 'rejected' statuses are managed via 
+     * the approval_status field to maintain backward compatibility.
      * Format: 'current_status' => ['allowed_next_statuses']
      */
     private static $allowedTransitions = [
         'offen' => ['inbearb'],
-        'inbearb' => ['review', 'offen'],  // Can go back to open or forward to review
-        'review' => ['approved', 'rejected', 'inbearb'],  // Approval decision or back to work
-        'approved' => ['fertig', 'inbearb'],  // Complete or reopen for changes
-        'rejected' => ['inbearb'],  // Back to work after rejection
+        'inbearb' => ['offen', 'fertig'],  // Can go back to open or complete
         'fertig' => ['inbearb']  // Can reopen completed contracts
     ];
     
@@ -27,9 +27,6 @@ class WorkflowEngine {
     private static $statusLabels = [
         'offen' => 'Open',
         'inbearb' => 'In Progress',
-        'review' => 'Under Review',
-        'approved' => 'Approved',
-        'rejected' => 'Rejected',
         'fertig' => 'Completed'
     ];
     
@@ -176,10 +173,7 @@ class WorkflowEngine {
             throw new Exception('Contract already has a pending approval request');
         }
         
-        // Transition to review
-        self::transitionContract($contractId, 'review', $requesterId, 'Approval requested');
-        
-        // Create approval request
+        // Create approval request (status stays as inbearb, approval_status tracks approval)
         $stmt = $pdo->prepare('
             INSERT INTO contract_approvals 
             (contract_id, approver_id, requested_by, comments)
@@ -189,12 +183,20 @@ class WorkflowEngine {
         
         $approvalId = $pdo->lastInsertId();
         
-        // Update contract with approver
+        // Update contract approval fields (main status unchanged)
         $stmt = $pdo->prepare('
             UPDATE contracts SET approver_id = ?, approval_status = "pending"
             WHERE id = ?
         ');
         $stmt->execute([$approverId, $contractId]);
+        
+        // Log the approval request in workflow transitions
+        $stmt = $pdo->prepare('
+            INSERT INTO workflow_transitions 
+            (contract_id, from_status, to_status, transition_by, reason)
+            VALUES (?, ?, ?, ?, ?)
+        ');
+        $stmt->execute([$contractId, 'approval:none', 'approval:pending', $requesterId, 'Approval requested']);
         
         // Send notification to approver
         self::createNotification(
@@ -252,7 +254,6 @@ class WorkflowEngine {
         }
         
         $newApprovalStatus = $approved ? 'approved' : 'rejected';
-        $newContractStatus = $approved ? 'approved' : 'rejected';
         
         $pdo->beginTransaction();
         
@@ -265,13 +266,13 @@ class WorkflowEngine {
             ');
             $stmt->execute([$newApprovalStatus, $comments, $approval['id']]);
             
-            // Update contract
+            // Update contract approval_status only (main status unchanged)
             $stmt = $pdo->prepare('
                 UPDATE contracts 
-                SET approval_status = ?, approval_date = NOW(), status = ?
+                SET approval_status = ?, approval_date = NOW()
                 WHERE id = ?
             ');
-            $stmt->execute([$newApprovalStatus, $newContractStatus, $contractId]);
+            $stmt->execute([$newApprovalStatus, $contractId]);
             
             // Log transition
             $stmt = $pdo->prepare('
@@ -281,8 +282,8 @@ class WorkflowEngine {
             ');
             $stmt->execute([
                 $contractId, 
-                'review', 
-                $newContractStatus, 
+                'approval:pending', 
+                'approval:' . $newApprovalStatus, 
                 $approverId, 
                 ($approved ? 'Approved' : 'Rejected') . ($comments ? ": $comments" : '')
             ]);

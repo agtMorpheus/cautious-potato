@@ -10,11 +10,13 @@ class ValidationRules {
     
     /**
      * Default validation rules (used when no database rules exist)
+     * Note: Extended status values are for Phase 6 workflow features.
+     * Ensure db/phase6_schema.sql has been applied for full functionality.
      */
     private static $defaultRules = [
         'status' => [
             'type' => 'enum',
-            'values' => ['offen', 'inbearb', 'fertig', 'review', 'approved', 'rejected'],
+            'values' => ['offen', 'inbearb', 'fertig'],  // Base statuses only
             'required' => true,
             'message' => 'Status must be a valid status value'
         ],

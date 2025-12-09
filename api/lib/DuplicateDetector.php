@@ -157,14 +157,17 @@ class DuplicateDetector {
         $reasons = [];
         
         // Title similarity (Levenshtein distance normalized)
+        // Note: Levenshtein is O(n*m) and limited to 255 chars by PHP.
+        // For very large datasets, consider using soundex, metaphone, or
+        // trigram-based similarity for better performance.
         if (!empty($c1['titel']) && !empty($c2['titel'])) {
             $maxLen = max(strlen($c1['titel']), strlen($c2['titel']));
             if ($maxLen > 0) {
-                $distance = levenshtein(
-                    mb_strtolower(mb_substr($c1['titel'], 0, 255)),
-                    mb_strtolower(mb_substr($c2['titel'], 0, 255))
-                );
-                $scores['titel'] = 1 - ($distance / $maxLen);
+                // Truncate to 255 chars to avoid PHP levenshtein limit
+                $title1 = mb_strtolower(mb_substr($c1['titel'], 0, 255));
+                $title2 = mb_strtolower(mb_substr($c2['titel'], 0, 255));
+                $distance = levenshtein($title1, $title2);
+                $scores['titel'] = 1 - ($distance / max(strlen($title1), strlen($title2)));
                 
                 if ($scores['titel'] > 0.8) {
                     $reasons[] = 'Similar titles';

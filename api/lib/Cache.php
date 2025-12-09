@@ -28,8 +28,9 @@ class Cache {
                 self::$redis = new Redis();
                 $host = $_ENV['REDIS_HOST'] ?? 'localhost';
                 $port = (int)($_ENV['REDIS_PORT'] ?? 6379);
+                $timeout = (float)($_ENV['REDIS_TIMEOUT'] ?? 2.0);
                 
-                if (self::$redis->connect($host, $port, 2.0)) {
+                if (self::$redis->connect($host, $port, $timeout)) {
                     // Test connection
                     self::$redis->ping();
                     return;
