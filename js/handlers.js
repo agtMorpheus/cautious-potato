@@ -24,6 +24,9 @@ import * as utils from './utils.js';
 let selectedFile = null;
 
 // Store generated workbook reference (not persisted in state - can't be serialized)
+// NOTE: Using window global as specified in roadmap_phase4.md line 259:
+// "Store workbook in window for export step (Phase 4)"
+// This is required because workbooks can't be serialized to state/localStorage
 window._currentWorkbook = null;
 
 /**
