@@ -446,6 +446,18 @@ describe('Protokoll State Management', () => {
       expect(current.positions.length).toBe(0);
       expect(current.prüfungsergebnis.mängelFestgestellt).toBe(false);
     });
+
+    test('setMetadataField() guards against prototype pollution', () => {
+      // Try to set __proto__ - should be rejected
+      state.setMetadataField('__proto__.polluted', 'malicious');
+      
+      // Verify Object prototype is not polluted
+      expect({}.polluted).toBeUndefined();
+      
+      // Try to set constructor - should be rejected
+      state.setMetadataField('constructor.polluted', 'malicious');
+      expect({}.polluted).toBeUndefined();
+    });
   });
 
   // ========== POSITION STRUCTURE ==========

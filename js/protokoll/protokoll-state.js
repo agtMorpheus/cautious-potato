@@ -728,9 +728,18 @@ function setNestedValue(obj, path, value) {
   const keys = path.split('.');
   let current = obj;
   
+  // Guard against prototype pollution
+  const forbiddenKeys = ['__proto__', 'constructor', 'prototype'];
+  
   // Navigate to parent object
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    
+    // Prevent prototype pollution
+    if (forbiddenKeys.includes(key)) {
+      console.error(`Invalid path key: ${key}`);
+      return;
+    }
     
     if (!(key in current)) {
       current[key] = {};
@@ -739,8 +748,15 @@ function setNestedValue(obj, path, value) {
     current = current[key];
   }
   
+  // Guard final key against prototype pollution
+  const finalKey = keys[keys.length - 1];
+  if (forbiddenKeys.includes(finalKey)) {
+    console.error(`Invalid path key: ${finalKey}`);
+    return;
+  }
+  
   // Set final value
-  current[keys[keys.length - 1]] = value;
+  current[finalKey] = value;
 }
 
 /**
@@ -748,7 +764,7 @@ function setNestedValue(obj, path, value) {
  * @returns {string} Position number
  */
 function generatePositionNumber() {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 // ============================================
