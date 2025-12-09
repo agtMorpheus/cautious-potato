@@ -1184,7 +1184,7 @@ button.secondary:hover:not(:disabled) {
 /* ==================== Responsive Design & Phase 5 ==================== */
 /* Dashboard Grid Layout for Large Screens */
 @media (min-width: 1200px) {
-    #view-dashboard {
+    #view-dashboard.active {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1.5rem;
@@ -1224,7 +1224,7 @@ button.secondary:hover:not(:disabled) {
     }
     
     /* Ensure dashboard fills screen */
-    #view-dashboard {
+    #view-dashboard.active {
         grid-template-rows: auto 1fr;
     }
 }
