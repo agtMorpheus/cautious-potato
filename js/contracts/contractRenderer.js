@@ -579,7 +579,6 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                         <th class="sortable" data-sort="plannedStart" onclick="window._handleContractSort && window._handleContractSort('plannedStart')">
                             Sollstart ${getSortIcon('plannedStart')}
                         </th>
-                        <th>Aktionen</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -609,14 +608,6 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                     </select>
                 </td>
                 <td>${escapeHtml(contract.plannedStart || '-')}</td>
-                <td class="action-cell">
-                    <button class="btn btn-sm btn-secondary" 
-                            data-action="edit-contract" 
-                            data-contract-id="${escapeHtml(contract.id)}"
-                            onclick="window._handleContractActionClick && window._handleContractActionClick('edit', '${escapeHtml(contract.id)}')">
-                        Bearbeiten
-                    </button>
-                </td>
             </tr>
         `;
     });
