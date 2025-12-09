@@ -1,0 +1,334 @@
+/**
+ * Cell Mapper Dialog Styles
+ */
+
+.cell-mapper-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell-mapper-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.cell-mapper-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: cell-mapper-slide-in 0.2s ease-out;
+}
+
+@keyframes cell-mapper-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cell-mapper-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cell-mapper-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.cell-mapper-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.cell-mapper-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.cell-mapper-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cell-mapper-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.cell-mapper-row:hover {
+    background: #f3f4f6;
+}
+
+.cell-mapper-row.required {
+    border-color: #fef3c7;
+    background: #fffbeb;
+}
+
+.cell-mapper-row.required:hover {
+    background: #fef3c7;
+}
+
+.cell-mapper-label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.cell-mapper-label label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.required-mark {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.cell-mapper-select select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cell-mapper-select select:hover {
+    border-color: #9ca3af;
+}
+
+.cell-mapper-select select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.cell-preview-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: #f9fafb;
+    color: #6b7280;
+    font-family: 'Courier New', monospace;
+}
+
+.cell-preview-input:empty,
+.cell-preview-input[value=""] {
+    font-style: italic;
+}
+
+.cell-mapper-help {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.cell-mapper-help svg {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cell-mapper-help p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #1e40af;
+    line-height: 1.5;
+}
+
+.cell-mapper-error {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.cell-mapper-error svg {
+    width: 20px;
+    height: 20px;
+    color: #ef4444;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cell-mapper-error strong {
+    display: block;
+    color: #991b1b;
+    margin-bottom: 4px;
+}
+
+.cell-mapper-error ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #dc2626;
+    font-size: 0.875rem;
+}
+
+.cell-mapper-error li {
+    margin: 4px 0;
+}
+
+.cell-mapper-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: #f9fafb;
+    border-radius: 0 0 12px 12px;
+}
+
+.cell-mapper-footer .btn {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cell-mapper-footer .btn-secondary {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.cell-mapper-footer .btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.cell-mapper-footer .btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.cell-mapper-footer .btn-primary:hover {
+    background: #2563eb;
+}
+
+.cell-mapper-footer .btn:active {
+    transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cell-mapper-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .cell-mapper-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .cell-mapper-label {
+        font-weight: 600;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .cell-mapper-content {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+    
+    .cell-mapper-header {
+        border-bottom-color: #374151;
+    }
+    
+    .cell-mapper-header h2 {
+        color: #f9fafb;
+    }
+    
+    .cell-mapper-description {
+        color: #9ca3af;
+    }
+    
+    .cell-mapper-row {
+        background: #111827;
+    }
+    
+    .cell-mapper-row:hover {
+        background: #1f2937;
+    }
+    
+    .cell-mapper-row.required {
+        border-color: #92400e;
+        background: #1c1917;
+    }
+    
+    .cell-mapper-select select {
+        background: #111827;
+        border-color: #374151;
+        color: #f9fafb;
+    }
+    
+    .cell-preview-input {
+        background: #111827;
+        border-color: #374151;
+        color: #9ca3af;
+    }
+    
+    .cell-mapper-footer {
+        background: #111827;
+        border-top-color: #374151;
+    }
+}

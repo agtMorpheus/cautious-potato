@@ -19,6 +19,7 @@ import {
     subscribe
 } from './state.js';
 import * as utils from './utils.js';
+import { showCellMapperDialog, applyMapping } from './cell-mapper.js';
 
 // Store selected file reference (not persisted in state)
 let selectedFile = null;
@@ -76,7 +77,7 @@ export function handleFileSelect(event) {
 }
 
 /**
- * Handle file import - Phase 4.1.1 Implementation
+ * Handle file import - Phase 4.1.1 Implementation with Cell Mapper
  * @param {Event} event - File input change event or button click
  * @returns {Promise<void>}
  */
@@ -102,7 +103,7 @@ export async function handleImportFile(event) {
             ...getState().ui,
             import: {
                 status: 'pending',
-                message: `Processing ${file.name}...`,
+                message: `Reading ${file.name}...`,
                 fileName: file.name,
                 fileSize: file.size,
                 importedAt: null
@@ -112,6 +113,62 @@ export async function handleImportFile(event) {
     
     try {
         console.log('Starting file import...', file.name);
+        
+        // Step 1: Read the Excel file first
+        const { workbook } = await utils.readExcelFile(file);
+        
+        // Step 2: Show cell mapper dialog for user to verify/adjust mapping
+        setState({
+            ui: {
+                ...getState().ui,
+                import: {
+                    status: 'pending',
+                    message: 'Überprüfen Sie die Zellenzuordnung...',
+                    fileName: file.name,
+                    fileSize: file.size,
+                    importedAt: null
+                }
+            }
+        });
+        
+        let mappingResult;
+        try {
+            mappingResult = await showCellMapperDialog(workbook);
+        } catch (error) {
+            // User cancelled the dialog
+            console.log('Cell mapping cancelled by user');
+            setState({
+                ui: {
+                    ...getState().ui,
+                    import: {
+                        status: 'idle',
+                        message: 'Import abgebrochen',
+                        fileName: file.name,
+                        fileSize: file.size,
+                        importedAt: null
+                    }
+                }
+            });
+            return;
+        }
+        
+        // Step 3: Apply the user's mapping choices
+        applyMapping(mappingResult.mapping);
+        
+        // Step 4: Now parse with the updated mapping
+        setState({
+            ui: {
+                ...getState().ui,
+                import: {
+                    status: 'pending',
+                    message: `Processing ${file.name}...`,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    importedAt: null
+                }
+            }
+        });
+        
         const startTime = performance.now();
         
         // Use safe wrapper function from utils

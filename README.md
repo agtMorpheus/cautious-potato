@@ -9,6 +9,8 @@ Die Anwendung liest Excel-basierte Prüfprotokolle (`protokoll.xlsx`), aggregier
 For comprehensive documentation, see:
 - **[Architecture Overview](docs/ARCHITECTURE.md)** - System design and module structure
 - **[API Reference](docs/API.md)** - Complete API documentation
+- **[Cell Mapper Guide](docs/CELL-MAPPER-GUIDE.md)** - Interactive cell mapping dialog usage
+- **[Configuration Guide](docs/CONFIGURATION.md)** - Flexible Excel parsing configuration
 - **[Desktop Application Guide](docs/DESKTOP.md)** - Running as a desktop app with Electron
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Security Review](docs/SECURITY.md)** - Security assessment and recommendations
@@ -16,7 +18,10 @@ For comprehensive documentation, see:
 
 ## 🚀 Features
 
-- **Import**: Einlesen von `protokoll.xlsx` Dateien via Dateiauswahl
+- **Flexible Import**: Einlesen von `protokoll.xlsx` Dateien via Dateiauswahl
+  - **Interactive Cell Mapper**: Visuelles Dialog zur Überprüfung und Anpassung der Zellenzuordnung
+  - **Automatic Detection**: Intelligente Erkennung von Metadaten in verschiedenen Zellpositionen
+  - **Multiple Fallbacks**: Unterstützt verschiedene Excel-Layouts ohne Konfigurationsänderungen
 - **Automatische Aggregation**: Summiert Mengen basierend auf identischen Positionsnummern (z.B. `01.01.0010`)
 - **Template-Engine**: Füllt ein vordefiniertes Excel-Template (`abrechnung.xlsx`) mit:
   - Header-Daten (Auftrags-Nr., Anlage, Einsatzort, Datum, etc.)
@@ -172,6 +177,10 @@ Nach dem Setup sollte die Struktur wie folgt aussehen:
 1. **Protokoll importieren**:
    - Klicke auf "Datei auswählen" im Bereich **1. Protokoll importieren**.
    - Wähle eine gültige `protokoll.xlsx` Datei aus.
+   - **Cell Mapper Dialog** erscheint automatisch:
+     - Überprüfe die automatisch erkannten Zellenzuordnungen
+     - Passe bei Bedarf die Zuordnung an (z.B. wenn Auftrags-Nr. in einer anderen Zelle steht)
+     - Klicke auf "Zuordnung übernehmen" zum Fortfahren
    - Die App validiert die Datei und zeigt Metadaten (Auftrag, Anlage, etc.) an.
 
 2. **Abrechnung generieren**:
@@ -197,7 +206,7 @@ Nach dem Setup sollte die Struktur wie folgt aussehen:
 ## ⚠️ Bekannte Einschränkungen & Hinweise
 
 - **Dateiformat**: Es werden nur `.xlsx` Dateien unterstützt (kein `.xls` oder `.csv`).
-- **Template-Struktur**: Die Anwendung erwartet strikte Einhaltung der Zellpositionen in den Templates (z.B. Auftrags-Nr. in Zelle `N5` des Protokolls). Änderungen am Template-Layout erfordern Anpassungen in `js/utils.js`.
+- **Template-Struktur**: Die Anwendung unterstützt flexible Zellpositionen durch den Cell Mapper Dialog. Für häufig verwendete Layouts können Standardpositionen in `js/config.js` angepasst werden (siehe [Configuration Guide](docs/CONFIGURATION.md)).
 - **Browser-Kompatibilität**: Optimiert für Desktop-Browser. Mobile Nutzung möglich, aber aufgrund der Dateihandhabung eingeschränkt.
 
 ## 🤝 Mitwirken

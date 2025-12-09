@@ -11,13 +11,32 @@
  * - Template caching for performance
  * - Export workbook creation
  * - Comprehensive error handling
+ * 
+ * Phase 3.5 enhancements:
+ * - Flexible cell mapping with fallbacks
+ * - Pattern-based metadata search
+ * - Runtime configuration updates
  */
 
-// Configuration constants
-const QUANTITY_COLUMN_FALLBACKS = ['X', 'B', 'C']; // Columns to check for quantity values
+import {
+    METADATA_CELL_CONFIG,
+    POSITION_CONFIG,
+    ABRECHNUNG_CONFIG,
+    PARSING_CONFIG
+} from './config.js';
 
-// Position number format pattern: DD.DD.DDDD (e.g., "01.01.0010")
-const POSITION_NUMBER_PATTERN = /^\d{2}\.\d{2}\.\d{4}/;
+// Mutable configuration (can be updated at runtime)
+let METADATA_CELL_MAP = { ...METADATA_CELL_CONFIG };
+
+// Search patterns for finding metadata by content
+const METADATA_SEARCH_PATTERNS = {
+    protokollNr: /protokoll[-\s]?nr/i,
+    auftragsNr: /auftrags[-\s]?nr|order[-\s]?number/i,
+    anlage: /anlage|plant/i,
+    einsatzort: /einsatzort|location/i,
+    firma: /firma|company/i,
+    auftraggeber: /auftraggeber|client/i
+};
 
 // Template cache for performance optimization
 // Cache the raw ArrayBuffer instead of parsed workbook to preserve formatting on clone
@@ -82,38 +101,86 @@ export async function readExcelFile(file) {
 }
 
 /**
- * Parse protokoll workbook and extract metadata
+ * Parse protokoll workbook and extract metadata with flexible cell detection
  * @param {Object} workbook - SheetJS workbook object
- * @returns {Object} Metadata object
+ * @param {Object} options - Optional configuration { strictMode: boolean, searchRange: string }
+ * @returns {Object} Metadata object with foundCells info
  */
-export function parseProtokollMetadata(workbook) {
-    // Check if 'Vorlage' sheet exists
-    if (!workbook.Sheets['Vorlage']) {
-        throw new Error('Sheet "Vorlage" nicht gefunden');
+export function parseProtokollMetadata(workbook, options = {}) {
+    const { 
+        strictMode = PARSING_CONFIG.strictMode, 
+        searchRange = PARSING_CONFIG.metadataSearchRange 
+    } = options;
+    
+    // Check if configured sheet exists
+    const sheetName = PARSING_CONFIG.protokollSheetName;
+    if (!workbook.Sheets[sheetName]) {
+        throw new Error(`Sheet "${sheetName}" nicht gefunden`);
     }
     
-    const worksheet = workbook.Sheets['Vorlage'];
-    
-    // Extract metadata from specific cells
+    const worksheet = workbook.Sheets[sheetName];
     const metadata = {
-        protokollNr: getCellValue(worksheet, 'U3') || '',
-        auftragsNr: getCellValue(worksheet, 'N5') || '',
-        anlage: getCellValue(worksheet, 'A10') || '',
-        einsatzort: getCellValue(worksheet, 'T10') || '',
-        firma: getCellValue(worksheet, 'T7') || '',
-        auftraggeber: getCellValue(worksheet, 'A5') || '',
-        datum: new Date().toISOString().split('T')[0] // Default to today
+        protokollNr: '',
+        auftragsNr: '',
+        anlage: '',
+        einsatzort: '',
+        firma: '',
+        auftraggeber: '',
+        datum: new Date().toISOString().split('T')[0]
     };
+    
+    const foundCells = {}; // Track where values were found
+    
+    // Try to find each metadata field using flexible approach
+    for (const [field, cellAddresses] of Object.entries(METADATA_CELL_MAP)) {
+        let value = null;
+        let foundAt = null;
+        
+        // Strategy 1: Try predefined cell locations (fallbacks)
+        for (const address of cellAddresses) {
+            value = getCellValue(worksheet, address);
+            if (value && String(value).trim()) {
+                foundAt = address;
+                break;
+            }
+        }
+        
+        // Strategy 2: If not found and not in strict mode, search by pattern
+        if (!value && !strictMode && METADATA_SEARCH_PATTERNS[field]) {
+            const searchResult = searchMetadataByPattern(
+                worksheet, 
+                METADATA_SEARCH_PATTERNS[field],
+                searchRange
+            );
+            if (searchResult) {
+                value = searchResult.value;
+                foundAt = searchResult.address;
+            }
+        }
+        
+        metadata[field] = value ? String(value).trim() : '';
+        foundCells[field] = foundAt;
+    }
     
     // Validate required fields
     const requiredFields = ['auftragsNr', 'anlage'];
     const missingFields = requiredFields.filter(field => !metadata[field]);
     
     if (missingFields.length > 0) {
-        throw new Error(`Fehlende Pflichtfelder: ${missingFields.join(', ')}`);
+        const error = new Error(`Fehlende Pflichtfelder: ${missingFields.join(', ')}`);
+        error.details = [
+            'Versuchen Sie:',
+            '1. Überprüfen Sie, ob die Werte in den erwarteten Zellen vorhanden sind',
+            '2. Verwenden Sie parseProtokollMetadata(workbook, { strictMode: false }) für flexible Suche',
+            `3. Erwartete Zellen: ${missingFields.map(f => METADATA_CELL_MAP[f].join(' oder ')).join(', ')}`
+        ];
+        throw error;
     }
     
-    return metadata;
+    // Log where values were found for debugging
+    console.log('Metadata gefunden in Zellen:', foundCells);
+    
+    return { ...metadata, _foundCells: foundCells };
 }
 
 /**
@@ -122,22 +189,27 @@ export function parseProtokollMetadata(workbook) {
  * @returns {Array} Array of position objects
  */
 export function extractPositions(workbook) {
-    if (!workbook.Sheets['Vorlage']) {
-        throw new Error('Sheet "Vorlage" nicht gefunden');
+    const sheetName = PARSING_CONFIG.protokollSheetName;
+    if (!workbook.Sheets[sheetName]) {
+        throw new Error(`Sheet "${sheetName}" nicht gefunden`);
     }
     
-    const worksheet = workbook.Sheets['Vorlage'];
+    const worksheet = workbook.Sheets[sheetName];
     const positionen = [];
     
-    // Scan rows 30-325 for position data
-    for (let row = 30; row <= 325; row++) {
-        const posNr = getCellValue(worksheet, `A${row}`);
+    const { positionNumberColumn, quantityColumns, startRow, endRow } = POSITION_CONFIG;
+    
+    // Scan configured row range for position data
+    for (let row = startRow; row <= endRow; row++) {
+        const posNr = getCellValue(worksheet, `${positionNumberColumn}${row}`);
         
         // Try configured columns for quantity
         let menge = null;
-        for (const col of QUANTITY_COLUMN_FALLBACKS) {
+        let foundInColumn = null;
+        for (const col of quantityColumns) {
             menge = getCellValue(worksheet, `${col}${row}`);
             if (menge && !isNaN(menge)) {
+                foundInColumn = col;
                 break;
             }
         }
@@ -147,7 +219,8 @@ export function extractPositions(workbook) {
             positionen.push({
                 posNr: String(posNr).trim(),
                 menge: Number(menge),
-                row: row
+                row: row,
+                column: foundInColumn
             });
         }
     }
@@ -236,8 +309,8 @@ export function validateExtractedPositions(positionen) {
             posNrMap.set(pos.posNr, pos.row);
         }
         
-        // Check for invalid Pos.Nr. format using named constant
-        if (!POSITION_NUMBER_PATTERN.test(pos.posNr)) {
+        // Check for invalid Pos.Nr. format using configured pattern
+        if (!POSITION_CONFIG.positionNumberPattern.test(pos.posNr)) {
             warnings.push(`Position ${pos.posNr} in Zeile ${pos.row} hat unerwartetes Format`);
         }
         
@@ -345,17 +418,19 @@ export function clearAbrechnungTemplateCache() {
  * @returns {Object} Updated workbook
  */
 export function fillAbrechnungHeader(workbook, metadata) {
-    if (!workbook.Sheets['EAW']) {
-        throw new Error('Sheet "EAW" nicht gefunden im Template');
+    const sheetName = ABRECHNUNG_CONFIG.sheetName;
+    if (!workbook.Sheets[sheetName]) {
+        throw new Error(`Sheet "${sheetName}" nicht gefunden im Template`);
     }
     
-    const worksheet = workbook.Sheets['EAW'];
+    const worksheet = workbook.Sheets[sheetName];
+    const { header } = ABRECHNUNG_CONFIG;
     
-    // Fill header cells
-    setCellValue(worksheet, 'B1', metadata.datum);
-    setCellValue(worksheet, 'B2', metadata.auftragsNr);
-    setCellValue(worksheet, 'B3', metadata.anlage);
-    setCellValue(worksheet, 'B4', metadata.einsatzort);
+    // Fill header cells using configuration
+    setCellValue(worksheet, header.datum, metadata.datum);
+    setCellValue(worksheet, header.auftragsNr, metadata.auftragsNr);
+    setCellValue(worksheet, header.anlage, metadata.anlage);
+    setCellValue(worksheet, header.einsatzort, metadata.einsatzort);
     
     return workbook;
 }
@@ -367,20 +442,22 @@ export function fillAbrechnungHeader(workbook, metadata) {
  * @returns {Object} Updated workbook
  */
 export function fillAbrechnungPositions(workbook, positionSums) {
-    if (!workbook.Sheets['EAW']) {
-        throw new Error('Sheet "EAW" nicht gefunden im Template');
+    const sheetName = ABRECHNUNG_CONFIG.sheetName;
+    if (!workbook.Sheets[sheetName]) {
+        throw new Error(`Sheet "${sheetName}" nicht gefunden im Template`);
     }
     
-    const worksheet = workbook.Sheets['EAW'];
+    const worksheet = workbook.Sheets[sheetName];
+    const { positions } = ABRECHNUNG_CONFIG;
     let filledCount = 0;
     let skippedCount = 0;
     
     // Scan template for position numbers and fill quantities
-    for (let row = 9; row <= 500; row++) {
-        const posNr = getCellValue(worksheet, `A${row}`);
+    for (let row = positions.startRow; row <= positions.endRow; row++) {
+        const posNr = getCellValue(worksheet, `${positions.positionNumberColumn}${row}`);
         
         if (posNr && Object.prototype.hasOwnProperty.call(positionSums, posNr)) {
-            setCellValue(worksheet, `B${row}`, positionSums[posNr]);
+            setCellValue(worksheet, `${positions.quantityColumn}${row}`, positionSums[posNr]);
             filledCount++;
         } else if (posNr) {
             skippedCount++;
@@ -397,28 +474,29 @@ export function fillAbrechnungPositions(workbook, positionSums) {
  * @returns {Object} { filledCount, emptyCount, errors, isValid }
  */
 export function validateFilledPositions(workbook) {
-    const sheetName = 'EAW';
+    const sheetName = ABRECHNUNG_CONFIG.sheetName;
     
     if (!workbook.Sheets[sheetName]) {
         return {
             filledCount: 0,
             emptyCount: 0,
-            errors: ['Arbeitsblatt "EAW" nicht gefunden'],
+            errors: [`Arbeitsblatt "${sheetName}" nicht gefunden`],
             isValid: false
         };
     }
     
     const worksheet = workbook.Sheets[sheetName];
+    const { positions } = ABRECHNUNG_CONFIG;
     const errors = [];
     let filledCount = 0;
     let emptyCount = 0;
     
-    for (let rowIndex = 9; rowIndex <= 500; rowIndex++) {
-        const cellAddress = `A${rowIndex}`;
+    for (let rowIndex = positions.startRow; rowIndex <= positions.endRow; rowIndex++) {
+        const cellAddress = `${positions.positionNumberColumn}${rowIndex}`;
         const cell = worksheet[cellAddress];
         
         if (cell && cell.v) {
-            const quantityCell = worksheet[`B${rowIndex}`];
+            const quantityCell = worksheet[`${positions.quantityColumn}${rowIndex}`];
             
             if (quantityCell && quantityCell.v !== undefined && quantityCell.v !== null) {
                 filledCount++;
@@ -590,6 +668,51 @@ export function exportToExcel(workbook, metadata) {
 }
 
 /**
+ * Search for metadata value by pattern in worksheet
+ * Looks for a label cell matching the pattern, then checks adjacent cells for the value
+ * @param {Object} worksheet - SheetJS worksheet object
+ * @param {RegExp} pattern - Pattern to match label
+ * @param {string} searchRange - Range to search (e.g., 'A1:Z50')
+ * @returns {Object|null} { value, address } or null if not found
+ */
+function searchMetadataByPattern(worksheet, pattern, searchRange = 'A1:Z50') {
+    const range = XLSX.utils.decode_range(searchRange);
+    
+    // Scan all cells in range for label
+    for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            const cellValue = getCellValue(worksheet, cellAddress);
+            
+            if (cellValue && pattern.test(String(cellValue))) {
+                // Found label, check adjacent cells for value
+                const adjacentCells = [
+                    { r: row, c: col + 1 },     // Right
+                    { r: row, c: col + 2 },     // Two cells right
+                    { r: row + 1, c: col },     // Below
+                    { r: row + 1, c: col + 1 }, // Diagonal
+                    { r: row, c: col - 1 }      // Left (less common)
+                ];
+                
+                for (const pos of adjacentCells) {
+                    if (pos.r >= range.s.r && pos.r <= range.e.r && 
+                        pos.c >= range.s.c && pos.c <= range.e.c) {
+                        const adjAddress = XLSX.utils.encode_cell(pos);
+                        const adjValue = getCellValue(worksheet, adjAddress);
+                        
+                        if (adjValue && String(adjValue).trim()) {
+                            return { value: adjValue, address: adjAddress };
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
  * Get cell value safely
  * @param {Object} worksheet - SheetJS worksheet object
  * @param {string} address - Cell address (e.g., 'A1')
@@ -622,4 +745,35 @@ function setCellValue(worksheet, address, value) {
 export function generateExportFilename(auftragsNr) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     return `Abrechnung_${auftragsNr}_${timestamp}.xlsx`;
+}
+
+/**
+ * Update metadata cell mapping configuration
+ * Allows runtime customization of where to look for metadata fields
+ * @param {string} field - Field name (e.g., 'auftragsNr')
+ * @param {Array<string>} cellAddresses - Array of cell addresses to try (e.g., ['N5', 'M5'])
+ */
+export function updateMetadataCellMap(field, cellAddresses) {
+    if (!Array.isArray(cellAddresses) || cellAddresses.length === 0) {
+        throw new Error('cellAddresses muss ein nicht-leeres Array sein');
+    }
+    
+    METADATA_CELL_MAP[field] = cellAddresses;
+    console.log(`Metadata cell map aktualisiert: ${field} → ${cellAddresses.join(', ')}`);
+}
+
+/**
+ * Get current metadata cell mapping configuration
+ * @returns {Object} Current cell mapping configuration
+ */
+export function getMetadataCellMap() {
+    return { ...METADATA_CELL_MAP };
+}
+
+/**
+ * Reset metadata cell mapping to defaults
+ */
+export function resetMetadataCellMap() {
+    METADATA_CELL_MAP = { ...METADATA_CELL_CONFIG };
+    console.log('Metadata cell map auf Standard zurückgesetzt');
 }

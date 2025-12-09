@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Flexible Excel Parsing</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #666; font-size: 1.2em; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #2563eb; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Flexible Excel Parsing Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Configuration Test</h2>
+        <p>Test that configuration is loaded correctly:</p>
+        <button onclick="testConfiguration()">Run Test</button>
+        <div id="config-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Runtime Update Test</h2>
+        <p>Test updating cell mappings at runtime:</p>
+        <button onclick="testRuntimeUpdate()">Run Test</button>
+        <div id="runtime-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Fallback Chain Test</h2>
+        <p>Test that fallback cells are tried in order:</p>
+        <button onclick="testFallbackChain()">Run Test</button>
+        <div id="fallback-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. File Upload Test</h2>
+        <p>Upload a Protokoll file to test flexible parsing:</p>
+        <input type="file" id="test-file" accept=".xlsx" />
+        <button onclick="testFileUpload()">Test Import</button>
+        <div id="upload-result" class="result"></div>
+    </div>
+
+    <script type="module">
+        import { 
+            getMetadataCellMap, 
+            updateMetadataCellMap, 
+            resetMetadataCellMap,
+            safeReadAndParseProtokoll 
+        } from '../../js/utils.js';
+        
+        import { 
+            METADATA_CELL_CONFIG,
+            POSITION_CONFIG,
+            ABRECHNUNG_CONFIG,
+            PARSING_CONFIG 
+        } from '../../js/config.js';
+
+        // Make functions available globally for onclick handlers
+        window.testConfiguration = function() {
+            const result = document.getElementById('config-result');
+            try {
+                const config = getMetadataCellMap();
+                
+                result.innerHTML = `
+                    <div class="success">✓ Configuration loaded successfully!</div>
+                    <pre>${JSON.stringify(config, null, 2)}</pre>
+                    <p><strong>Position Config:</strong></p>
+                    <pre>${JSON.stringify(POSITION_CONFIG, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">✗ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testRuntimeUpdate = function() {
+            const result = document.getElementById('runtime-result');
+            try {
+                // Get original
+                const original = getMetadataCellMap();
+                
+                // Update
+                updateMetadataCellMap('auftragsNr', ['TEST1', 'TEST2', 'N5']);
+                const updated = getMetadataCellMap();
+                
+                // Reset
+                resetMetadataCellMap();
+                const reset = getMetadataCellMap();
+                
+                result.innerHTML = `
+                    <div class="success">✓ Runtime updates work!</div>
+                    <p><strong>Original auftragsNr:</strong></p>
+                    <pre>${JSON.stringify(original.auftragsNr, null, 2)}</pre>
+                    <p><strong>After update:</strong></p>
+                    <pre>${JSON.stringify(updated.auftragsNr, null, 2)}</pre>
+                    <p><strong>After reset:</strong></p>
+                    <pre>${JSON.stringify(reset.auftragsNr, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">✗ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testFallbackChain = function() {
+            const result = document.getElementById('fallback-result');
+            try {
+                const config = getMetadataCellMap();
+                
+                let html = '<div class="success">✓ Fallback chains configured!</div>';
+                html += '<p>Each field will try these cells in order:</p>';
+                
+                for (const [field, cells] of Object.entries(config)) {
+                    html += `<p><strong>${field}:</strong> ${cells.join(' → ')}</p>`;
+                }
+                
+                result.innerHTML = html;
+            } catch (error) {
+                result.innerHTML = `<div class="error">✗ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testFileUpload = async function() {
+            const result = document.getElementById('upload-result');
+            const fileInput = document.getElementById('test-file');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                result.innerHTML = '<div class="error">✗ Please select a file first</div>';
+                return;
+            }
+            
+            try {
+                result.innerHTML = '<p>⏳ Parsing file...</p>';
+                
+                const file = fileInput.files[0];
+                const parseResult = await safeReadAndParseProtokoll(file);
+                
+                if (parseResult.success) {
+                    result.innerHTML = `
+                        <div class="success">✓ File parsed successfully!</div>
+                        <p><strong>Found cells:</strong></p>
+                        <pre>${JSON.stringify(parseResult.metadata._foundCells, null, 2)}</pre>
+                        <p><strong>Metadata:</strong></p>
+                        <pre>${JSON.stringify({
+                            auftragsNr: parseResult.metadata.auftragsNr,
+                            anlage: parseResult.metadata.anlage,
+                            einsatzort: parseResult.metadata.einsatzort,
+                            firma: parseResult.metadata.firma
+                        }, null, 2)}</pre>
+                        <p><strong>Positions found:</strong> ${parseResult.positionen.length}</p>
+                        <p><strong>Unique positions:</strong> ${Object.keys(parseResult.positionSums).length}</p>
+                        ${parseResult.warnings.length > 0 ? `
+                            <p><strong>Warnings:</strong></p>
+                            <ul>${parseResult.warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+                        ` : ''}
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="error">✗ Parsing failed</div>
+                        <p><strong>Errors:</strong></p>
+                        <ul>${parseResult.errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">✗ Error: ${error.message}</div>`;
+            }
+        };
+    </script>
+</body>
+</html>
