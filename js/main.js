@@ -349,8 +349,9 @@ function initializeSyncSettings() {
                     addActivityLogEntry('Synchronisation erfolgreich', 'success');
                     addLogEntry('Manual sync completed successfully', 'success');
                 } else {
-                    addActivityLogEntry(`Synchronisation fehlgeschlagen: ${result.reason || result.error}`, 'error');
-                    addLogEntry(`Manual sync failed: ${result.reason || result.error}`, 'error');
+                    const errorMessage = result.reason || result.error || 'Unbekannter Fehler';
+                    addActivityLogEntry(`Synchronisation fehlgeschlagen: ${errorMessage}`, 'error');
+                    addLogEntry(`Manual sync failed: ${errorMessage}`, 'error');
                 }
             } catch (error) {
                 addActivityLogEntry(`Synchronisation fehlgeschlagen: ${error.message}`, 'error');
@@ -408,9 +409,10 @@ function initializeSyncSettings() {
     // Import backup handler
     if (importBackupInput) {
         importBackupInput.addEventListener('change', (event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
             
+            const file = files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {

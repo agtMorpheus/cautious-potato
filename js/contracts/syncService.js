@@ -122,12 +122,16 @@ export async function syncToServer(options = { force: false }) {
         }
         
         // Upload contracts to server
+        // Note: This implementation uses individual API calls per contract.
+        // For better performance with large datasets, consider implementing
+        // a bulk upsert endpoint on the server that handles existence checking.
         let uploadedCount = 0;
         const errors = [];
         
         for (const contract of contracts) {
             try {
                 // Check if contract exists on server (by ID)
+                // If the server returns an error (404 or other), treat as non-existing
                 const existing = await apiClient.getContract(contract.id).catch(() => null);
                 
                 if (existing) {
@@ -190,11 +194,20 @@ export async function syncFromServer(options = { merge: true }) {
     
     try {
         // Fetch contracts from server
+        // Expected API response formats:
+        // 1. { contracts: [...] } - Standard paginated response
+        // 2. [...] - Direct array response (simple API)
         const serverResponse = await apiClient.listContracts();
-        const serverContracts = serverResponse?.contracts || serverResponse || [];
         
-        if (!Array.isArray(serverContracts)) {
-            throw new Error('Invalid server response format');
+        let serverContracts;
+        if (serverResponse && Array.isArray(serverResponse.contracts)) {
+            // Standard paginated response format
+            serverContracts = serverResponse.contracts;
+        } else if (Array.isArray(serverResponse)) {
+            // Direct array response format
+            serverContracts = serverResponse;
+        } else {
+            throw new Error('Invalid server response format: expected array or object with contracts property');
         }
         
         const state = getState();
@@ -297,7 +310,10 @@ function mergeContracts(localContracts, serverContracts) {
         contractMap.set(contract.id, contract);
     }
     
-    // Merge server contracts (newer wins)
+    // Merge server contracts using "server wins on conflict" strategy.
+    // Rationale: The server is the source of truth for shared data, and 
+    // server timestamps are more reliable for determining the canonical version.
+    // On equal timestamps, server wins to ensure consistency across clients.
     for (const serverContract of serverContracts) {
         const local = contractMap.get(serverContract.id);
         
@@ -305,15 +321,16 @@ function mergeContracts(localContracts, serverContracts) {
             // New contract from server
             contractMap.set(serverContract.id, serverContract);
         } else {
-            // Conflict: compare updatedAt timestamps
+            // Conflict resolution: compare updatedAt timestamps
+            // Server version wins if it's newer or has the same timestamp
             const localUpdated = new Date(local.updatedAt || 0);
             const serverUpdated = new Date(serverContract.updatedAt || 0);
             
             if (serverUpdated >= localUpdated) {
-                // Server version is newer or same
+                // Server version is newer or same - use server version
                 contractMap.set(serverContract.id, serverContract);
             }
-            // Otherwise keep local version
+            // Otherwise keep local version (local is newer)
         }
     }
     
