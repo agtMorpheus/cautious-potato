@@ -52,7 +52,10 @@ export const POSITION_CONFIG = {
     endRow: 325,
     
     // Position number format validation pattern
-    positionNumberPattern: /^\d{2}\.\d{2}\.\d{4}/
+    // Flexible pattern: accepts DD.DD.DDDD anywhere in the cell value
+    // Examples: "01.01.0010", "Pos. 1.1.10", "10.20.0100 - Description"
+    // Uses "contains" logic instead of exact match
+    positionNumberPattern: /\d{1,2}\.\d{1,2}\.\d{1,4}/
 };
 
 /**

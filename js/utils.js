@@ -72,7 +72,10 @@ export async function readExcelFile(file) {
         reader.onload = (e) => {
             try {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+                const workbook = XLSX.read(data, { 
+                    type: 'array',
+                    cellStyles: true  // Preserve cell formatting
+                });
                 
                 if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
                     throw new Error('Arbeitsmappe enthält keine Arbeitsblätter');
@@ -199,9 +202,30 @@ export function extractPositions(workbook) {
     
     const { positionNumberColumn, quantityColumns, startRow, endRow } = POSITION_CONFIG;
     
+    console.log(`Extracting positions from column ${positionNumberColumn}, rows ${startRow}-${endRow}`);
+    console.log(`Looking for quantities in columns: ${quantityColumns.join(', ')}`);
+    
     // Scan configured row range for position data
+    let foundCount = 0;
+    let skippedCount = 0;
+    
     for (let row = startRow; row <= endRow; row++) {
-        const posNr = getCellValue(worksheet, `${positionNumberColumn}${row}`);
+        const cellValue = getCellValue(worksheet, `${positionNumberColumn}${row}`);
+        
+        // Extract position number from cell (might contain extra text)
+        let posNr = null;
+        if (cellValue) {
+            const cellStr = String(cellValue).trim();
+            // Try to extract position number pattern from the cell
+            const match = cellStr.match(POSITION_CONFIG.positionNumberPattern);
+            if (match) {
+                posNr = match[0]; // Use the matched position number
+            } else if (cellStr) {
+                // If no pattern match but cell has value, use it as-is
+                // This handles cases where the format is different
+                posNr = cellStr;
+            }
+        }
         
         // Try configured columns for quantity
         let menge = null;
@@ -214,7 +238,12 @@ export function extractPositions(workbook) {
             }
         }
         
-        // Only include valid entries
+        // Debug: Log first few rows to help troubleshoot
+        if (row <= startRow + 5) {
+            console.log(`Row ${row}: posNr="${cellValue}" → extracted="${posNr}", menge=${menge} (col ${foundInColumn})`);
+        }
+        
+        // Only include valid entries (must have both position number and quantity)
         if (posNr && menge && !isNaN(menge)) {
             positionen.push({
                 posNr: String(posNr).trim(),
@@ -222,8 +251,13 @@ export function extractPositions(workbook) {
                 row: row,
                 column: foundInColumn
             });
+            foundCount++;
+        } else if (cellValue || menge) {
+            skippedCount++;
         }
     }
+    
+    console.log(`Position extraction complete: Found ${foundCount} positions, skipped ${skippedCount} rows`);
     
     return positionen;
 }
@@ -413,6 +447,7 @@ export function clearAbrechnungTemplateCache() {
 
 /**
  * Fill abrechnung header with metadata
+ * Uses minimal cell updates to preserve all Excel formatting
  * @param {Object} workbook - SheetJS workbook object
  * @param {Object} metadata - Metadata to fill
  * @returns {Object} Updated workbook
@@ -427,16 +462,31 @@ export function fillAbrechnungHeader(workbook, metadata) {
     const { header } = ABRECHNUNG_CONFIG;
     
     // Fill header cells using configuration
-    setCellValue(worksheet, header.datum, metadata.datum);
-    setCellValue(worksheet, header.auftragsNr, metadata.auftragsNr);
-    setCellValue(worksheet, header.anlage, metadata.anlage);
-    setCellValue(worksheet, header.einsatzort, metadata.einsatzort);
+    // Only update values, preserve all formatting
+    const headerData = {
+        [header.datum]: metadata.datum,
+        [header.auftragsNr]: metadata.auftragsNr,
+        [header.anlage]: metadata.anlage,
+        [header.einsatzort]: metadata.einsatzort
+    };
+    
+    for (const [address, value] of Object.entries(headerData)) {
+        if (!worksheet[address]) {
+            worksheet[address] = { t: 's' };
+        }
+        worksheet[address].v = value;
+        worksheet[address].t = typeof value === 'number' ? 'n' : 's';
+        if (typeof value === 'string') {
+            worksheet[address].w = value;
+        }
+    }
     
     return workbook;
 }
 
 /**
  * Fill abrechnung positions with summed quantities
+ * Uses minimal cell updates to preserve all Excel formatting
  * @param {Object} workbook - SheetJS workbook object
  * @param {Object} positionSums - Object with summed quantities
  * @returns {Object} Updated workbook
@@ -453,11 +503,25 @@ export function fillAbrechnungPositions(workbook, positionSums) {
     let skippedCount = 0;
     
     // Scan template for position numbers and fill quantities
+    // Only update cell values, never delete or recreate cells
     for (let row = positions.startRow; row <= positions.endRow; row++) {
-        const posNr = getCellValue(worksheet, `${positions.positionNumberColumn}${row}`);
+        const posNrAddress = `${positions.positionNumberColumn}${row}`;
+        const posNr = getCellValue(worksheet, posNrAddress);
         
         if (posNr && Object.prototype.hasOwnProperty.call(positionSums, posNr)) {
-            setCellValue(worksheet, `${positions.quantityColumn}${row}`, positionSums[posNr]);
+            const quantityAddress = `${positions.quantityColumn}${row}`;
+            const quantity = positionSums[posNr];
+            
+            // Preserve existing cell object if it exists (keeps formatting)
+            if (!worksheet[quantityAddress]) {
+                worksheet[quantityAddress] = { t: 'n' };
+            }
+            
+            // Only update the value, keep everything else
+            worksheet[quantityAddress].v = quantity;
+            worksheet[quantityAddress].t = 'n';
+            worksheet[quantityAddress].w = String(quantity);
+            
             filledCount++;
         } else if (posNr) {
             skippedCount++;
@@ -637,7 +701,14 @@ export async function safeReadAndParseProtokoll(file) {
 }
 
 /**
- * Export workbook as Excel file
+ * Export workbook as Excel file with maximum format preservation
+ * 
+ * NOTE: SheetJS Community Edition has limited support for preserving complex
+ * formatting (colors, images, etc.). For full format preservation, consider:
+ * 1. Using SheetJS Pro (commercial license)
+ * 2. Using a server-side solution with libraries like ExcelJS or python-openpyxl
+ * 3. Using Office.js API if running in Office context
+ * 
  * @param {Object} workbook - SheetJS workbook object
  * @param {string} filename - Filename for export
  */
@@ -654,8 +725,15 @@ export function exportToExcel(workbook, metadata) {
             filename = generateExportFilename('Abrechnung');
         }
         
-        // Write the file
-        XLSX.writeFile(workbook, filename);
+        // Write the file with all available preservation options
+        // Note: cellStyles option in Community Edition has limited effect
+        // It primarily preserves number formats, not colors/images/etc.
+        XLSX.writeFile(workbook, filename, {
+            bookType: 'xlsx',
+            bookSST: true,
+            cellStyles: true,
+            compression: true
+        });
         
         // Return metadata for Phase 4
         return {
@@ -731,17 +809,27 @@ function getCellValue(worksheet, address) {
 }
 
 /**
- * Set cell value
+ * Set cell value while preserving existing cell formatting
  * @param {Object} worksheet - SheetJS worksheet object
  * @param {string} address - Cell address (e.g., 'A1')
  * @param {*} value - Value to set
  */
 function setCellValue(worksheet, address, value) {
+    // If cell doesn't exist, create it with basic structure
     if (!worksheet[address]) {
         worksheet[address] = {};
     }
-    worksheet[address].v = value;
-    worksheet[address].t = typeof value === 'number' ? 'n' : 's';
+    
+    // Preserve existing cell properties (formatting, styles, etc.)
+    // Only update the value and type
+    const cell = worksheet[address];
+    cell.v = value;
+    cell.t = typeof value === 'number' ? 'n' : 's';
+    
+    // If it's a number, also set the raw value
+    if (typeof value === 'number') {
+        cell.w = String(value); // formatted text
+    }
 }
 
 /**
