@@ -373,7 +373,7 @@
                     </div>
                 </section>
 
-                <!-- Contract Manager View (Phase 1) -->
+                <!-- Contract Manager View (Phase 1 & Phase 3) -->
                 <section id="view-contracts" class="view-container" aria-labelledby="contracts-heading">
                     <h2 id="contracts-heading" class="sr-only">Contract Manager</h2>
                     
@@ -466,9 +466,10 @@
                                 <div class="form-actions">
                                     <button id="contract-import-button" type="button" class="btn btn-primary" disabled>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
-                                        <span>Verträge importieren</span>
+                                        <span>Vorschau generieren</span>
                                     </button>
                                     <button id="contract-reset-button" type="button" class="btn btn-secondary">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -481,6 +482,19 @@
                         </div>
                     </div>
 
+                    <!-- Phase 3: Import Preview Card -->
+                    <div class="card" id="contract-preview-card" style="display: none;">
+                        <div class="card-header">
+                            <h3 class="card-title">Vorschau &amp; Prüfung</h3>
+                            <p class="card-description">Überprüfen Sie die importierten Daten vor dem Speichern</p>
+                        </div>
+                        <div class="card-body">
+                            <div id="contract-preview-container">
+                                <!-- Preview content populated dynamically by contractRenderer.js -->
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Contract List Card -->
                     <div class="card">
                         <div class="card-header">
@@ -488,6 +502,41 @@
                             <p class="card-description">Übersicht aller importierten Vertragseinträge</p>
                         </div>
                         <div class="card-body">
+                            <!-- Phase 3: Filter Section -->
+                            <div class="filter-section">
+                                <div class="filter-row">
+                                    <div class="filter-group filter-group--search">
+                                        <label for="contract-search-input">Suche</label>
+                                        <input type="text" 
+                                               id="contract-search-input" 
+                                               placeholder="Suche in allen Feldern..."
+                                               class="form-input">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="contract-status-filter">Status</label>
+                                        <select id="contract-status-filter" class="form-select">
+                                            <option value="">Alle Status</option>
+                                            <option value="inbearb">In Bearbeitung</option>
+                                            <option value="fertig">Fertig</option>
+                                            <option value="offen">Offen</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="contract-filter-from">Von</label>
+                                        <input type="date" id="contract-filter-from" class="form-input">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="contract-filter-to">Bis</label>
+                                        <input type="date" id="contract-filter-to" class="form-input">
+                                    </div>
+                                    <div class="filter-group filter-group--actions">
+                                        <button type="button" id="contract-clear-filters" class="btn btn-secondary btn-sm">
+                                            Filter zurücksetzen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Status Breakdown -->
                             <div id="contract-status-breakdown" class="status-breakdown"></div>
 

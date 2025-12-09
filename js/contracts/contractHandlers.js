@@ -1,5 +1,5 @@
 /**
- * Contract Handlers Module (Phase 1)
+ * Contract Handlers Module (Phase 1 & Phase 3)
  * 
  * Handles user interactions for the Contract Manager module
  * Coordinates between UI, state, and utilities
@@ -9,17 +9,27 @@
  * - Sheet selection and column mapping change handlers
  * - Import confirmation handler
  * - Filter change handlers
+ * 
+ * Phase 3 implements:
+ * - Preview generation (handleContractMappingConfirm)
+ * - Final import save (handleContractImportSave)
+ * - Filter changes with date range (handleContractFilterChange)
+ * - Table sorting (handleContractSort)
+ * - Action clicks for inline editing (handleContractActionClick)
  */
 
-import { getState, setState } from '../state.js';
+import { getState, setState, setLastImportResult, setContractUIState, setContractFilters } from '../state.js';
 import {
     discoverContractSheets,
     suggestContractColumnMapping,
     extractContractsFromSheet,
+    extractContractsFromSheetAsync,
     getContractSummary,
     DEFAULT_COLUMN_MAPPING
 } from './contractUtils.js';
+import { addContracts, updateContract } from './contractRepository.js';
 import { showErrorAlert, showSuccessAlert, escapeHtml } from '../handlers.js';
+import { highlightPreviewRow } from './contractRenderer.js';
 
 // Store selected contract file reference (not persisted in state)
 let selectedContractFile = null;
@@ -465,10 +475,10 @@ export function initializeContractEventListeners() {
         console.log('✓ Contract sheet selector listener bound');
     }
     
-    // Import button handler
+    // Import button handler (now generates preview)
     const importButton = document.getElementById('contract-import-button');
     if (importButton) {
-        importButton.addEventListener('click', handleContractImportConfirm);
+        importButton.addEventListener('click', handleContractMappingConfirm);
         console.log('✓ Contract import button listener bound');
     }
     
@@ -493,6 +503,19 @@ export function initializeContractEventListeners() {
         console.log('✓ Contract status filter listener bound');
     }
     
+    // Date range filter handlers (Phase 3)
+    const filterFrom = document.getElementById('contract-filter-from');
+    if (filterFrom) {
+        filterFrom.addEventListener('change', (e) => handleContractDateRangeChange('from', e.target.value));
+        console.log('✓ Contract date from filter listener bound');
+    }
+    
+    const filterTo = document.getElementById('contract-filter-to');
+    if (filterTo) {
+        filterTo.addEventListener('change', (e) => handleContractDateRangeChange('to', e.target.value));
+        console.log('✓ Contract date to filter listener bound');
+    }
+    
     // Clear filters button handler
     const clearFiltersBtn = document.getElementById('contract-clear-filters');
     if (clearFiltersBtn) {
@@ -500,5 +523,348 @@ export function initializeContractEventListeners() {
         console.log('✓ Contract clear filters button listener bound');
     }
     
-    console.log('Contract event listeners initialized');
+    // Set up global handler references for dynamically rendered elements (Phase 3)
+    window._handleContractSort = handleContractSort;
+    window._handleContractActionClick = handleContractActionClick;
+    window._handleContractImportSave = handleContractImportSave;
+    window._handleContractCancelPreview = handleContractCancelPreview;
+    window._highlightPreviewRow = highlightPreviewRow;
+    
+    console.log('Contract event listeners initialized (Phase 3)');
+}
+
+// ============================================================
+// Phase 3: Preview & Import Save Handlers
+// ============================================================
+
+/**
+ * Handle mapping confirmation and generate preview (Phase 3)
+ * Replaces direct import with a preview step
+ */
+export async function handleContractMappingConfirm() {
+    const state = getState();
+    const workbook = window._contractWorkbook;
+    
+    if (!workbook) {
+        showErrorAlert(
+            'Keine Datei',
+            'Bitte laden Sie zuerst eine Excel-Datei hoch.'
+        );
+        return;
+    }
+    
+    const currentSheet = state.contracts?.importState?.currentSheet;
+    
+    if (!currentSheet) {
+        showErrorAlert(
+            'Kein Arbeitsblatt',
+            'Bitte wählen Sie ein Arbeitsblatt aus.'
+        );
+        return;
+    }
+    
+    const currentMapping = state.contracts?.currentMapping || DEFAULT_COLUMN_MAPPING;
+    
+    try {
+        updateContractImportStatus({
+            status: 'pending',
+            message: `Vorschau wird generiert für "${currentSheet}"...`,
+            progress: 10
+        });
+        
+        const startTime = performance.now();
+        
+        // Use async extraction with progress callback
+        const result = await extractContractsFromSheetAsync(
+            workbook,
+            currentSheet,
+            currentMapping,
+            {
+                skipInvalidRows: true,
+                onProgress: (progress) => {
+                    const percent = Math.round((progress.processed / progress.total) * 80) + 10;
+                    updateContractImportStatus({ progress: percent });
+                }
+            }
+        );
+        
+        const elapsedMs = performance.now() - startTime;
+        
+        // Store preview result in state (don't save to records yet)
+        setState({
+            contracts: {
+                ...state.contracts,
+                lastImportResult: result,
+                importState: {
+                    ...state.contracts?.importState,
+                    status: 'success',
+                    message: `Vorschau: ${result.contracts.length} Verträge, ${result.errors.length} Fehler`,
+                    progress: 100
+                }
+            }
+        });
+        
+        console.log(`Preview generated in ${elapsedMs.toFixed(2)}ms`);
+        console.log(`Contracts: ${result.contracts.length}, Errors: ${result.errors.length}, Warnings: ${result.warnings.length}`);
+        
+        // Show preview container
+        const previewContainer = document.getElementById('contract-preview-container');
+        if (previewContainer) {
+            previewContainer.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Preview generation failed:', error);
+        
+        updateContractImportStatus({
+            status: 'error',
+            message: `Vorschau fehlgeschlagen: ${error.message}`,
+            progress: 0,
+            errors: [error.message]
+        });
+        
+        showErrorAlert(
+            'Vorschau-Fehler',
+            `Die Vorschau konnte nicht generiert werden: ${error.message}`
+        );
+    }
+}
+
+/**
+ * Handle final import save after preview confirmation (Phase 3)
+ */
+export async function handleContractImportSave() {
+    const state = getState();
+    const lastImportResult = state.contracts?.lastImportResult;
+    
+    if (!lastImportResult || !lastImportResult.contracts || lastImportResult.contracts.length === 0) {
+        showErrorAlert(
+            'Keine Verträge',
+            'Es gibt keine Verträge zum Speichern.'
+        );
+        return;
+    }
+    
+    try {
+        updateContractImportStatus({
+            status: 'pending',
+            message: 'Verträge werden gespeichert...',
+            progress: 50
+        });
+        
+        // Get file metadata
+        const fileMeta = {
+            fileName: state.contracts?.importState?.currentFile || 'unknown.xlsx',
+            size: state.contracts?.importState?.fileSize || 0,
+            importedAt: new Date().toISOString(),
+            recordsImported: lastImportResult.contracts.length,
+            recordsWithErrors: lastImportResult.errors.length
+        };
+        
+        // Save contracts using repository
+        const addResult = addContracts(lastImportResult.contracts, fileMeta);
+        
+        // Update state: clear preview, update import state
+        setState({
+            contracts: {
+                ...state.contracts,
+                lastImportResult: null,
+                importState: {
+                    ...state.contracts?.importState,
+                    isImporting: false,
+                    status: 'success',
+                    message: `${addResult.addedCount} Verträge erfolgreich gespeichert`,
+                    progress: 100,
+                    errors: [],
+                    warnings: []
+                }
+            }
+        });
+        
+        // Clear workbook reference
+        delete window._contractWorkbook;
+        
+        // Hide preview container
+        const previewContainer = document.getElementById('contract-preview-container');
+        if (previewContainer) {
+            previewContainer.style.display = 'none';
+        }
+        
+        // Reset file input
+        const fileInput = document.getElementById('contract-file-input');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        
+        showSuccessAlert(
+            'Import erfolgreich',
+            `${addResult.addedCount} Verträge wurden erfolgreich importiert.`
+        );
+        
+        console.log(`Import completed: ${addResult.addedCount} contracts saved`);
+        
+    } catch (error) {
+        console.error('Import save failed:', error);
+        
+        updateContractImportStatus({
+            status: 'error',
+            message: `Speichern fehlgeschlagen: ${error.message}`,
+            progress: 0
+        });
+        
+        showErrorAlert(
+            'Speicher-Fehler',
+            `Die Verträge konnten nicht gespeichert werden: ${error.message}`
+        );
+    }
+}
+
+/**
+ * Handle preview cancellation (Phase 3)
+ */
+export function handleContractCancelPreview() {
+    const state = getState();
+    
+    setState({
+        contracts: {
+            ...state.contracts,
+            lastImportResult: null,
+            importState: {
+                ...state.contracts?.importState,
+                status: 'idle',
+                message: 'Import abgebrochen',
+                progress: 0
+            }
+        }
+    });
+    
+    // Hide preview container
+    const previewContainer = document.getElementById('contract-preview-container');
+    if (previewContainer) {
+        previewContainer.style.display = 'none';
+    }
+    
+    console.log('Import preview cancelled');
+}
+
+// ============================================================
+// Phase 3: Sorting & Actions Handlers
+// ============================================================
+
+/**
+ * Handle contract table sorting (Phase 3)
+ * @param {string} sortKey - Field name to sort by
+ */
+export function handleContractSort(sortKey) {
+    const state = getState();
+    const currentSortKey = state.contracts?.ui?.sortKey || 'contractId';
+    const currentSortDir = state.contracts?.ui?.sortDir || 'asc';
+    
+    // Toggle direction if clicking same column
+    let newSortDir = 'asc';
+    if (sortKey === currentSortKey) {
+        newSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    }
+    
+    setState({
+        contracts: {
+            ...state.contracts,
+            ui: {
+                ...state.contracts?.ui,
+                sortKey,
+                sortDir: newSortDir
+            }
+        }
+    });
+    
+    console.log(`Sort changed: ${sortKey} ${newSortDir}`);
+}
+
+/**
+ * Handle contract action click (Phase 3)
+ * @param {string} action - Action type ('edit', 'delete', etc.)
+ * @param {string} contractId - Contract ID
+ */
+export function handleContractActionClick(action, contractId) {
+    console.log(`Contract action: ${action} for ${contractId}`);
+    
+    switch (action) {
+        case 'edit':
+            handleContractEdit(contractId);
+            break;
+        case 'delete':
+            handleContractDelete(contractId);
+            break;
+        default:
+            console.warn(`Unknown contract action: ${action}`);
+    }
+}
+
+/**
+ * Handle contract edit (Phase 3)
+ * Opens inline editor or modal for editing contract fields
+ * @param {string} contractId - Contract ID to edit
+ */
+export function handleContractEdit(contractId) {
+    const state = getState();
+    const contracts = state.contracts?.records || [];
+    const contract = contracts.find(c => c.id === contractId);
+    
+    if (!contract) {
+        showErrorAlert('Fehler', 'Vertrag nicht gefunden');
+        return;
+    }
+    
+    // Simple inline editing via prompt (can be enhanced with modal later)
+    const newStatus = prompt(
+        `Status bearbeiten für Vertrag ${contract.contractId}:`,
+        contract.status || ''
+    );
+    
+    if (newStatus !== null && newStatus !== contract.status) {
+        // Update contract via repository
+        const updated = updateContract(contractId, { status: newStatus.toLowerCase() });
+        
+        if (updated) {
+            showSuccessAlert('Aktualisiert', `Status wurde auf "${newStatus}" geändert.`);
+            console.log(`Contract ${contractId} updated: status = ${newStatus}`);
+        } else {
+            showErrorAlert('Fehler', 'Vertrag konnte nicht aktualisiert werden.');
+        }
+    }
+}
+
+/**
+ * Handle contract delete (Phase 3 - placeholder for future implementation)
+ * @param {string} contractId - Contract ID to delete
+ */
+export function handleContractDelete(contractId) {
+    // Placeholder - deletion would require confirmation dialog
+    console.log(`Delete contract ${contractId} - not implemented yet`);
+    showErrorAlert('Nicht verfügbar', 'Löschen ist in dieser Version nicht verfügbar.');
+}
+
+/**
+ * Handle date range filter change (Phase 3)
+ * @param {string} type - 'from' or 'to'
+ * @param {string} value - Date string
+ */
+export function handleContractDateRangeChange(type, value) {
+    const state = getState();
+    const currentDateRange = state.contracts?.filters?.dateRange || { from: null, to: null };
+    
+    setState({
+        contracts: {
+            ...state.contracts,
+            filters: {
+                ...state.contracts?.filters,
+                dateRange: {
+                    ...currentDateRange,
+                    [type]: value || null
+                }
+            }
+        }
+    });
+    
+    console.log(`Date range filter changed: ${type} = ${value}`);
 }

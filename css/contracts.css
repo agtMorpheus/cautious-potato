@@ -525,3 +525,240 @@
 .text-warning {
     color: var(--color-warning);
 }
+
+/* ==================== Phase 3: Preview Section ==================== */
+.cm-preview-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.cm-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+.cm-summary-item strong {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.cm-summary-errors.has-errors strong {
+    color: var(--color-error);
+}
+
+.cm-summary-warnings.has-warnings strong {
+    color: var(--color-warning);
+}
+
+.cm-preview-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-muted);
+}
+
+.cm-preview-table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.cm-preview-table {
+    font-size: var(--font-size-sm);
+}
+
+.cm-row--highlight {
+    background: rgba(59, 130, 246, 0.15) !important;
+    outline: 2px solid var(--color-primary);
+}
+
+.cm-error-list {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-error-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-error);
+}
+
+.cm-error-list h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-error);
+}
+
+.cm-error-list ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.cm-error-item {
+    padding: 0.25rem 0;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.cm-error-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.cm-error-row {
+    font-weight: 600;
+    color: var(--color-error);
+    margin-right: 0.5rem;
+}
+
+.cm-error-message {
+    color: var(--color-text-muted);
+}
+
+.cm-error-more {
+    font-style: italic;
+    color: var(--color-text-muted);
+}
+
+.cm-preview-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* ==================== Phase 3: Contract Table ==================== */
+.cm-contract-table {
+    width: 100%;
+}
+
+.cm-contract-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease;
+}
+
+.cm-contract-table th.sortable:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.sort-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 0.25rem;
+    vertical-align: middle;
+}
+
+.action-cell {
+    white-space: nowrap;
+}
+
+.action-cell .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--font-size-xs);
+}
+
+/* ==================== Phase 3: Filter Section Enhancements ==================== */
+.filter-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group--search {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group--actions {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.filter-group label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-group input[type="date"] {
+    padding: 0.5rem 0.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    min-width: 140px;
+}
+
+.filter-group input[type="date"]:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* ==================== Phase 3: Status Breakdown ==================== */
+.status-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+}
+
+.status-item .status-count {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* ==================== Responsive (Phase 3) ==================== */
+@media (max-width: 768px) {
+    .cm-preview-summary {
+        flex-direction: column;
+    }
+    
+    .cm-preview-actions {
+        flex-direction: column;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-group--search {
+        min-width: auto;
+    }
+}
