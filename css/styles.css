@@ -71,7 +71,7 @@
     --transition-normal: 200ms ease-out; /* Roadmap: 0.2s ease-out */
     --transition-slow: 300ms ease;
     
-    /* Font Sizes Scale (Based on 16px base) */
+    /* Font Sizes Scale (rem units relative to browser default 16px) */
     --font-size-xs: 0.6875rem;   /* 11px */
     --font-size-sm: 0.75rem;     /* 12px */
     --font-size-base: var(--font-base);
