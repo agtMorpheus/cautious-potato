@@ -40,6 +40,11 @@ temp/
 .env.development.local
 .env.test.local
 .env.production.local
+config/production.env
+config/development.env
+
+# Keep logs directory but not log files
+!logs/.gitkeep
 
 # Backup files
 *.bak
