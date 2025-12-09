@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Background -->
+  <rect width="256" height="256" rx="32" fill="#0059b3"/>
+  
+  <!-- Document icon -->
+  <path d="M72 40h80l40 40v136c0 8.84-7.16 16-16 16H72c-8.84 0-16-7.16-16-16V56c0-8.84 7.16-16 16-16z" fill="white"/>
+  
+  <!-- Document fold -->
+  <path d="M152 40v40h40" fill="none" stroke="#0059b3" stroke-width="4"/>
+  
+  <!-- Excel-like bars -->
+  <rect x="80" y="100" width="80" height="12" rx="2" fill="#16a34a"/>
+  <rect x="80" y="124" width="60" height="12" rx="2" fill="#0059b3"/>
+  <rect x="80" y="148" width="70" height="12" rx="2" fill="#f59e0b"/>
+  <rect x="80" y="172" width="50" height="12" rx="2" fill="#dc2626"/>
+</svg>

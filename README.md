@@ -9,6 +9,7 @@ Die Anwendung liest Excel-basierte Prüfprotokolle (`protokoll.xlsx`), aggregier
 For comprehensive documentation, see:
 - **[Architecture Overview](docs/ARCHITECTURE.md)** - System design and module structure
 - **[API Reference](docs/API.md)** - Complete API documentation
+- **[Desktop Application Guide](docs/DESKTOP.md)** - Running as a desktop app with Electron
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Security Review](docs/SECURITY.md)** - Security assessment and recommendations
 - **[Accessibility Audit](docs/ACCESSIBILITY.md)** - WCAG 2.1 compliance review
@@ -25,11 +26,13 @@ For comprehensive documentation, see:
 - **Datenschutz**: Lokale Verarbeitung im Browser (Client-Side Only)
 - **Status-Tracking**: Visuelles Feedback über den aktuellen Verarbeitungsstatus
 - **Persistenz**: Zwischenspeicherung des Bearbeitungsstatus im `localStorage` (Verlustschutz bei Page-Reload)
+- **Desktop-Anwendung**: Ausführbar als eigenständige Desktop-Anwendung mit Electron (Windows, macOS, Linux)
 
 ## 🛠 Technologien
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6 Modules)
 - **Excel-Verarbeitung**: [SheetJS (xlsx)](https://sheetjs.com/) - Loaded from CDN
+- **Desktop**: [Electron](https://www.electronjs.org/) - Für eigenständige Desktop-Anwendung
 - **Server (Dev/Local)**: Jeder lokale Webserver (XAMPP, Python http.server, Node http-server, etc.)
 - **Speicherung**: Browser `localStorage`
 
@@ -101,13 +104,54 @@ http-server -p 8000
 # Im Browser öffnen: http://localhost:8000
 ```
 
+### Option 4: Desktop-Anwendung (Electron)
+
+```bash
+# Repository klonen
+git clone https://github.com/agtMorpheus/cautious-potato.git abrechnung-app
+cd abrechnung-app
+
+# Abhängigkeiten installieren
+npm install
+
+# Templates hinzufügen (siehe templates/README.md)
+
+# Desktop-Anwendung starten
+npm run electron
+
+# Oder im Entwicklungsmodus (mit DevTools)
+npm run electron:dev
+```
+
+**Installationspakete erstellen:**
+```bash
+# Windows
+npm run electron:build:win
+
+# macOS
+npm run electron:build:mac
+
+# Linux
+npm run electron:build:linux
+```
+
+Die erstellten Installationspakete befinden sich im `dist/` Ordner.
+
+Für detaillierte Informationen zur Desktop-Anwendung siehe [Desktop Application Guide](docs/DESKTOP.md).
+
 ### Dateistruktur
 
 Nach dem Setup sollte die Struktur wie folgt aussehen:
 ```
 /abrechnung-app
+├── assets/
+│   ├── icon.svg          (Anwendungs-Icon)
+│   └── README.md
 ├── css/
 │   └── styles.css
+├── electron/
+│   ├── main.cjs          (Electron Hauptprozess)
+│   └── preload.cjs       (Sicherheits-Bridge)
 ├── js/
 │   ├── state.js
 │   ├── utils.js
