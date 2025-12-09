@@ -6,66 +6,113 @@ Die Anwendung liest Excel-basierte Prüfprotokolle (`protokoll.xlsx`), aggregier
 
 ## 🚀 Features
 
-- **Import**: Einlesen von `protokoll.xlsx` Dateien via Drag & Drop oder Dateiauswahl.
-- **Automatische Aggregation**: Summiert Mengen basierend auf identischen Positionsnummern (z.B. `01.01.0010`).
+- **Import**: Einlesen von `protokoll.xlsx` Dateien via Dateiauswahl
+- **Automatische Aggregation**: Summiert Mengen basierend auf identischen Positionsnummern (z.B. `01.01.0010`)
 - **Template-Engine**: Füllt ein vordefiniertes Excel-Template (`abrechnung.xlsx`) mit:
   - Header-Daten (Auftrags-Nr., Anlage, Einsatzort, Datum, etc.)
   - Aggregierten Positionsmengen
   - Automatisch berechneten Summen (unter Beibehaltung von Excel-Formeln)
-- **Export**: Generiert eine fertige `.xlsx` Datei zum Download.
-- **Datenschutz**: Lokale Verarbeitung im Browser (Client-Side Only).
-- **Status-Tracking**: Visuelles Feedback über den aktuellen Verarbeitungsstatus.
-- **Persistenz**: Zwischenspeicherung des Bearbeitungsstatus im `localStorage` (Verlustschutz bei Page-Reload).
+- **Export**: Generiert eine fertige `.xlsx` Datei zum Download
+- **Datenschutz**: Lokale Verarbeitung im Browser (Client-Side Only)
+- **Status-Tracking**: Visuelles Feedback über den aktuellen Verarbeitungsstatus
+- **Persistenz**: Zwischenspeicherung des Bearbeitungsstatus im `localStorage` (Verlustschutz bei Page-Reload)
 
 ## 🛠 Technologien
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6 Modules)
-- **Excel-Verarbeitung**: [SheetJS (xlsx)](https://sheetjs.com/)
-- **Server (Dev/Local)**: XAMPP (Apache) für lokales Hosting
+- **Excel-Verarbeitung**: [SheetJS (xlsx)](https://sheetjs.com/) - Loaded from CDN
+- **Server (Dev/Local)**: Jeder lokale Webserver (XAMPP, Python http.server, Node http-server, etc.)
 - **Speicherung**: Browser `localStorage`
 
 ## 📦 Installation & Setup
 
-Da die Anwendung client-seitig läuft, wird lediglich ein lokaler Webserver benötigt, um Module und CORS-Richtlinien korrekt zu behandeln.
+Da die Anwendung client-seitig läuft, wird lediglich ein lokaler Webserver benötigt, um ES6 Module und CORS-Richtlinien korrekt zu behandeln.
 
 ### Voraussetzungen
-- [XAMPP](https://www.apachefriends.org/de/index.html) (oder ein anderer lokaler Webserver wie Python `http.server`, Node `http-server`)
-- Ein moderner Webbrowser (Chrome, Firefox, Edge)
+- Ein lokaler Webserver (siehe Optionen unten)
+- Ein moderner Webbrowser (Chrome, Firefox, Edge, Safari)
+- Excel-Templates (`protokoll.xlsx` und `abrechnung.xlsx`)
 
-### Schritte
+### Option 1: XAMPP (empfohlen für Windows)
 
-1. **Repository klonen oder entpacken**:
-   Navigiere in das `htdocs` Verzeichnis deiner XAMPP-Installation.
+1. **XAMPP installieren**:
+   - Download: [https://www.apachefriends.org/de/index.html](https://www.apachefriends.org/de/index.html)
+   - Installiere XAMPP
+
+2. **Repository klonen**:
    ```bash
    cd C:\xampp\htdocs
-   git clone https://github.com/yourusername/abrechnung-app.git
+   git clone https://github.com/agtMorpheus/cautious-potato.git abrechnung-app
+   cd abrechnung-app
    ```
 
-2. **Dateistruktur prüfen**:
-   Stelle sicher, dass die Ordnerstruktur wie folgt aussieht:
-   ```
-   /abrechnung-app
-   ├── css/
-   ├── js/
-   │   ├── libs/ (enthält xlsx.min.js)
-   │   ├── state.js
-   │   ├── utils.js
-   │   ├── handlers.js
-   │   └── main.js
-   ├── templates/
-   │   ├── protokoll.xlsx
-   │   └── abrechnung.xlsx
-   ├── index.html
-   └── README.md
-   ```
+3. **Templates hinzufügen**:
+   - Kopiere deine `protokoll.xlsx` und `abrechnung.xlsx` Templates in den `templates/` Ordner
+   - Siehe `templates/README.md` für die erforderliche Template-Struktur
 
-3. **Server starten**:
-   - Öffne das **XAMPP Control Panel**.
-   - Starte das Modul **Apache**.
+4. **Server starten**:
+   - Öffne das **XAMPP Control Panel**
+   - Starte das Modul **Apache**
 
-4. **Anwendung öffnen**:
-   Navigiere im Browser zu:
-   `http://localhost/abrechnung-app/`
+5. **Anwendung öffnen**:
+   - Navigiere im Browser zu: `http://localhost/abrechnung-app/`
+
+### Option 2: Python (plattformübergreifend)
+
+```bash
+# Repository klonen
+git clone https://github.com/agtMorpheus/cautious-potato.git abrechnung-app
+cd abrechnung-app
+
+# Templates hinzufügen (siehe templates/README.md)
+
+# Server starten
+python -m http.server 8000
+# oder für Python 2:
+# python -m SimpleHTTPServer 8000
+
+# Im Browser öffnen: http://localhost:8000
+```
+
+### Option 3: Node.js http-server
+
+```bash
+# Repository klonen
+git clone https://github.com/agtMorpheus/cautious-potato.git abrechnung-app
+cd abrechnung-app
+
+# Templates hinzufügen (siehe templates/README.md)
+
+# http-server installieren (falls nicht vorhanden)
+npm install -g http-server
+
+# Server starten
+http-server -p 8000
+
+# Im Browser öffnen: http://localhost:8000
+```
+
+### Dateistruktur
+
+Nach dem Setup sollte die Struktur wie folgt aussehen:
+```
+/abrechnung-app
+├── css/
+│   └── styles.css
+├── js/
+│   ├── state.js
+│   ├── utils.js
+│   ├── handlers.js
+│   └── main.js
+├── templates/
+│   ├── protokoll.xlsx    (von Ihnen bereitzustellen)
+│   ├── abrechnung.xlsx   (von Ihnen bereitzustellen)
+│   └── README.md
+├── index.html
+├── README.md
+├── .gitignore
+└── (weitere Dokumentationsdateien)
+```
 
 ## 📖 Benutzung
 
