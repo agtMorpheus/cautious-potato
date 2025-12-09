@@ -607,7 +607,7 @@ export function setContractUIState(uiState) {
     contracts: {
       ...currentState.contracts,
       ui: {
-        ...currentState.contracts?.ui,
+        ...(currentState.contracts?.ui || {}),
         ...uiState
       }
     }

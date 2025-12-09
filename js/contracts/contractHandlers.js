@@ -25,7 +25,8 @@ import {
     extractContractsFromSheet,
     extractContractsFromSheetAsync,
     getContractSummary,
-    DEFAULT_COLUMN_MAPPING
+    DEFAULT_COLUMN_MAPPING,
+    normalizeStatus
 } from './contractUtils.js';
 import { addContracts, updateContract } from './contractRepository.js';
 import { showErrorAlert, showSuccessAlert, escapeHtml } from '../handlers.js';
@@ -822,12 +823,15 @@ export function handleContractEdit(contractId) {
     );
     
     if (newStatus !== null && newStatus !== contract.status) {
+        // Normalize the status value using the existing normalizeStatus function
+        const normalizedStatus = normalizeStatus(newStatus);
+        
         // Update contract via repository
-        const updated = updateContract(contractId, { status: newStatus.toLowerCase() });
+        const updated = updateContract(contractId, { status: normalizedStatus });
         
         if (updated) {
-            showSuccessAlert('Aktualisiert', `Status wurde auf "${newStatus}" geändert.`);
-            console.log(`Contract ${contractId} updated: status = ${newStatus}`);
+            showSuccessAlert('Aktualisiert', `Status wurde auf "${normalizedStatus}" geändert.`);
+            console.log(`Contract ${contractId} updated: status = ${normalizedStatus}`);
         } else {
             showErrorAlert('Fehler', 'Vertrag konnte nicht aktualisiert werden.');
         }
