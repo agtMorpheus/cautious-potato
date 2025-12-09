@@ -26,7 +26,8 @@ import {
     extractContractsFromSheetAsync,
     getContractSummary,
     DEFAULT_COLUMN_MAPPING,
-    normalizeStatus
+    normalizeStatus,
+    VALID_STATUS_VALUES
 } from './contractUtils.js';
 import { addContracts, updateContract } from './contractRepository.js';
 import { showErrorAlert, showSuccessAlert, escapeHtml } from '../handlers.js';
@@ -42,14 +43,14 @@ let selectedContractFile = null;
 export function handleContractFileSelect(event) {
     const file = event.target.files[0];
     const importBtn = document.getElementById('contract-import-button');
-    
+
     if (file) {
         // Validate file type
         const validExtensions = ['.xlsx', '.xls'];
-        const hasValidExtension = validExtensions.some(ext => 
+        const hasValidExtension = validExtensions.some(ext =>
             file.name.toLowerCase().endsWith(ext)
         );
-        
+
         if (!hasValidExtension) {
             showErrorAlert(
                 'Ungültiges Dateiformat',
@@ -61,10 +62,10 @@ export function handleContractFileSelect(event) {
             }
             return;
         }
-        
+
         // Store file reference locally
         selectedContractFile = file;
-        
+
         // Update state with file info
         updateContractImportStatus({
             currentFile: file.name,
@@ -73,23 +74,23 @@ export function handleContractFileSelect(event) {
             message: '',
             progress: 0
         });
-        
+
         // Enable import button
         if (importBtn) {
             importBtn.disabled = false;
         }
-        
+
         // Automatically discover sheets
         handleDiscoverSheets(file);
-        
+
     } else {
         // Reset state
         selectedContractFile = null;
-        
+
         if (importBtn) {
             importBtn.disabled = true;
         }
-        
+
         updateContractImportStatus({
             currentFile: null,
             fileSize: 0,
@@ -111,13 +112,13 @@ async function handleDiscoverSheets(file) {
             message: `Analysiere ${file.name}...`,
             progress: 10
         });
-        
+
         const arrayBuffer = await file.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        
+
         // Discover sheets and columns
         const discoveredSheets = discoverContractSheets(workbook);
-        
+
         // Update state with discovered sheets
         const state = getState();
         setState({
@@ -132,19 +133,19 @@ async function handleDiscoverSheets(file) {
                 }
             }
         });
-        
+
         // Store workbook reference for later use
         window._contractWorkbook = workbook;
-        
+
         console.log('Contract sheets discovered:', Object.keys(discoveredSheets));
-        
+
     } catch (error) {
         console.error('Error discovering sheets:', error);
         showErrorAlert(
             'Analysefehler',
             `Fehler beim Analysieren der Datei: ${error.message}`
         );
-        
+
         updateContractImportStatus({
             status: 'error',
             message: `Fehler: ${error.message}`,
@@ -159,23 +160,23 @@ async function handleDiscoverSheets(file) {
  */
 export function handleContractSheetSelect(event) {
     const selectedSheet = event.target.value;
-    
+
     if (!selectedSheet) {
         return;
     }
-    
+
     const state = getState();
     const rawSheets = state.contracts?.rawSheets || {};
     const sheetInfo = rawSheets[selectedSheet];
-    
+
     if (!sheetInfo) {
         console.warn('Selected sheet not found in discovered sheets');
         return;
     }
-    
+
     // Suggest column mapping based on discovered columns
     const suggestedMapping = suggestContractColumnMapping(sheetInfo.columns);
-    
+
     // Update state with current mapping
     setState({
         contracts: {
@@ -188,7 +189,7 @@ export function handleContractSheetSelect(event) {
             }
         }
     });
-    
+
     console.log('Sheet selected:', selectedSheet, 'with', sheetInfo.rowCount, 'rows');
     console.log('Suggested mapping:', suggestedMapping);
 }
@@ -201,20 +202,20 @@ export function handleContractSheetSelect(event) {
 export function handleContractMappingChange(field, column) {
     const state = getState();
     const currentMapping = state.contracts?.currentMapping || { ...DEFAULT_COLUMN_MAPPING };
-    
+
     // Update the mapping for this field
     currentMapping[field] = {
         ...currentMapping[field],
         excelColumn: column
     };
-    
+
     setState({
         contracts: {
             ...state.contracts,
             currentMapping
         }
     });
-    
+
     console.log(`Mapping changed: ${field} -> ${column}`);
 }
 
@@ -225,7 +226,7 @@ export function handleContractMappingChange(field, column) {
 export async function handleContractImportConfirm() {
     const state = getState();
     const workbook = window._contractWorkbook;
-    
+
     if (!workbook) {
         showErrorAlert(
             'Keine Datei',
@@ -233,9 +234,9 @@ export async function handleContractImportConfirm() {
         );
         return;
     }
-    
+
     const currentSheet = state.contracts?.importState?.currentSheet;
-    
+
     if (!currentSheet) {
         showErrorAlert(
             'Kein Arbeitsblatt',
@@ -243,32 +244,32 @@ export async function handleContractImportConfirm() {
         );
         return;
     }
-    
+
     const currentMapping = state.contracts?.currentMapping || DEFAULT_COLUMN_MAPPING;
-    
+
     try {
         updateContractImportStatus({
             status: 'pending',
             message: `Importiere Verträge aus "${currentSheet}"...`,
             progress: 20
         });
-        
+
         const startTime = performance.now();
-        
+
         // Extract contracts using the mapping
         const result = extractContractsFromSheet(workbook, currentSheet, currentMapping);
-        
+
         updateContractImportStatus({ progress: 60 });
-        
+
         // Get summary statistics
         const summary = getContractSummary(result.contracts);
-        
+
         const elapsedMs = performance.now() - startTime;
-        
+
         // Update state with imported contracts
         const existingRecords = state.contracts?.records || [];
         const newRecords = [...existingRecords, ...result.contracts];
-        
+
         // Update imported files list
         const existingFiles = state.contracts?.importedFiles || [];
         const newFileEntry = {
@@ -279,7 +280,7 @@ export async function handleContractImportConfirm() {
             recordsImported: result.contracts.length,
             recordsWithErrors: result.errors.length
         };
-        
+
         setState({
             contracts: {
                 ...state.contracts,
@@ -296,12 +297,12 @@ export async function handleContractImportConfirm() {
                 }
             }
         });
-        
+
         // Log results
         console.log(`Import completed in ${elapsedMs.toFixed(2)}ms`);
         console.log(`Imported: ${result.contracts.length}, Errors: ${result.errors.length}, Warnings: ${result.warnings.length}`);
         console.log('Summary:', summary);
-        
+
         // Show success message
         if (result.errors.length > 0) {
             showSuccessAlert(
@@ -314,20 +315,20 @@ export async function handleContractImportConfirm() {
                 `${result.contracts.length} Verträge wurden importiert`
             );
         }
-        
+
         // Clear workbook reference
         delete window._contractWorkbook;
-        
+
     } catch (error) {
         console.error('Import failed:', error);
-        
+
         updateContractImportStatus({
             status: 'error',
             message: `Import fehlgeschlagen: ${error.message}`,
             progress: 0,
             errors: [error.message]
         });
-        
+
         showErrorAlert(
             'Import-Fehler',
             `Der Import ist fehlgeschlagen: ${error.message}`
@@ -343,7 +344,7 @@ export async function handleContractImportConfirm() {
 export function handleContractFilterChange(filterName, value) {
     const state = getState();
     const currentFilters = state.contracts?.filters || {};
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -353,7 +354,7 @@ export function handleContractFilterChange(filterName, value) {
             }
         }
     });
-    
+
     console.log(`Filter changed: ${filterName} = ${value}`);
 }
 
@@ -370,7 +371,7 @@ export function handleContractSearch(searchText) {
  */
 export function handleClearContractFilters() {
     const state = getState();
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -384,7 +385,7 @@ export function handleClearContractFilters() {
             }
         }
     });
-    
+
     console.log('All contract filters cleared');
 }
 
@@ -395,14 +396,14 @@ export function handleResetContracts() {
     const confirmed = confirm(
         'Möchten Sie wirklich alle importierten Verträge löschen? Diese Aktion kann nicht rückgängig gemacht werden.'
     );
-    
+
     if (!confirmed) {
         console.log('Contract reset cancelled by user');
         return;
     }
-    
+
     const state = getState();
-    
+
     setState({
         contracts: {
             importedFiles: [],
@@ -429,11 +430,11 @@ export function handleResetContracts() {
             }
         }
     });
-    
+
     // Clear workbook reference
     delete window._contractWorkbook;
     selectedContractFile = null;
-    
+
     console.log('Contract module reset complete');
 }
 
@@ -443,7 +444,7 @@ export function handleResetContracts() {
  */
 function updateContractImportStatus(partial) {
     const state = getState();
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -455,82 +456,147 @@ function updateContractImportStatus(partial) {
     });
 }
 
+
+/**
+ * Handle contract subview change (Import vs List)
+ * @param {string} subview - 'list' or 'import'
+ */
+export function handleContractSubviewChange(subview) {
+    // Update UI active state for buttons
+    const buttons = document.querySelectorAll('.sub-nav-btn');
+    buttons.forEach(btn => {
+        if (btn.dataset.subview === subview) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Update visibility of subview containers
+    const containers = document.querySelectorAll('.subview-container');
+    containers.forEach(container => {
+        container.classList.remove('active');
+        // Small delay to allow display:block to apply before opacity transition
+        setTimeout(() => {
+            if (container.id === `contract-subview-${subview}`) {
+                container.classList.add('active');
+            }
+        }, 10);
+    });
+
+    // Explicitly show the target container immediately to prevent flickering
+    const targetContainer = document.getElementById(`contract-subview-${subview}`);
+    if (targetContainer) {
+        targetContainer.classList.add('active');
+    }
+
+    console.log(`Switched to contract subview: ${subview}`);
+}
+
 /**
  * Initialize contract event listeners
  * Should be called from main.js during app initialization
  */
 export function initializeContractEventListeners() {
     console.log('Initializing contract event listeners...');
-    
+
     // File input handler
     const fileInput = document.getElementById('contract-file-input');
     if (fileInput) {
         fileInput.addEventListener('change', handleContractFileSelect);
         console.log('✓ Contract file input listener bound');
     }
-    
+
     // Sheet selector handler
     const sheetSelector = document.getElementById('contract-sheet-select');
     if (sheetSelector) {
         sheetSelector.addEventListener('change', handleContractSheetSelect);
         console.log('✓ Contract sheet selector listener bound');
     }
-    
+
     // Import button handler (now generates preview)
     const importButton = document.getElementById('contract-import-button');
     if (importButton) {
         importButton.addEventListener('click', handleContractMappingConfirm);
         console.log('✓ Contract import button listener bound');
     }
-    
+
     // Reset button handler
     const resetButton = document.getElementById('contract-reset-button');
     if (resetButton) {
         resetButton.addEventListener('click', handleResetContracts);
         console.log('✓ Contract reset button listener bound');
     }
-    
+
     // Search input handler
     const searchInput = document.getElementById('contract-search-input');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => handleContractSearch(e.target.value));
         console.log('✓ Contract search input listener bound');
     }
-    
+
     // Status filter handler
     const statusFilter = document.getElementById('contract-status-filter');
     if (statusFilter) {
         statusFilter.addEventListener('change', (e) => handleContractFilterChange('status', e.target.value));
         console.log('✓ Contract status filter listener bound');
     }
-    
+
     // Date range filter handlers (Phase 3)
     const filterFrom = document.getElementById('contract-filter-from');
     if (filterFrom) {
         filterFrom.addEventListener('change', (e) => handleContractDateRangeChange('from', e.target.value));
         console.log('✓ Contract date from filter listener bound');
     }
-    
+
     const filterTo = document.getElementById('contract-filter-to');
     if (filterTo) {
         filterTo.addEventListener('change', (e) => handleContractDateRangeChange('to', e.target.value));
         console.log('✓ Contract date to filter listener bound');
     }
-    
+
     // Clear filters button handler
     const clearFiltersBtn = document.getElementById('contract-clear-filters');
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', handleClearContractFilters);
         console.log('✓ Contract clear filters button listener bound');
     }
-    
+
     // Set up global handler references for dynamically rendered elements (Phase 3)
     window._handleContractSort = handleContractSort;
     window._handleContractActionClick = handleContractActionClick;
     window._handleContractImportSave = handleContractImportSave;
     window._handleContractCancelPreview = handleContractCancelPreview;
     window._highlightPreviewRow = highlightPreviewRow;
-    
+    window._handleContractStatusChange = handleContractStatusChange;
+
+    // Sub-nav tab handlers
+    const subNavButtons = document.querySelectorAll('.sub-nav-btn');
+    subNavButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const subview = btn.dataset.subview;
+            if (subview) {
+                handleContractSubviewChange(subview);
+            }
+        });
+    });
+    console.log(`✓ Contract sub-nav listeners bound (${subNavButtons.length})`);
+
+    // Refresh button handler
+    const refreshBtn = document.getElementById('contract-refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            // Re-render the table using current state
+            // We can trigger a filter update to force refresh
+            const state = getState();
+            const currentFilters = state.contracts?.filters || {};
+            // Triggering a "fake" filter change to re-render
+            setContractFilters({ ...currentFilters });
+            console.log('Refreshing contract list...');
+        });
+        console.log('✓ Contract refresh button listener bound');
+    }
+
     console.log('Contract event listeners initialized (Phase 3)');
 }
 
@@ -545,7 +611,7 @@ export function initializeContractEventListeners() {
 export async function handleContractMappingConfirm() {
     const state = getState();
     const workbook = window._contractWorkbook;
-    
+
     if (!workbook) {
         showErrorAlert(
             'Keine Datei',
@@ -553,9 +619,9 @@ export async function handleContractMappingConfirm() {
         );
         return;
     }
-    
+
     const currentSheet = state.contracts?.importState?.currentSheet;
-    
+
     if (!currentSheet) {
         showErrorAlert(
             'Kein Arbeitsblatt',
@@ -563,18 +629,18 @@ export async function handleContractMappingConfirm() {
         );
         return;
     }
-    
+
     const currentMapping = state.contracts?.currentMapping || DEFAULT_COLUMN_MAPPING;
-    
+
     try {
         updateContractImportStatus({
             status: 'pending',
             message: `Vorschau wird generiert für "${currentSheet}"...`,
             progress: 10
         });
-        
+
         const startTime = performance.now();
-        
+
         // Use async extraction with progress callback
         const result = await extractContractsFromSheetAsync(
             workbook,
@@ -588,9 +654,9 @@ export async function handleContractMappingConfirm() {
                 }
             }
         );
-        
+
         const elapsedMs = performance.now() - startTime;
-        
+
         // Store preview result in state (don't save to records yet)
         setState({
             contracts: {
@@ -604,26 +670,26 @@ export async function handleContractMappingConfirm() {
                 }
             }
         });
-        
+
         console.log(`Preview generated in ${elapsedMs.toFixed(2)}ms`);
         console.log(`Contracts: ${result.contracts.length}, Errors: ${result.errors.length}, Warnings: ${result.warnings.length}`);
-        
+
         // Show preview container
         const previewContainer = document.getElementById('contract-preview-container');
         if (previewContainer) {
             previewContainer.style.display = 'block';
         }
-        
+
     } catch (error) {
         console.error('Preview generation failed:', error);
-        
+
         updateContractImportStatus({
             status: 'error',
             message: `Vorschau fehlgeschlagen: ${error.message}`,
             progress: 0,
             errors: [error.message]
         });
-        
+
         showErrorAlert(
             'Vorschau-Fehler',
             `Die Vorschau konnte nicht generiert werden: ${error.message}`
@@ -637,7 +703,7 @@ export async function handleContractMappingConfirm() {
 export async function handleContractImportSave() {
     const state = getState();
     const lastImportResult = state.contracts?.lastImportResult;
-    
+
     if (!lastImportResult || !lastImportResult.contracts || lastImportResult.contracts.length === 0) {
         showErrorAlert(
             'Keine Verträge',
@@ -645,14 +711,14 @@ export async function handleContractImportSave() {
         );
         return;
     }
-    
+
     try {
         updateContractImportStatus({
             status: 'pending',
             message: 'Verträge werden gespeichert...',
             progress: 50
         });
-        
+
         // Get file metadata
         const fileMeta = {
             fileName: state.contracts?.importState?.currentFile || 'unknown.xlsx',
@@ -661,10 +727,10 @@ export async function handleContractImportSave() {
             recordsImported: lastImportResult.contracts.length,
             recordsWithErrors: lastImportResult.errors.length
         };
-        
+
         // Save contracts using repository
         const addResult = addContracts(lastImportResult.contracts, fileMeta);
-        
+
         // Update import state to show success
         updateContractImportStatus({
             isImporting: false,
@@ -674,7 +740,7 @@ export async function handleContractImportSave() {
             errors: [],
             warnings: []
         });
-        
+
         // Clear the preview result (contracts are already saved by addContracts)
         const currentState = getState();
         setState({
@@ -683,38 +749,38 @@ export async function handleContractImportSave() {
                 lastImportResult: null
             }
         });
-        
+
         // Clear workbook reference
         delete window._contractWorkbook;
-        
+
         // Hide preview container
         const previewContainer = document.getElementById('contract-preview-container');
         if (previewContainer) {
             previewContainer.style.display = 'none';
         }
-        
+
         // Reset file input
         const fileInput = document.getElementById('contract-file-input');
         if (fileInput) {
             fileInput.value = '';
         }
-        
+
         showSuccessAlert(
             'Import erfolgreich',
             `${addResult.addedCount} Verträge wurden erfolgreich importiert.`
         );
-        
+
         console.log(`Import completed: ${addResult.addedCount} contracts saved`);
-        
+
     } catch (error) {
         console.error('Import save failed:', error);
-        
+
         updateContractImportStatus({
             status: 'error',
             message: `Speichern fehlgeschlagen: ${error.message}`,
             progress: 0
         });
-        
+
         showErrorAlert(
             'Speicher-Fehler',
             `Die Verträge konnten nicht gespeichert werden: ${error.message}`
@@ -727,7 +793,7 @@ export async function handleContractImportSave() {
  */
 export function handleContractCancelPreview() {
     const state = getState();
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -740,13 +806,13 @@ export function handleContractCancelPreview() {
             }
         }
     });
-    
+
     // Hide preview container
     const previewContainer = document.getElementById('contract-preview-container');
     if (previewContainer) {
         previewContainer.style.display = 'none';
     }
-    
+
     console.log('Import preview cancelled');
 }
 
@@ -762,13 +828,13 @@ export function handleContractSort(sortKey) {
     const state = getState();
     const currentSortKey = state.contracts?.ui?.sortKey || 'contractId';
     const currentSortDir = state.contracts?.ui?.sortDir || 'asc';
-    
+
     // Toggle direction if clicking same column
     let newSortDir = 'asc';
     if (sortKey === currentSortKey) {
         newSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
     }
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -779,7 +845,7 @@ export function handleContractSort(sortKey) {
             }
         }
     });
-    
+
     console.log(`Sort changed: ${sortKey} ${newSortDir}`);
 }
 
@@ -790,7 +856,7 @@ export function handleContractSort(sortKey) {
  */
 export function handleContractActionClick(action, contractId) {
     console.log(`Contract action: ${action} for ${contractId}`);
-    
+
     switch (action) {
         case 'edit':
             handleContractEdit(contractId);
@@ -812,25 +878,25 @@ export function handleContractEdit(contractId) {
     const state = getState();
     const contracts = state.contracts?.records || [];
     const contract = contracts.find(c => c.id === contractId);
-    
+
     if (!contract) {
         showErrorAlert('Fehler', 'Vertrag nicht gefunden');
         return;
     }
-    
+
     // Simple inline editing via prompt (can be enhanced with modal later)
     const newStatus = prompt(
         `Status bearbeiten für Vertrag ${contract.contractId}:`,
         contract.status || ''
     );
-    
+
     if (newStatus !== null && newStatus !== contract.status) {
         // Normalize the status value using the existing normalizeStatus function
         const normalizedStatus = normalizeStatus(newStatus);
-        
+
         // Update contract via repository
         const updated = updateContract(contractId, { status: normalizedStatus });
-        
+
         if (updated) {
             showSuccessAlert('Aktualisiert', `Status wurde auf "${normalizedStatus}" geändert.`);
             console.log(`Contract ${contractId} updated: status = ${normalizedStatus}`);
@@ -858,7 +924,7 @@ export function handleContractDelete(contractId) {
 export function handleContractDateRangeChange(type, value) {
     const state = getState();
     const currentDateRange = state.contracts?.filters?.dateRange || { from: null, to: null };
-    
+
     setState({
         contracts: {
             ...state.contracts,
@@ -871,6 +937,32 @@ export function handleContractDateRangeChange(type, value) {
             }
         }
     });
-    
+
     console.log(`Date range filter changed: ${type} = ${value}`);
+}
+
+/**
+ * Handle contract status change from dropdown (Phase 3)
+ * @param {string} contractId - Contract UUID
+ * @param {string} newStatus - New status value
+ */
+export function handleContractStatusChange(contractId, newStatus) {
+    console.log(`Status change: ${contractId} -> ${newStatus}`);
+
+    // Validate status value (VALID_STATUS_VALUES is imported from contractUtils.js at top of file)
+    if (!VALID_STATUS_VALUES.includes(newStatus)) {
+        showErrorAlert('Ungültiger Status', `Der Status "${newStatus}" ist nicht gültig.`);
+        return;
+    }
+
+    // Update contract via repository
+    const updated = updateContract(contractId, { status: newStatus });
+
+    if (updated) {
+        console.log(`Contract ${contractId} status updated to: ${newStatus}`);
+        // No need to show success alert for every status change (too intrusive)
+        // The UI will update automatically via state subscription
+    } else {
+        showErrorAlert('Fehler', 'Vertrag konnte nicht aktualisiert werden.');
+    }
 }

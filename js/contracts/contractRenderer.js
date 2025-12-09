@@ -29,16 +29,16 @@ import { normalizeStatus, VALID_STATUS_VALUES, getContractSummary } from './cont
  */
 export function initializeContractUI() {
     console.log('Initializing Contract Manager UI...');
-    
+
     // Subscribe to state changes for reactive updates
     subscribe((state) => {
         updateContractUI(state);
     });
-    
+
     // Perform initial render
     const state = getState();
     updateContractUI(state);
-    
+
     console.log('Contract Manager UI initialized');
 }
 
@@ -48,26 +48,26 @@ export function initializeContractUI() {
  */
 function updateContractUI(state) {
     const contractState = state.contracts;
-    
+
     if (!contractState) {
         return;
     }
-    
+
     // Update import section
     updateImportSection(contractState);
-    
+
     // Update sheet selector
     updateSheetSelector(contractState);
-    
+
     // Update mapping editor
     updateMappingEditor(contractState);
-    
+
     // Update preview section (Phase 3)
     renderContractPreview(contractState);
-    
+
     // Update statistics
     updateContractStatistics(contractState);
-    
+
     // Update contract list with filters and sorting (Phase 3)
     renderContractList(contractState);
 }
@@ -78,39 +78,39 @@ function updateContractUI(state) {
  */
 function updateImportSection(contractState) {
     const importState = contractState.importState || {};
-    
+
     // Update status indicator
     const statusIndicator = document.getElementById('contract-import-status');
     if (statusIndicator) {
         updateStatusIndicator(statusIndicator, importState.status || 'idle');
     }
-    
+
     // Update status message
     const statusMessage = document.getElementById('contract-import-message');
     if (statusMessage) {
         statusMessage.textContent = importState.message || 'Keine Datei ausgewählt';
     }
-    
+
     // Update progress bar
     const progressBar = document.getElementById('contract-import-progress');
     if (progressBar) {
         progressBar.style.width = `${importState.progress || 0}%`;
         progressBar.setAttribute('aria-valuenow', importState.progress || 0);
     }
-    
+
     // Show/hide progress container
     const progressContainer = document.getElementById('contract-progress-container');
     if (progressContainer) {
         progressContainer.style.display = importState.status === 'pending' ? 'block' : 'none';
     }
-    
+
     // Update import button state
     const importButton = document.getElementById('contract-import-button');
     if (importButton) {
         const hasSheet = importState.currentSheet;
         importButton.disabled = !hasSheet || importState.status === 'pending';
     }
-    
+
     // Show errors if any
     const errorContainer = document.getElementById('contract-import-errors');
     if (errorContainer) {
@@ -137,20 +137,20 @@ function updateImportSection(contractState) {
  */
 function updateSheetSelector(contractState) {
     const selector = document.getElementById('contract-sheet-select');
-    
+
     if (!selector) {
         return;
     }
-    
+
     const rawSheets = contractState.rawSheets || {};
     const currentSheet = contractState.importState?.currentSheet;
     const sheetNames = Object.keys(rawSheets);
-    
+
     // Clear existing options (except placeholder)
     while (selector.options.length > 1) {
         selector.remove(1);
     }
-    
+
     // Add sheet options
     sheetNames.forEach(sheetName => {
         const sheetInfo = rawSheets[sheetName];
@@ -160,7 +160,7 @@ function updateSheetSelector(contractState) {
         option.selected = sheetName === currentSheet;
         selector.appendChild(option);
     });
-    
+
     // Enable/disable selector
     selector.disabled = sheetNames.length === 0;
 }
@@ -171,26 +171,26 @@ function updateSheetSelector(contractState) {
  */
 function updateMappingEditor(contractState) {
     const container = document.getElementById('contract-mapping-editor');
-    
+
     if (!container) {
         return;
     }
-    
+
     const currentMapping = contractState.currentMapping || {};
     const currentSheet = contractState.importState?.currentSheet;
     const rawSheets = contractState.rawSheets || {};
     const sheetInfo = currentSheet ? rawSheets[currentSheet] : null;
-    
+
     // Hide if no sheet selected
     if (!sheetInfo) {
         container.style.display = 'none';
         return;
     }
-    
+
     container.style.display = 'block';
-    
+
     const availableColumns = sheetInfo.columns || [];
-    
+
     // Build mapping editor HTML
     const mappingFields = [
         { key: 'contractId', label: 'Auftrag (Contract ID)', required: true },
@@ -202,14 +202,14 @@ function updateMappingEditor(contractState) {
         { key: 'taskId', label: 'Aufgabe (Task ID)', required: false },
         { key: 'equipmentDescription', label: 'Anlagenbeschreibung', required: false }
     ];
-    
+
     let html = '<div class="mapping-grid">';
-    
+
     mappingFields.forEach(field => {
         const mapping = currentMapping[field.key] || {};
         const currentColumn = mapping.excelColumn || '';
         const detectedHeader = mapping.detectedHeader || '';
-        
+
         html += `
             <div class="mapping-row ${field.required ? 'required' : ''}">
                 <label for="mapping-${field.key}" class="mapping-label">
@@ -231,7 +231,7 @@ function updateMappingEditor(contractState) {
             </div>
         `;
     });
-    
+
     html += '</div>';
     container.innerHTML = html;
 }
@@ -242,23 +242,23 @@ function updateMappingEditor(contractState) {
  */
 function updateContractStatistics(contractState) {
     const stats = getContractStatistics();
-    
+
     // Update stat cards
     const totalContractsEl = document.getElementById('stat-total-contracts');
     if (totalContractsEl) {
         totalContractsEl.textContent = stats.totalContracts.toString();
     }
-    
+
     const uniqueIdsEl = document.getElementById('stat-unique-contract-ids');
     if (uniqueIdsEl) {
         uniqueIdsEl.textContent = stats.uniqueContractIds.toString();
     }
-    
+
     const importedFilesEl = document.getElementById('stat-imported-files');
     if (importedFilesEl) {
         importedFilesEl.textContent = stats.totalImportedFiles.toString();
     }
-    
+
     // Update status breakdown
     const statusBreakdownEl = document.getElementById('contract-status-breakdown');
     if (statusBreakdownEl && stats.byStatus) {
@@ -282,13 +282,13 @@ function updateContractStatistics(contractState) {
 export function renderContractPreview(contractState) {
     const previewContainer = document.getElementById('contract-preview-container');
     const previewCard = document.getElementById('contract-preview-card');
-    
+
     if (!previewContainer) {
         return;
     }
-    
+
     const preview = contractState.lastImportResult;
-    
+
     if (!preview) {
         previewContainer.style.display = 'none';
         if (previewCard) {
@@ -296,14 +296,14 @@ export function renderContractPreview(contractState) {
         }
         return;
     }
-    
+
     previewContainer.style.display = 'block';
     if (previewCard) {
         previewCard.style.display = 'block';
     }
-    
+
     const { contracts, errors, warnings, summary } = preview;
-    
+
     // Build summary section
     const summaryHtml = `
         <div class="cm-preview-summary">
@@ -318,11 +318,11 @@ export function renderContractPreview(contractState) {
             </span>
         </div>
     `;
-    
+
     // Build preview table (limit to 100 rows for performance)
     const maxPreviewRows = 100;
     const previewRows = contracts.slice(0, maxPreviewRows);
-    
+
     let tableHtml = '';
     if (previewRows.length === 0) {
         tableHtml = `
@@ -348,9 +348,9 @@ export function renderContractPreview(contractState) {
                     </thead>
                     <tbody>
                         ${previewRows.map((c, index) => {
-                            const statusClass = getStatusClass(c.status);
-                            const rowIndex = c.sourceFile?.rowIndex || index + 2;
-                            return `
+            const statusClass = getStatusClass(c.status);
+            const rowIndex = c.sourceFile?.rowIndex || index + 2;
+            return `
                                 <tr data-row-index="${rowIndex}">
                                     <td>${index + 1}</td>
                                     <td>${escapeHtml(c.contractId || '-')}</td>
@@ -362,17 +362,17 @@ export function renderContractPreview(contractState) {
                                     <td>${escapeHtml(c.plannedStart || '-')}</td>
                                 </tr>
                             `;
-                        }).join('')}
+        }).join('')}
                     </tbody>
                 </table>
             </div>
         `;
-        
+
         if (contracts.length > maxPreviewRows) {
             tableHtml += `<p class="table-footer">Zeige ${maxPreviewRows} von ${contracts.length} Verträgen</p>`;
         }
     }
-    
+
     // Build error list
     let errorListHtml = '';
     if (errors.length > 0) {
@@ -381,21 +381,21 @@ export function renderContractPreview(contractState) {
                 <h4>Fehler (${errors.length}):</h4>
                 <ul>
                     ${errors.slice(0, 20).map(err => {
-                        const rowIndex = err.rowIndex || 'Unbekannt';
-                        const message = err.message || JSON.stringify(err);
-                        return `
+            const rowIndex = err.rowIndex || 'Unbekannt';
+            const message = err.message || JSON.stringify(err);
+            return `
                             <li class="cm-error-item" data-row-index="${rowIndex}" onclick="window._highlightPreviewRow && window._highlightPreviewRow(${rowIndex})">
                                 <span class="cm-error-row">Zeile ${rowIndex}:</span>
                                 <span class="cm-error-message">${escapeHtml(message)}</span>
                             </li>
                         `;
-                    }).join('')}
+        }).join('')}
                     ${errors.length > 20 ? `<li class="cm-error-more">... und ${errors.length - 20} weitere Fehler</li>` : ''}
                 </ul>
             </div>
         `;
     }
-    
+
     // Build save button
     const saveButtonHtml = `
         <div class="cm-preview-actions">
@@ -410,14 +410,14 @@ export function renderContractPreview(contractState) {
             </button>
         </div>
     `;
-    
+
     previewContainer.innerHTML = `
         ${summaryHtml}
         ${tableHtml}
         ${errorListHtml}
         ${saveButtonHtml}
     `;
-    
+
     // Wire up save and cancel buttons
     const saveBtn = document.getElementById('contract-save-button');
     if (saveBtn) {
@@ -427,7 +427,7 @@ export function renderContractPreview(contractState) {
             }
         });
     }
-    
+
     const cancelBtn = document.getElementById('contract-cancel-preview');
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
@@ -448,7 +448,7 @@ export function highlightPreviewRow(rowIndex) {
         const r = row.dataset.rowIndex;
         row.classList.toggle('cm-row--highlight', Number(r) === Number(rowIndex));
     });
-    
+
     // Scroll to the highlighted row
     const highlightedRow = document.querySelector('.cm-preview-table tbody tr.cm-row--highlight');
     if (highlightedRow) {
@@ -462,22 +462,22 @@ export function highlightPreviewRow(rowIndex) {
  */
 export function renderContractList(contractState) {
     const container = document.getElementById('contract-list-container');
-    
+
     if (!container) {
         return;
     }
-    
+
     const filters = contractState.filters || {};
     const uiState = contractState.ui || {};
     const sortKey = uiState.sortKey || 'contractId';
     const sortDir = uiState.sortDir || 'asc';
-    
+
     // Get filtered contracts
     let contracts = getFilteredContracts(filters);
-    
+
     // Apply sorting
     contracts = applyContractFiltersAndSort(contracts, { ...filters, sortKey, sortDir });
-    
+
     if (contracts.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -491,7 +491,7 @@ export function renderContractList(contractState) {
         `;
         return;
     }
-    
+
     // Render contract table with sortable headers
     container.innerHTML = renderContractTableWithActions(contracts, sortKey, sortDir);
 }
@@ -504,35 +504,35 @@ export function renderContractList(contractState) {
  */
 function applyContractFiltersAndSort(contracts, filters) {
     let result = [...contracts];
-    
+
     // Sorting (default: by contractId)
     const sortKey = filters.sortKey || 'contractId';
     const sortDir = filters.sortDir || 'asc';
-    
+
     result.sort((a, b) => {
         let va = a[sortKey];
         let vb = b[sortKey];
-        
+
         // Handle null/undefined
         if (va === null || va === undefined) va = '';
         if (vb === null || vb === undefined) vb = '';
-        
+
         // Handle date fields
         if (sortKey === 'plannedStart') {
             va = va ? new Date(va).getTime() : 0;
             vb = vb ? new Date(vb).getTime() : 0;
             return sortDir === 'asc' ? va - vb : vb - va;
         }
-        
+
         // String comparison
         const strA = String(va).toLowerCase();
         const strB = String(vb).toLowerCase();
-        
+
         if (strA < strB) return sortDir === 'asc' ? -1 : 1;
         if (strA > strB) return sortDir === 'asc' ? 1 : -1;
         return 0;
     });
-    
+
     return result;
 }
 
@@ -545,14 +545,14 @@ function applyContractFiltersAndSort(contracts, filters) {
  */
 function renderContractTableWithActions(contracts, sortKey, sortDir) {
     const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
-    
+
     const getSortIcon = (key) => {
         if (key !== sortKey) return '';
-        return sortDir === 'asc' 
+        return sortDir === 'asc'
             ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sort-icon"><path d="M5 15l7-7 7 7"/></svg>'
             : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sort-icon"><path d="M19 9l-7 7-7-7"/></svg>';
     };
-    
+
     let html = `
         <div class="data-table-container">
             <table class="data-table cm-contract-table">
@@ -584,21 +584,29 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                 </thead>
                 <tbody>
     `;
-    
+
     displayContracts.forEach(contract => {
         const statusClass = getStatusClass(contract.status);
-        
+        const rowClass = getRowClassForStatus(contract.status);
+
         html += `
-            <tr data-contract-id="${escapeHtml(contract.id)}">
+            <tr data-contract-id="${escapeHtml(contract.id)}" class="${rowClass}">
                 <td>${escapeHtml(contract.contractId || '-')}</td>
                 <td>${escapeHtml(contract.contractTitle || '-')}</td>
                 <td>${escapeHtml(contract.location || '-')}</td>
                 <td>${escapeHtml(contract.roomArea || '-')}</td>
                 <td>${escapeHtml(contract.equipmentId || '-')}</td>
                 <td>
-                    <span class="status-badge ${statusClass}">
-                        ${escapeHtml(contract.status || '-')}
-                    </span>
+                    <select 
+                        class="status-select ${statusClass}" 
+                        data-contract-id="${escapeHtml(contract.id)}"
+                        onchange="window._handleContractStatusChange && window._handleContractStatusChange('${escapeHtml(contract.id)}', this.value)">
+                        ${VALID_STATUS_VALUES.map(status => `
+                            <option value="${escapeHtml(status)}" ${contract.status === status ? 'selected' : ''}>
+                                ${escapeHtml(status)}
+                            </option>
+                        `).join('')}
+                    </select>
                 </td>
                 <td>${escapeHtml(contract.plannedStart || '-')}</td>
                 <td class="action-cell">
@@ -612,18 +620,61 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
             </tr>
         `;
     });
-    
+
     html += `
                 </tbody>
             </table>
         </div>
     `;
-    
+
     if (contracts.length > 100) {
         html += `<p class="table-footer">Zeige 100 von ${contracts.length} Verträgen</p>`;
     }
-    
+
     return html;
+}
+
+/**
+ * Get CSS class for row background based on status
+ * @param {string} status 
+ * @returns {string} CSS class name
+ */
+function getRowClassForStatus(status) {
+    if (!status) return '';
+
+    switch (status) {
+        // Blue - Info
+        case 'Wochenende':
+        case 'Steiger':
+            return 'row-status-info';
+
+        // Red - Danger/Alert
+        case 'Nicht Auffindbar':
+        case 'Noch geprueft':
+        case 'Verschlossen':
+        case 'Doppelt':
+        case 'Demontiert':
+            return 'row-status-danger';
+
+        // Yellow - Warning/Attention
+        case 'Abgelehnt':
+        case 'Genehmigt':
+            return 'row-status-warning';
+
+        // Green - Success/Final
+        case 'Bereit zur Abrechnung':
+        case 'Abgerechnet':
+            return 'row-status-success';
+
+        // Faded - Archived
+        case 'Archiviert':
+            return 'row-status-archived';
+
+        // White - Default
+        // Erstellt, Geplant, Freigegeben, In Bearbeitung
+        default:
+            return '';
+    }
 }
 
 /**
@@ -642,7 +693,7 @@ function updateContractList(contractState) {
  */
 function renderContractTable(contracts) {
     const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
-    
+
     let html = `
         <div class="data-table-container">
             <table class="data-table">
@@ -658,10 +709,10 @@ function renderContractTable(contracts) {
                 </thead>
                 <tbody>
     `;
-    
+
     displayContracts.forEach(contract => {
         const statusClass = getStatusClass(contract.status);
-        
+
         html += `
             <tr data-id="${escapeHtml(contract.id)}">
                 <td>${escapeHtml(contract.contractId || '-')}</td>
@@ -677,17 +728,17 @@ function renderContractTable(contracts) {
             </tr>
         `;
     });
-    
+
     html += `
                 </tbody>
             </table>
         </div>
     `;
-    
+
     if (contracts.length > 100) {
         html += `<p class="table-footer">Zeige 100 von ${contracts.length} Verträgen</p>`;
     }
-    
+
     return html;
 }
 
@@ -697,15 +748,44 @@ function renderContractTable(contracts) {
  * @returns {string} CSS class name
  */
 function getStatusClass(status) {
-    const normalized = normalizeStatus(status);
-    
-    switch (normalized) {
-        case 'fertig':
+    if (!status) return 'status-default';
+
+    // Status Grouping based on User Request
+    switch (status) {
+        // White (Default)
+        case 'Erstellt':
+        case 'Geplant':
+        case 'Freigegeben':
+            return 'status-default';
+
+        // Blue (Info)
+        case 'Wochenende':
+        case 'Steiger':
+            return 'status-info';
+
+        // Red (Danger)
+        case 'Nicht Auffindbar':
+        case 'Noch geprueft':
+        case 'Verschlossen':
+        case 'Doppelt':
+        case 'Demontiert':
+            return 'status-danger';
+
+        // Yellow (Warning)
+        case 'Abgelehnt':
+        case 'Genehmigt':
+        case 'In Bearbeitung':
+            return 'status-warning';
+
+        // Green (Success)
+        case 'Bereit zur Abrechnung':
+        case 'Abgerechnet':
             return 'status-success';
-        case 'inbearb':
-            return 'status-pending';
-        case 'offen':
-            return 'status-idle';
+
+        // Opacity Reduced (Archived)
+        case 'Archiviert':
+            return 'status-archived';
+
         default:
             return 'status-unknown';
     }
@@ -718,13 +798,13 @@ function getStatusClass(status) {
  */
 function updateStatusIndicator(element, status) {
     if (!element) return;
-    
+
     // Remove all status classes
     element.className = 'status-indicator';
-    
+
     // Add current status class
     element.classList.add(`status-${status}`);
-    
+
     // Set ARIA label for accessibility
     element.setAttribute('aria-label', `Status: ${status}`);
 }
@@ -737,7 +817,7 @@ function updateStatusIndicator(element, status) {
 export function renderImportSummary(importResult) {
     const { contracts, errors, warnings } = importResult;
     const summary = getContractSummary ? getContractSummary(contracts) : {};
-    
+
     return `
         <div class="import-summary">
             <div class="summary-header">
@@ -772,7 +852,7 @@ export function renderImportSummary(importResult) {
 export function renderContractFilters() {
     const statusValues = VALID_STATUS_VALUES;
     const locations = getUniqueFieldValues('location');
-    
+
     return `
         <div class="filter-section">
             <div class="filter-row">

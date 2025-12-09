@@ -17,10 +17,10 @@
  */
 
 // Re-export Phase 2 modules for convenience
-export { 
+export {
     discoverContractSheets as discoverContractSheetsV2,
     suggestContractColumnMapping as suggestContractColumnMappingV2,
-    inferColumnType 
+    inferColumnType
 } from './contractColumnMapper.js';
 
 export {
@@ -39,12 +39,12 @@ export const DEFAULT_COLUMN_MAPPING = {
     contractId: { excelColumn: 'A', type: 'string', required: true },
     contractTitle: { excelColumn: 'F', type: 'string', required: true },
     status: { excelColumn: 'M', type: 'string', required: true },
-    
+
     // Recommended fields (import continues if missing, but marked as incomplete)
     location: { excelColumn: 'H', type: 'string', required: false },
     equipmentId: { excelColumn: 'J', type: 'string', required: false },
     plannedStart: { excelColumn: 'O', type: 'date', required: false },
-    
+
     // Optional fields
     taskId: { excelColumn: 'B', type: 'string', required: false },
     taskType: { excelColumn: 'C', type: 'string', required: false },
@@ -58,7 +58,24 @@ export const DEFAULT_COLUMN_MAPPING = {
 };
 
 // Valid status values for contracts
-export const VALID_STATUS_VALUES = ['inbearb', 'fertig', 'offen'];
+export const VALID_STATUS_VALUES = [
+    'Erstellt',
+    'Geplant',
+    'Freigegeben',
+    'In Bearbeitung',
+    'Wochenende',
+    'Steiger',
+    'Nicht Auffindbar',
+    'Noch geprueft',
+    'Verschlossen',
+    'Doppelt',
+    'Demontiert',
+    'Abgelehnt',
+    'Genehmigt',
+    'Bereit zur Abrechnung',
+    'Abgerechnet',
+    'Archiviert'
+];
 
 // Pattern for equipment ID format (e.g., "1100-00003-HG-B22")
 const EQUIPMENT_ID_PATTERN = /^\d{4}-[\w]+-[\w]+-[\w]+$/;
@@ -84,15 +101,15 @@ export function columnLetterToIndex(column) {
     if (!column || typeof column !== 'string') {
         return -1;
     }
-    
+
     let index = 0;
     const upperColumn = column.toUpperCase();
-    
+
     for (let i = 0; i < upperColumn.length; i++) {
         const charCode = upperColumn.charCodeAt(i) - 64; // A=1, B=2, etc.
         index = index * 26 + charCode;
     }
-    
+
     return index - 1; // Convert to zero-based
 }
 
@@ -105,16 +122,16 @@ export function indexToColumnLetter(index) {
     if (typeof index !== 'number' || index < 0) {
         return '';
     }
-    
+
     let letter = '';
     let temp = index + 1; // Convert to 1-based
-    
+
     while (temp > 0) {
         const remainder = (temp - 1) % 26;
         letter = String.fromCharCode(65 + remainder) + letter;
         temp = Math.floor((temp - 1) / 26);
     }
-    
+
     return letter;
 }
 
@@ -138,16 +155,16 @@ export function discoverContractSheets(workbook) {
     if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
         throw new Error('Workbook enthält keine Arbeitsblätter');
     }
-    
+
     const sheets = {};
-    
+
     workbook.SheetNames.forEach((sheetName) => {
         const worksheet = workbook.Sheets[sheetName];
-        
+
         if (!worksheet) {
             return;
         }
-        
+
         // Get the range of the worksheet
         const range = worksheet['!ref'];
         if (!range) {
@@ -159,7 +176,7 @@ export function discoverContractSheets(workbook) {
             };
             return;
         }
-        
+
         // Parse range to get dimensions
         const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
         if (!rangeMatch) {
@@ -171,39 +188,39 @@ export function discoverContractSheets(workbook) {
             };
             return;
         }
-        
+
         const startCol = rangeMatch[1];
         const startRow = parseInt(rangeMatch[2], 10);
         const endCol = rangeMatch[3];
         const endRow = parseInt(rangeMatch[4], 10);
-        
+
         const rowCount = endRow - startRow + 1;
-        
+
         // Extract column headers from first row
         const columns = [];
         const startColIndex = columnLetterToIndex(startCol);
         const endColIndex = columnLetterToIndex(endCol);
-        
+
         for (let colIndex = startColIndex; colIndex <= endColIndex; colIndex++) {
             const colLetter = indexToColumnLetter(colIndex);
             const headerAddress = `${colLetter}1`;
             const headerValue = getCellValue(worksheet, headerAddress);
-            
+
             // Determine data type from sample data (row 2)
             const sampleAddress = `${colLetter}2`;
             const sampleValue = getCellValue(worksheet, sampleAddress);
             let dataType = 'string';
-            
+
             if (sampleValue !== null) {
                 if (typeof sampleValue === 'number') {
                     dataType = 'number';
-                } else if (sampleValue instanceof Date || 
-                          (typeof sampleValue === 'number' && sampleValue > 40000 && sampleValue < 50000)) {
+                } else if (sampleValue instanceof Date ||
+                    (typeof sampleValue === 'number' && sampleValue > 40000 && sampleValue < 50000)) {
                     // Excel date serial numbers are typically in this range
                     dataType = 'date';
                 }
             }
-            
+
             columns.push({
                 index: colIndex,
                 letter: colLetter,
@@ -212,7 +229,7 @@ export function discoverContractSheets(workbook) {
                 visible: true // Default to visible; hidden column detection would require additional processing
             });
         }
-        
+
         sheets[sheetName] = {
             sheetName,
             rowCount: rowCount - 1, // Exclude header row
@@ -220,7 +237,7 @@ export function discoverContractSheets(workbook) {
             isEmpty: rowCount <= 1
         };
     });
-    
+
     return sheets;
 }
 
@@ -234,9 +251,9 @@ export function suggestContractColumnMapping(columns) {
     if (!Array.isArray(columns) || columns.length === 0) {
         return { ...DEFAULT_COLUMN_MAPPING };
     }
-    
+
     const mapping = {};
-    
+
     // Header name patterns for auto-detection (German headers)
     const headerPatterns = {
         contractId: ['auftrag', 'auftragsnr', 'auftragsnummer', 'contract'],
@@ -255,14 +272,14 @@ export function suggestContractColumnMapping(columns) {
         plannedStart: ['sollstart', 'startdatum', 'planned'],
         serialNumber: ['seriennummer', 'serial', 'sn']
     };
-    
+
     // First pass: match by header name
     for (const [field, patterns] of Object.entries(headerPatterns)) {
         for (const col of columns) {
             if (!col.header) continue;
-            
+
             const normalizedHeader = col.header.toLowerCase().replace(/[\s\-_]/g, '');
-            
+
             for (const pattern of patterns) {
                 if (normalizedHeader.includes(pattern.toLowerCase())) {
                     mapping[field] = {
@@ -274,18 +291,18 @@ export function suggestContractColumnMapping(columns) {
                     break;
                 }
             }
-            
+
             if (mapping[field]) break;
         }
     }
-    
+
     // Second pass: fill in missing required fields with defaults
     for (const [field, config] of Object.entries(DEFAULT_COLUMN_MAPPING)) {
         if (!mapping[field]) {
             mapping[field] = { ...config, detectedHeader: null };
         }
     }
-    
+
     return mapping;
 }
 
@@ -304,12 +321,12 @@ export function extractContractsFromSheet(workbook, sheetName, mapping) {
             warnings: []
         };
     }
-    
+
     const worksheet = workbook.Sheets[sheetName];
     const contracts = [];
     const errors = [];
     const warnings = [];
-    
+
     // Get the range of the worksheet
     const range = worksheet['!ref'];
     if (!range) {
@@ -319,7 +336,7 @@ export function extractContractsFromSheet(workbook, sheetName, mapping) {
             warnings: []
         };
     }
-    
+
     // Parse range to get dimensions
     const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
     if (!rangeMatch) {
@@ -329,28 +346,28 @@ export function extractContractsFromSheet(workbook, sheetName, mapping) {
             warnings: []
         };
     }
-    
+
     const startRow = 2; // Skip header row
     const endRow = parseInt(rangeMatch[4], 10);
-    
+
     // Process each row
     for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
         const rowResult = extractContractFromRow(worksheet, rowIndex, mapping, sheetName);
-        
+
         if (rowResult.error) {
             errors.push(`Zeile ${rowIndex}: ${rowResult.error}`);
             continue;
         }
-        
+
         if (rowResult.warning) {
             warnings.push(`Zeile ${rowIndex}: ${rowResult.warning}`);
         }
-        
+
         if (rowResult.contract) {
             contracts.push(rowResult.contract);
         }
     }
-    
+
     return { contracts, errors, warnings };
 }
 
@@ -374,44 +391,44 @@ function extractContractFromRow(worksheet, rowIndex, mapping, sheetName) {
         updatedAt: new Date().toISOString(),
         importVersion: 1
     };
-    
+
     // Extract values based on mapping
     for (const [field, config] of Object.entries(mapping)) {
         const cellAddress = `${config.excelColumn}${rowIndex}`;
         let value = getCellValue(worksheet, cellAddress);
-        
+
         // Apply type conversion
         if (value !== null && value !== undefined) {
             value = convertValue(value, config.type);
         }
-        
+
         // Apply cleanup
         if (typeof value === 'string') {
             value = cleanupStringValue(value);
         }
-        
+
         contract[field] = value;
     }
-    
+
     // Validate required fields
     const validation = validateContractRecord(contract);
-    
+
     if (!validation.valid) {
         // Check if this is just an empty row
         const hasAnyData = Object.entries(contract)
             .filter(([key]) => !['id', 'sourceFile', 'createdAt', 'updatedAt', 'importVersion'].includes(key))
             .some(([_, value]) => value !== null && value !== undefined && value !== '');
-        
+
         if (!hasAnyData) {
             return { contract: null, error: null, warning: null }; // Skip empty rows
         }
-        
+
         return { contract: null, error: validation.errors.join(', '), warning: null };
     }
-    
+
     // Generate internal key for deduplication
     contract.internalKey = generateInternalKey(contract, rowIndex);
-    
+
     return {
         contract,
         error: null,
@@ -429,7 +446,7 @@ function convertValue(value, type) {
     if (value === null || value === undefined) {
         return null;
     }
-    
+
     switch (type) {
         case 'date':
             // Handle Excel serial date numbers
@@ -448,11 +465,11 @@ function convertValue(value, type) {
                 }
             }
             return null;
-            
+
         case 'number':
             const num = Number(value);
             return isNaN(num) ? null : num;
-            
+
         case 'string':
         default:
             return String(value);
@@ -468,13 +485,13 @@ function cleanupStringValue(value) {
     if (typeof value !== 'string') {
         return value;
     }
-    
+
     // Trim whitespace
     let cleaned = value.trim();
-    
+
     // Replace multiple spaces with single space
     cleaned = cleaned.replace(/\s+/g, ' ');
-    
+
     return cleaned || null; // Return null for empty strings
 }
 
@@ -503,20 +520,20 @@ function generateInternalKey(contract, rowIndex) {
 export function validateContractRecord(contract) {
     const errors = [];
     const warnings = [];
-    
+
     if (!contract || typeof contract !== 'object') {
         return { valid: false, errors: ['Ungültiges Contract-Objekt'], warnings: [] };
     }
-    
+
     // Validate required fields
     if (!contract.contractId || String(contract.contractId).trim() === '') {
         errors.push('Contract ID ist erforderlich');
     }
-    
+
     if (!contract.contractTitle || String(contract.contractTitle).trim() === '') {
         errors.push('Contract-Titel ist erforderlich');
     }
-    
+
     if (!contract.status || String(contract.status).trim() === '') {
         errors.push('Status ist erforderlich');
     } else {
@@ -526,7 +543,7 @@ export function validateContractRecord(contract) {
             warnings.push(`Unbekannter Status-Wert: "${contract.status}"`);
         }
     }
-    
+
     // Validate optional fields if present
     if (contract.plannedStart && typeof contract.plannedStart === 'string') {
         const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -534,7 +551,7 @@ export function validateContractRecord(contract) {
             warnings.push('Geplantes Startdatum hat ungültiges Format');
         }
     }
-    
+
     if (contract.equipmentId && typeof contract.equipmentId === 'string') {
         // Only warn if it doesn't match the expected pattern
         if (!EQUIPMENT_ID_PATTERN.test(contract.equipmentId) && contract.equipmentId.length > 0) {
@@ -542,7 +559,7 @@ export function validateContractRecord(contract) {
             // Some equipment IDs might have different formats
         }
     }
-    
+
     return {
         valid: errors.length === 0,
         errors,
@@ -551,7 +568,7 @@ export function validateContractRecord(contract) {
 }
 
 /**
- * Normalize status value to lowercase enum
+ * Normalize status value to standard format
  * @param {string} status - Raw status string
  * @returns {string} Normalized status
  */
@@ -559,23 +576,37 @@ export function normalizeStatus(status) {
     if (!status || typeof status !== 'string') {
         return '';
     }
-    
-    const normalized = status.toLowerCase().trim();
-    
-    // Map common variations
+
+    const normalized = status.trim();
+
+    // Map old status values to new equivalents for backward compatibility
     const statusMap = {
-        'in bearbeitung': 'inbearb',
-        'in arbeit': 'inbearb',
-        'offen': 'offen',
-        'open': 'offen',
-        'fertig': 'fertig',
-        'abgeschlossen': 'fertig',
-        'done': 'fertig',
-        'complete': 'fertig',
-        'completed': 'fertig'
+        'inbearb': 'In Bearbeitung',
+        'in bearbeitung': 'In Bearbeitung',
+        'in arbeit': 'In Bearbeitung',
+        'offen': 'Erstellt',
+        'open': 'Erstellt',
+        'fertig': 'Abgerechnet',
+        'abgeschlossen': 'Abgerechnet',
+        'done': 'Abgerechnet',
+        'complete': 'Abgerechnet',
+        'completed': 'Abgerechnet'
     };
-    
-    return statusMap[normalized] || normalized;
+
+    const lowerNormalized = normalized.toLowerCase();
+
+    // Check if it's an old value that needs mapping
+    if (statusMap[lowerNormalized]) {
+        return statusMap[lowerNormalized];
+    }
+
+    // Check if it's already a valid new status value
+    if (VALID_STATUS_VALUES.includes(normalized)) {
+        return normalized;
+    }
+
+    // Return as-is if not found (will be caught by validation)
+    return normalized;
 }
 
 /**
@@ -593,27 +624,27 @@ export function getContractSummary(contracts) {
             dateRange: { earliest: null, latest: null }
         };
     }
-    
+
     const uniqueContractIds = new Set();
     const byStatus = {};
     const byLocation = {};
     let earliestDate = null;
     let latestDate = null;
-    
+
     contracts.forEach(contract => {
         // Count unique contract IDs
         if (contract.contractId) {
             uniqueContractIds.add(contract.contractId);
         }
-        
+
         // Group by status
         const status = normalizeStatus(contract.status) || 'unknown';
         byStatus[status] = (byStatus[status] || 0) + 1;
-        
+
         // Group by location
         const location = contract.location || 'Unbekannt';
         byLocation[location] = (byLocation[location] || 0) + 1;
-        
+
         // Track date range
         if (contract.plannedStart) {
             const date = new Date(contract.plannedStart);
@@ -627,7 +658,7 @@ export function getContractSummary(contracts) {
             }
         }
     });
-    
+
     return {
         totalContracts: contracts.length,
         uniqueContractIds: uniqueContractIds.size,
@@ -658,43 +689,43 @@ export async function readContractWorkbook(file) {
             reject(new Error('Keine Datei ausgewählt'));
             return;
         }
-        
+
         const fileName = file.name.toLowerCase();
         if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
             reject(new Error('Datei muss im .xlsx oder .xls Format sein'));
             return;
         }
-        
+
         // Validate file size (10 MB limit)
         const MAX_FILE_SIZE = 10 * 1024 * 1024;
         if (file.size > MAX_FILE_SIZE) {
             reject(new Error('Datei überschreitet die maximale Größe von 10 MB'));
             return;
         }
-        
+
         // Read file
         const reader = new FileReader();
-        
+
         reader.onload = (event) => {
             try {
                 const data = event.target.result;
                 // XLSX is expected to be available globally (loaded via script tag)
                 const workbook = XLSX.read(data, { type: 'array' });
-                
+
                 // Attach file metadata to workbook
                 workbook.fileName = file.name;
                 workbook.fileSize = file.size;
-                
+
                 resolve(workbook);
             } catch (err) {
                 reject(new Error(`Fehler beim Parsen der Excel-Datei: ${err.message}`));
             }
         };
-        
+
         reader.onerror = () => {
             reject(new Error('Fehler beim Lesen der Datei'));
         };
-        
+
         reader.readAsArrayBuffer(file);
     });
 }
@@ -715,75 +746,75 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
         maxRows = null,
         onProgress = null
     } = options;
-    
+
     const startTime = performance.now();
     const contracts = [];
     const errors = [];
     const warnings = [];
     const seen = new Set(); // For deduplication
-    
+
     try {
         const worksheet = workbook.Sheets[sheetName];
         if (!worksheet) {
             throw new Error(`Arbeitsblatt "${sheetName}" nicht gefunden`);
         }
-        
+
         // Get worksheet range
         const range = worksheet['!ref'];
         if (!range) {
             throw new Error('Arbeitsblatt ist leer');
         }
-        
+
         // Parse range
         const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
         if (!rangeMatch) {
             throw new Error('Ungültiger Bereich im Arbeitsblatt');
         }
-        
+
         const endRow = parseInt(rangeMatch[4], 10);
         const startRow = 2; // Skip header row
-        
+
         // Read all rows as array of arrays
         const allRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
+
         if (allRows.length < 2) {
             throw new Error('Arbeitsblatt enthält keine Datenzeilen (nur Kopfzeile)');
         }
-        
+
         const dataRows = allRows.slice(1); // Skip header
         const limitedRows = maxRows ? dataRows.slice(0, maxRows) : dataRows;
         const totalRows = limitedRows.length;
-        
+
         // Process each row
         for (let i = 0; i < totalRows; i++) {
             const row = limitedRows[i];
             const excelRowNumber = i + 2; // +2: header row + 0-index
-            
+
             // Report progress every 100 rows
             if (onProgress && i % 100 === 0) {
                 onProgress({ processed: i, total: totalRows });
             }
-            
+
             try {
                 // Check if row is empty
                 const hasData = row.some(cell => cell !== null && cell !== undefined && cell !== '');
                 if (!hasData) {
                     continue; // Skip empty rows
                 }
-                
+
                 // Parse row using mapping
                 const rowData = {};
                 Object.entries(mapping).forEach(([fieldName, columnInfo]) => {
                     const colLetter = columnInfo.excelColumn || columnInfo;
                     const colIndex = columnLetterToIndex(typeof colLetter === 'string' ? colLetter : colLetter.excelColumn);
                     const rawValue = colIndex >= 0 && colIndex < row.length ? row[colIndex] : null;
-                    
+
                     rowData[fieldName] = {
                         raw: rawValue !== undefined ? rawValue : null,
                         type: columnInfo.type || 'string'
                     };
                 });
-                
+
                 // Validate required fields
                 const missingFields = [];
                 ['contractId', 'contractTitle', 'status'].forEach(field => {
@@ -792,7 +823,7 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                         missingFields.push(field);
                     }
                 });
-                
+
                 if (missingFields.length > 0) {
                     errors.push({
                         rowIndex: excelRowNumber,
@@ -801,22 +832,22 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                         missingFields,
                         message: `Fehlende Pflichtfelder: ${missingFields.join(', ')}`
                     });
-                    
+
                     if (skipInvalidRows) continue;
                 }
-                
+
                 // Normalize and convert values
                 const normalized = {};
                 Object.entries(rowData).forEach(([field, data]) => {
                     const { raw, type } = data;
-                    
+
                     if (type === 'date') {
                         // Convert Excel date
                         if (typeof raw === 'number') {
                             const excelEpoch = new Date(Date.UTC(1899, 11, 30));
                             const date = new Date(excelEpoch.getTime() + raw * 24 * 60 * 60 * 1000);
-                            normalized[field] = !isNaN(date.getTime()) 
-                                ? date.toISOString().split('T')[0] 
+                            normalized[field] = !isNaN(date.getTime())
+                                ? date.toISOString().split('T')[0]
                                 : null;
                         } else if (raw) {
                             normalized[field] = String(raw).trim() || null;
@@ -827,37 +858,37 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                         normalized[field] = raw !== null && raw !== '' ? Number(raw) : null;
                         if (isNaN(normalized[field])) normalized[field] = null;
                     } else {
-                        normalized[field] = raw !== null && raw !== undefined 
-                            ? String(raw).trim() || null 
+                        normalized[field] = raw !== null && raw !== undefined
+                            ? String(raw).trim() || null
                             : null;
                     }
                 });
-                
+
                 // Create contract object
                 const contract = {
                     id: generateUUID(),
                     internalKey: `${normalized.contractId || 'unknown'}_row_${excelRowNumber}`,
-                    
+
                     // Core fields
                     contractId: normalized.contractId,
                     contractTitle: normalized.contractTitle,
                     taskId: normalized.taskId || null,
                     taskType: normalized.taskType || null,
                     description: normalized.description || null,
-                    
+
                     // Location & equipment
                     location: normalized.location || null,
                     roomArea: normalized.roomArea || null,
                     equipmentId: normalized.equipmentId || null,
                     equipmentDescription: normalized.equipmentDescription || null,
                     serialNumber: normalized.serialNumber || null,
-                    
+
                     // Management
                     status: normalized.status ? String(normalized.status).toLowerCase() : null,
                     workorderCode: normalized.workorderCode || null,
                     reportedBy: normalized.reportedBy || null,
                     plannedStart: normalized.plannedStart || null,
-                    
+
                     // Metadata
                     sourceFile: {
                         fileName: workbook.fileName || 'unknown.xlsx',
@@ -865,7 +896,7 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                         rowIndex: excelRowNumber,
                         importedAt: new Date().toISOString()
                     },
-                    
+
                     // Audit
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
@@ -874,7 +905,7 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                     isComplete: [normalized.location, normalized.equipmentId, normalized.plannedStart]
                         .filter(v => v !== null && v !== undefined).length >= 2
                 };
-                
+
                 // Check for duplicates
                 if (seen.has(contract.internalKey)) {
                     warnings.push({
@@ -885,10 +916,10 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                     });
                     continue;
                 }
-                
+
                 seen.add(contract.internalKey);
                 contracts.push(contract);
-                
+
             } catch (rowError) {
                 errors.push({
                     rowIndex: excelRowNumber,
@@ -897,7 +928,7 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                 });
             }
         }
-        
+
         const endTime = performance.now();
         const summary = {
             totalRows: totalRows,
@@ -907,9 +938,9 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
             duplicateCount: warnings.filter(w => w.type === 'duplicate_record').length,
             importDuration: Math.round(endTime - startTime)
         };
-        
+
         return { contracts, errors, warnings, summary };
-        
+
     } catch (err) {
         return {
             contracts: [],
@@ -918,11 +949,11 @@ export async function extractContractsFromSheetAsync(workbook, sheetName, mappin
                 message: err.message
             }],
             warnings: [],
-            summary: { 
-                totalRows: 0, 
-                successCount: 0, 
-                errorCount: 1, 
-                warningCount: 0, 
+            summary: {
+                totalRows: 0,
+                successCount: 0,
+                errorCount: 1,
+                warningCount: 0,
                 duplicateCount: 0,
                 importDuration: 0
             }
@@ -942,23 +973,23 @@ export async function importContractFile(file, userMappingOverrides = null, opti
     try {
         // Step 1: Read workbook
         const workbook = await readContractWorkbook(file);
-        
+
         // Step 2: Discover sheets and columns
         const discoveredSheets = discoverContractSheets(workbook);
-        
+
         // Step 3: Suggest mapping (use first sheet)
         // Note: discoveredSheets has { sheets: [...] } format (Phase 2)
         if (!discoveredSheets.sheets || discoveredSheets.sheets.length === 0) {
             throw new Error('Keine Arbeitsblätter gefunden');
         }
-        
+
         const firstSheetInfo = discoveredSheets.sheets[0];
         const firstSheet = firstSheetInfo.name;
         const suggested = suggestContractColumnMapping(discoveredSheets);
-        
+
         // Step 4: Apply user overrides if provided
         const finalMapping = userMappingOverrides || suggested.mapping;
-        
+
         // Step 5: Extract contracts
         const extractResult = await extractContractsFromSheetAsync(
             workbook,
@@ -966,7 +997,7 @@ export async function importContractFile(file, userMappingOverrides = null, opti
             finalMapping,
             options
         );
-        
+
         return {
             fileName: file.name,
             fileSize: file.size,
@@ -976,7 +1007,7 @@ export async function importContractFile(file, userMappingOverrides = null, opti
             selectedSheet: firstSheet,
             ...extractResult
         };
-        
+
     } catch (err) {
         return {
             fileName: file.name,
