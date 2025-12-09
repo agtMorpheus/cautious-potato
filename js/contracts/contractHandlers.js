@@ -665,20 +665,22 @@ export async function handleContractImportSave() {
         // Save contracts using repository
         const addResult = addContracts(lastImportResult.contracts, fileMeta);
         
-        // Update state: clear preview, update import state
+        // Update import state to show success
+        updateContractImportStatus({
+            isImporting: false,
+            status: 'success',
+            message: `${addResult.addedCount} Verträge erfolgreich gespeichert`,
+            progress: 100,
+            errors: [],
+            warnings: []
+        });
+        
+        // Clear the preview result (contracts are already saved by addContracts)
+        const currentState = getState();
         setState({
             contracts: {
-                ...state.contracts,
-                lastImportResult: null,
-                importState: {
-                    ...state.contracts?.importState,
-                    isImporting: false,
-                    status: 'success',
-                    message: `${addResult.addedCount} Verträge erfolgreich gespeichert`,
-                    progress: 100,
-                    errors: [],
-                    warnings: []
-                }
+                ...currentState.contracts,
+                lastImportResult: null
             }
         });
         
