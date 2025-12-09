@@ -44,6 +44,46 @@ const initialState = {
       // e.g. "01.01.0010": 5
     }
   },
+  // Contract Manager state slice (Phase 1)
+  contracts: {
+    // Import metadata for tracking imported files
+    importedFiles: [
+      // { fileName, size, importedAt, sheets, recordsImported, recordsWithErrors }
+    ],
+    // Discovered sheet metadata (for mapping UI)
+    rawSheets: {
+      // [sheetName]: { sheetName, rowCount, columns: [...], isEmpty }
+    },
+    // Current column mapping for active import
+    currentMapping: {
+      // fieldName: { excelColumn, type, required, detectedHeader }
+    },
+    // Normalized contract records
+    records: [
+      // Contract objects with full schema
+    ],
+    // UI state for filtering/searching
+    filters: {
+      contractId: null,
+      status: null,
+      location: null,
+      equipmentId: null,
+      dateRange: { from: null, to: null },
+      searchText: ''
+    },
+    // Import state (for UI progress/feedback)
+    importState: {
+      isImporting: false,
+      currentFile: null,
+      currentSheet: null,
+      fileSize: 0,
+      progress: 0,
+      status: 'idle',       // 'idle' | 'pending' | 'success' | 'error'
+      message: '',
+      errors: [],
+      warnings: []
+    }
+  },
   ui: {
     import: {
       status: 'idle',       // 'idle' | 'pending' | 'success' | 'error'
@@ -356,6 +396,174 @@ export function updateAbrechnungHeader(headerData) {
       header: {
         ...currentState.abrechnungData.header,
         ...headerData
+      }
+    }
+  });
+}
+
+// ============================================================
+// Contract Manager Helper Functions (Phase 1)
+// ============================================================
+
+/**
+ * Add an imported contract file to the list
+ * @param {Object} fileInfo - File metadata { fileName, size, sheets, recordsImported, recordsWithErrors }
+ * @returns {Object} New state snapshot
+ */
+export function addContractFile(fileInfo) {
+  const newFile = {
+    ...fileInfo,
+    importedAt: new Date().toISOString()
+  };
+  
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      importedFiles: [...(currentState.contracts?.importedFiles || []), newFile]
+    }
+  });
+}
+
+/**
+ * Set contract records (replaces existing)
+ * @param {Array} records - Array of contract objects
+ * @returns {Object} New state snapshot
+ */
+export function setContracts(records) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      records: records || []
+    }
+  });
+}
+
+/**
+ * Add contracts to existing records
+ * @param {Array} newRecords - Array of new contract objects to add
+ * @returns {Object} New state snapshot
+ */
+export function addContracts(newRecords) {
+  const existingRecords = currentState.contracts?.records || [];
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      records: [...existingRecords, ...newRecords]
+    }
+  });
+}
+
+/**
+ * Update contract filters
+ * @param {Object} filters - Filter object to merge with existing filters
+ * @returns {Object} New state snapshot
+ */
+export function setContractFilters(filters) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      filters: {
+        ...currentState.contracts?.filters,
+        ...filters
+      }
+    }
+  });
+}
+
+/**
+ * Reset contract filters to defaults
+ * @returns {Object} New state snapshot
+ */
+export function resetContractFilters() {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      filters: {
+        contractId: null,
+        status: null,
+        location: null,
+        equipmentId: null,
+        dateRange: { from: null, to: null },
+        searchText: ''
+      }
+    }
+  });
+}
+
+/**
+ * Update contract import state
+ * @param {Object} partial - Partial import state updates
+ * @returns {Object} New state snapshot
+ */
+export function setContractImportState(partial) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      importState: {
+        ...currentState.contracts?.importState,
+        ...partial
+      }
+    }
+  });
+}
+
+/**
+ * Set discovered sheets from contract file analysis
+ * @param {Object} sheets - Object with sheet metadata
+ * @returns {Object} New state snapshot
+ */
+export function setContractRawSheets(sheets) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      rawSheets: sheets || {}
+    }
+  });
+}
+
+/**
+ * Set current column mapping for contract import
+ * @param {Object} mapping - Column mapping configuration
+ * @returns {Object} New state snapshot
+ */
+export function setContractMapping(mapping) {
+  return setState({
+    contracts: {
+      ...currentState.contracts,
+      currentMapping: mapping || {}
+    }
+  });
+}
+
+/**
+ * Clear all contract data (reset contract module)
+ * @returns {Object} New state snapshot
+ */
+export function clearContracts() {
+  return setState({
+    contracts: {
+      importedFiles: [],
+      rawSheets: {},
+      currentMapping: {},
+      records: [],
+      filters: {
+        contractId: null,
+        status: null,
+        location: null,
+        equipmentId: null,
+        dateRange: { from: null, to: null },
+        searchText: ''
+      },
+      importState: {
+        isImporting: false,
+        currentFile: null,
+        currentSheet: null,
+        fileSize: 0,
+        progress: 0,
+        status: 'idle',
+        message: '',
+        errors: [],
+        warnings: []
       }
     }
   });

@@ -1,0 +1,527 @@
+/**
+ * Contract Manager Module Styles (Phase 1)
+ * 
+ * Extends the base styles.css for Contract Manager specific components
+ * Follows the existing dark professional theme with blue accent
+ */
+
+/* ==================== Contract Manager Variables ==================== */
+:root {
+    /* Contract-specific status colors */
+    --contract-status-inbearb: var(--color-warning);
+    --contract-status-fertig: var(--color-success);
+    --contract-status-offen: var(--color-info);
+    --contract-status-unknown: var(--color-text-muted);
+}
+
+/* ==================== Contract Import Section ==================== */
+.contract-import-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contract-file-upload {
+    position: relative;
+}
+
+.contract-file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-top: 1rem;
+}
+
+.contract-file-info .file-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.contract-file-info .file-details {
+    flex: 1;
+}
+
+.contract-file-info .file-name {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.contract-file-info .file-size {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ==================== Sheet Selector ==================== */
+.sheet-selector-container {
+    margin-top: 1rem;
+}
+
+.sheet-selector-container label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.sheet-selector-container select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.sheet-selector-container select:hover {
+    border-color: var(--color-primary);
+}
+
+.sheet-selector-container select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.sheet-selector-container select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==================== Column Mapping Editor ==================== */
+#contract-mapping-editor {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.mapping-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.mapping-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.mapping-row.required {
+    border-left: 3px solid var(--color-primary);
+}
+
+.mapping-label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.mapping-label .required-mark {
+    color: var(--color-error);
+    margin-left: 0.25rem;
+}
+
+.mapping-select {
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.mapping-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.detected-hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+/* ==================== Import Progress ==================== */
+#contract-progress-container {
+    margin-top: 1rem;
+}
+
+.progress-bar-container {
+    height: 8px;
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar.error {
+    background: var(--color-error);
+}
+
+.progress-bar.success {
+    background: var(--color-success);
+}
+
+/* ==================== Contract Statistics Cards ==================== */
+.contract-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contract-stat-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contract-stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contract-stat-card .stat-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.contract-stat-card .stat-icon.contracts {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.contract-stat-card .stat-icon.files {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+}
+
+.contract-stat-card .stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.contract-stat-card .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ==================== Status Badges ==================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-badge.status-success,
+.status-badge.status-fertig {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.status-badge.status-pending,
+.status-badge.status-inbearb {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.status-badge.status-idle,
+.status-badge.status-offen {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+}
+
+.status-badge.status-unknown {
+    background: rgba(107, 114, 128, 0.12);
+    color: var(--color-text-muted);
+}
+
+.status-badge.status-error {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+/* ==================== Contract List/Table ==================== */
+#contract-list-container {
+    min-height: 200px;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.empty-state .empty-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin: 0.25rem 0;
+}
+
+.empty-state .text-muted {
+    font-size: var(--font-size-sm);
+}
+
+.table-footer {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 1rem;
+}
+
+/* ==================== Filter Section ==================== */
+.filter-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem 0.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.filter-group input::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* ==================== Import Summary ==================== */
+.import-summary {
+    padding: 1.5rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    margin-top: 1rem;
+}
+
+.import-summary .summary-header h4 {
+    margin: 0 0 1rem 0;
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+}
+
+.import-summary .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.import-summary .summary-stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+}
+
+.import-summary .summary-stat .stat-value {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.import-summary .summary-stat .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.import-summary .summary-stat.has-errors .stat-value {
+    color: var(--color-error);
+}
+
+.import-summary .summary-stat.has-warnings .stat-value {
+    color: var(--color-warning);
+}
+
+/* ==================== Status Breakdown ==================== */
+#contract-status-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+}
+
+.status-item .status-count {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* ==================== Import Errors Display ==================== */
+#contract-import-errors {
+    margin-top: 1rem;
+}
+
+#contract-import-errors .alert {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid;
+}
+
+#contract-import-errors .alert-error {
+    background: var(--color-error-bg);
+    border-color: var(--color-error);
+    color: var(--color-text);
+}
+
+#contract-import-errors .alert strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-error);
+}
+
+#contract-import-errors .alert ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+#contract-import-errors .alert li {
+    font-size: var(--font-size-sm);
+    margin-bottom: 0.25rem;
+}
+
+/* ==================== Responsive Adjustments ==================== */
+@media (max-width: 768px) {
+    .mapping-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .contract-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .import-summary .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ==================== Disabled State ==================== */
+.contract-section.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.contract-section.disabled::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+}
+
+/* ==================== Text Utilities ==================== */
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-error {
+    color: var(--color-error);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}

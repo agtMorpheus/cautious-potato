@@ -653,6 +653,12 @@ ul { list-style: none; }
     .app-container {
         max-width: 1920px;
         margin: 0 auto;
+        width: 100%;
+    }
+    
+    /* Ensure dashboard fills screen */
+    #view-dashboard.active {
+        grid-template-rows: auto 1fr;
         box-shadow: 0 0 50px rgba(0,0,0,0.5); /* Cinema feel if viewport is huge */
     }
 

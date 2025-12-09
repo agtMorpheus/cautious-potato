@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/contracts.css" />
 </head>
 
 <body>
@@ -66,6 +67,14 @@
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             <span class="nav-text">Export</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#contracts" class="nav-link" role="menuitem" data-view="contracts">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="nav-text">Contracts</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
@@ -359,6 +368,138 @@
                                     <dd id="export-last-size">–</dd>
                                 </div>
                             </dl>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contract Manager View (Phase 1) -->
+                <section id="view-contracts" class="view-container" aria-labelledby="contracts-heading">
+                    <h2 id="contracts-heading" class="sr-only">Contract Manager</h2>
+                    
+                    <!-- Contract Statistics -->
+                    <div class="contract-stats-grid">
+                        <div class="contract-stat-card">
+                            <div class="stat-icon contracts">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <span class="stat-value" id="stat-total-contracts">0</span>
+                            <span class="stat-label">Verträge</span>
+                        </div>
+                        <div class="contract-stat-card">
+                            <div class="stat-icon contracts">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                            </div>
+                            <span class="stat-value" id="stat-unique-contract-ids">0</span>
+                            <span class="stat-label">Aufträge</span>
+                        </div>
+                        <div class="contract-stat-card">
+                            <div class="stat-icon files">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </div>
+                            <span class="stat-value" id="stat-imported-files">0</span>
+                            <span class="stat-label">Importierte Dateien</span>
+                        </div>
+                    </div>
+
+                    <!-- Contract Import Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Verträge importieren</h3>
+                            <p class="card-description">Laden Sie eine Excel-Datei mit Vertragsdaten hoch (z.B. <code>1406-Auftrage-2025.xlsx</code>)</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="contract-import-section">
+                                <!-- File Upload -->
+                                <div class="form-group">
+                                    <label for="contract-file-input" class="form-label">Excel-Datei (.xlsx)</label>
+                                    <div class="file-upload-area" id="contract-file-drop-zone">
+                                        <input
+                                            id="contract-file-input"
+                                            type="file"
+                                            accept=".xlsx,.xls"
+                                            aria-describedby="contract-file-help"
+                                            class="file-input-hidden"
+                                        />
+                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <p class="upload-text">Datei hierher ziehen oder <span class="upload-link">durchsuchen</span></p>
+                                        <p class="upload-hint" id="contract-file-help">Unterstützte Formate: .xlsx, .xls</p>
+                                    </div>
+                                </div>
+
+                                <!-- Sheet Selector -->
+                                <div class="sheet-selector-container">
+                                    <label for="contract-sheet-select">Arbeitsblatt auswählen</label>
+                                    <select id="contract-sheet-select" disabled>
+                                        <option value="">-- Bitte zuerst eine Datei laden --</option>
+                                    </select>
+                                </div>
+
+                                <!-- Column Mapping Editor (populated dynamically) -->
+                                <div id="contract-mapping-editor" style="display: none;"></div>
+
+                                <!-- Progress -->
+                                <div id="contract-progress-container" style="display: none;">
+                                    <div class="progress-bar-container">
+                                        <div id="contract-import-progress" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Status Display -->
+                                <div class="status-display">
+                                    <span class="status-indicator status-idle" id="contract-import-status"></span>
+                                    <p id="contract-import-message" class="status-message">Keine Datei ausgewählt</p>
+                                </div>
+
+                                <!-- Error Display -->
+                                <div id="contract-import-errors" style="display: none;"></div>
+
+                                <!-- Actions -->
+                                <div class="form-actions">
+                                    <button id="contract-import-button" type="button" class="btn btn-primary" disabled>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <span>Verträge importieren</span>
+                                    </button>
+                                    <button id="contract-reset-button" type="button" class="btn btn-secondary">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span>Zurücksetzen</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contract List Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Importierte Verträge</h3>
+                            <p class="card-description">Übersicht aller importierten Vertragseinträge</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Status Breakdown -->
+                            <div id="contract-status-breakdown" class="status-breakdown"></div>
+
+                            <!-- Contract List Container -->
+                            <div id="contract-list-container">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p>Keine Verträge vorhanden</p>
+                                    <p class="text-muted">Importieren Sie eine Excel-Datei, um Verträge anzuzeigen.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
