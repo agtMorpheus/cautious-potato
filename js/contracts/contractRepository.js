@@ -9,10 +9,16 @@
  * - Search functionality
  * - Sorting and pagination (stubs)
  * - Data aggregation for reports
+ * 
+ * Hybrid Sync Integration:
+ * - Automatically syncs changes to server when sync mode is enabled
+ * - Uses debouncing to batch multiple rapid changes
  */
 
 import { getState, setState } from '../state.js';
 import { normalizeStatus, getContractSummary } from './contractUtils.js';
+import { syncToServer } from './syncService.js';
+import { isSyncEnabled, loadSyncConfig } from './syncConfig.js';
 
 /**
  * Get all contract records from state
@@ -237,6 +243,9 @@ export function addContract(contract) {
         }
     });
     
+    // Trigger background sync if enabled
+    triggerBackgroundSync();
+    
     return newContract;
 }
 
@@ -290,6 +299,9 @@ export function addContracts(contracts, importMetadata = null) {
     
     setState(updatedState);
     
+    // Trigger background sync if enabled
+    triggerBackgroundSync();
+    
     return {
         addedCount: newContracts.length,
         contracts: newContracts
@@ -330,6 +342,9 @@ export function updateContract(id, updates) {
         }
     });
     
+    // Trigger background sync if enabled
+    triggerBackgroundSync();
+    
     return updatedContract;
 }
 
@@ -356,6 +371,9 @@ export function deleteContract(id) {
             records: newRecords
         }
     });
+    
+    // Trigger background sync if enabled
+    triggerBackgroundSync();
     
     return true;
 }
@@ -466,4 +484,39 @@ function generateUUID() {
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+// ============================================================
+// Sync Integration (Hybrid Approach)
+// ============================================================
+
+/**
+ * Debounce timer for sync operations
+ */
+let syncDebounceTimer = null;
+
+/**
+ * Trigger background sync if enabled and syncOnSave is true
+ * Uses debouncing to batch multiple rapid changes
+ */
+function triggerBackgroundSync() {
+    const config = loadSyncConfig();
+    
+    // Only sync if enabled and syncOnSave is true
+    if (!isSyncEnabled() || !config.syncOnSave) {
+        return;
+    }
+    
+    // Clear existing timer
+    if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+    }
+    
+    // Set new timer - sync after 2 seconds of inactivity
+    syncDebounceTimer = setTimeout(() => {
+        syncToServer().catch(err => {
+            console.warn('Background sync failed:', err);
+            // Don't throw - sync failures shouldn't break the app
+        });
+    }, 2000);
 }

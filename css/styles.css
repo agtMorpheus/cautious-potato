@@ -1013,9 +1013,8 @@ select:focus {
         transform: translateX(0);
     }
 }
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+
+
 
 /* ==================== Sync Settings Styles ==================== */
 
@@ -1049,7 +1048,7 @@ select:focus {
     transition: all var(--duration-fast) var(--ease-out);
 }
 
-.storage-mode-option input[type="radio"]:checked + .storage-mode-content {
+.storage-mode-option input[type="radio"]:checked+.storage-mode-content {
     border-color: var(--c-brand-500);
     background-color: rgba(59, 130, 246, 0.1);
 }
@@ -1075,7 +1074,7 @@ select:focus {
     stroke: var(--text-muted);
 }
 
-.storage-mode-option input[type="radio"]:checked + .storage-mode-content .storage-mode-icon svg {
+.storage-mode-option input[type="radio"]:checked+.storage-mode-content .storage-mode-icon svg {
     stroke: var(--c-brand-500);
 }
 
@@ -1135,8 +1134,13 @@ select:focus {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .sync-last-time {
@@ -1183,4 +1187,73 @@ select:focus {
     display: inline-flex;
     align-items: center;
     cursor: pointer;
+}
+
+/* ==================== Automatic Minimized Sidebar (<= 1280px) ==================== */
+@media (max-width: 1280px) {
+    :root {
+        --sidebar-width: 80px;
+    }
+
+    /* Sidebar Header */
+    .sidebar-header {
+        justify-content: center;
+        padding: 0;
+    }
+
+    .sidebar-logo {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .sidebar-logo .logo-text {
+        display: none;
+    }
+
+    .sidebar-logo svg {
+        width: 32px;
+        height: 32px;
+        margin: 0;
+    }
+
+    /* Navigation */
+    .sidebar-nav {
+        padding: 1.5rem 0.5rem;
+    }
+
+    .nav-link {
+        justify-content: center;
+        padding: 1rem 0;
+        position: relative;
+    }
+
+    .nav-text {
+        display: none;
+    }
+
+    .nav-link svg {
+        width: 24px;
+        height: 24px;
+        margin: 0;
+    }
+
+    /* Footer */
+    .sidebar-footer {
+        padding: 0.75rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-reset {
+        padding: 0.75rem;
+        font-size: 0;
+    }
+
+    .btn-reset svg {
+        margin: 0;
+    }
+
+    .settings-desc {
+        display: none;
+    }
 }
