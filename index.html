@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/contracts.css" />
     <link rel="stylesheet" href="css/cell-mapper.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
 </head>
 
 <body>
@@ -68,6 +69,16 @@
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             <span class="nav-text">Export</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#protokoll" class="nav-link" role="menuitem" data-view="protokoll">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            <span class="nav-text">Protokoll</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
@@ -371,6 +382,35 @@
                                     <dd id="export-last-size">–</dd>
                                 </div>
                             </dl>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Protokoll Module View (Phase 4) -->
+                <section id="view-protokoll" class="view-container" aria-labelledby="protokoll-heading">
+                    <h2 id="protokoll-heading" class="sr-only">Inspection Protocol</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Prüfprotokoll erstellen</h3>
+                            <p class="card-description">VDE 0100 Prüfprotokoll ausfüllen und als Excel exportieren</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Protokoll Form Container - dynamically populated -->
+                            <div id="protokollFormContainer">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="empty-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                    </svg>
+                                    <p>Protokoll-Modul wird geladen...</p>
+                                    <p class="text-muted">Füllen Sie das Formular aus, um ein Prüfprotokoll zu erstellen.</p>
+                                </div>
+                            </div>
+
+                            <!-- Message Container for Protokoll -->
+                            <div id="messageContainer" class="message-container" role="status" aria-live="polite"></div>
                         </div>
                     </div>
                 </section>

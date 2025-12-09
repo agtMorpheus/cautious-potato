@@ -25,6 +25,12 @@ import {
 import { initializeContractEventListeners, handleContractMappingChange } from './contracts/contractHandlers.js';
 import { initializeContractUI } from './contracts/contractRenderer.js';
 
+// Protokoll Module imports (Phase 4)
+import * as protokollState from './protokoll/protokoll-state.js';
+import * as protokollHandlers from './protokoll/protokoll-handlers.js';
+import * as protokollRenderer from './protokoll/protokoll-renderer.js';
+import * as protokollExporter from './protokoll/protokoll-exporter.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -33,6 +39,7 @@ const VIEW_CONFIG = {
     import: { title: 'Import', subtitle: 'Protokoll-Datei hochladen und verarbeiten' },
     process: { title: 'Process', subtitle: 'Abrechnung aus Protokolldaten erzeugen' },
     export: { title: 'Export', subtitle: 'Fertige Abrechnung herunterladen' },
+    protokoll: { title: 'Protokoll', subtitle: 'VDE 0100 Prüfprotokoll erstellen und exportieren' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
     settings: { title: 'Settings', subtitle: 'Anwendungseinstellungen konfigurieren' },
@@ -260,6 +267,112 @@ function initializeSettings() {
 }
 
 /**
+ * Initialize Protokoll Module (Phase 4)
+ * Sets up state, handlers, renderer, and export functionality
+ */
+function initializeProtokollModule() {
+    console.log('\n--- Protokoll Module ---');
+    
+    // Check if SheetJS library is available
+    if (typeof XLSX === 'undefined') {
+        console.warn('⚠ SheetJS library not loaded - Protokoll export may not work');
+    } else {
+        console.log('✓ SheetJS library available');
+    }
+
+    // Initialize state management
+    try {
+        protokollState.init();
+        console.log('✓ Protokoll state management initialized');
+    } catch (error) {
+        console.error('✗ Protokoll state initialization failed:', error);
+        return false;
+    }
+
+    // Initialize handlers
+    try {
+        protokollHandlers.init();
+        console.log('✓ Protokoll event handlers initialized');
+    } catch (error) {
+        console.error('✗ Protokoll handler initialization failed:', error);
+        return false;
+    }
+
+    // Initialize renderer
+    try {
+        protokollRenderer.init();
+        console.log('✓ Protokoll UI renderer initialized');
+    } catch (error) {
+        console.error('✗ Protokoll renderer initialization failed:', error);
+        return false;
+    }
+
+    // Wire up export handlers
+    setupProtokollExportHandlers();
+
+    console.log('✓ Protokoll Module fully initialized');
+    return true;
+}
+
+/**
+ * Set up Protokoll export button handlers
+ */
+function setupProtokollExportHandlers() {
+    // Listen for export events from handlers
+    document.addEventListener('protokoll:export', async (e) => {
+        try {
+            protokollRenderer.displayMessage('info', 'Export wird vorbereitet...');
+            
+            // Determine export type from button clicked
+            const action = e.detail?.action || 'both';
+            
+            if (action === 'protokoll') {
+                await protokollExporter.exportProtokoll();
+            } else if (action === 'abrechnung') {
+                await protokollExporter.exportAbrechnung();
+            } else {
+                await protokollExporter.exportBoth();
+            }
+            
+            protokollRenderer.displayMessage('success', 'Export erfolgreich abgeschlossen!');
+            addActivityLogEntry('Protokoll Export erfolgreich', 'success');
+            addLogEntry('Protokoll exported successfully', 'success');
+            
+            // Track export
+            protokollState.markUnsaved();
+            protokollState.forceSave();
+        } catch (error) {
+            console.error('Export error:', error);
+            protokollRenderer.displayMessage('error', `Export fehlgeschlagen: ${error.message}`);
+            addActivityLogEntry('Protokoll Export fehlgeschlagen', 'error');
+            addLogEntry(`Protokoll export failed: ${error.message}`, 'error');
+        }
+    });
+
+    // Wire up export buttons to handlers using event delegation
+    document.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-action^="export-"]');
+        if (!button) return;
+        
+        // Only handle buttons within protokoll section
+        const protokollSection = button.closest('#view-protokoll, .protokoll-form');
+        if (!protokollSection) return;
+
+        e.preventDefault();
+        
+        const action = button.getAttribute('data-action');
+        
+        // Dispatch export event with action type
+        document.dispatchEvent(new CustomEvent('protokoll:export', {
+            detail: { 
+                state: protokollState.getState(),
+                action: action.replace('export-', '')
+            }
+        }));
+    });
+}
+
+/**
  * Initialize the application (Phase 5.1.4)
  */
 async function initializeApp() {
@@ -292,6 +405,9 @@ async function initializeApp() {
     // 5c. Set up global handler for contract mapping changes
     // This is used by dynamically rendered mapping selects
     window._handleMappingChange = handleContractMappingChange;
+    
+    // 5d. Initialize Protokoll Module (Phase 4)
+    initializeProtokollModule();
     
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
