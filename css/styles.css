@@ -1,4 +1,26 @@
-/* Reset and Base Styles */
+/**
+ * Styles for Abrechnung Application (Phase 5)
+ * 
+ * Clean, professional design with card-based layout
+ * Responsive for desktop, tablet, and mobile
+ * Clear visual hierarchy and accessibility
+ */
+
+/* ==================== CSS Variables (Phase 5) ==================== */
+:root {
+    --color-bg: #f5f7fa;
+    --color-panel: #ffffff;
+    --color-border: #d0d7e2;
+    --color-primary: #0059b3;
+    --color-primary-hover: #004494;
+    --color-text: #1f2933;
+    --color-muted: #6b7280;
+    --color-success: #16a34a;
+    --color-error: #dc2626;
+    --color-pending: #f59e0b;
+}
+
+/* ==================== Base Styles ==================== */
 * {
     margin: 0;
     padding: 0;
@@ -6,341 +28,73 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
     line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
 }
 
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
+/* ==================== Header & Footer ==================== */
+.app-header,
+.app-footer {
+    padding: 1.5rem 1rem;
+    background: #ffffff;
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Header Styles */
-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 40px;
+.app-header {
     text-align: center;
 }
 
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+.app-header h1 {
+    font-size: 2rem;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
 }
 
-.subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
+.app-tagline {
+    font-size: 0.95rem;
+    color: var(--color-muted);
 }
 
-/* Main Content */
-main {
-    padding: 40px;
-}
-
-/* Status Display */
-.status-display {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    background: #e0e7ff;
-    color: #4c51bf;
-}
-
-.status-badge.importing {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-badge.generating {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.status-badge.ready {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-badge.error {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* Panel Styles */
-.panel {
-    background: #f9fafb;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.panel:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.panel-header {
+.app-tagline code {
     background: #f3f4f6;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
 }
 
-.panel-header h2 {
-    font-size: 1.25rem;
-    color: #374151;
-}
-
-.panel-body {
-    padding: 25px;
-}
-
-/* File Input Styles */
-.file-input-wrapper {
-    margin-bottom: 20px;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-.file-label {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #667eea;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    margin-right: 10px;
-}
-
-.file-label:hover {
-    background: #5568d3;
-}
-
-.file-name {
-    color: #6b7280;
-    font-size: 0.9rem;
-}
-
-/* Button Styles */
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-block;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn-primary:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.btn-primary:disabled {
-    background: #d1d5db;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.btn-secondary {
-    background: #6b7280;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #4b5563;
-}
-
-/* Status Message Styles */
-.status-message {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    display: none;
-}
-
-.status-message.show {
-    display: block;
-}
-
-.status-message.success {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-}
-
-.status-message.error {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-}
-
-.status-message.info {
-    background: #dbeafe;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
-}
-
-/* Data Preview Styles */
-.data-preview {
-    margin-top: 20px;
-    display: none;
-}
-
-.data-preview.show {
-    display: block;
-}
-
-.data-preview h3 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    color: #374151;
-}
-
-.data-preview table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-}
-
-.data-preview table th,
-.data-preview table td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.data-preview table th {
-    background: #f3f4f6;
-    font-weight: 600;
-    color: #374151;
-}
-
-.data-preview .metadata {
-    background: #f9fafb;
-    padding: 15px;
-    border-radius: 6px;
-    margin-top: 10px;
-}
-
-.data-preview .metadata p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-}
-
-.data-preview .metadata strong {
-    color: #374151;
-}
-
-/* Reset Section */
-.reset-section {
+.app-footer {
     text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 2px solid #e5e7eb;
-}
-
-/* Footer */
-footer {
-    background: #f9fafb;
-    padding: 20px;
-    text-align: center;
-    color: #6b7280;
     font-size: 0.875rem;
-    border-top: 1px solid #e5e7eb;
+    color: var(--color-muted);
+    border-top: 1px solid var(--color-border);
+    border-bottom: none;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        margin: 0;
-        border-radius: 0;
-    }
-
-    header {
-        padding: 30px 20px;
-    }
-
-    header h1 {
-        font-size: 2rem;
-    }
-
-    main {
-        padding: 20px;
-    }
-
-    .panel-body {
-        padding: 20px;
-    }
+/* ==================== Main Content ==================== */
+.app-main {
+    max-width: 960px;
+    margin: 1.5rem auto 2rem;
+    padding: 0 1rem;
 }
 
-/* Loading Animation */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #f3f4f6;
-    border-top: 3px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    vertical-align: middle;
-    margin-left: 10px;
-}
-
-/* ==================== Phase 4: UI Enhancements ==================== */
-
-/* Alert Container */
-.alert-container {
+/* ==================== Global Messages ==================== */
+.messages {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
+    top: 1rem;
+    right: 1rem;
     max-width: 400px;
+    z-index: 1000;
 }
 
-.alert {
+.message {
     background: white;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    margin-bottom: 10px;
-    padding: 16px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
     animation: slideIn 0.3s ease-out;
 }
 
@@ -355,79 +109,150 @@ footer {
     }
 }
 
-.alert-error {
-    border-left: 4px solid #ef4444;
+.message-error {
+    border-left: 4px solid var(--color-error);
 }
 
-.alert-success {
-    border-left: 4px solid #10b981;
+.message-success {
+    border-left: 4px solid var(--color-success);
 }
 
-.alert-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+/* ==================== Panel Styles (Card-based) ==================== */
+.panel {
+    background: var(--color-panel);
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
-.alert-header strong {
-    color: #1f2937;
-    font-size: 1rem;
+.panel-secondary {
+    background: #f9fafb;
 }
 
-.alert-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #6b7280;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
+.panel-header {
+    margin-bottom: 1rem;
 }
 
-.alert-close:hover {
-    color: #1f2937;
+.panel-header h2 {
+    font-size: 1.25rem;
+    color: var(--color-text);
+    margin-bottom: 0.375rem;
 }
 
-.alert-body {
-    color: #4b5563;
+.panel-description {
     font-size: 0.9rem;
+    color: var(--color-muted);
+    margin: 0;
 }
 
-/* Status Indicators - Phase 4 */
+.panel-body {
+    /* No additional padding - already on .panel */
+}
+
+.panel-body.inline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ==================== Form Elements ==================== */
+.form-row {
+    margin-bottom: 1rem;
+}
+
+.form-row label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+}
+
+.form-row input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: white;
+    font-family: inherit;
+}
+
+.hint {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-top: 0.375rem;
+}
+
+/* ==================== Buttons ==================== */
+.actions {
+    margin: 1rem 0;
+}
+
+button {
+    border-radius: 0.375rem;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background: var(--color-primary);
+    color: white;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    background: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+}
+
+button.secondary:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* ==================== Status Display ==================== */
 .status-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 12px;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .status-indicator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    background: #f3f4f6;
-    color: #6b7280;
-    transition: all 0.3s ease;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    background: var(--color-muted);
+    flex-shrink: 0;
 }
 
-.status-indicator.status-idle {
-    background: #f3f4f6;
-    color: #6b7280;
+.status-idle {
+    background: var(--color-muted);
 }
 
-.status-indicator.status-pending {
-    background: #dbeafe;
-    color: #3b82f6;
+.status-success {
+    background: var(--color-success);
+}
+
+.status-error {
+    background: var(--color-error);
+}
+
+.status-pending {
+    background: var(--color-pending);
     animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -436,97 +261,59 @@ footer {
     50% { opacity: 0.5; }
 }
 
-.status-indicator.status-success {
-    background: #d1fae5;
-    color: #10b981;
-}
-
-.status-indicator.status-error {
-    background: #fee2e2;
-    color: #ef4444;
-}
-
-/* Status Messages - Phase 4 */
 .status-message {
     flex: 1;
-    padding: 8px 12px;
-    border-radius: 6px;
     font-size: 0.9rem;
+    color: var(--color-muted);
 }
 
-.status-message.status-idle {
+/* ==================== Summary Displays ==================== */
+.summary[hidden] {
     display: none;
 }
 
-.status-message.status-pending {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.status-message.status-success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-message.status-error {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* Summary Panel - Phase 4 */
-.summary-panel {
-    margin-top: 16px;
-    padding: 16px;
+.summary {
+    margin-top: 1rem;
+    padding: 1rem;
     background: #f9fafb;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    border: 1px solid var(--color-border);
+}
+
+.summary-list {
+    margin: 0;
 }
 
 .summary-item {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .summary-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
 }
 
-.summary-item .label {
+.summary-item dt {
     font-weight: 500;
-    color: #4b5563;
+    color: var(--color-muted);
 }
 
-.summary-item .value {
-    color: #1f2937;
+.summary-item dd {
+    color: var(--color-text);
     font-weight: 600;
+    margin: 0;
 }
 
-.summary-item .value.status-success {
-    color: #10b981;
-}
-
-.summary-item .value.status-error {
-    color: #ef4444;
-}
-
-.summary-item .value.status-pending {
-    color: #3b82f6;
-}
-
-/* Export History - Phase 4 */
-.export-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-}
-
-.export-item .label {
-    font-weight: 500;
-    color: #6b7280;
-}
-
-.export-item .value {
-    color: #1f2937;
+/* ==================== Responsive Design ==================== */
+@media (min-width: 768px) {
+    .app-main {
+        padding: 0;
+    }
+    
+    .app-header h1 {
+        font-size: 2.5rem;
+    }
 }

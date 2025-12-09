@@ -1,95 +1,139 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abrechnung Generator</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abrechnung aus Protokoll</title>
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-    <!-- Alert Container for Phase 4 -->
-    <div id="alert-container" class="alert-container"></div>
+    <header class="app-header">
+        <h1>Abrechnung aus Prüfprotokoll</h1>
+        <p class="app-tagline">
+            Excel‑basierte Abrechnungserstellung aus <code>protokoll.xlsx</code> – vollständig im Browser.
+        </p>
+    </header>
 
-    <div class="container">
-        <header>
-            <h1>📊 Abrechnung Generator</h1>
-            <p class="subtitle">Automatische Erstellung von Abrechnungsdokumenten aus Prüfprotokollen</p>
-        </header>
+    <main class="app-main" aria-live="polite">
+        <!-- Global message container -->
+        <div id="global-messages" class="messages" aria-live="assertive"></div>
 
-        <main>
-            <!-- Status Display -->
-            <div id="statusDisplay" class="status-display">
-                <span class="status-badge" id="statusBadge">Bereit</span>
+        <!-- Import Section -->
+        <section id="import-section" class="panel" aria-labelledby="import-heading">
+            <header class="panel-header">
+                <h2 id="import-heading">1. Protokoll importieren</h2>
+                <p class="panel-description">
+                    Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der Vorlage.
+                </p>
+            </header>
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <label for="file-input">Protokoll-Datei (.xlsx)</label>
+                    <input
+                        id="file-input"
+                        type="file"
+                        accept=".xlsx"
+                        aria-describedby="file-help"
+                    />
+                    <p id="file-help" class="hint">
+                        Die Datei wird nur lokal im Browser verarbeitet und nicht hochgeladen.
+                    </p>
+                </div>
+
+                <div class="actions">
+                    <button id="import-button" type="button">Datei importieren</button>
+                </div>
+
+                <div class="status-row">
+                    <span class="status-indicator status-idle" id="import-status"></span>
+                    <p id="import-message" class="status-message">Noch keine Datei importiert.</p>
+                </div>
+
+                <div id="import-summary" class="summary" aria-live="polite" hidden></div>
             </div>
+        </section>
 
-            <!-- Import Section -->
-            <section class="panel" id="importSection">
-                <div class="panel-header">
-                    <h2>📁 1. Protokoll importieren</h2>
+        <!-- Generate Section -->
+        <section id="generate-section" class="panel" aria-labelledby="generate-heading">
+            <header class="panel-header">
+                <h2 id="generate-heading">2. Abrechnung erzeugen</h2>
+                <p class="panel-description">
+                    Positionen werden aggregiert und in die Abrechnungsvorlage übernommen.
+                </p>
+            </header>
+
+            <div class="panel-body">
+                <div class="actions">
+                    <button id="generate-button" type="button" disabled>
+                        Abrechnung erzeugen
+                    </button>
                 </div>
-                <div class="panel-body">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="file-input" accept=".xlsx" aria-label="Protokoll-Datei auswählen">
-                        <label for="file-input" class="file-label">Datei auswählen</label>
-                        <span id="fileName" class="file-name">Keine Datei ausgewählt</span>
+
+                <div class="status-row">
+                    <span class="status-indicator status-idle" id="generate-status"></span>
+                    <p id="generate-message" class="status-message">Noch keine Abrechnung erzeugt.</p>
+                </div>
+
+                <div id="generate-summary" class="summary" aria-live="polite" hidden></div>
+            </div>
+        </section>
+
+        <!-- Export Section -->
+        <section id="export-section" class="panel" aria-labelledby="export-heading">
+            <header class="panel-header">
+                <h2 id="export-heading">3. Abrechnung exportieren</h2>
+                <p class="panel-description">
+                    Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.
+                </p>
+            </header>
+
+            <div class="panel-body">
+                <div class="actions">
+                    <button id="export-button" type="button" disabled>
+                        Abrechnung herunterladen
+                    </button>
+                </div>
+
+                <div class="status-row">
+                    <span class="status-indicator status-idle" id="export-status"></span>
+                    <p id="export-message" class="status-message">Noch keine Datei exportiert.</p>
+                </div>
+
+                <dl id="export-summary" class="summary" aria-live="polite" hidden>
+                    <div class="summary-item">
+                        <dt>Letzter Export</dt>
+                        <dd id="export-last-date">–</dd>
                     </div>
-                    <button id="import-button" class="btn btn-primary" disabled>Protokoll importieren</button>
-                    <div class="status-row">
-                        <span id="import-status" class="status-indicator">○</span>
-                        <div id="import-message" class="status-message"></div>
+                    <div class="summary-item">
+                        <dt>Dateigröße</dt>
+                        <dd id="export-last-size">–</dd>
                     </div>
-                    <div id="import-summary" class="summary-panel" style="display:none;"></div>
-                    <div id="importPreview" class="data-preview"></div>
-                </div>
-            </section>
+                </dl>
+            </div>
+        </section>
 
-            <!-- Generate Section -->
-            <section class="panel" id="generateSection">
-                <div class="panel-header">
-                    <h2>🔧 2. Abrechnung generieren</h2>
-                </div>
-                <div class="panel-body">
-                    <button id="generate-button" class="btn btn-primary" disabled>Abrechnung erzeugen</button>
-                    <div class="status-row">
-                        <span id="generate-status" class="status-indicator">○</span>
-                        <div id="generate-message" class="status-message"></div>
-                    </div>
-                    <div id="generate-summary" class="summary-panel" style="display:none;"></div>
-                    <div id="generatePreview" class="data-preview"></div>
-                </div>
-            </section>
+        <!-- Reset / Debug Section -->
+        <section id="reset-section" class="panel panel-secondary" aria-label="Anwendung zurücksetzen">
+            <div class="panel-body inline">
+                <button id="reset-button" type="button" class="secondary">
+                    Anwendung zurücksetzen
+                </button>
+                <p class="hint">Löscht importierte Daten, generierte Abrechnung und lokale Speicherung.</p>
+            </div>
+        </section>
+    </main>
 
-            <!-- Export Section -->
-            <section class="panel" id="exportSection">
-                <div class="panel-header">
-                    <h2>💾 3. Abrechnung exportieren</h2>
-                </div>
-                <div class="panel-body">
-                    <button id="export-button" class="btn btn-primary" disabled>Abrechnung herunterladen</button>
-                    <div class="status-row">
-                        <span id="export-status" class="status-indicator">○</span>
-                        <div id="export-message" class="status-message"></div>
-                    </div>
-                    <div id="export-history" class="summary-panel" style="display:none;"></div>
-                </div>
-            </section>
+    <footer class="app-footer">
+        <p>
+            Läuft lokal über XAMPP. Excel‑Verarbeitung mit SheetJS, Zustand mit ES6‑Modulen und localStorage.
+        </p>
+    </footer>
 
-            <!-- Reset Section -->
-            <section class="reset-section">
-                <button id="reset-button" class="btn btn-secondary">🔄 Anwendung zurücksetzen</button>
-            </section>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 Abrechnung Generator | Lokale Verarbeitung - Keine Datenübertragung</p>
-        </footer>
-    </div>
-
-    <!-- Load SheetJS library -->
-    <!-- Note: For production, consider hosting xlsx.js locally or adding SRI hash for security -->
+    <!-- SheetJS Library -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    
-    <!-- Load application modules -->
+
+    <!-- Application Modules -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
