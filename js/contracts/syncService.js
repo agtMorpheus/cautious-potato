@@ -1,0 +1,451 @@
+/**
+ * Sync Service Module
+ * 
+ * Coordinates data synchronization between localStorage and server API.
+ * Implements the hybrid approach recommended in docs/DATABASE_USAGE_ANALYSIS.md (Option 3):
+ * - Uses localStorage as primary storage (fast, offline-capable)
+ * - Optional server sync for backup and collaboration
+ * - User can choose between "Local Only" and "Sync with Server" modes
+ * 
+ * Benefits:
+ * - Maintains current offline-first experience
+ * - Adds enterprise features for users who need data persistence
+ * - Enables collaboration for users who choose server sync
+ */
+
+import { apiClient } from './contractApiClient.js';
+import { 
+    loadSyncConfig, 
+    saveSyncConfig, 
+    isSyncEnabled, 
+    isAutoSyncEnabled,
+    updateLastSyncTime,
+    SyncStatus 
+} from './syncConfig.js';
+import { getState, setState } from '../state.js';
+
+/**
+ * Current sync status
+ */
+let syncStatus = SyncStatus.IDLE;
+
+/**
+ * Sync error message (if any)
+ */
+let syncError = null;
+
+/**
+ * Auto-sync interval ID
+ */
+let autoSyncIntervalId = null;
+
+/**
+ * Listeners for sync status changes
+ */
+const statusListeners = new Set();
+
+/**
+ * Get current sync status
+ * @returns {Object} Status object with status and error
+ */
+export function getSyncStatus() {
+    return {
+        status: syncStatus,
+        error: syncError,
+        isOnline: navigator.onLine
+    };
+}
+
+/**
+ * Subscribe to sync status changes
+ * @param {Function} listener - Callback function
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeSyncStatus(listener) {
+    statusListeners.add(listener);
+    return () => statusListeners.delete(listener);
+}
+
+/**
+ * Update sync status and notify listeners
+ * @param {string} status - New status (SyncStatus enum)
+ * @param {string|null} error - Error message if any
+ */
+function updateSyncStatus(status, error = null) {
+    syncStatus = status;
+    syncError = error;
+    
+    const statusInfo = getSyncStatus();
+    
+    // Notify listeners
+    statusListeners.forEach(listener => {
+        try {
+            listener(statusInfo);
+        } catch (e) {
+            console.error('Sync status listener error:', e);
+        }
+    });
+    
+    // Dispatch DOM event
+    window.dispatchEvent(new CustomEvent('syncStatusChanged', {
+        detail: statusInfo
+    }));
+}
+
+/**
+ * Sync contracts from localStorage to server
+ * @param {Object} options - Sync options { force: boolean }
+ * @returns {Promise<Object>} Sync result
+ */
+export async function syncToServer(options = { force: false }) {
+    // Check if sync is enabled
+    if (!isSyncEnabled() && !options.force) {
+        return { success: false, reason: 'sync_disabled' };
+    }
+    
+    // Check if online
+    if (!navigator.onLine) {
+        updateSyncStatus(SyncStatus.OFFLINE);
+        return { success: false, reason: 'offline' };
+    }
+    
+    updateSyncStatus(SyncStatus.SYNCING);
+    
+    try {
+        const state = getState();
+        const contracts = state.contracts?.records || [];
+        
+        if (contracts.length === 0) {
+            updateSyncStatus(SyncStatus.SYNCED);
+            updateLastSyncTime();
+            return { success: true, uploaded: 0 };
+        }
+        
+        // Upload contracts to server
+        let uploadedCount = 0;
+        const errors = [];
+        
+        for (const contract of contracts) {
+            try {
+                // Check if contract exists on server (by ID)
+                const existing = await apiClient.getContract(contract.id).catch(() => null);
+                
+                if (existing) {
+                    // Update existing contract
+                    await apiClient.updateContract(contract.id, contract);
+                } else {
+                    // Create new contract
+                    await apiClient.createContract(contract);
+                }
+                uploadedCount++;
+            } catch (error) {
+                errors.push({
+                    contractId: contract.id,
+                    error: error.message
+                });
+            }
+        }
+        
+        if (errors.length === 0) {
+            updateSyncStatus(SyncStatus.SYNCED);
+        } else {
+            updateSyncStatus(SyncStatus.ERROR, `${errors.length} contracts failed to sync`);
+        }
+        
+        updateLastSyncTime();
+        
+        return {
+            success: errors.length === 0,
+            uploaded: uploadedCount,
+            errors: errors.length > 0 ? errors : undefined
+        };
+    } catch (error) {
+        updateSyncStatus(SyncStatus.ERROR, error.message);
+        return {
+            success: false,
+            reason: 'sync_failed',
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Sync contracts from server to localStorage
+ * @param {Object} options - Sync options { merge: boolean }
+ * @returns {Promise<Object>} Sync result
+ */
+export async function syncFromServer(options = { merge: true }) {
+    // Check if sync is enabled
+    if (!isSyncEnabled()) {
+        return { success: false, reason: 'sync_disabled' };
+    }
+    
+    // Check if online
+    if (!navigator.onLine) {
+        updateSyncStatus(SyncStatus.OFFLINE);
+        return { success: false, reason: 'offline' };
+    }
+    
+    updateSyncStatus(SyncStatus.SYNCING);
+    
+    try {
+        // Fetch contracts from server
+        const serverResponse = await apiClient.listContracts();
+        const serverContracts = serverResponse?.contracts || serverResponse || [];
+        
+        if (!Array.isArray(serverContracts)) {
+            throw new Error('Invalid server response format');
+        }
+        
+        const state = getState();
+        const localContracts = state.contracts?.records || [];
+        
+        let mergedContracts;
+        
+        if (options.merge) {
+            // Merge server contracts with local contracts
+            mergedContracts = mergeContracts(localContracts, serverContracts);
+        } else {
+            // Replace local contracts with server contracts
+            mergedContracts = serverContracts;
+        }
+        
+        // Update state with merged contracts
+        setState({
+            contracts: {
+                ...state.contracts,
+                records: mergedContracts
+            }
+        });
+        
+        updateSyncStatus(SyncStatus.SYNCED);
+        updateLastSyncTime();
+        
+        return {
+            success: true,
+            downloaded: serverContracts.length,
+            merged: mergedContracts.length
+        };
+    } catch (error) {
+        updateSyncStatus(SyncStatus.ERROR, error.message);
+        return {
+            success: false,
+            reason: 'sync_failed',
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Perform bidirectional sync
+ * @returns {Promise<Object>} Sync result
+ */
+export async function performFullSync() {
+    // Check if sync is enabled
+    if (!isSyncEnabled()) {
+        return { success: false, reason: 'sync_disabled' };
+    }
+    
+    // Check if online
+    if (!navigator.onLine) {
+        updateSyncStatus(SyncStatus.OFFLINE);
+        return { success: false, reason: 'offline' };
+    }
+    
+    updateSyncStatus(SyncStatus.SYNCING);
+    
+    try {
+        // First, download from server
+        const downloadResult = await syncFromServer({ merge: true });
+        
+        // Then, upload local changes
+        const uploadResult = await syncToServer({ force: true });
+        
+        if (downloadResult.success && uploadResult.success) {
+            updateSyncStatus(SyncStatus.SYNCED);
+        } else {
+            updateSyncStatus(SyncStatus.ERROR, 'Partial sync completed');
+        }
+        
+        return {
+            success: downloadResult.success && uploadResult.success,
+            download: downloadResult,
+            upload: uploadResult
+        };
+    } catch (error) {
+        updateSyncStatus(SyncStatus.ERROR, error.message);
+        return {
+            success: false,
+            reason: 'sync_failed',
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Merge local and server contracts
+ * Server contracts take precedence for conflicts (based on updatedAt)
+ * @param {Array} localContracts - Local contract records
+ * @param {Array} serverContracts - Server contract records
+ * @returns {Array} Merged contracts
+ */
+function mergeContracts(localContracts, serverContracts) {
+    const contractMap = new Map();
+    
+    // Add local contracts first
+    for (const contract of localContracts) {
+        contractMap.set(contract.id, contract);
+    }
+    
+    // Merge server contracts (newer wins)
+    for (const serverContract of serverContracts) {
+        const local = contractMap.get(serverContract.id);
+        
+        if (!local) {
+            // New contract from server
+            contractMap.set(serverContract.id, serverContract);
+        } else {
+            // Conflict: compare updatedAt timestamps
+            const localUpdated = new Date(local.updatedAt || 0);
+            const serverUpdated = new Date(serverContract.updatedAt || 0);
+            
+            if (serverUpdated >= localUpdated) {
+                // Server version is newer or same
+                contractMap.set(serverContract.id, serverContract);
+            }
+            // Otherwise keep local version
+        }
+    }
+    
+    return Array.from(contractMap.values());
+}
+
+/**
+ * Start auto-sync if enabled
+ */
+export function startAutoSync() {
+    stopAutoSync(); // Clear any existing interval
+    
+    if (!isAutoSyncEnabled()) {
+        return;
+    }
+    
+    const config = loadSyncConfig();
+    const intervalMs = config.syncIntervalMs || 30000;
+    
+    autoSyncIntervalId = setInterval(async () => {
+        if (navigator.onLine && isSyncEnabled()) {
+            await performFullSync();
+        }
+    }, intervalMs);
+    
+    console.log(`Auto-sync started with interval: ${intervalMs}ms`);
+}
+
+/**
+ * Stop auto-sync
+ */
+export function stopAutoSync() {
+    if (autoSyncIntervalId) {
+        clearInterval(autoSyncIntervalId);
+        autoSyncIntervalId = null;
+        console.log('Auto-sync stopped');
+    }
+}
+
+/**
+ * Initialize sync service
+ * Sets up online/offline listeners and starts auto-sync if enabled
+ */
+export function initSyncService() {
+    // Listen for online/offline events
+    window.addEventListener('online', () => {
+        if (syncStatus === SyncStatus.OFFLINE) {
+            updateSyncStatus(SyncStatus.IDLE);
+        }
+        // Trigger sync when coming back online
+        if (isSyncEnabled()) {
+            performFullSync();
+        }
+    });
+    
+    window.addEventListener('offline', () => {
+        updateSyncStatus(SyncStatus.OFFLINE);
+    });
+    
+    // Listen for config changes
+    window.addEventListener('syncConfigChanged', (event) => {
+        const config = event.detail?.config;
+        if (config?.autoSync && config?.storageMode === 'sync_with_server') {
+            startAutoSync();
+        } else {
+            stopAutoSync();
+        }
+    });
+    
+    // Set initial status
+    if (!navigator.onLine) {
+        updateSyncStatus(SyncStatus.OFFLINE);
+    }
+    
+    // Start auto-sync if enabled
+    if (isAutoSyncEnabled()) {
+        startAutoSync();
+    }
+    
+    console.log('Sync service initialized');
+}
+
+/**
+ * Export contracts as JSON backup (works in any mode)
+ * @returns {Object} Export data with contracts and metadata
+ */
+export function exportContractsAsJson() {
+    const state = getState();
+    const contracts = state.contracts?.records || [];
+    const config = loadSyncConfig();
+    
+    return {
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0',
+        storageMode: config.storageMode,
+        contractCount: contracts.length,
+        contracts: contracts
+    };
+}
+
+/**
+ * Import contracts from JSON backup
+ * @param {Object} data - Import data with contracts array
+ * @param {Object} options - Import options { replace: boolean }
+ * @returns {Object} Import result
+ */
+export function importContractsFromJson(data, options = { replace: false }) {
+    if (!data || !Array.isArray(data.contracts)) {
+        return { success: false, error: 'Invalid import data format' };
+    }
+    
+    const state = getState();
+    let contracts;
+    
+    if (options.replace) {
+        contracts = data.contracts;
+    } else {
+        // Merge with existing contracts
+        const existing = state.contracts?.records || [];
+        contracts = mergeContracts(existing, data.contracts);
+    }
+    
+    setState({
+        contracts: {
+            ...state.contracts,
+            records: contracts
+        }
+    });
+    
+    return {
+        success: true,
+        imported: data.contracts.length,
+        total: contracts.length
+    };
+}

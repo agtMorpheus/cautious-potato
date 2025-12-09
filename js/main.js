@@ -4,6 +4,7 @@
  * Application initialization and event listener setup
  * Implements Phase 5 integration requirements
  * Updated for modern minimalist sidebar navigation
+ * Includes hybrid sync approach (Option 3 from DATABASE_USAGE_ANALYSIS.md)
  */
 
 import { getState, subscribe, loadStateFromStorage } from './state.js';
@@ -24,6 +25,22 @@ import {
 // Contract Manager imports (Phase 1)
 import { initializeContractEventListeners, handleContractMappingChange } from './contracts/contractHandlers.js';
 import { initializeContractUI } from './contracts/contractRenderer.js';
+
+// Sync imports (Hybrid Approach - Option 3)
+import { 
+    loadSyncConfig, 
+    saveSyncConfig, 
+    StorageMode, 
+    getLastSyncTime 
+} from './contracts/syncConfig.js';
+import { 
+    initSyncService, 
+    performFullSync, 
+    getSyncStatus, 
+    subscribeSyncStatus,
+    exportContractsAsJson,
+    importContractsFromJson
+} from './contracts/syncService.js';
 
 /**
  * View titles and subtitles for navigation
@@ -260,6 +277,228 @@ function initializeSettings() {
 }
 
 /**
+ * Initialize sync settings functionality (Hybrid Approach - Option 3)
+ */
+function initializeSyncSettings() {
+    // Get UI elements
+    const storageModeLocal = document.getElementById('storage-mode-local');
+    const storageModeSync = document.getElementById('storage-mode-sync');
+    const syncStatusSection = document.getElementById('sync-status-section');
+    const syncStatusIndicator = document.getElementById('sync-status-indicator');
+    const syncStatusText = document.getElementById('sync-status-text');
+    const syncLastTime = document.getElementById('sync-last-time');
+    const syncNowBtn = document.getElementById('sync-now-btn');
+    const autoSyncCheckbox = document.getElementById('auto-sync-checkbox');
+    const exportBackupBtn = document.getElementById('export-backup-btn');
+    const importBackupInput = document.getElementById('import-backup-input');
+    
+    // Load current config
+    const config = loadSyncConfig();
+    
+    // Set initial radio state
+    if (storageModeLocal && storageModeSync) {
+        if (config.storageMode === StorageMode.SYNC_WITH_SERVER) {
+            storageModeSync.checked = true;
+            if (syncStatusSection) syncStatusSection.style.display = 'block';
+        } else {
+            storageModeLocal.checked = true;
+            if (syncStatusSection) syncStatusSection.style.display = 'none';
+        }
+    }
+    
+    // Set initial auto-sync state
+    if (autoSyncCheckbox) {
+        autoSyncCheckbox.checked = config.autoSync || false;
+    }
+    
+    // Update last sync time display
+    updateSyncTimeDisplay();
+    
+    // Storage mode change handlers
+    if (storageModeLocal) {
+        storageModeLocal.addEventListener('change', () => {
+            if (storageModeLocal.checked) {
+                saveSyncConfig({ storageMode: StorageMode.LOCAL_ONLY });
+                if (syncStatusSection) syncStatusSection.style.display = 'none';
+                addActivityLogEntry('Speichermodus: Nur lokal', 'info');
+                addLogEntry('Storage mode changed to local only', 'info');
+            }
+        });
+    }
+    
+    if (storageModeSync) {
+        storageModeSync.addEventListener('change', () => {
+            if (storageModeSync.checked) {
+                saveSyncConfig({ storageMode: StorageMode.SYNC_WITH_SERVER });
+                if (syncStatusSection) syncStatusSection.style.display = 'block';
+                addActivityLogEntry('Speichermodus: Mit Server synchronisieren', 'info');
+                addLogEntry('Storage mode changed to sync with server', 'info');
+            }
+        });
+    }
+    
+    // Sync now button handler
+    if (syncNowBtn) {
+        syncNowBtn.addEventListener('click', async () => {
+            syncNowBtn.disabled = true;
+            syncNowBtn.textContent = 'Synchronisiere...';
+            
+            try {
+                const result = await performFullSync();
+                if (result.success) {
+                    addActivityLogEntry('Synchronisation erfolgreich', 'success');
+                    addLogEntry('Manual sync completed successfully', 'success');
+                } else {
+                    addActivityLogEntry(`Synchronisation fehlgeschlagen: ${result.reason || result.error}`, 'error');
+                    addLogEntry(`Manual sync failed: ${result.reason || result.error}`, 'error');
+                }
+            } catch (error) {
+                addActivityLogEntry(`Synchronisation fehlgeschlagen: ${error.message}`, 'error');
+                addLogEntry(`Manual sync error: ${error.message}`, 'error');
+            } finally {
+                syncNowBtn.disabled = false;
+                syncNowBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Jetzt synchronisieren
+                `;
+            }
+        });
+    }
+    
+    // Auto-sync checkbox handler
+    if (autoSyncCheckbox) {
+        autoSyncCheckbox.addEventListener('change', () => {
+            saveSyncConfig({ autoSync: autoSyncCheckbox.checked });
+            if (autoSyncCheckbox.checked) {
+                addActivityLogEntry('Automatische Synchronisation aktiviert', 'info');
+                addLogEntry('Auto-sync enabled', 'info');
+            } else {
+                addActivityLogEntry('Automatische Synchronisation deaktiviert', 'info');
+                addLogEntry('Auto-sync disabled', 'info');
+            }
+        });
+    }
+    
+    // Export backup handler
+    if (exportBackupBtn) {
+        exportBackupBtn.addEventListener('click', () => {
+            try {
+                const backup = exportContractsAsJson();
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `contracts-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                addActivityLogEntry('Backup exportiert', 'success');
+                addLogEntry('Backup exported successfully', 'success');
+            } catch (error) {
+                addActivityLogEntry(`Backup-Export fehlgeschlagen: ${error.message}`, 'error');
+                addLogEntry(`Backup export failed: ${error.message}`, 'error');
+            }
+        });
+    }
+    
+    // Import backup handler
+    if (importBackupInput) {
+        importBackupInput.addEventListener('change', (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const result = importContractsFromJson(data, { replace: false });
+                    
+                    if (result.success) {
+                        addActivityLogEntry(`Backup importiert: ${result.imported} Verträge`, 'success');
+                        addLogEntry(`Backup imported: ${result.imported} contracts`, 'success');
+                    } else {
+                        addActivityLogEntry(`Backup-Import fehlgeschlagen: ${result.error}`, 'error');
+                        addLogEntry(`Backup import failed: ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    addActivityLogEntry(`Backup-Import fehlgeschlagen: ${error.message}`, 'error');
+                    addLogEntry(`Backup import failed: ${error.message}`, 'error');
+                }
+                
+                // Reset file input
+                importBackupInput.value = '';
+            };
+            reader.readAsText(file);
+        });
+    }
+    
+    // Subscribe to sync status changes
+    subscribeSyncStatus((status) => {
+        updateSyncStatusUI(status);
+    });
+    
+    console.log('✓ Sync settings initialized');
+}
+
+/**
+ * Update sync status UI
+ */
+function updateSyncStatusUI(status) {
+    const syncStatusIndicator = document.getElementById('sync-status-indicator');
+    const syncStatusText = document.getElementById('sync-status-text');
+    
+    if (!syncStatusIndicator || !syncStatusText) return;
+    
+    // Remove all status classes
+    syncStatusIndicator.classList.remove('syncing', 'synced', 'error', 'offline');
+    
+    // Add appropriate class and text
+    switch (status.status) {
+        case 'syncing':
+            syncStatusIndicator.classList.add('syncing');
+            syncStatusText.textContent = 'Synchronisiere...';
+            break;
+        case 'synced':
+            syncStatusIndicator.classList.add('synced');
+            syncStatusText.textContent = 'Synchronisiert';
+            break;
+        case 'error':
+            syncStatusIndicator.classList.add('error');
+            syncStatusText.textContent = `Fehler: ${status.error || 'Unbekannt'}`;
+            break;
+        case 'offline':
+            syncStatusIndicator.classList.add('offline');
+            syncStatusText.textContent = 'Offline';
+            break;
+        default:
+            syncStatusText.textContent = 'Bereit';
+    }
+    
+    // Update last sync time
+    updateSyncTimeDisplay();
+}
+
+/**
+ * Update last sync time display
+ */
+function updateSyncTimeDisplay() {
+    const syncLastTime = document.getElementById('sync-last-time');
+    if (!syncLastTime) return;
+    
+    const lastSync = getLastSyncTime();
+    if (lastSync) {
+        const date = new Date(lastSync);
+        syncLastTime.textContent = `Letzte Synchronisation: ${date.toLocaleString('de-DE')}`;
+    } else {
+        syncLastTime.textContent = 'Noch nicht synchronisiert';
+    }
+}
+
+/**
  * Initialize the application (Phase 5.1.4)
  */
 async function initializeApp() {
@@ -277,6 +516,12 @@ async function initializeApp() {
     
     // 4. Initialize settings
     initializeSettings();
+    
+    // 4b. Initialize sync settings (Hybrid Approach - Option 3)
+    initializeSyncSettings();
+    
+    // 4c. Initialize sync service
+    initSyncService();
     
     // 5. Bind event listeners once
     initializeEventListeners({
