@@ -32,16 +32,16 @@ import * as protokollHandlers from './protokoll/protokoll-handlers.js';
 import * as protokollRenderer from './protokoll/protokoll-renderer.js';
 import * as protokollExporter from './protokoll/protokoll-exporter.js';
 // Sync imports (Hybrid Approach - Option 3)
-import { 
-    loadSyncConfig, 
-    saveSyncConfig, 
-    StorageMode, 
-    getLastSyncTime 
+import {
+    loadSyncConfig,
+    saveSyncConfig,
+    StorageMode,
+    getLastSyncTime
 } from './contracts/syncConfig.js';
-import { 
-    initSyncService, 
-    performFullSync, 
-    getSyncStatus, 
+import {
+    initSyncService,
+    performFullSync,
+    getSyncStatus,
     subscribeSyncStatus,
     exportContractsAsJson,
     importContractsFromJson
@@ -69,7 +69,7 @@ const VIEW_CONFIG = {
 function initializeNavigation() {
     const navLinks = document.querySelectorAll('.nav-link[data-view]');
     const quickActionBtns = document.querySelectorAll('.quick-action-btn[data-action]');
-    
+
     // Handle navigation clicks
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -78,7 +78,7 @@ function initializeNavigation() {
             switchView(viewId);
         });
     });
-    
+
     // Handle quick action clicks (navigate to corresponding view)
     quickActionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -102,7 +102,7 @@ function initializeNavigation() {
             }
         });
     });
-    
+
     // Handle hash changes for direct linking
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1);
@@ -110,13 +110,13 @@ function initializeNavigation() {
             switchView(hash);
         }
     });
-    
+
     // Check initial hash
     const initialHash = window.location.hash.slice(1);
     if (initialHash && VIEW_CONFIG[initialHash]) {
         switchView(initialHash);
     }
-    
+
     console.log('✓ Navigation initialized');
 }
 
@@ -135,7 +135,7 @@ function switchView(viewId) {
             link.removeAttribute('aria-current');
         }
     });
-    
+
     // Update view containers
     const viewContainers = document.querySelectorAll('.view-container');
     viewContainers.forEach(container => {
@@ -145,7 +145,7 @@ function switchView(viewId) {
             container.classList.remove('active');
         }
     });
-    
+
     // Update header title
     const viewTitle = document.getElementById('view-title');
     const headerSubtitle = document.querySelector('.header-subtitle');
@@ -155,7 +155,7 @@ function switchView(viewId) {
     if (headerSubtitle && VIEW_CONFIG[viewId]) {
         headerSubtitle.textContent = VIEW_CONFIG[viewId].subtitle;
     }
-    
+
     // Update URL hash without triggering scroll
     history.replaceState(null, '', `#${viewId}`);
 }
@@ -167,38 +167,38 @@ function updateDashboardStats(state) {
     const statImport = document.getElementById('stat-import-status');
     const statPositions = document.getElementById('stat-positions');
     const statExports = document.getElementById('stat-exports');
-    
+
     if (statImport) {
         const importStatus = state.ui.import.status;
-        statImport.textContent = importStatus === 'success' ? 'Importiert' : 
-                                  importStatus === 'pending' ? 'Lädt...' :
-                                  importStatus === 'error' ? 'Fehler' : 'Bereit';
+        statImport.textContent = importStatus === 'success' ? 'Importiert' :
+            importStatus === 'pending' ? 'Lädt...' :
+                importStatus === 'error' ? 'Fehler' : 'Bereit';
     }
-    
+
     if (statPositions) {
         const posCount = state.protokollData?.positionen?.length || 0;
         statPositions.textContent = posCount.toString();
     }
-    
+
     if (statExports) {
         // Count exports (we can track this via last export status)
         const hasExported = state.ui.export.status === 'success';
         statExports.textContent = hasExported ? '1' : '0';
     }
-    
+
     // Update quick action buttons state
     const processBtn = document.querySelector('.quick-action-btn[data-action="process"]');
     const exportBtn = document.querySelector('.quick-action-btn[data-action="export"]');
-    
+
     if (processBtn) {
-        const hasValidInput = state.protokollData?.metadata?.auftragsNr && 
-                             state.protokollData?.positionen?.length > 0;
+        const hasValidInput = state.protokollData?.metadata?.auftragsNr &&
+            state.protokollData?.positionen?.length > 0;
         processBtn.disabled = !hasValidInput;
     }
-    
+
     if (exportBtn) {
         const hasValidAbrechnung = state.abrechnungData?.header?.orderNumber &&
-                                   Object.keys(state.abrechnungData?.positionen || {}).length > 0;
+            Object.keys(state.abrechnungData?.positionen || {}).length > 0;
         exportBtn.disabled = !hasValidAbrechnung;
     }
 }
@@ -209,19 +209,19 @@ function updateDashboardStats(state) {
 function addActivityLogEntry(message, type = 'info') {
     const activityLog = document.getElementById('activity-log');
     if (!activityLog) return;
-    
+
     const now = new Date();
     const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-    
+
     const entry = document.createElement('div');
     entry.className = 'activity-item';
     entry.innerHTML = `
         <div class="activity-icon ${type}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 ${type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />' :
-                  type === 'error' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />' :
-                  type === 'warning' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />' :
-                  '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'}
+            type === 'error' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />' :
+                type === 'warning' ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'}
             </svg>
         </div>
         <div class="activity-content">
@@ -229,10 +229,10 @@ function addActivityLogEntry(message, type = 'info') {
             <span class="activity-time">${timeStr}</span>
         </div>
     `;
-    
+
     // Insert at the beginning
     activityLog.insertBefore(entry, activityLog.firstChild);
-    
+
     // Keep only last 10 entries
     while (activityLog.children.length > 10) {
         activityLog.removeChild(activityLog.lastChild);
@@ -245,10 +245,10 @@ function addActivityLogEntry(message, type = 'info') {
 function addLogEntry(message, level = 'info') {
     const logEntries = document.getElementById('log-entries');
     if (!logEntries) return;
-    
+
     const now = new Date();
     const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
+
     const entry = document.createElement('div');
     entry.className = 'log-entry';
     entry.innerHTML = `
@@ -256,10 +256,10 @@ function addLogEntry(message, level = 'info') {
         <span class="log-level ${level}">${level.toUpperCase()}</span>
         <span class="log-message">${message}</span>
     `;
-    
+
     // Insert at the beginning
     logEntries.insertBefore(entry, logEntries.firstChild);
-    
+
     // Keep only last 50 entries
     while (logEntries.children.length > 50) {
         logEntries.removeChild(logEntries.lastChild);
@@ -288,7 +288,7 @@ function initializeSettings() {
  */
 function initializeProtokollModule() {
     console.log('Protokoll Module: Initializing...');
-    
+
     // Check if SheetJS library is available
     if (typeof XLSX === 'undefined') {
         console.warn('Protokoll Module: SheetJS library not loaded - export may not work');
@@ -338,10 +338,10 @@ function setupProtokollExportHandlers() {
     document.addEventListener('protokoll:export', async (e) => {
         try {
             protokollRenderer.displayMessage('info', 'Export wird vorbereitet...');
-            
+
             // Determine export type from button clicked
             const action = e.detail?.action || 'both';
-            
+
             if (action === 'protokoll') {
                 await protokollExporter.exportProtokoll();
             } else if (action === 'abrechnung') {
@@ -349,11 +349,11 @@ function setupProtokollExportHandlers() {
             } else {
                 await protokollExporter.exportBoth();
             }
-            
+
             protokollRenderer.displayMessage('success', 'Export erfolgreich abgeschlossen!');
             addActivityLogEntry('Protokoll Export erfolgreich', 'success');
             addLogEntry('Protokoll exported successfully', 'success');
-            
+
             // Track export
             protokollState.markUnsaved();
             protokollState.forceSave();
@@ -369,23 +369,26 @@ function setupProtokollExportHandlers() {
     document.addEventListener('click', (e) => {
         const button = e.target.closest('[data-action^="export-"]');
         if (!button) return;
-        
+
         // Only handle buttons within protokoll section
         const protokollSection = button.closest('#view-protokoll, .protokoll-form');
         if (!protokollSection) return;
 
         e.preventDefault();
-        
+
         const action = button.getAttribute('data-action');
-        
+
         // Dispatch export event with action type
         document.dispatchEvent(new CustomEvent('protokoll:export', {
-            detail: { 
+            detail: {
                 state: protokollState.getState(),
                 action: action.replace('export-', '')
             }
         }));
     });
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
@@ -400,10 +403,10 @@ function initializeSyncSettings() {
     const autoSyncCheckbox = document.getElementById('auto-sync-checkbox');
     const exportBackupBtn = document.getElementById('export-backup-btn');
     const importBackupInput = document.getElementById('import-backup-input');
-    
+
     // Load current config
     const config = loadSyncConfig();
-    
+
     // Set initial radio state
     if (storageModeLocal && storageModeSync) {
         if (config.storageMode === StorageMode.SYNC_WITH_SERVER) {
@@ -414,15 +417,15 @@ function initializeSyncSettings() {
             if (syncStatusSection) syncStatusSection.style.display = 'none';
         }
     }
-    
+
     // Set initial auto-sync state
     if (autoSyncCheckbox) {
         autoSyncCheckbox.checked = config.autoSync || false;
     }
-    
+
     // Update last sync time display
     updateSyncTimeDisplay();
-    
+
     // Storage mode change handlers
     if (storageModeLocal) {
         storageModeLocal.addEventListener('change', () => {
@@ -434,7 +437,7 @@ function initializeSyncSettings() {
             }
         });
     }
-    
+
     if (storageModeSync) {
         storageModeSync.addEventListener('change', () => {
             if (storageModeSync.checked) {
@@ -445,13 +448,13 @@ function initializeSyncSettings() {
             }
         });
     }
-    
+
     // Sync now button handler
     if (syncNowBtn) {
         syncNowBtn.addEventListener('click', async () => {
             syncNowBtn.disabled = true;
             syncNowBtn.textContent = 'Synchronisiere...';
-            
+
             try {
                 const result = await performFullSync();
                 if (result.success) {
@@ -476,7 +479,7 @@ function initializeSyncSettings() {
             }
         });
     }
-    
+
     // Auto-sync checkbox handler
     if (autoSyncCheckbox) {
         autoSyncCheckbox.addEventListener('change', () => {
@@ -490,7 +493,7 @@ function initializeSyncSettings() {
             }
         });
     }
-    
+
     // Export backup handler
     if (exportBackupBtn) {
         exportBackupBtn.addEventListener('click', () => {
@@ -505,7 +508,7 @@ function initializeSyncSettings() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 addActivityLogEntry('Backup exportiert', 'success');
                 addLogEntry('Backup exported successfully', 'success');
             } catch (error) {
@@ -514,20 +517,20 @@ function initializeSyncSettings() {
             }
         });
     }
-    
+
     // Import backup handler
     if (importBackupInput) {
         importBackupInput.addEventListener('change', (event) => {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            
+
             const file = files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
                     const result = importContractsFromJson(data, { replace: false });
-                    
+
                     if (result.success) {
                         addActivityLogEntry(`Backup importiert: ${result.imported} Verträge`, 'success');
                         addLogEntry(`Backup imported: ${result.imported} contracts`, 'success');
@@ -539,19 +542,19 @@ function initializeSyncSettings() {
                     addActivityLogEntry(`Backup-Import fehlgeschlagen: ${error.message}`, 'error');
                     addLogEntry(`Backup import failed: ${error.message}`, 'error');
                 }
-                
+
                 // Reset file input
                 importBackupInput.value = '';
             };
             reader.readAsText(file);
         });
     }
-    
+
     // Subscribe to sync status changes
     subscribeSyncStatus((status) => {
         updateSyncStatusUI(status);
     });
-    
+
     console.log('✓ Sync settings initialized');
 }
 
@@ -561,12 +564,12 @@ function initializeSyncSettings() {
 function updateSyncStatusUI(status) {
     const syncStatusIndicator = document.getElementById('sync-status-indicator');
     const syncStatusText = document.getElementById('sync-status-text');
-    
+
     if (!syncStatusIndicator || !syncStatusText) return;
-    
+
     // Remove all status classes
     syncStatusIndicator.classList.remove('syncing', 'synced', 'error', 'offline');
-    
+
     // Add appropriate class and text
     switch (status.status) {
         case 'syncing':
@@ -588,7 +591,7 @@ function updateSyncStatusUI(status) {
         default:
             syncStatusText.textContent = 'Bereit';
     }
-    
+
     // Update last sync time
     updateSyncTimeDisplay();
 }
@@ -599,7 +602,7 @@ function updateSyncStatusUI(status) {
 function updateSyncTimeDisplay() {
     const syncLastTime = document.getElementById('sync-last-time');
     if (!syncLastTime) return;
-    
+
     const lastSync = getLastSyncTime();
     if (lastSync) {
         const date = new Date(lastSync);
@@ -614,26 +617,26 @@ function updateSyncTimeDisplay() {
  */
 async function initializeApp() {
     console.log('Abrechnung Application – Initializing (Phase 5 with Modern UI)');
-    
+
     // 1. Load persisted state (if any)
     const initialState = loadStateFromStorage();
     console.log('Initial state loaded', initialState);
-    
+
     // 2. Initialize static UI (non-dynamic DOM tweaks, ARIA, etc.)
     initializeStaticUI();
-    
+
     // 3. Initialize navigation
     initializeNavigation();
-    
+
     // 4. Initialize settings
     initializeSettings();
-    
+
     // 4b. Initialize sync settings (Hybrid Approach - Option 3)
     initializeSyncSettings();
-    
+
     // 4c. Initialize sync service
     initSyncService();
-    
+
     // 5. Bind event listeners once
     initializeEventListeners({
         onImport: handleImportFile,
@@ -641,24 +644,24 @@ async function initializeApp() {
         onExport: handleExportAbrechnung,
         onReset: handleResetApplication
     });
-    
+
     // 5b. Initialize Contract Manager event listeners (Phase 1)
     initializeContractEventListeners();
-    
+
     // 5c. Set up global handler for contract mapping changes
     // This is used by dynamically rendered mapping selects
     window._handleMappingChange = handleContractMappingChange;
-    
+
     // 5d. Initialize Protokoll Module (Phase 4)
     initializeProtokollModule();
-    
+
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
         updateImportUI(nextState);
         updateGenerateUI(nextState);
         updateExportUI(nextState);
         updateDashboardStats(nextState);
-        
+
         // Log state changes
         if (nextState.ui.import.status === 'success') {
             addActivityLogEntry('Protokoll erfolgreich importiert', 'success');
@@ -667,7 +670,7 @@ async function initializeApp() {
             addActivityLogEntry('Fehler beim Import', 'error');
             addLogEntry('File import failed', 'error');
         }
-        
+
         if (nextState.ui.generate.status === 'success') {
             addActivityLogEntry('Abrechnung erfolgreich erzeugt', 'success');
             addLogEntry('Abrechnung generated', 'success');
@@ -675,7 +678,7 @@ async function initializeApp() {
             addActivityLogEntry('Fehler bei der Erzeugung', 'error');
             addLogEntry('Abrechnung generation failed', 'error');
         }
-        
+
         if (nextState.ui.export.status === 'success') {
             addActivityLogEntry('Export erfolgreich heruntergeladen', 'success');
             addLogEntry('File exported', 'success');
@@ -683,7 +686,7 @@ async function initializeApp() {
             addActivityLogEntry('Fehler beim Export', 'error');
             addLogEntry('File export failed', 'error');
         }
-        
+
         // Log contract import status changes
         if (nextState.contracts?.importState?.status === 'success') {
             addActivityLogEntry('Verträge erfolgreich importiert', 'success');
@@ -693,20 +696,20 @@ async function initializeApp() {
             addLogEntry('Contract import failed', 'error');
         }
     });
-    
+
     // 7. Perform initial render based on loaded state
     const state = getState();
     updateImportUI(state);
     updateGenerateUI(state);
     updateExportUI(state);
     updateDashboardStats(state);
-    
+
     // 7b. Initialize Contract Manager UI (Phase 1)
     initializeContractUI();
-    
+
     // 8. Add initial log entry
     addLogEntry('Application initialized', 'info');
-    
+
     console.log('Abrechnung Application – Initialization complete');
 }
 
