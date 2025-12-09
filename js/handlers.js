@@ -1,8 +1,8 @@
 /**
- * Event Handlers Module (Phase 2)
+ * Event Handlers Module (Phase 4)
  * 
  * Handles user interactions and coordinates between UI, state, and utilities
- * Uses Phase 2 state management with domain-specific helper functions
+ * Implements Phase 4 requirements with enhanced UI updates and error handling
  */
 
 import { 
@@ -15,7 +15,8 @@ import {
     setExportStatus,
     updateProtokollData,
     updateAbrechnungPositions,
-    updateAbrechnungHeader
+    updateAbrechnungHeader,
+    subscribe
 } from './state.js';
 import * as utils from './utils.js';
 
@@ -23,16 +24,19 @@ import * as utils from './utils.js';
 let selectedFile = null;
 
 // Store generated workbook reference (not persisted in state - can't be serialized)
-let generatedWorkbook = null;
+// NOTE: Using window global as specified in roadmap_phase4.md line 259:
+// "Store workbook in window for export step (Phase 4)"
+// This is required because workbooks can't be serialized to state/localStorage
+window._currentWorkbook = null;
 
 /**
- * Handle file input change (Phase 2)
+ * Handle file input change (Phase 4)
  * @param {Event} event - File input change event
  */
 export function handleFileSelect(event) {
     const file = event.target.files[0];
     const fileNameDisplay = document.getElementById('fileName');
-    const importBtn = document.getElementById('importBtn');
+    const importBtn = document.getElementById('import-button');
     
     if (file) {
         fileNameDisplay.textContent = file.name;
@@ -63,331 +67,809 @@ export function handleFileSelect(event) {
 }
 
 /**
- * Handle protokoll import (Phase 2)
+ * Handle file import - Phase 4.1.1 Implementation
+ * @param {Event} event - File input change event or button click
+ * @returns {Promise<void>}
  */
-export async function handleImportProtokoll() {
-    const statusElement = document.getElementById('importStatus');
-    const previewElement = document.getElementById('importPreview');
+export async function handleImportFile(event) {
+    const file = selectedFile;
     
-    if (!selectedFile) {
-        showStatus(statusElement, 'Bitte wählen Sie zuerst eine Datei aus', 'error');
-        setImportStatus({ status: 'error', message: 'Keine Datei ausgewählt' });
+    if (!file) {
+        console.log('File selection cancelled');
         return;
     }
     
-    const startTime = Date.now();
+    // Mark UI as loading
+    setState({
+        ui: {
+            ...getState().ui,
+            import: {
+                status: 'pending',
+                message: `Processing ${file.name}...`,
+                fileName: file.name,
+                fileSize: file.size,
+                importedAt: null
+            }
+        }
+    });
     
     try {
-        // Update UI state to pending
-        setImportStatus({ status: 'pending', message: 'Protokoll wird importiert...' });
-        showStatus(statusElement, 'Protokoll wird importiert...', 'info');
-        previewElement.classList.remove('show');
+        console.log('Starting file import...', file.name);
+        const startTime = performance.now();
         
-        // Read Excel file (Phase 3 returns { workbook, metadata: fileMetadata })
-        const result = await utils.readExcelFile(selectedFile);
-        const workbook = result.workbook;
+        // Use safe wrapper function from utils
+        const result = await utils.safeReadAndParseProtokoll(file);
         
-        // Parse metadata
-        const metadata = utils.parseProtokollMetadata(workbook);
-        
-        // Extract positions
-        const positionen = utils.extractPositions(workbook);
-        
-        if (positionen.length === 0) {
-            throw new Error('Keine Positionen im Protokoll gefunden');
+        if (!result.success) {
+            throw new Error(result.errors[0] || 'Unknown import error');
         }
         
-        // Update state with imported data using Phase 2 helpers
-        // Map legacy metadata fields to Phase 2 structure
-        updateProtokollData({
-            metadata: {
-                protocolNumber: metadata.protokollNr,
-                orderNumber: metadata.auftragsNr,
-                plant: metadata.anlage,
-                location: metadata.einsatzort,
-                company: metadata.firma,
-                date: metadata.datum
+        const { metadata, positionen, positionSums } = result;
+        const summary = utils.getPositionSummary(positionSums);
+        
+        // Show any warnings to user
+        if (result.warnings.length > 0) {
+            console.warn('Import warnings:', result.warnings);
+        }
+        
+        const elapsedMs = performance.now() - startTime;
+        
+        // Update state with imported data
+        setState({
+            protokollData: {
+                metadata,
+                positionen
             },
-            positionen: positionen
+            ui: {
+                ...getState().ui,
+                import: {
+                    status: 'success',
+                    message: `Successfully imported ${file.name}`,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    importedAt: new Date().toISOString()
+                },
+                generate: {
+                    ...getState().ui.generate,
+                    positionCount: positionen.length,
+                    uniquePositionCount: summary.uniquePositions
+                }
+            }
         });
         
-        // Update import status to success
-        setImportStatus({
-            status: 'success',
-            message: `Protokoll erfolgreich importiert (${positionen.length} Positionen)`,
-            importedAt: new Date().toISOString()
-        });
-        
-        // Reset generate and export status since we have new data
-        setGenerateStatus({ status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0 });
-        setExportStatus({ status: 'idle', message: '' });
-        
-        // Show success message
-        showStatus(
-            statusElement,
-            `✓ Protokoll erfolgreich importiert (${positionen.length} Positionen)`,
-            'success'
-        );
-        
-        // Show preview using legacy metadata format for display
-        showImportPreview(metadata, positionen);
+        console.log('File import completed in', elapsedMs.toFixed(2), 'ms');
+        console.log('Imported metadata:', metadata);
+        console.log('Extracted positions:', summary);
         
     } catch (error) {
-        console.error('Import error:', error);
-        setImportStatus({ status: 'error', message: error.message });
-        showStatus(statusElement, `✗ Fehler: ${error.message}`, 'error');
+        console.error('Import failed:', error);
+        
+        setState({
+            ui: {
+                ...getState().ui,
+                import: {
+                    status: 'error',
+                    message: `Import failed: ${error.message}`,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    importedAt: null
+                }
+            }
+        });
+        
+        // Show error dialog to user
+        showErrorAlert(
+            'Import Error',
+            `Failed to import file: ${error.message}`
+        );
+    }
+    
+    // Reset file input for re-selection
+    const fileInput = document.querySelector('#file-input');
+    if (fileInput) {
+        fileInput.value = '';
     }
 }
 
 /**
- * Handle abrechnung generation (Phase 2)
+ * Handle "Generate" button click - Phase 4.1.2 Implementation
+ * @returns {Promise<void>}
  */
 export async function handleGenerateAbrechnung() {
     const state = getState();
-    const statusElement = document.getElementById('generateStatus');
-    const previewElement = document.getElementById('generatePreview');
     
-    // Check if protokollData has positions
-    if (!state.protokollData?.positionen?.length) {
-        showStatus(statusElement, 'Bitte importieren Sie zuerst ein Protokoll', 'error');
-        setGenerateStatus({ status: 'error', message: 'Kein Protokoll importiert' });
+    // Validate preconditions
+    if (!state.protokollData || !state.protokollData.metadata) {
+        showErrorAlert(
+            'No Data',
+            'Please import a protokoll.xlsx file first.'
+        );
         return;
     }
     
-    const startTime = Date.now();
+    // Mark UI as loading
+    setState({
+        ui: {
+            ...state.ui,
+            generate: {
+                ...state.ui.generate,
+                status: 'pending',
+                message: 'Generating abrechnung...'
+            }
+        }
+    });
     
     try {
-        // Update UI state to pending
-        setGenerateStatus({ status: 'pending', message: 'Abrechnung wird generiert...' });
-        showStatus(statusElement, 'Abrechnung wird generiert...', 'info');
-        previewElement.classList.remove('show');
+        console.log('Starting abrechnung generation...');
+        const startTime = performance.now();
         
-        // Load template
-        const workbook = await utils.loadAbrechnungTemplate();
+        const { metadata, positionen } = state.protokollData;
         
-        // Create legacy metadata format for utils
-        const legacyMetadata = {
-            protokollNr: state.protokollData.metadata.protocolNumber,
-            auftragsNr: state.protokollData.metadata.orderNumber,
-            anlage: state.protokollData.metadata.plant,
-            einsatzort: state.protokollData.metadata.location,
-            firma: state.protokollData.metadata.company,
-            datum: state.protokollData.metadata.date
-        };
+        // Step 1: Aggregate positions
+        const positionSums = utils.sumByPosition(positionen);
+        const summary = utils.getPositionSummary(positionSums);
         
-        // Fill header
-        utils.fillAbrechnungHeader(workbook, legacyMetadata);
+        console.log('Position aggregation complete:', summary);
         
-        // Sum positions
-        const positionSums = utils.sumByPosition(state.protokollData.positionen);
-        
-        // Fill positions
-        utils.fillAbrechnungPositions(workbook, positionSums);
-        
-        const generationTimeMs = Date.now() - startTime;
-        
-        // Update abrechnung data using Phase 2 helpers
-        updateAbrechnungHeader({
-            date: state.protokollData.metadata.date,
-            orderNumber: state.protokollData.metadata.orderNumber,
-            plant: state.protokollData.metadata.plant,
-            location: state.protokollData.metadata.location
-        });
-        updateAbrechnungPositions(positionSums);
-        
-        // Store workbook reference for export (not in state - can't be serialized)
-        // We'll need to regenerate it on export if needed
-        generatedWorkbook = workbook;
-        
-        // Update generate status to success
-        const positionCount = Object.keys(positionSums).length;
-        setGenerateStatus({
-            status: 'success',
-            message: `Abrechnung erfolgreich generiert (${positionCount} Positionen)`,
-            positionCount: state.protokollData.positionen.length,
-            uniquePositionCount: positionCount,
-            generationTimeMs: generationTimeMs
+        // Step 2: Create export workbook
+        const workbook = await utils.createExportWorkbook({
+            header: {
+                date: metadata.date,
+                orderNumber: metadata.orderNumber,
+                plant: metadata.plant,
+                location: metadata.location
+            },
+            positionen: positionSums
         });
         
-        // Reset export status
-        setExportStatus({ status: 'idle', message: '' });
+        const validation = utils.validateFilledPositions(workbook);
+        console.log('Workbook creation validation:', validation);
         
-        // Show success message
-        showStatus(
-            statusElement,
-            `✓ Abrechnung erfolgreich generiert (${positionCount} Positionen)`,
-            'success'
-        );
+        const elapsedMs = performance.now() - startTime;
         
-        // Show preview using legacy metadata for display
-        showGeneratePreview(legacyMetadata, positionSums);
+        // Update state
+        setState({
+            abrechnungData: {
+                header: {
+                    date: metadata.date,
+                    orderNumber: metadata.orderNumber,
+                    plant: metadata.plant,
+                    location: metadata.location
+                },
+                positionen: positionSums
+            },
+            ui: {
+                ...state.ui,
+                generate: {
+                    status: 'success',
+                    message: 'Abrechnung generated successfully',
+                    positionCount: summary.uniquePositions,
+                    uniquePositionCount: summary.uniquePositions,
+                    generationTimeMs: Math.round(elapsedMs)
+                }
+            }
+        });
+        
+        // Store workbook in window for export step
+        window._currentWorkbook = workbook;
+        
+        console.log('Generation completed in', elapsedMs.toFixed(2), 'ms');
         
     } catch (error) {
-        console.error('Generation error:', error);
-        setGenerateStatus({ status: 'error', message: error.message });
-        showStatus(statusElement, `✗ Fehler: ${error.message}`, 'error');
+        console.error('Generation failed:', error);
+        
+        setState({
+            ui: {
+                ...state.ui,
+                generate: {
+                    status: 'error',
+                    message: `Generation failed: ${error.message}`,
+                    positionCount: 0,
+                    uniquePositionCount: 0,
+                    generationTimeMs: 0
+                }
+            }
+        });
+        
+        showErrorAlert(
+            'Generation Error',
+            `Failed to generate abrechnung: ${error.message}`
+        );
     }
 }
 
 /**
- * Handle abrechnung export (Phase 2)
+ * Handle "Export" button click - Phase 4.1.3 Implementation
+ * @returns {Promise<void>}
  */
 export async function handleExportAbrechnung() {
     const state = getState();
-    const statusElement = document.getElementById('exportStatus');
     
-    // Check if abrechnung has positions
-    const hasPositions = Object.keys(state.abrechnungData?.positionen || {}).length > 0;
+    // Validate preconditions
+    if (!state.abrechnungData || !state.abrechnungData.header) {
+        showErrorAlert(
+            'No Data',
+            'Please generate an abrechnung first.'
+        );
+        return;
+    }
     
-    if (!hasPositions) {
-        showStatus(statusElement, 'Bitte generieren Sie zuerst eine Abrechnung', 'error');
-        setExportStatus({ status: 'error', message: 'Keine Abrechnung generiert' });
+    if (!window._currentWorkbook) {
+        showErrorAlert(
+            'No Workbook',
+            'Workbook not found in memory. Please regenerate.'
+        );
+        return;
+    }
+    
+    // Mark UI as loading
+    setState({
+        ui: {
+            ...state.ui,
+            export: {
+                ...state.ui.export,
+                status: 'pending',
+                message: 'Preparing download...'
+            }
+        }
+    });
+    
+    try {
+        console.log('Starting abrechnung export...');
+        
+        const metadata = state.protokollData.metadata;
+        const workbook = window._currentWorkbook;
+        
+        // Export the workbook
+        const exportMetadata = utils.exportToExcel(workbook, metadata);
+        
+        // Update state
+        setState({
+            ui: {
+                ...state.ui,
+                export: {
+                    status: 'success',
+                    message: `Downloaded: ${exportMetadata.fileName}`,
+                    lastExportAt: new Date().toISOString(),
+                    lastExportSize: exportMetadata.fileSize
+                }
+            }
+        });
+        
+        console.log('Export successful:', exportMetadata);
+        
+    } catch (error) {
+        console.error('Export failed:', error);
+        
+        setState({
+            ui: {
+                ...state.ui,
+                export: {
+                    status: 'error',
+                    message: `Export failed: ${error.message}`,
+                    lastExportAt: null,
+                    lastExportSize: 0
+                }
+            }
+        });
+        
+        showErrorAlert(
+            'Export Error',
+            `Failed to export file: ${error.message}`
+        );
+    }
+}
+
+/**
+ * Handle "Reset" button click - Phase 4.1.4 Implementation
+ * @returns {void}
+ */
+export async function handleResetApplication() {
+    const confirmed = confirm(
+        'Are you sure you want to reset? This will clear all imported data and generated files.'
+    );
+    
+    if (!confirmed) {
+        console.log('Reset cancelled by user');
         return;
     }
     
     try {
-        // Update export status to pending
-        setExportStatus({ status: 'pending', message: 'Abrechnung wird exportiert...' });
+        // Clear UI
+        clearErrorAlerts();
         
-        // If we don't have a workbook reference, regenerate it
-        if (!generatedWorkbook) {
-            const workbook = await utils.loadAbrechnungTemplate();
-            
-            // Create legacy metadata format for utils
-            const legacyMetadata = {
-                protokollNr: state.protokollData?.metadata?.protocolNumber,
-                auftragsNr: state.protokollData?.metadata?.orderNumber || state.abrechnungData.header.orderNumber,
-                anlage: state.protokollData?.metadata?.plant || state.abrechnungData.header.plant,
-                einsatzort: state.protokollData?.metadata?.location || state.abrechnungData.header.location,
-                firma: state.protokollData?.metadata?.company,
-                datum: state.protokollData?.metadata?.date || state.abrechnungData.header.date
-            };
-            
-            utils.fillAbrechnungHeader(workbook, legacyMetadata);
-            utils.fillAbrechnungPositions(workbook, state.abrechnungData.positionen);
-            generatedWorkbook = workbook;
-        }
-        
-        const filename = utils.generateExportFilename(
-            state.abrechnungData.header.orderNumber || 'Abrechnung'
-        );
-        utils.exportToExcel(generatedWorkbook, filename);
-        
-        // Update export status to success
-        setExportStatus({
-            status: 'success',
-            message: `Abrechnung erfolgreich exportiert: ${filename}`,
-            lastExportAt: new Date().toISOString()
-        });
-        
-        showStatus(statusElement, `✓ Abrechnung erfolgreich exportiert: ${filename}`, 'success');
-        
-    } catch (error) {
-        console.error('Export error:', error);
-        setExportStatus({ status: 'error', message: error.message });
-        showStatus(statusElement, `✗ Fehler beim Export: ${error.message}`, 'error');
-    }
-}
-
-/**
- * Handle application reset (Phase 2)
- */
-export function handleReset() {
-    if (confirm('Möchten Sie wirklich alle Daten löschen und die Anwendung zurücksetzen?')) {
-        // Reset state to initial values and clear localStorage
+        // Clear state and storage
         resetState({ persist: true, silent: false });
         clearPersistedState();
         
-        // Clear local file and workbook references
+        // Clear file input
+        const fileInput = document.querySelector('#file-input');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        
+        // Reset file name display
+        const fileNameDisplay = document.getElementById('fileName');
+        if (fileNameDisplay) {
+            fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+        }
+        
+        // Clear workbook from window
+        delete window._currentWorkbook;
+        
+        // Clear local references
         selectedFile = null;
-        generatedWorkbook = null;
         
-        // Reset UI elements
-        document.getElementById('fileInput').value = '';
-        document.getElementById('fileName').textContent = 'Keine Datei ausgewählt';
-        document.getElementById('importBtn').disabled = true;
-        document.getElementById('importStatus').textContent = '';
-        document.getElementById('importStatus').classList.remove('show', 'success', 'error', 'info');
-        document.getElementById('importPreview').classList.remove('show');
-        document.getElementById('generateStatus').textContent = '';
-        document.getElementById('generateStatus').classList.remove('show', 'success', 'error', 'info');
-        document.getElementById('generatePreview').classList.remove('show');
-        document.getElementById('exportStatus').textContent = '';
-        document.getElementById('exportStatus').classList.remove('show', 'success', 'error', 'info');
+        console.log('Application reset complete');
         
-        alert('Anwendung wurde zurückgesetzt');
+    } catch (error) {
+        console.error('Reset failed:', error);
+        showErrorAlert(
+            'Reset Error',
+            'Failed to reset application'
+        );
+    }
+}
+
+// ==================== Phase 4.4: UI Helper Functions ====================
+
+/**
+ * Display an error alert to the user - Phase 4.4
+ * @param {string} title - Alert title
+ * @param {string} message - Alert message
+ * @returns {void}
+ */
+export function showErrorAlert(title, message) {
+    const alertContainer = document.querySelector('#alert-container');
+    
+    if (!alertContainer) {
+        console.warn('Alert container not found. Falling back to alert()');
+        alert(`${title}: ${message}`);
+        return;
+    }
+    
+    const alertElement = document.createElement('div');
+    alertElement.className = 'alert alert-error';
+    alertElement.role = 'alert';
+    alertElement.innerHTML = `
+        <div class="alert-header">
+            <strong>${escapeHtml(title)}</strong>
+            <button class="alert-close" aria-label="Close alert">&times;</button>
+        </div>
+        <div class="alert-body">
+            ${escapeHtml(message)}
+        </div>
+    `;
+    
+    // Close button handler
+    alertElement.querySelector('.alert-close').addEventListener('click', () => {
+        alertElement.remove();
+    });
+    
+    // Auto-dismiss after 8 seconds
+    setTimeout(() => {
+        if (alertElement.parentElement) {
+            alertElement.remove();
+        }
+    }, 8000);
+    
+    alertContainer.appendChild(alertElement);
+    console.error(`${title}: ${message}`);
+}
+
+/**
+ * Display a success alert to the user - Phase 4.4
+ * @param {string} title - Alert title
+ * @param {string} message - Alert message
+ * @returns {void}
+ */
+export function showSuccessAlert(title, message) {
+    const alertContainer = document.querySelector('#alert-container');
+    
+    if (!alertContainer) {
+        console.log(`${title}: ${message}`);
+        return;
+    }
+    
+    const alertElement = document.createElement('div');
+    alertElement.className = 'alert alert-success';
+    alertElement.role = 'status';
+    alertElement.innerHTML = `
+        <div class="alert-header">
+            <strong>${escapeHtml(title)}</strong>
+            <button class="alert-close" aria-label="Close alert">&times;</button>
+        </div>
+        <div class="alert-body">
+            ${escapeHtml(message)}
+        </div>
+    `;
+    
+    // Close button handler
+    alertElement.querySelector('.alert-close').addEventListener('click', () => {
+        alertElement.remove();
+    });
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertElement.parentElement) {
+            alertElement.remove();
+        }
+    }, 5000);
+    
+    alertContainer.appendChild(alertElement);
+    console.log(`${title}: ${message}`);
+}
+
+/**
+ * Clear all alert messages from the container - Phase 4.4
+ * @returns {void}
+ */
+export function clearErrorAlerts() {
+    const alertContainer = document.querySelector('#alert-container');
+    if (alertContainer) {
+        alertContainer.innerHTML = '';
     }
 }
 
 /**
- * Show status message
- * @param {HTMLElement} element - Status element
- * @param {string} message - Message to display
- * @param {string} type - Message type (success, error, info)
+ * Escape HTML special characters to prevent XSS - Phase 4.4
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped text safe for HTML insertion
  */
-function showStatus(element, message, type) {
-    element.textContent = message;
-    element.className = 'status-message show ' + type;
+export function escapeHtml(text) {
+    if (typeof text !== 'string') {
+        return String(text);
+    }
+    
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    
+    return text.replace(/[&<>"']/g, (char) => map[char]);
 }
 
 /**
- * Show import preview
- * @param {Object} metadata - Imported metadata
- * @param {Array} positionen - Imported positions
+ * Show/hide loading spinner - Phase 4.4
+ * @param {boolean} show - Whether to show spinner
+ * @param {string} message - Optional message to display
+ * @returns {void}
  */
-function showImportPreview(metadata, positionen) {
-    const previewElement = document.getElementById('importPreview');
+export function setLoadingSpinner(show, message = '') {
+    const spinner = document.querySelector('#loading-spinner');
+    const message_el = document.querySelector('#loading-message');
     
-    const html = `
-        <h3>Importierte Daten</h3>
-        <div class="metadata">
-            <p><strong>Auftrags-Nr.:</strong> ${metadata.auftragsNr}</p>
-            <p><strong>Anlage:</strong> ${metadata.anlage}</p>
-            <p><strong>Einsatzort:</strong> ${metadata.einsatzort}</p>
-            <p><strong>Firma:</strong> ${metadata.firma}</p>
-            <p><strong>Positionen:</strong> ${positionen.length}</p>
-        </div>
-    `;
+    if (!spinner) {
+        return;
+    }
     
-    previewElement.innerHTML = html;
-    previewElement.classList.add('show');
+    if (show) {
+        spinner.style.display = 'flex';
+        if (message_el) {
+            message_el.textContent = message;
+        }
+    } else {
+        spinner.style.display = 'none';
+    }
 }
 
 /**
- * Show generate preview
- * @param {Object} metadata - Metadata
- * @param {Object} positionSums - Summed positions
+ * Format file size for display - Phase 4.4
+ * @param {number} bytes - Size in bytes
+ * @returns {string} Formatted size (e.g., "2.5 MB")
  */
-function showGeneratePreview(metadata, positionSums) {
-    const previewElement = document.getElementById('generatePreview');
+export function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
     
-    // Create table of first 10 positions
-    const positions = Object.entries(positionSums).slice(0, 10);
-    const tableRows = positions.map(([posNr, menge]) => 
-        `<tr><td>${posNr}</td><td>${menge}</td></tr>`
-    ).join('');
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    const html = `
-        <h3>Generierte Abrechnung - Vorschau</h3>
-        <div class="metadata">
-            <p><strong>Auftrags-Nr.:</strong> ${metadata.auftragsNr}</p>
-            <p><strong>Anlage:</strong> ${metadata.anlage}</p>
-            <p><strong>Gefüllte Positionen:</strong> ${Object.keys(positionSums).length}</p>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Position</th>
-                    <th>Menge</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableRows}
-            </tbody>
-        </table>
-        ${Object.keys(positionSums).length > 10 ? '<p><em>... und weitere</em></p>' : ''}
-    `;
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+}
+
+// ==================== Phase 4.2: UI Update Handlers ====================
+
+/**
+ * Update import section UI based on state - Phase 4.2.1
+ * @param {Object} state - Current application state
+ * @returns {void}
+ */
+export function updateImportUI(state) {
+    const {
+        ui: { import: importState },
+        protokollData
+    } = state;
     
-    previewElement.innerHTML = html;
-    previewElement.classList.add('show');
+    // Select DOM elements
+    const fileInput = document.querySelector('#file-input');
+    const importButton = document.querySelector('#import-button');
+    const importStatus = document.querySelector('#import-status');
+    const importMessage = document.querySelector('#import-message');
+    const importSummary = document.querySelector('#import-summary');
+    const generateButton = document.querySelector('#generate-button');
+    
+    if (!fileInput || !importStatus) {
+        console.warn('Import UI elements not found in DOM');
+        return;
+    }
+    
+    // Update status indicator
+    updateStatusIndicator(importStatus, importState.status);
+    
+    // Update message
+    if (importMessage) {
+        importMessage.textContent = importState.message;
+        importMessage.className = `import-message status-${importState.status}`;
+    }
+    
+    // Update summary display
+    if (importSummary && protokollData && protokollData.metadata && protokollData.positionen.length > 0) {
+        const { metadata, positionen } = protokollData;
+        
+        importSummary.innerHTML = `
+            <div class="summary-item">
+                <span class="label">Order Number:</span>
+                <span class="value">${escapeHtml(metadata.orderNumber || 'N/A')}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Protocol Number:</span>
+                <span class="value">${escapeHtml(metadata.protocolNumber || 'N/A')}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Plant (Anlage):</span>
+                <span class="value">${escapeHtml(metadata.plant || 'N/A')}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Location (Einsatzort):</span>
+                <span class="value">${escapeHtml(metadata.location || 'N/A')}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Date:</span>
+                <span class="value">${escapeHtml(metadata.date || 'N/A')}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Positions Extracted:</span>
+                <span class="value">${positionen.length}</span>
+            </div>
+        `;
+        importSummary.style.display = 'block';
+    } else if (importSummary) {
+        importSummary.style.display = 'none';
+    }
+    
+    // Update button states
+    if (importButton) {
+        importButton.disabled = importState.status === 'pending';
+        importButton.textContent = importState.status === 'pending'
+            ? 'Processing...'
+            : 'Import File';
+    }
+    
+    // Enable/disable generate button based on successful import
+    if (generateButton) {
+        generateButton.disabled = !protokollData || !protokollData.metadata;
+    }
+}
+
+/**
+ * Update generate section UI based on state - Phase 4.2.2
+ * @param {Object} state - Current application state
+ * @returns {void}
+ */
+export function updateGenerateUI(state) {
+    const {
+        ui: { generate: generateState },
+        abrechnungData
+    } = state;
+    
+    // Select DOM elements
+    const generateButton = document.querySelector('#generate-button');
+    const generateStatus = document.querySelector('#generate-status');
+    const generateMessage = document.querySelector('#generate-message');
+    const generateSummary = document.querySelector('#generate-summary');
+    const exportButton = document.querySelector('#export-button');
+    
+    if (!generateButton || !generateStatus) {
+        console.warn('Generate UI elements not found in DOM');
+        return;
+    }
+    
+    // Update status indicator
+    updateStatusIndicator(generateStatus, generateState.status);
+    
+    // Update message
+    if (generateMessage) {
+        generateMessage.textContent = generateState.message;
+        generateMessage.className = `generate-message status-${generateState.status}`;
+    }
+    
+    // Update generation summary
+    if (generateSummary && abrechnungData && abrechnungData.header && Object.keys(abrechnungData.positionen || {}).length > 0) {
+        const { header, positionen } = abrechnungData;
+        const totalQuantity = Object.values(positionen).reduce((sum, q) => sum + q, 0);
+        
+        generateSummary.innerHTML = `
+            <div class="summary-item">
+                <span class="label">Unique Positions:</span>
+                <span class="value">${Object.keys(positionen).length}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Total Quantity:</span>
+                <span class="value">${totalQuantity.toFixed(2)}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Generation Time:</span>
+                <span class="value">${generateState.generationTimeMs}ms</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Status:</span>
+                <span class="value status-${generateState.status}">${generateState.status}</span>
+            </div>
+        `;
+        generateSummary.style.display = 'block';
+    } else if (generateSummary) {
+        generateSummary.style.display = 'none';
+    }
+    
+    // Update button states
+    if (generateButton) {
+        generateButton.disabled = generateState.status === 'pending';
+        generateButton.textContent = generateState.status === 'pending'
+            ? 'Generating...'
+            : 'Generate Abrechnung';
+    }
+    
+    // Enable/disable export button based on successful generation
+    if (exportButton) {
+        exportButton.disabled = !abrechnungData || !abrechnungData.header;
+    }
+}
+
+/**
+ * Update export section UI based on state - Phase 4.2.3
+ * @param {Object} state - Current application state
+ * @returns {void}
+ */
+export function updateExportUI(state) {
+    const {
+        ui: { export: exportState }
+    } = state;
+    
+    // Select DOM elements
+    const exportButton = document.querySelector('#export-button');
+    const exportStatus = document.querySelector('#export-status');
+    const exportMessage = document.querySelector('#export-message');
+    const exportHistory = document.querySelector('#export-history');
+    
+    if (!exportButton || !exportStatus) {
+        console.warn('Export UI elements not found in DOM');
+        return;
+    }
+    
+    // Update status indicator
+    updateStatusIndicator(exportStatus, exportState.status);
+    
+    // Update message
+    if (exportMessage) {
+        exportMessage.textContent = exportState.message;
+        exportMessage.className = `export-message status-${exportState.status}`;
+    }
+    
+    // Update export history
+    if (exportHistory && exportState.lastExportAt) {
+        const exportDate = new Date(exportState.lastExportAt);
+        const dateStr = exportDate.toLocaleString();
+        const sizeKB = (exportState.lastExportSize / 1024).toFixed(2);
+        
+        exportHistory.innerHTML = `
+            <div class="export-item">
+                <span class="label">Last Export:</span>
+                <span class="value">${dateStr}</span>
+            </div>
+            <div class="export-item">
+                <span class="label">File Size:</span>
+                <span class="value">${sizeKB} KB</span>
+            </div>
+        `;
+        exportHistory.style.display = 'block';
+    } else if (exportHistory) {
+        exportHistory.style.display = 'none';
+    }
+    
+    // Update button state
+    if (exportButton) {
+        exportButton.disabled = exportState.status === 'pending';
+        exportButton.textContent = exportState.status === 'pending'
+            ? 'Exporting...'
+            : 'Export to Excel';
+    }
+}
+
+/**
+ * Helper to update status indicator element - Phase 4.2
+ * @param {HTMLElement} element - Status element to update
+ * @param {string} status - Status value ('idle', 'pending', 'success', 'error')
+ */
+function updateStatusIndicator(element, status) {
+    // Remove all status classes
+    element.className = 'status-indicator';
+    
+    // Add current status class
+    element.classList.add(`status-${status}`);
+    
+    // Set indicator text
+    const statusText = {
+        idle: '○',
+        pending: '⟳',
+        success: '✓',
+        error: '✕'
+    };
+    
+    element.textContent = statusText[status] || '○';
+    element.title = status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+// ==================== Phase 4.3: Event Binding & Initialization ====================
+
+/**
+ * Initialize all event listeners for user interactions and state changes - Phase 4.3.1
+ * @returns {void}
+ */
+export function initializeEventListeners() {
+    console.log('Initializing event listeners...');
+    
+    // File input handler
+    const fileInput = document.querySelector('#file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+        console.log('✓ File input listener bound');
+    } else {
+        console.warn('File input (#file-input) not found in DOM');
+    }
+    
+    // Generate button handler
+    const generateButton = document.querySelector('#generate-button');
+    if (generateButton) {
+        generateButton.addEventListener('click', handleGenerateAbrechnung);
+        console.log('✓ Generate button listener bound');
+    } else {
+        console.warn('Generate button (#generate-button) not found in DOM');
+    }
+    
+    // Export button handler
+    const exportButton = document.querySelector('#export-button');
+    if (exportButton) {
+        exportButton.addEventListener('click', handleExportAbrechnung);
+        console.log('✓ Export button listener bound');
+    } else {
+        console.warn('Export button (#export-button) not found in DOM');
+    }
+    
+    // Reset button handler (optional)
+    const resetButton = document.querySelector('#reset-button');
+    if (resetButton) {
+        resetButton.addEventListener('click', handleResetApplication);
+        console.log('✓ Reset button listener bound');
+    }
+    
+    // Import button handler - trigger import when button is clicked
+    const importButton = document.querySelector('#import-button');
+    if (importButton) {
+        importButton.addEventListener('click', handleImportFile);
+        console.log('✓ Import button listener bound');
+    }
+    
+    // State change listener - updates UI reactively
+    subscribe((state) => {
+        console.log('State changed - updating UI');
+        updateImportUI(state);
+        updateGenerateUI(state);
+        updateExportUI(state);
+    });
+    
+    console.log('Event listeners initialized');
 }

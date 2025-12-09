@@ -1,8 +1,8 @@
 /**
- * Main Application Module (Phase 2)
+ * Main Application Module (Phase 4)
  * 
  * Application initialization and event listener setup
- * Implements Phase 2 state management and event-driven architecture
+ * Implements Phase 4 event handlers and reactive UI updates
  */
 
 import { getState, subscribe, loadStateFromStorage } from './state.js';
@@ -12,76 +12,48 @@ import * as handlers from './handlers.js';
  * Initialize the application
  */
 function initializeApp() {
-    console.log('=== Abrechnung Application Initializing (Phase 2) ===');
+    console.log('=== Abrechnung Application Initializing (Phase 4) ===');
     
     // 1. Load persisted state from localStorage
     const initialState = loadStateFromStorage();
     console.log('Initial state:', initialState);
     
-    // 2. Set up event listeners
-    setupEventListeners();
+    // 2. Set up event listeners using Phase 4 initialization
+    handlers.initializeEventListeners();
     
-    // 3. Subscribe to state changes for UI updates
-    subscribe(updateUI);
+    // 3. Initial UI update based on loaded state
+    updateUI(getState());
     
     // 4. Subscribe to state changes for debugging (development only)
     subscribe((nextState) => {
         console.log('State changed:', nextState);
     });
     
-    // 5. Initial UI update based on loaded state
-    updateUI(getState());
-    
-    console.log('=== Abrechnung Generator initialized successfully (Phase 2) ===');
+    console.log('=== Abrechnung Generator initialized successfully (Phase 4) ===');
 }
 
 /**
- * Set up all event listeners
+ * Set up all event listeners (Phase 4 - Delegated to handlers.js)
  */
 function setupEventListeners() {
-    // File input change
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-        fileInput.addEventListener('change', handlers.handleFileSelect);
-    }
-    
-    // Import button
-    const importBtn = document.getElementById('importBtn');
-    if (importBtn) {
-        importBtn.addEventListener('click', handlers.handleImportProtokoll);
-    }
-    
-    // Generate button
-    const generateBtn = document.getElementById('generateBtn');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', handlers.handleGenerateAbrechnung);
-    }
-    
-    // Export button
-    const exportBtn = document.getElementById('exportBtn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', handlers.handleExportAbrechnung);
-    }
-    
-    // Reset button
-    const resetBtn = document.getElementById('resetBtn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', handlers.handleReset);
-    }
-    
-    console.log('Event listeners set up');
+    // This is now handled by handlers.initializeEventListeners()
+    // Keeping this function for backward compatibility
+    handlers.initializeEventListeners();
 }
 
 /**
- * Update UI based on current state (Phase 2)
+ * Update UI based on current state (Phase 4)
  * @param {Object} state - Current application state
  */
 function updateUI(state) {
     // Update status badge based on new UI state structure
     updateStatusBadge(state);
     
-    // Update button states
-    updateButtonStates(state);
+    // Phase 4: UI updates are now handled by handlers module
+    // through state subscription
+    handlers.updateImportUI(state);
+    handlers.updateGenerateUI(state);
+    handlers.updateExportUI(state);
 }
 
 /**

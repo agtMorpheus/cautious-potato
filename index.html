@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Alert Container for Phase 4 -->
+    <div id="alert-container" class="alert-container"></div>
+
     <div class="container">
         <header>
             <h1>📊 Abrechnung Generator</h1>
@@ -26,12 +29,16 @@
                 </div>
                 <div class="panel-body">
                     <div class="file-input-wrapper">
-                        <input type="file" id="fileInput" accept=".xlsx" aria-label="Protokoll-Datei auswählen">
-                        <label for="fileInput" class="file-label">Datei auswählen</label>
+                        <input type="file" id="file-input" accept=".xlsx" aria-label="Protokoll-Datei auswählen">
+                        <label for="file-input" class="file-label">Datei auswählen</label>
                         <span id="fileName" class="file-name">Keine Datei ausgewählt</span>
                     </div>
-                    <button id="importBtn" class="btn btn-primary" disabled>Protokoll importieren</button>
-                    <div id="importStatus" class="status-message"></div>
+                    <button id="import-button" class="btn btn-primary" disabled>Protokoll importieren</button>
+                    <div class="status-row">
+                        <span id="import-status" class="status-indicator">○</span>
+                        <div id="import-message" class="status-message"></div>
+                    </div>
+                    <div id="import-summary" class="summary-panel" style="display:none;"></div>
                     <div id="importPreview" class="data-preview"></div>
                 </div>
             </section>
@@ -42,8 +49,12 @@
                     <h2>🔧 2. Abrechnung generieren</h2>
                 </div>
                 <div class="panel-body">
-                    <button id="generateBtn" class="btn btn-primary" disabled>Abrechnung erzeugen</button>
-                    <div id="generateStatus" class="status-message"></div>
+                    <button id="generate-button" class="btn btn-primary" disabled>Abrechnung erzeugen</button>
+                    <div class="status-row">
+                        <span id="generate-status" class="status-indicator">○</span>
+                        <div id="generate-message" class="status-message"></div>
+                    </div>
+                    <div id="generate-summary" class="summary-panel" style="display:none;"></div>
                     <div id="generatePreview" class="data-preview"></div>
                 </div>
             </section>
@@ -54,14 +65,18 @@
                     <h2>💾 3. Abrechnung exportieren</h2>
                 </div>
                 <div class="panel-body">
-                    <button id="exportBtn" class="btn btn-primary" disabled>Abrechnung herunterladen</button>
-                    <div id="exportStatus" class="status-message"></div>
+                    <button id="export-button" class="btn btn-primary" disabled>Abrechnung herunterladen</button>
+                    <div class="status-row">
+                        <span id="export-status" class="status-indicator">○</span>
+                        <div id="export-message" class="status-message"></div>
+                    </div>
+                    <div id="export-history" class="summary-panel" style="display:none;"></div>
                 </div>
             </section>
 
             <!-- Reset Section -->
             <section class="reset-section">
-                <button id="resetBtn" class="btn btn-secondary">🔄 Anwendung zurücksetzen</button>
+                <button id="reset-button" class="btn btn-secondary">🔄 Anwendung zurücksetzen</button>
             </section>
         </main>
 
