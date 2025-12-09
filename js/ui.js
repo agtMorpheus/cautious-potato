@@ -3,6 +3,7 @@
  * 
  * Responsible for UI initialization and updates
  * Separates UI concerns from handlers and state management
+ * Updated for modern minimalist sidebar navigation
  */
 
 import { escapeHtml } from './handlers.js';
@@ -25,12 +26,61 @@ export function initializeStaticUI() {
         globalMessages.setAttribute('role', 'alert');
     }
     
-    const mainElement = document.querySelector('.app-main');
+    const mainElement = document.querySelector('.main-content');
     if (mainElement) {
         mainElement.setAttribute('aria-live', 'polite');
     }
     
+    // Initialize file drop zone
+    initializeFileDrop();
+    
     console.log('Static UI initialized');
+}
+
+/**
+ * Initialize file drop zone for drag and drop
+ */
+function initializeFileDrop() {
+    const dropZone = document.getElementById('file-drop-zone');
+    const fileInput = document.getElementById('file-input');
+    
+    if (!dropZone || !fileInput) return;
+    
+    // Click on drop zone triggers file input
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+    
+    // Highlight drop zone when dragging over
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('dragover');
+        });
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('dragover');
+        });
+    });
+    
+    // Handle dropped files
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            // Trigger change event
+            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    });
 }
 
 /**
@@ -72,27 +122,27 @@ export function updateImportUI(state) {
         
         importSummary.innerHTML = `
             <dl class="summary-list">
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Auftrags-Nr.</dt>
                     <dd>${escapeHtml(metadata.auftragsNr || 'N/A')}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Protokoll-Nr.</dt>
                     <dd>${escapeHtml(metadata.protokollNr || 'N/A')}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Anlage</dt>
                     <dd>${escapeHtml(metadata.anlage || 'N/A')}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Einsatzort</dt>
                     <dd>${escapeHtml(metadata.einsatzort || 'N/A')}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Datum</dt>
                     <dd>${escapeHtml(metadata.datum || 'N/A')}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Positionen extrahiert</dt>
                     <dd>${positionen.length}</dd>
                 </div>
@@ -106,9 +156,12 @@ export function updateImportUI(state) {
     // Update button states
     if (importButton) {
         importButton.disabled = importState.status === 'pending';
-        importButton.textContent = importState.status === 'pending'
-            ? 'Importiere...'
-            : 'Datei importieren';
+        const buttonText = importButton.querySelector('span');
+        if (buttonText) {
+            buttonText.textContent = importState.status === 'pending'
+                ? 'Importiere...'
+                : 'Datei importieren';
+        }
     }
 }
 
@@ -151,15 +204,15 @@ export function updateGenerateUI(state) {
         
         generateSummary.innerHTML = `
             <dl class="summary-list">
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Eindeutige Positionen</dt>
                     <dd>${Object.keys(positionen).length}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Gesamtmenge</dt>
                     <dd>${totalQuantity.toFixed(2)}</dd>
                 </div>
-                <div class="summary-item">
+                <div class="summary-row">
                     <dt>Generierungszeit</dt>
                     <dd>${generateState.generationTimeMs || 0}ms</dd>
                 </div>
@@ -183,9 +236,12 @@ export function updateGenerateUI(state) {
                             protokollData.positionen.length > 0;
         
         generateButton.disabled = isPending || !hasValidInput;
-        generateButton.textContent = isPending
-            ? 'Erzeuge...'
-            : 'Abrechnung erzeugen';
+        const buttonText = generateButton.querySelector('span');
+        if (buttonText) {
+            buttonText.textContent = isPending
+                ? 'Erzeuge...'
+                : 'Abrechnung erzeugen';
+        }
     }
 }
 
@@ -256,9 +312,12 @@ export function updateExportUI(state) {
                                   Object.keys(abrechnungData.positionen).length > 0;
         
         exportButton.disabled = isPending || !hasValidAbrechnung;
-        exportButton.textContent = isPending
-            ? 'Exportiere...'
-            : 'Abrechnung herunterladen';
+        const buttonText = exportButton.querySelector('span');
+        if (buttonText) {
+            buttonText.textContent = isPending
+                ? 'Exportiere...'
+                : 'Abrechnung herunterladen';
+        }
     }
 }
 

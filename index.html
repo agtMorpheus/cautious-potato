@@ -10,128 +10,450 @@
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-    <header class="app-header">
-        <h1>Abrechnung aus Prüfprotokoll</h1>
-        <p class="app-tagline">
-            Automatische Abrechnungserstellung aus <code>protokoll.xlsx</code>
-        </p>
-    </header>
-
-    <main class="app-main" aria-live="polite">
-        <!-- Global message container -->
-        <div id="global-messages" class="messages" aria-live="assertive"></div>
-
-        <!-- Import Section -->
-        <section id="import-section" class="panel" aria-labelledby="import-heading">
-            <header class="panel-header">
-                <h2 id="import-heading">1. Protokoll importieren</h2>
-                <p class="panel-description">
-                    Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der Vorlage.
-                </p>
-            </header>
-
-            <div class="panel-body">
-                <div class="form-row">
-                    <label for="file-input">Protokoll-Datei (.xlsx)</label>
-                    <input
-                        id="file-input"
-                        type="file"
-                        accept=".xlsx"
-                        aria-describedby="file-help"
-                    />
-                    <p id="file-help" class="hint">
-                        Die Datei wird nur lokal im Browser verarbeitet und nicht hochgeladen.
-                    </p>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" role="navigation" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="logo-text">Abrechnung</span>
                 </div>
-
-                <div class="actions">
-                    <button id="import-button" type="button">Datei importieren</button>
-                </div>
-
-                <div class="status-row">
-                    <span class="status-indicator status-idle" id="import-status"></span>
-                    <p id="import-message" class="status-message">Noch keine Datei importiert.</p>
-                </div>
-
-                <div id="import-summary" class="summary" aria-live="polite" hidden></div>
             </div>
-        </section>
-
-        <!-- Generate Section -->
-        <section id="generate-section" class="panel" aria-labelledby="generate-heading">
-            <header class="panel-header">
-                <h2 id="generate-heading">2. Abrechnung erzeugen</h2>
-                <p class="panel-description">
-                    Positionen werden aggregiert und in die Abrechnungsvorlage übernommen.
-                </p>
-            </header>
-
-            <div class="panel-body">
-                <div class="actions">
-                    <button id="generate-button" type="button" disabled>
-                        Abrechnung erzeugen
-                    </button>
-                </div>
-
-                <div class="status-row">
-                    <span class="status-indicator status-idle" id="generate-status"></span>
-                    <p id="generate-message" class="status-message">Noch keine Abrechnung erzeugt.</p>
-                </div>
-
-                <div id="generate-summary" class="summary" aria-live="polite" hidden></div>
-            </div>
-        </section>
-
-        <!-- Export Section -->
-        <section id="export-section" class="panel" aria-labelledby="export-heading">
-            <header class="panel-header">
-                <h2 id="export-heading">3. Abrechnung exportieren</h2>
-                <p class="panel-description">
-                    Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.
-                </p>
-            </header>
-
-            <div class="panel-body">
-                <div class="actions">
-                    <button id="export-button" type="button" disabled>
-                        Abrechnung herunterladen
-                    </button>
-                </div>
-
-                <div class="status-row">
-                    <span class="status-indicator status-idle" id="export-status"></span>
-                    <p id="export-message" class="status-message">Noch keine Datei exportiert.</p>
-                </div>
-
-                <dl id="export-summary" class="summary" aria-live="polite" hidden>
-                    <div class="summary-item">
-                        <dt>Letzter Export</dt>
-                        <dd id="export-last-date">–</dd>
-                    </div>
-                    <div class="summary-item">
-                        <dt>Dateigröße</dt>
-                        <dd id="export-last-size">–</dd>
-                    </div>
-                </dl>
-            </div>
-        </section>
-
-        <!-- Reset / Debug Section -->
-        <section id="reset-section" class="panel panel-secondary" aria-label="Anwendung zurücksetzen">
-            <div class="panel-body inline">
-                <button id="reset-button" type="button" class="secondary">
-                    Anwendung zurücksetzen
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list" role="menubar">
+                    <li class="nav-item" role="none">
+                        <a href="#dashboard" class="nav-link active" role="menuitem" data-view="dashboard" aria-current="page">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                            </svg>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#import" class="nav-link" role="menuitem" data-view="import">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <span class="nav-text">Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#process" class="nav-link" role="menuitem" data-view="process">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span class="nav-text">Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#export" class="nav-link" role="menuitem" data-view="export">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span class="nav-text">Export</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#templates" class="nav-link" role="menuitem" data-view="templates">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                            <span class="nav-text">Templates</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#settings" class="nav-link" role="menuitem" data-view="settings">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#logs" class="nav-link" role="menuitem" data-view="logs">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            <span class="nav-text">Logs</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#help" class="nav-link" role="menuitem" data-view="help">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="nav-text">Help</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="reset-button" type="button" class="btn-reset">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reset App</span>
                 </button>
-                <p class="hint">Löscht importierte Daten, generierte Abrechnung und lokale Speicherung.</p>
             </div>
-        </section>
-    </main>
+        </aside>
 
-    <footer class="app-footer">
-        <p>
-            Lokale Verarbeitung im Browser • Excel-Verarbeitung mit SheetJS • Zustand mit ES6-Modulen
-        </p>
-    </footer>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="view-title">Dashboard</h1>
+                    <p class="header-subtitle">Übersicht aller Module und aktueller Status</p>
+                </div>
+                <div class="header-actions">
+                    <div id="global-messages" class="messages" aria-live="assertive"></div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Container -->
+            <div class="content-scroll">
+                <!-- Dashboard View -->
+                <section id="view-dashboard" class="view-container active" aria-labelledby="dashboard-heading">
+                    <h2 id="dashboard-heading" class="sr-only">Dashboard Übersicht</h2>
+                    
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon import">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Import Status</span>
+                                <span class="stat-value" id="stat-import-status">Bereit</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon process">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Positionen</span>
+                                <span class="stat-value" id="stat-positions">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon export">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Exporte</span>
+                                <span class="stat-value" id="stat-exports">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon templates">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Templates</span>
+                                <span class="stat-value" id="stat-templates">2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Schnellstart</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions">
+                                <button type="button" class="quick-action-btn" data-action="import">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span>Datei importieren</span>
+                                </button>
+                                <button type="button" class="quick-action-btn" data-action="process" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Abrechnung erzeugen</span>
+                                </button>
+                                <button type="button" class="quick-action-btn" data-action="export" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <span>Export herunterladen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Letzte Aktivitäten</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="activity-log" class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon info">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p class="activity-text">Anwendung bereit. Importieren Sie ein Protokoll, um zu beginnen.</p>
+                                        <span class="activity-time">Gerade eben</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Import View -->
+                <section id="view-import" class="view-container" aria-labelledby="import-heading">
+                    <h2 id="import-heading" class="sr-only">Protokoll importieren</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Protokoll importieren</h3>
+                            <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der Vorlage.</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="file-input" class="form-label">Protokoll-Datei (.xlsx)</label>
+                                <div class="file-upload-area" id="file-drop-zone">
+                                    <input
+                                        id="file-input"
+                                        type="file"
+                                        accept=".xlsx"
+                                        aria-describedby="file-help"
+                                        class="file-input-hidden"
+                                    />
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p class="upload-text">Datei hierher ziehen oder <span class="upload-link">durchsuchen</span></p>
+                                    <p class="upload-hint" id="file-help">Die Datei wird nur lokal im Browser verarbeitet.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="import-button" type="button" class="btn btn-primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span>Datei importieren</span>
+                                </button>
+                            </div>
+
+                            <div class="status-display">
+                                <span class="status-indicator status-idle" id="import-status"></span>
+                                <p id="import-message" class="status-message">Noch keine Datei importiert.</p>
+                            </div>
+
+                            <div id="import-summary" class="summary-panel" aria-live="polite" hidden></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Process View -->
+                <section id="view-process" class="view-container" aria-labelledby="process-heading">
+                    <h2 id="process-heading" class="sr-only">Abrechnung erzeugen</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Abrechnung erzeugen</h3>
+                            <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage übernommen.</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-actions">
+                                <button id="generate-button" type="button" class="btn btn-primary" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Abrechnung erzeugen</span>
+                                </button>
+                            </div>
+
+                            <div class="status-display">
+                                <span class="status-indicator status-idle" id="generate-status"></span>
+                                <p id="generate-message" class="status-message">Noch keine Abrechnung erzeugt.</p>
+                            </div>
+
+                            <div id="generate-summary" class="summary-panel" aria-live="polite" hidden></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Export View -->
+                <section id="view-export" class="view-container" aria-labelledby="export-heading">
+                    <h2 id="export-heading" class="sr-only">Abrechnung exportieren</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Abrechnung exportieren</h3>
+                            <p class="card-description">Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-actions">
+                                <button id="export-button" type="button" class="btn btn-primary" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <span>Abrechnung herunterladen</span>
+                                </button>
+                            </div>
+
+                            <div class="status-display">
+                                <span class="status-indicator status-idle" id="export-status"></span>
+                                <p id="export-message" class="status-message">Noch keine Datei exportiert.</p>
+                            </div>
+
+                            <dl id="export-summary" class="summary-panel" aria-live="polite" hidden>
+                                <div class="summary-row">
+                                    <dt>Letzter Export</dt>
+                                    <dd id="export-last-date">–</dd>
+                                </div>
+                                <div class="summary-row">
+                                    <dt>Dateigröße</dt>
+                                    <dd id="export-last-size">–</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Templates View -->
+                <section id="view-templates" class="view-container" aria-labelledby="templates-heading">
+                    <h2 id="templates-heading" class="sr-only">Templates verwalten</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Verfügbare Templates</h3>
+                            <p class="card-description">Excel-Vorlagen für Import und Export</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="template-grid">
+                                <div class="template-item">
+                                    <div class="template-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="template-info">
+                                        <h4 class="template-name">protokoll.xlsx</h4>
+                                        <p class="template-desc">Prüfprotokoll-Vorlage</p>
+                                    </div>
+                                </div>
+                                <div class="template-item">
+                                    <div class="template-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="template-info">
+                                        <h4 class="template-name">abrechnung.xlsx</h4>
+                                        <p class="template-desc">Abrechnungs-Vorlage</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings View -->
+                <section id="view-settings" class="view-container" aria-labelledby="settings-heading">
+                    <h2 id="settings-heading" class="sr-only">Einstellungen</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Anwendungseinstellungen</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="settings-group">
+                                <h4 class="settings-label">Speicherung</h4>
+                                <p class="settings-desc">Lokale Daten werden im Browser-Speicher abgelegt.</p>
+                                <button type="button" class="btn btn-secondary btn-sm" id="clear-storage-btn">
+                                    Lokalen Speicher löschen
+                                </button>
+                            </div>
+                            <div class="settings-group">
+                                <h4 class="settings-label">Version</h4>
+                                <p class="settings-desc">Abrechnung App v1.0.0</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Logs View -->
+                <section id="view-logs" class="view-container" aria-labelledby="logs-heading">
+                    <h2 id="logs-heading" class="sr-only">Protokoll</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Anwendungsprotokoll</h3>
+                            <p class="card-description">Letzte Aktivitäten und Systemereignisse</p>
+                        </div>
+                        <div class="card-body">
+                            <div id="log-entries" class="log-list">
+                                <div class="log-entry">
+                                    <span class="log-time">--:--:--</span>
+                                    <span class="log-level info">INFO</span>
+                                    <span class="log-message">Anwendung gestartet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Help View -->
+                <section id="view-help" class="view-container" aria-labelledby="help-heading">
+                    <h2 id="help-heading" class="sr-only">Hilfe</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Hilfe & Dokumentation</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="help-section">
+                                <h4>Workflow</h4>
+                                <ol class="help-steps">
+                                    <li><strong>Import:</strong> Laden Sie ein ausgefülltes Prüfprotokoll hoch.</li>
+                                    <li><strong>Process:</strong> Erzeugen Sie die Abrechnung aus den Protokolldaten.</li>
+                                    <li><strong>Export:</strong> Laden Sie die fertige Abrechnung herunter.</li>
+                                </ol>
+                            </div>
+                            <div class="help-section">
+                                <h4>Unterstützte Dateiformate</h4>
+                                <p>Es werden nur <code>.xlsx</code> Dateien unterstützt.</p>
+                            </div>
+                            <div class="help-section">
+                                <h4>Datenschutz</h4>
+                                <p>Alle Daten werden lokal im Browser verarbeitet. Es werden keine Daten auf externe Server übertragen.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Footer -->
+            <footer class="content-footer">
+                <p>Lokale Verarbeitung • Excel mit SheetJS • ES6 Module</p>
+            </footer>
+        </main>
+    </div>
 
     <!-- SheetJS Library -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
