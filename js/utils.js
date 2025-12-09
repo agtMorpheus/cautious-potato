@@ -560,9 +560,27 @@ export async function safeReadAndParseProtokoll(file) {
  * @param {Object} workbook - SheetJS workbook object
  * @param {string} filename - Filename for export
  */
-export function exportToExcel(workbook, filename) {
+export function exportToExcel(workbook, metadata) {
     try {
+        // Generate filename based on metadata
+        let filename;
+        if (metadata && metadata.orderNumber) {
+            filename = generateExportFilename(metadata.orderNumber);
+        } else if (typeof metadata === 'string') {
+            // Backward compatibility: if metadata is a string, treat it as filename
+            filename = metadata;
+        } else {
+            filename = generateExportFilename('Abrechnung');
+        }
+        
+        // Write the file
         XLSX.writeFile(workbook, filename);
+        
+        // Return metadata for Phase 4
+        return {
+            fileName: filename,
+            fileSize: 0 // Browser doesn't provide actual file size for downloads
+        };
     } catch (error) {
         throw new Error('Fehler beim Exportieren: ' + error.message);
     }
