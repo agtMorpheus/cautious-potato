@@ -3,13 +3,19 @@
  * 
  * Interactive UI for mapping Excel cells to metadata fields
  * Allows users to preview and adjust cell mappings before import
+ * 
+ * Note: Requires XLSX library (SheetJS) to be loaded globally
  */
 
 import { getMetadataCellMap, updateMetadataCellMap } from './utils.js';
 import { PARSING_CONFIG } from './config.js';
 
+// XLSX is loaded globally from CDN in index.html
+/* global XLSX */
+
 /**
  * Preview cell values from workbook
+ * Expands search to include adjacent cells to catch label/value pairs
  * @param {Object} workbook - SheetJS workbook
  * @param {Array<string>} cellAddresses - Cell addresses to preview
  * @returns {Object} Map of cell address to value
@@ -24,24 +30,77 @@ export function previewCellValues(workbook, cellAddresses) {
     const worksheet = workbook.Sheets[sheetName];
     const preview = {};
     
+    // For each configured cell, also check adjacent cells
+    // This helps when the configured cell contains a label instead of the value
     for (const address of cellAddresses) {
         const cell = worksheet[address];
         preview[address] = cell ? cell.v : null;
+        
+        // Also preview adjacent cells (right, left, below)
+        const adjacentAddresses = getAdjacentCells(address);
+        for (const adjAddr of adjacentAddresses) {
+            if (!preview[adjAddr]) { // Don't overwrite if already in list
+                const adjCell = worksheet[adjAddr];
+                preview[adjAddr] = adjCell ? adjCell.v : null;
+            }
+        }
     }
     
     return preview;
 }
 
 /**
+ * Get adjacent cell addresses for a given cell
+ * @param {string} address - Cell address (e.g., 'A5')
+ * @returns {Array<string>} Adjacent cell addresses
+ */
+function getAdjacentCells(address) {
+    // Parse cell address using SheetJS utility
+    const decoded = XLSX.utils.decode_cell(address);
+    const row = decoded.r;
+    const col = decoded.c;
+    
+    const adjacent = [];
+    
+    // Right (most common for label: value pairs)
+    if (col < 16383) { // Max Excel column
+        adjacent.push(XLSX.utils.encode_cell({ r: row, c: col + 1 }));
+    }
+    
+    // Left
+    if (col > 0) {
+        adjacent.push(XLSX.utils.encode_cell({ r: row, c: col - 1 }));
+    }
+    
+    // Below
+    if (row < 1048575) { // Max Excel row
+        adjacent.push(XLSX.utils.encode_cell({ r: row + 1, c: col }));
+    }
+    
+    // Two cells right (for wider layouts)
+    if (col < 16382) {
+        adjacent.push(XLSX.utils.encode_cell({ r: row, c: col + 2 }));
+    }
+    
+    return adjacent;
+}
+
+/**
  * Get all possible cell addresses for preview
- * @returns {Array<string>} All cell addresses from config
+ * Includes configured cells and their adjacent cells
+ * @returns {Array<string>} All cell addresses from config plus adjacent cells
  */
 export function getAllConfiguredCells() {
     const config = getMetadataCellMap();
     const allCells = new Set();
     
+    // Add all configured cells
     for (const cellArray of Object.values(config)) {
-        cellArray.forEach(cell => allCells.add(cell));
+        cellArray.forEach(cell => {
+            allCells.add(cell);
+            // Also add adjacent cells to catch label/value pairs
+            getAdjacentCells(cell).forEach(adj => allCells.add(adj));
+        });
     }
     
     return Array.from(allCells).sort();
@@ -49,6 +108,7 @@ export function getAllConfiguredCells() {
 
 /**
  * Find best matching cell for a field based on preview values
+ * Tries to detect if a cell contains a label vs actual data
  * @param {string} field - Field name
  * @param {Object} preview - Cell preview map
  * @returns {string|null} Best matching cell address
@@ -57,7 +117,50 @@ export function findBestMatch(field, preview) {
     const config = getMetadataCellMap();
     const cellAddresses = config[field] || [];
     
-    // Return first non-empty cell
+    // Common label patterns that indicate this is a label cell, not data
+    const labelPatterns = [
+        /^(auftrags?[-\s]?nr|order[-\s]?number|auftrag)[:.]?\s*$/i,
+        /^(protokoll[-\s]?nr|protocol[-\s]?number)[:.]?\s*$/i,
+        /^(anlage|plant|facility)[:.]?\s*$/i,
+        /^(einsatzort|ort|location|standort)[:.]?\s*$/i,
+        /^(firma|company|unternehmen)[:.]?\s*$/i,
+        /^(auftraggeber|client|kunde|customer)[:.]?\s*$/i
+    ];
+    
+    // Strategy 1: Try configured cells, but skip if they look like labels
+    for (const address of cellAddresses) {
+        const value = preview[address];
+        if (value && String(value).trim()) {
+            const valueStr = String(value).trim();
+            
+            // Check if this looks like a label
+            const isLabel = labelPatterns.some(pattern => pattern.test(valueStr));
+            
+            if (!isLabel) {
+                // This looks like actual data, use it
+                return address;
+            } else {
+                // This is a label, check adjacent cells for the actual value
+                console.log(`Cell ${address} contains label "${valueStr}", checking adjacent cells`);
+                const adjacentCells = getAdjacentCells(address);
+                
+                for (const adjAddr of adjacentCells) {
+                    const adjValue = preview[adjAddr];
+                    if (adjValue && String(adjValue).trim()) {
+                        const adjStr = String(adjValue).trim();
+                        const adjIsLabel = labelPatterns.some(pattern => pattern.test(adjStr));
+                        
+                        if (!adjIsLabel) {
+                            console.log(`Found value "${adjStr}" in adjacent cell ${adjAddr}`);
+                            return adjAddr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Strategy 2: If no match found, return first non-empty cell (fallback)
     for (const address of cellAddresses) {
         const value = preview[address];
         if (value && String(value).trim()) {
@@ -111,7 +214,23 @@ export function createCellMapperDialog(workbook) {
     for (const field of fields) {
         const bestMatch = findBestMatch(field.key, preview);
         const value = bestMatch ? preview[bestMatch] : '';
-        const cellOptions = config[field.key] || [];
+        
+        // Get configured cells plus their adjacent cells for this field
+        const configuredCells = config[field.key] || [];
+        const expandedCellOptions = new Set(configuredCells);
+        
+        // Add adjacent cells to options
+        for (const cell of configuredCells) {
+            getAdjacentCells(cell).forEach(adj => expandedCellOptions.add(adj));
+        }
+        
+        // Convert to array, filter out empty cells, and sort
+        const cellOptions = Array.from(expandedCellOptions)
+            .filter(addr => {
+                const cellValue = preview[addr];
+                return cellValue && String(cellValue).trim(); // Only include non-empty cells
+            })
+            .sort();
         
         html += `
             <div class="cell-mapper-row ${field.required ? 'required' : ''}">
@@ -127,10 +246,10 @@ export function createCellMapperDialog(workbook) {
                         <option value="">-- Keine Zuordnung --</option>
         `;
         
-        // Add options for each configured cell
+        // Add options for each non-empty cell
         for (const cellAddr of cellOptions) {
             const cellValue = preview[cellAddr];
-            const displayValue = cellValue ? String(cellValue).substring(0, 30) : '(leer)';
+            const displayValue = String(cellValue).substring(0, 30);
             const selected = cellAddr === bestMatch ? 'selected' : '';
             
             html += `

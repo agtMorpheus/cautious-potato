@@ -685,9 +685,10 @@ function searchMetadataByPattern(worksheet, pattern, searchRange = 'A1:Z50') {
             const cellValue = getCellValue(worksheet, cellAddress);
             
             if (cellValue && pattern.test(String(cellValue))) {
-                // Found label, check adjacent cells for value
+                // Found label cell, now look for the actual value in adjacent cells
+                // Priority: Right (most common), Two cells right, Below, Diagonal, Left
                 const adjacentCells = [
-                    { r: row, c: col + 1 },     // Right
+                    { r: row, c: col + 1 },     // Right (most common: Label | Value)
                     { r: row, c: col + 2 },     // Two cells right
                     { r: row + 1, c: col },     // Below
                     { r: row + 1, c: col + 1 }, // Diagonal
@@ -700,11 +701,17 @@ function searchMetadataByPattern(worksheet, pattern, searchRange = 'A1:Z50') {
                         const adjAddress = XLSX.utils.encode_cell(pos);
                         const adjValue = getCellValue(worksheet, adjAddress);
                         
-                        if (adjValue && String(adjValue).trim()) {
+                        // Make sure we found a value AND it's not another label
+                        // (i.e., it doesn't match the same pattern)
+                        if (adjValue && String(adjValue).trim() && !pattern.test(String(adjValue))) {
+                            console.log(`Pattern search: Found "${cellValue}" at ${cellAddress}, value "${adjValue}" at ${adjAddress}`);
                             return { value: adjValue, address: adjAddress };
                         }
                     }
                 }
+                
+                // If we found the label but no adjacent value, log it for debugging
+                console.warn(`Pattern search: Found label "${cellValue}" at ${cellAddress} but no adjacent value`);
             }
         }
     }

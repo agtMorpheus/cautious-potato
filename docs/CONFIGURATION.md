@@ -134,9 +134,17 @@ export const POSITION_CONFIG = {
 When `strictMode: false` (default), the parser can search for metadata by looking for label patterns:
 
 **How it works:**
-1. Parser looks for cells containing text like "Auftrags-Nr", "Order Number", etc.
+1. Parser looks for cells containing text like "Auftrags-Nr", "Order Number", "Ort", etc.
 2. When found, it checks adjacent cells (right, below, diagonal) for the actual value
-3. This helps when cell locations vary between different Protokoll versions
+3. Skips cells that also match the label pattern (to avoid returning another label)
+4. Returns the first non-empty, non-label value found
+5. This helps when cell locations vary between different Protokoll versions
+
+**Example:**
+```
+Cell A5: "Ort:"        ← Label found by pattern
+Cell B5: "Halle 3"     ← Value returned (right of label)
+```
 
 **Search patterns:**
 ```javascript
