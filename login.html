@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contract Manager – Login">
+    <title>Contract Manager – Anmeldung</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body class="login-body">
+    <main class="login-container">
+        <section class="login-panel">
+            <div class="login-header">
+                <h1>Contract Manager</h1>
+                <p class="login-subtitle">Bitte melden Sie sich an, um fortzufahren</p>
+            </div>
+            
+            <form id="login-form" method="POST" autocomplete="on">
+                <div class="form-group">
+                    <label for="username">Benutzername</label>
+                    <input 
+                        id="username" 
+                        type="text" 
+                        name="username" 
+                        autocomplete="username"
+                        required 
+                        autofocus
+                        placeholder="Ihr Benutzername"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input 
+                        id="password" 
+                        type="password" 
+                        name="password" 
+                        autocomplete="current-password"
+                        required
+                        placeholder="Ihr Passwort"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="password-toggle"
+                        aria-label="Passwort anzeigen/verbergen"
+                    >
+                        <span class="icon-eye">👁</span>
+                    </button>
+                </div>
+                
+                <div class="form-group form-group--checkbox">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remember-me" name="remember">
+                        <span>Angemeldet bleiben</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn--primary btn--full" id="login-button">
+                    <span class="btn-text">Anmelden</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
+                
+                <div id="login-error" class="status status--error" role="alert" aria-live="polite"></div>
+            </form>
+            
+            <div class="login-footer">
+                <p class="login-hint">
+                    <a href="#" id="forgot-password-link">Passwort vergessen?</a>
+                </p>
+            </div>
+        </section>
+        
+        <aside class="login-info">
+            <div class="info-content">
+                <h2>Willkommen</h2>
+                <p>Der Contract Manager hilft Ihnen bei der Verwaltung und Nachverfolgung Ihrer Verträge.</p>
+                <ul class="feature-list">
+                    <li>📋 Verträge importieren und verwalten</li>
+                    <li>🔍 Schnelle Suche und Filterung</li>
+                    <li>📊 Übersichtliche Statusanzeige</li>
+                    <li>📤 Export in verschiedene Formate</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+    
+    <!-- Offline indicator -->
+    <div id="offline-indicator" class="offline-indicator" role="status" aria-live="polite">
+        <span class="offline-icon">📡</span>
+        <span class="offline-text">Keine Internetverbindung</span>
+    </div>
+
+    <script type="module">
+        import { apiClient } from './js/contracts/contractApiClient.js';
+
+        // DOM elements
+        const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const loginError = document.getElementById('login-error');
+        const passwordToggle = document.getElementById('password-toggle');
+        const offlineIndicator = document.getElementById('offline-indicator');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+        // Check if already logged in
+        async function checkExistingSession() {
+            try {
+                const user = await apiClient.getCurrentUser();
+                if (user) {
+                    // Already logged in, redirect to main app
+                    window.location.href = '/index.html';
+                }
+            } catch (err) {
+                // Not logged in, stay on login page
+                console.log('No active session');
+            }
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!username || !password) {
+                showError('Bitte geben Sie Benutzername und Passwort ein.');
+                return;
+            }
+            
+            setLoading(true);
+            hideError();
+            
+            try {
+                await apiClient.login(username, password);
+                // Success - redirect to main app
+                window.location.href = '/index.html';
+                
+            } catch (err) {
+                console.error('Login failed:', err);
+                
+                // Show user-friendly error message
+                let errorMessage = 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+                
+                if (err.status === 401) {
+                    errorMessage = 'Ungültiger Benutzername oder Passwort.';
+                } else if (err.status === 403) {
+                    errorMessage = 'Ihr Konto ist deaktiviert. Bitte kontaktieren Sie den Administrator.';
+                } else if (!navigator.onLine) {
+                    errorMessage = 'Keine Internetverbindung. Bitte überprüfen Sie Ihre Verbindung.';
+                }
+                
+                showError(errorMessage);
+                setLoading(false);
+            }
+        });
+
+        // Password visibility toggle
+        passwordToggle.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            passwordToggle.querySelector('.icon-eye').textContent = isPassword ? '🙈' : '👁';
+        });
+
+        // Forgot password link
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Bitte kontaktieren Sie Ihren Administrator, um Ihr Passwort zurückzusetzen.');
+        });
+
+        // Online/offline status
+        function updateOnlineStatus() {
+            offlineIndicator.classList.toggle('visible', !navigator.onLine);
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // Helper functions
+        function setLoading(isLoading) {
+            loginButton.classList.toggle('loading', isLoading);
+            loginButton.disabled = isLoading;
+            usernameInput.disabled = isLoading;
+            passwordInput.disabled = isLoading;
+        }
+
+        function showError(message) {
+            loginError.textContent = message;
+            loginError.style.display = 'block';
+        }
+
+        function hideError() {
+            loginError.textContent = '';
+            loginError.style.display = 'none';
+        }
+
+        // Initialize
+        updateOnlineStatus();
+        checkExistingSession();
+    </script>
+</body>
+</html>
