@@ -16,6 +16,9 @@
 // Configuration constants
 const QUANTITY_COLUMN_FALLBACKS = ['X', 'B', 'C']; // Columns to check for quantity values
 
+// Position number format pattern: DD.DD.DDDD (e.g., "01.01.0010")
+const POSITION_NUMBER_PATTERN = /^\d{2}\.\d{2}\.\d{4}/;
+
 // Template cache for performance optimization
 let cachedAbrechnungTemplate = null;
 
@@ -59,7 +62,7 @@ export async function readExcelFile(file) {
                 resolve({
                     workbook,
                     metadata: {
-                        fileName: fileName,
+                        fileName,
                         fileSize: file.size,
                         readAt: new Date().toISOString()
                     }
@@ -152,7 +155,14 @@ export function extractPositions(workbook) {
 }
 
 /**
- * Sum positions by position number
+ * Sum positions by position number.
+ * 
+ * Note: This function throws errors for invalid input that prevents processing,
+ * in contrast to validateExtractedPositions() which collects validation issues
+ * for reporting. Use validateExtractedPositions() before this function to get
+ * user-friendly validation feedback, or use safeReadAndParseProtokoll() for
+ * complete error handling.
+ * 
  * @param {Array} positionen - Array of position objects
  * @returns {Object} Object with summed quantities by position number
  * @throws {Error} If positionen is not an array or contains invalid objects
@@ -225,8 +235,8 @@ export function validateExtractedPositions(positionen) {
             posNrMap.set(pos.posNr, pos.row);
         }
         
-        // Check for invalid Pos.Nr. format (should be like "01.01.0010")
-        if (!/^\d{2}\.\d{2}\.\d{4}/.test(pos.posNr)) {
+        // Check for invalid Pos.Nr. format using named constant
+        if (!POSITION_NUMBER_PATTERN.test(pos.posNr)) {
             warnings.push(`Position ${pos.posNr} in Zeile ${pos.row} hat unerwartetes Format`);
         }
         
