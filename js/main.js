@@ -1,34 +1,38 @@
 /**
- * Main Application Module
+ * Main Application Module (Phase 2)
  * 
  * Application initialization and event listener setup
+ * Implements Phase 2 state management and event-driven architecture
  */
 
-import { getState, subscribe, loadState } from './state.js';
+import { getState, subscribe, loadStateFromStorage } from './state.js';
 import * as handlers from './handlers.js';
 
 /**
  * Initialize the application
  */
 function initializeApp() {
-    console.log('Initializing Abrechnung Generator...');
+    console.log('=== Abrechnung Application Initializing (Phase 2) ===');
     
-    // Load saved state from localStorage
-    const stateLoaded = loadState();
-    if (stateLoaded) {
-        console.log('Previous state loaded from localStorage');
-    }
+    // 1. Load persisted state from localStorage
+    const initialState = loadStateFromStorage();
+    console.log('Initial state:', initialState);
     
-    // Set up event listeners
+    // 2. Set up event listeners
     setupEventListeners();
     
-    // Subscribe to state changes for UI updates
+    // 3. Subscribe to state changes for UI updates
     subscribe(updateUI);
     
-    // Initial UI update
+    // 4. Subscribe to state changes for debugging (development only)
+    subscribe((nextState) => {
+        console.log('State changed:', nextState);
+    });
+    
+    // 5. Initial UI update based on loaded state
     updateUI(getState());
     
-    console.log('Abrechnung Generator initialized successfully');
+    console.log('=== Abrechnung Generator initialized successfully (Phase 2) ===');
 }
 
 /**
@@ -69,72 +73,96 @@ function setupEventListeners() {
 }
 
 /**
- * Update UI based on current state
+ * Update UI based on current state (Phase 2)
  * @param {Object} state - Current application state
  */
 function updateUI(state) {
-    // Update status badge
-    updateStatusBadge(state.status);
+    // Update status badge based on new UI state structure
+    updateStatusBadge(state);
     
     // Update button states
     updateButtonStates(state);
 }
 
 /**
- * Update status badge display
- * @param {string} status - Current status
+ * Update status badge display (Phase 2)
+ * Derives overall status from ui section statuses
+ * @param {Object} state - Current application state
  */
-function updateStatusBadge(status) {
+function updateStatusBadge(state) {
     const statusBadge = document.getElementById('statusBadge');
     if (!statusBadge) return;
     
     // Remove all status classes
     statusBadge.classList.remove('importing', 'generating', 'ready', 'error');
     
-    // Set status text and class
-    switch (status) {
-        case 'importing':
-            statusBadge.textContent = 'Importiere...';
-            statusBadge.classList.add('importing');
-            break;
-        case 'imported':
-            statusBadge.textContent = 'Protokoll importiert';
-            statusBadge.classList.add('ready');
-            break;
-        case 'generating':
-            statusBadge.textContent = 'Generiere...';
-            statusBadge.classList.add('generating');
-            break;
-        case 'generated':
-            statusBadge.textContent = 'Abrechnung bereit';
-            statusBadge.classList.add('ready');
-            break;
-        case 'error':
-            statusBadge.textContent = 'Fehler';
-            statusBadge.classList.add('error');
-            break;
-        default:
-            statusBadge.textContent = 'Bereit';
-            statusBadge.classList.add('ready');
+    const ui = state.ui;
+    
+    // Determine status based on UI section statuses (Phase 2 structure)
+    // Check for errors first
+    if (ui.import.status === 'error' || ui.generate.status === 'error' || ui.export.status === 'error') {
+        statusBadge.textContent = 'Fehler';
+        statusBadge.classList.add('error');
+        return;
     }
+    
+    // Check for pending operations
+    if (ui.import.status === 'pending') {
+        statusBadge.textContent = 'Importiere...';
+        statusBadge.classList.add('importing');
+        return;
+    }
+    
+    if (ui.generate.status === 'pending') {
+        statusBadge.textContent = 'Generiere...';
+        statusBadge.classList.add('generating');
+        return;
+    }
+    
+    if (ui.export.status === 'pending') {
+        statusBadge.textContent = 'Exportiere...';
+        statusBadge.classList.add('generating');
+        return;
+    }
+    
+    // Check for successful completion states
+    if (ui.generate.status === 'success') {
+        statusBadge.textContent = 'Abrechnung bereit';
+        statusBadge.classList.add('ready');
+        return;
+    }
+    
+    if (ui.import.status === 'success') {
+        statusBadge.textContent = 'Protokoll importiert';
+        statusBadge.classList.add('ready');
+        return;
+    }
+    
+    // Default idle state
+    statusBadge.textContent = 'Bereit';
+    statusBadge.classList.add('ready');
 }
 
 /**
- * Update button enabled/disabled states
+ * Update button enabled/disabled states (Phase 2)
  * @param {Object} state - Current application state
  */
 function updateButtonStates(state) {
     const generateBtn = document.getElementById('generateBtn');
     const exportBtn = document.getElementById('exportBtn');
     
-    // Generate button - enabled if protokoll is imported
+    // Check if protokollData has positions (Phase 2 structure)
+    const hasProtokollData = state.protokollData?.positionen?.length > 0;
+    const hasAbrechnungData = Object.keys(state.abrechnungData?.positionen || {}).length > 0;
+    
+    // Generate button - enabled if protokoll is imported and not currently importing
     if (generateBtn) {
-        generateBtn.disabled = !state.protokollData || state.status === 'importing';
+        generateBtn.disabled = !hasProtokollData || state.ui.import.status === 'pending';
     }
     
-    // Export button - enabled if abrechnung is generated
+    // Export button - enabled if abrechnung is generated and not currently generating
     if (exportBtn) {
-        exportBtn.disabled = !state.abrechnungData || state.status === 'generating';
+        exportBtn.disabled = !hasAbrechnungData || state.ui.generate.status === 'pending';
     }
 }
 

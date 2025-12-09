@@ -1,14 +1,32 @@
 /**
- * Event Handlers Module
+ * Event Handlers Module (Phase 2)
  * 
  * Handles user interactions and coordinates between UI, state, and utilities
+ * Uses Phase 2 state management with domain-specific helper functions
  */
 
-import { getState, setState, clearState } from './state.js';
+import { 
+    getState, 
+    setState, 
+    resetState, 
+    clearPersistedState,
+    setImportStatus,
+    setGenerateStatus,
+    setExportStatus,
+    updateProtokollData,
+    updateAbrechnungPositions,
+    updateAbrechnungHeader
+} from './state.js';
 import * as utils from './utils.js';
 
+// Store selected file reference (not persisted in state)
+let selectedFile = null;
+
+// Store generated workbook reference (not persisted in state - can't be serialized)
+let generatedWorkbook = null;
+
 /**
- * Handle file input change
+ * Handle file input change (Phase 2)
  * @param {Event} event - File input change event
  */
 export function handleFileSelect(event) {
@@ -20,37 +38,53 @@ export function handleFileSelect(event) {
         fileNameDisplay.textContent = file.name;
         importBtn.disabled = false;
         
-        // Store file reference in state
-        setState({ selectedFile: file });
+        // Store file reference locally (not in state - files can't be serialized)
+        selectedFile = file;
+        
+        // Update UI state with file info
+        setImportStatus({
+            fileName: file.name,
+            fileSize: file.size,
+            status: 'idle',
+            message: ''
+        });
     } else {
         fileNameDisplay.textContent = 'Keine Datei ausgewählt';
         importBtn.disabled = true;
-        setState({ selectedFile: null });
+        selectedFile = null;
+        
+        setImportStatus({
+            fileName: '',
+            fileSize: 0,
+            status: 'idle',
+            message: ''
+        });
     }
 }
 
 /**
- * Handle protokoll import
+ * Handle protokoll import (Phase 2)
  */
 export async function handleImportProtokoll() {
-    const state = getState();
-    const file = state.selectedFile;
     const statusElement = document.getElementById('importStatus');
     const previewElement = document.getElementById('importPreview');
     
-    if (!file) {
+    if (!selectedFile) {
         showStatus(statusElement, 'Bitte wählen Sie zuerst eine Datei aus', 'error');
+        setImportStatus({ status: 'error', message: 'Keine Datei ausgewählt' });
         return;
     }
     
+    const startTime = Date.now();
+    
     try {
-        // Update UI state
-        setState({ status: 'importing' });
+        // Update UI state to pending
+        setImportStatus({ status: 'pending', message: 'Protokoll wird importiert...' });
         showStatus(statusElement, 'Protokoll wird importiert...', 'info');
         previewElement.classList.remove('show');
         
         // Read Excel file
-        const workbook = await utils.readExcelFile(file);
+        const workbook = await utils.readExcelFile(selectedFile);
         
         // Parse metadata
         const metadata = utils.parseProtokollMetadata(workbook);
@@ -62,14 +96,30 @@ export async function handleImportProtokoll() {
             throw new Error('Keine Positionen im Protokoll gefunden');
         }
         
-        // Update state with imported data
-        setState({
-            protokollData: {
-                metadata,
-                positionen
+        // Update state with imported data using Phase 2 helpers
+        // Map legacy metadata fields to Phase 2 structure
+        updateProtokollData({
+            metadata: {
+                protocolNumber: metadata.protokollNr,
+                orderNumber: metadata.auftragsNr,
+                plant: metadata.anlage,
+                location: metadata.einsatzort,
+                company: metadata.firma,
+                date: metadata.datum
             },
-            status: 'imported'
+            positionen: positionen
         });
+        
+        // Update import status to success
+        setImportStatus({
+            status: 'success',
+            message: `Protokoll erfolgreich importiert (${positionen.length} Positionen)`,
+            importedAt: new Date().toISOString()
+        });
+        
+        // Reset generate and export status since we have new data
+        setGenerateStatus({ status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0 });
+        setExportStatus({ status: 'idle', message: '' });
         
         // Show success message
         showStatus(
@@ -78,40 +128,54 @@ export async function handleImportProtokoll() {
             'success'
         );
         
-        // Show preview
+        // Show preview using legacy metadata format for display
         showImportPreview(metadata, positionen);
         
     } catch (error) {
         console.error('Import error:', error);
-        setState({ status: 'error' });
+        setImportStatus({ status: 'error', message: error.message });
         showStatus(statusElement, `✗ Fehler: ${error.message}`, 'error');
     }
 }
 
 /**
- * Handle abrechnung generation
+ * Handle abrechnung generation (Phase 2)
  */
 export async function handleGenerateAbrechnung() {
     const state = getState();
     const statusElement = document.getElementById('generateStatus');
     const previewElement = document.getElementById('generatePreview');
     
-    if (!state.protokollData) {
+    // Check if protokollData has positions
+    if (!state.protokollData?.positionen?.length) {
         showStatus(statusElement, 'Bitte importieren Sie zuerst ein Protokoll', 'error');
+        setGenerateStatus({ status: 'error', message: 'Kein Protokoll importiert' });
         return;
     }
     
+    const startTime = Date.now();
+    
     try {
-        // Update UI state
-        setState({ status: 'generating' });
+        // Update UI state to pending
+        setGenerateStatus({ status: 'pending', message: 'Abrechnung wird generiert...' });
         showStatus(statusElement, 'Abrechnung wird generiert...', 'info');
         previewElement.classList.remove('show');
         
         // Load template
         const workbook = await utils.loadAbrechnungTemplate();
         
+        // Create legacy metadata format for utils
+        const legacyMetadata = {
+            protokollNr: state.protokollData.metadata.protocolNumber,
+            auftragsNr: state.protokollData.metadata.orderNumber,
+            anlage: state.protokollData.metadata.plant,
+            einsatzort: state.protokollData.metadata.location,
+            firma: state.protokollData.metadata.company,
+            datum: state.protokollData.metadata.date
+        };
+        
         // Fill header
-        utils.fillAbrechnungHeader(workbook, state.protokollData.metadata);
+        utils.fillAbrechnungHeader(workbook, legacyMetadata);
         
         // Sum positions
         const positionSums = utils.sumByPosition(state.protokollData.positionen);
@@ -119,67 +183,125 @@ export async function handleGenerateAbrechnung() {
         // Fill positions
         utils.fillAbrechnungPositions(workbook, positionSums);
         
-        // Update state with generated data
-        setState({
-            abrechnungData: {
-                header: state.protokollData.metadata,
-                positionen: positionSums,
-                workbook: workbook
-            },
-            status: 'generated'
+        const generationTimeMs = Date.now() - startTime;
+        
+        // Update abrechnung data using Phase 2 helpers
+        updateAbrechnungHeader({
+            date: state.protokollData.metadata.date,
+            orderNumber: state.protokollData.metadata.orderNumber,
+            plant: state.protokollData.metadata.plant,
+            location: state.protokollData.metadata.location
+        });
+        updateAbrechnungPositions(positionSums);
+        
+        // Store workbook reference for export (not in state - can't be serialized)
+        // We'll need to regenerate it on export if needed
+        generatedWorkbook = workbook;
+        
+        // Update generate status to success
+        const positionCount = Object.keys(positionSums).length;
+        setGenerateStatus({
+            status: 'success',
+            message: `Abrechnung erfolgreich generiert (${positionCount} Positionen)`,
+            positionCount: state.protokollData.positionen.length,
+            uniquePositionCount: positionCount,
+            generationTimeMs: generationTimeMs
         });
         
+        // Reset export status
+        setExportStatus({ status: 'idle', message: '' });
+        
         // Show success message
-        const positionCount = Object.keys(positionSums).length;
         showStatus(
             statusElement,
             `✓ Abrechnung erfolgreich generiert (${positionCount} Positionen)`,
             'success'
         );
         
-        // Show preview
-        showGeneratePreview(state.protokollData.metadata, positionSums);
+        // Show preview using legacy metadata for display
+        showGeneratePreview(legacyMetadata, positionSums);
         
     } catch (error) {
         console.error('Generation error:', error);
-        setState({ status: 'error' });
+        setGenerateStatus({ status: 'error', message: error.message });
         showStatus(statusElement, `✗ Fehler: ${error.message}`, 'error');
     }
 }
 
 /**
- * Handle abrechnung export
+ * Handle abrechnung export (Phase 2)
  */
-export function handleExportAbrechnung() {
+export async function handleExportAbrechnung() {
     const state = getState();
     const statusElement = document.getElementById('exportStatus');
     
-    if (!state.abrechnungData || !state.abrechnungData.workbook) {
+    // Check if abrechnung has positions
+    const hasPositions = Object.keys(state.abrechnungData?.positionen || {}).length > 0;
+    
+    if (!hasPositions) {
         showStatus(statusElement, 'Bitte generieren Sie zuerst eine Abrechnung', 'error');
+        setExportStatus({ status: 'error', message: 'Keine Abrechnung generiert' });
         return;
     }
     
     try {
-        const filename = utils.generateExportFilename(state.abrechnungData.header.auftragsNr);
-        utils.exportToExcel(state.abrechnungData.workbook, filename);
+        // Update export status to pending
+        setExportStatus({ status: 'pending', message: 'Abrechnung wird exportiert...' });
+        
+        // If we don't have a workbook reference, regenerate it
+        if (!generatedWorkbook) {
+            const workbook = await utils.loadAbrechnungTemplate();
+            
+            // Create legacy metadata format for utils
+            const legacyMetadata = {
+                protokollNr: state.protokollData?.metadata?.protocolNumber,
+                auftragsNr: state.protokollData?.metadata?.orderNumber || state.abrechnungData.header.orderNumber,
+                anlage: state.protokollData?.metadata?.plant || state.abrechnungData.header.plant,
+                einsatzort: state.protokollData?.metadata?.location || state.abrechnungData.header.location,
+                firma: state.protokollData?.metadata?.company,
+                datum: state.protokollData?.metadata?.date || state.abrechnungData.header.date
+            };
+            
+            utils.fillAbrechnungHeader(workbook, legacyMetadata);
+            utils.fillAbrechnungPositions(workbook, state.abrechnungData.positionen);
+            generatedWorkbook = workbook;
+        }
+        
+        const filename = utils.generateExportFilename(
+            state.abrechnungData.header.orderNumber || 'Abrechnung'
+        );
+        utils.exportToExcel(generatedWorkbook, filename);
+        
+        // Update export status to success
+        setExportStatus({
+            status: 'success',
+            message: `Abrechnung erfolgreich exportiert: ${filename}`,
+            lastExportAt: new Date().toISOString()
+        });
         
         showStatus(statusElement, `✓ Abrechnung erfolgreich exportiert: ${filename}`, 'success');
         
     } catch (error) {
         console.error('Export error:', error);
+        setExportStatus({ status: 'error', message: error.message });
         showStatus(statusElement, `✗ Fehler beim Export: ${error.message}`, 'error');
     }
 }
 
 /**
- * Handle application reset
+ * Handle application reset (Phase 2)
  */
 export function handleReset() {
     if (confirm('Möchten Sie wirklich alle Daten löschen und die Anwendung zurücksetzen?')) {
-        // Clear state
-        clearState();
+        // Reset state to initial values and clear localStorage
+        resetState({ persist: true, silent: false });
+        clearPersistedState();
         
-        // Reset UI
+        // Clear local file and workbook references
+        selectedFile = null;
+        generatedWorkbook = null;
+        
+        // Reset UI elements
         document.getElementById('fileInput').value = '';
         document.getElementById('fileName').textContent = 'Keine Datei ausgewählt';
         document.getElementById('importBtn').disabled = true;
