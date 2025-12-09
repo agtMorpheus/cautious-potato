@@ -61,7 +61,7 @@ async function initializeApp() {
  * Cleanup & Testing Helper (Phase 5.1.5)
  * For testing or hot-reload scenarios
  */
-export function destroyApp() {
+function destroyApp() {
     // Future-proof hook: remove listeners, timers, etc.
     // For now, you can track and remove any custom listeners if you add them.
     console.log('Abrechnung Application – Destroyed');
