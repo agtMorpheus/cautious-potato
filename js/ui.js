@@ -74,23 +74,23 @@ export function updateImportUI(state) {
             <dl class="summary-list">
                 <div class="summary-item">
                     <dt>Auftrags-Nr.</dt>
-                    <dd>${escapeHtml(metadata.orderNumber || 'N/A')}</dd>
+                    <dd>${escapeHtml(metadata.auftragsNr || 'N/A')}</dd>
                 </div>
                 <div class="summary-item">
                     <dt>Protokoll-Nr.</dt>
-                    <dd>${escapeHtml(metadata.protocolNumber || 'N/A')}</dd>
+                    <dd>${escapeHtml(metadata.protokollNr || 'N/A')}</dd>
                 </div>
                 <div class="summary-item">
                     <dt>Anlage</dt>
-                    <dd>${escapeHtml(metadata.plant || 'N/A')}</dd>
+                    <dd>${escapeHtml(metadata.anlage || 'N/A')}</dd>
                 </div>
                 <div class="summary-item">
                     <dt>Einsatzort</dt>
-                    <dd>${escapeHtml(metadata.location || 'N/A')}</dd>
+                    <dd>${escapeHtml(metadata.einsatzort || 'N/A')}</dd>
                 </div>
                 <div class="summary-item">
                     <dt>Datum</dt>
-                    <dd>${escapeHtml(metadata.date || 'N/A')}</dd>
+                    <dd>${escapeHtml(metadata.datum || 'N/A')}</dd>
                 </div>
                 <div class="summary-item">
                     <dt>Positionen extrahiert</dt>
@@ -178,7 +178,7 @@ export function updateGenerateUI(state) {
         const protokollData = state.protokollData;
         const hasValidInput = protokollData && 
                             protokollData.metadata && 
-                            protokollData.metadata.orderNumber && 
+                            protokollData.metadata.auftragsNr && 
                             protokollData.positionen && 
                             protokollData.positionen.length > 0;
         

@@ -215,12 +215,13 @@ export async function handleGenerateAbrechnung() {
         console.log('Position aggregation complete:', summary);
         
         // Step 2: Create export workbook
+        // Map German field names from parseProtokollMetadata to English field names expected by createExportWorkbook
         const workbook = await utils.createExportWorkbook({
             header: {
-                date: metadata.date,
-                orderNumber: metadata.orderNumber,
-                plant: metadata.plant,
-                location: metadata.location
+                date: metadata.datum,
+                orderNumber: metadata.auftragsNr,
+                plant: metadata.anlage,
+                location: metadata.einsatzort
             },
             positionen: positionSums
         });
@@ -234,10 +235,10 @@ export async function handleGenerateAbrechnung() {
         setState({
             abrechnungData: {
                 header: {
-                    date: metadata.date,
-                    orderNumber: metadata.orderNumber,
-                    plant: metadata.plant,
-                    location: metadata.location
+                    date: metadata.datum,
+                    orderNumber: metadata.auftragsNr,
+                    plant: metadata.anlage,
+                    location: metadata.einsatzort
                 },
                 positionen: positionSums
             },
