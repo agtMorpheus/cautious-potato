@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExcelJS Export Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 ExcelJS Export Integration Test</h1>
+        <p>This page tests the ExcelJS export functionality to verify formatting preservation.</p>
+
+        <div class="test-section">
+            <h3>Test 1: Check ExcelJS Library</h3>
+            <button onclick="testExcelJSLoaded()">Check ExcelJS</button>
+            <div id="test1-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Load Template</h3>
+            <button onclick="testLoadTemplate()">Load Template</button>
+            <div id="test2-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Fill Sample Data</h3>
+            <button onclick="testFillData()" id="test3-btn" disabled>Fill Data</button>
+            <div id="test3-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Export with Formatting</h3>
+            <button onclick="testExport()" id="test4-btn" disabled>Export File</button>
+            <div id="test4-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Manual Verification Checklist</h3>
+            <p>After exporting, open the file in Excel and verify:</p>
+            <ul>
+                <li>✓ Cell background colors are preserved</li>
+                <li>✓ Font styles (bold, italic, colors) are preserved</li>
+                <li>✓ Borders and merged cells are preserved</li>
+                <li>✓ Images/logos are preserved</li>
+                <li>✓ Column widths are preserved</li>
+                <li>✓ Data is correctly filled in the right cells</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Load ExcelJS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4/dist/exceljs.min.js"></script>
+
+    <script type="module">
+        // Import configuration
+        import { ABRECHNUNG_CONFIG } from '../../js/config.js';
+
+        let testWorkbook = null;
+
+        // Test 1: Check if ExcelJS is loaded
+        window.testExcelJSLoaded = function() {
+            const result = document.getElementById('test1-result');
+            result.style.display = 'block';
+            
+            if (typeof ExcelJS !== 'undefined') {
+                result.className = 'result success';
+                result.innerHTML = '✅ ExcelJS library loaded successfully!<br>Version: ' + (ExcelJS.version || 'Unknown');
+                document.getElementById('test3-btn').disabled = false;
+            } else {
+                result.className = 'result error';
+                result.innerHTML = '❌ ExcelJS library not found. Check CDN link.';
+            }
+        };
+
+        // Test 2: Load template
+        window.testLoadTemplate = async function() {
+            const result = document.getElementById('test2-result');
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.innerHTML = '⏳ Loading template...';
+
+            try {
+                const response = await fetch('../../templates/abrechnung.xlsx');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(arrayBuffer);
+
+                testWorkbook = workbook;
+
+                const sheetName = ABRECHNUNG_CONFIG.sheetName;
+                const worksheet = workbook.getWorksheet(sheetName);
+
+                if (!worksheet) {
+                    throw new Error(`Sheet "${sheetName}" not found`);
+                }
+
+                result.className = 'result success';
+                result.innerHTML = `✅ Template loaded successfully!<br>
+                    Sheets: ${workbook.worksheets.map(ws => ws.name).join(', ')}<br>
+                    Target sheet: ${sheetName}<br>
+                    Rows: ${worksheet.rowCount}<br>
+                    Columns: ${worksheet.columnCount}`;
+                
+                document.getElementById('test3-btn').disabled = false;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Failed to load template:<br>${error.message}`;
+            }
+        };
+
+        // Test 3: Fill sample data
+        window.testFillData = function() {
+            const result = document.getElementById('test3-result');
+            result.style.display = 'block';
+
+            if (!testWorkbook) {
+                result.className = 'result error';
+                result.innerHTML = '❌ No workbook loaded. Run Test 2 first.';
+                return;
+            }
+
+            try {
+                const sheetName = ABRECHNUNG_CONFIG.sheetName;
+                const worksheet = testWorkbook.getWorksheet(sheetName);
+                const { header, positions } = ABRECHNUNG_CONFIG;
+
+                // Fill header with sample data
+                worksheet.getCell(header.datum).value = new Date().toISOString().split('T')[0];
+                worksheet.getCell(header.auftragsNr).value = 'TEST-12345';
+                worksheet.getCell(header.anlage).value = 'Test Plant';
+                worksheet.getCell(header.einsatzort).value = 'Test Location';
+
+                // Fill sample positions
+                const samplePositions = {
+                    '1.1': 10,
+                    '1.2': 25,
+                    '2.1': 15,
+                    '2.2': 30
+                };
+
+                let filledCount = 0;
+                for (let row = positions.startRow; row <= Math.min(positions.startRow + 50, positions.endRow); row++) {
+                    const posNrCell = worksheet.getCell(`${positions.positionNumberColumn}${row}`);
+                    const posNr = posNrCell.value;
+
+                    if (posNr && samplePositions[posNr]) {
+                        const quantityCell = worksheet.getCell(`${positions.quantityColumn}${row}`);
+                        quantityCell.value = samplePositions[posNr];
+                        filledCount++;
+                    }
+                }
+
+                result.className = 'result success';
+                result.innerHTML = `✅ Sample data filled successfully!<br>
+                    Header fields: 4<br>
+                    Position rows filled: ${filledCount}<br>
+                    Sample positions: ${Object.keys(samplePositions).join(', ')}`;
+                
+                document.getElementById('test4-btn').disabled = false;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Failed to fill data:<br>${error.message}`;
+            }
+        };
+
+        // Test 4: Export file
+        window.testExport = async function() {
+            const result = document.getElementById('test4-result');
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.innerHTML = '⏳ Exporting file...';
+
+            if (!testWorkbook) {
+                result.className = 'result error';
+                result.innerHTML = '❌ No workbook loaded. Run Test 2 and 3 first.';
+                return;
+            }
+
+            try {
+                const filename = `test_export_${Date.now()}.xlsx`;
+                
+                // Write workbook to buffer
+                const buffer = await testWorkbook.xlsx.writeBuffer();
+
+                // Create blob and download
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.click();
+
+                // Cleanup
+                window.URL.revokeObjectURL(url);
+
+                result.className = 'result success';
+                result.innerHTML = `✅ File exported successfully!<br>
+                    Filename: ${filename}<br>
+                    Size: ${(buffer.byteLength / 1024).toFixed(2)} KB<br><br>
+                    <strong>Next step:</strong> Open the downloaded file in Excel and verify all formatting is preserved.`;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Export failed:<br>${error.message}`;
+            }
+        };
+
+        // Auto-run Test 1 on load
+        window.addEventListener('load', () => {
+            setTimeout(() => testExcelJSLoaded(), 500);
+        });
+    </script>
+</body>
+</html>

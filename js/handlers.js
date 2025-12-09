@@ -19,6 +19,7 @@ import {
     subscribe
 } from './state.js';
 import * as utils from './utils.js';
+import { createAndExportAbrechnungExcelJS } from './utils-exceljs.js';
 import { showCellMapperDialog, applyMapping } from './cell-mapper.js';
 
 // Store selected file reference (not persisted in state)
@@ -354,7 +355,8 @@ export async function handleGenerateAbrechnung() {
 }
 
 /**
- * Handle "Export" button click - Phase 4.1.3 Implementation
+ * Handle "Export" button click - Phase 4.1.3 Implementation with ExcelJS
+ * Uses ExcelJS for full formatting preservation (colors, fonts, images, etc.)
  * @returns {Promise<void>}
  */
 export async function handleExportAbrechnung() {
@@ -369,14 +371,6 @@ export async function handleExportAbrechnung() {
         return;
     }
     
-    if (!window._currentWorkbook) {
-        showErrorAlert(
-            'No Workbook',
-            'Workbook not found in memory. Please regenerate.'
-        );
-        return;
-    }
-    
     // Mark UI as loading
     setState({
         ui: {
@@ -384,19 +378,16 @@ export async function handleExportAbrechnung() {
             export: {
                 ...state.ui.export,
                 status: 'pending',
-                message: 'Preparing download...'
+                message: 'Preparing download with full formatting...'
             }
         }
     });
     
     try {
-        console.log('Starting abrechnung export...');
+        console.log('Starting abrechnung export with ExcelJS...');
         
-        const metadata = state.protokollData.metadata;
-        const workbook = window._currentWorkbook;
-        
-        // Export the workbook
-        const exportMetadata = utils.exportToExcel(workbook, metadata);
+        // Use ExcelJS implementation for full formatting preservation
+        const exportMetadata = await createAndExportAbrechnungExcelJS(state.abrechnungData);
         
         // Update state
         setState({
@@ -411,7 +402,7 @@ export async function handleExportAbrechnung() {
             }
         });
         
-        console.log('Export successful:', exportMetadata);
+        console.log('Export successful with full formatting:', exportMetadata);
         
     } catch (error) {
         console.error('Export failed:', error);
