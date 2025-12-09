@@ -46,9 +46,23 @@ function initializeFileDrop() {
     
     if (!dropZone || !fileInput) return;
     
+    // Prevent multiple initializations
+    if (dropZone.dataset.initialized === 'true') {
+        console.log('Drop zone already initialized, skipping');
+        return;
+    }
+    dropZone.dataset.initialized = 'true';
+    
+    console.log('Initializing file drop zone');
+    
     // Click on drop zone triggers file input
-    dropZone.addEventListener('click', () => {
-        fileInput.click();
+    dropZone.addEventListener('click', (e) => {
+        console.log('Drop zone clicked', e.target);
+        // Only trigger if clicking the drop zone itself, not child elements
+        if (e.target === dropZone || e.target.closest('.upload-link')) {
+            console.log('Opening file dialog');
+            fileInput.click();
+        }
     });
     
     // Prevent default drag behaviors
@@ -112,7 +126,14 @@ export function updateImportUI(state) {
     
     // Update message
     if (importMessage) {
-        importMessage.textContent = importState.message || 'Noch keine Datei importiert.';
+        let message = importState.message || 'Keine Datei ausgewählt.';
+        
+        // If file is selected but not yet imported, add helpful instruction
+        if (importState.fileName && importState.status === 'idle') {
+            message = `${importState.fileName} ausgewählt. Klicken Sie auf "Datei importieren" um fortzufahren.`;
+        }
+        
+        importMessage.textContent = message;
         importMessage.className = `status-message status-${importState.status}`;
     }
     

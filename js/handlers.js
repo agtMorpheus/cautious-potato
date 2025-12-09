@@ -34,10 +34,14 @@ window._currentWorkbook = null;
  * @param {Event} event - File input change event
  */
 export function handleFileSelect(event) {
+    console.log('handleFileSelect called', event.target.files);
+    
     const file = event.target.files[0];
     const importBtn = document.getElementById('import-button');
     
     if (file) {
+        console.log('File selected:', file.name);
+        
         // Enable import button
         if (importBtn) {
             importBtn.disabled = false;
@@ -51,9 +55,11 @@ export function handleFileSelect(event) {
             fileName: file.name,
             fileSize: file.size,
             status: 'idle',
-            message: ''
+            message: '' // Let UI update handle the message
         });
     } else {
+        console.log('No file selected or file selection cancelled');
+        
         // Disable import button
         if (importBtn) {
             importBtn.disabled = true;
@@ -75,10 +81,18 @@ export function handleFileSelect(event) {
  * @returns {Promise<void>}
  */
 export async function handleImportFile(event) {
+    console.log('handleImportFile called', event);
+    
+    // Prevent event from bubbling up
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
     const file = selectedFile;
     
     if (!file) {
-        console.log('File selection cancelled');
+        console.log('No file selected');
         return;
     }
     
@@ -577,6 +591,9 @@ export function formatFileSize(bytes) {
 
 // ==================== Phase 4.3 / Phase 5: Event Binding & Initialization ====================
 
+// Track if event listeners have been initialized
+let listenersInitialized = false;
+
 /**
  * Initialize all event listeners for user interactions and state changes
  * Phase 5: Accepts optional handlers object for flexibility
@@ -584,6 +601,11 @@ export function formatFileSize(bytes) {
  * @returns {void}
  */
 export function initializeEventListeners(handlers = {}) {
+    if (listenersInitialized) {
+        console.warn('Event listeners already initialized, skipping to prevent duplicates');
+        return;
+    }
+    
     console.log('Initializing event listeners...');
     
     // Use provided handlers or fall back to module functions
@@ -639,5 +661,6 @@ export function initializeEventListeners(handlers = {}) {
         console.warn('Reset button (#reset-button) not found in DOM');
     }
     
+    listenersInitialized = true;
     console.log('Event listeners initialized');
 }

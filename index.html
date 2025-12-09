@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
@@ -16,90 +18,102 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span class="logo-text">Abrechnung</span>
                 </div>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <ul class="nav-list" role="menubar">
                     <li class="nav-item" role="none">
-                        <a href="#dashboard" class="nav-link active" role="menuitem" data-view="dashboard" aria-current="page">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                        <a href="#dashboard" class="nav-link active" role="menuitem" data-view="dashboard"
+                            aria-current="page">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                             </svg>
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#import" class="nav-link" role="menuitem" data-view="import">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                             <span class="nav-text">Import</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#process" class="nav-link" role="menuitem" data-view="process">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                             <span class="nav-text">Process</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#export" class="nav-link" role="menuitem" data-view="export">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             <span class="nav-text">Export</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#templates" class="nav-link" role="menuitem" data-view="templates">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                             </svg>
                             <span class="nav-text">Templates</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#settings" class="nav-link" role="menuitem" data-view="settings">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <span class="nav-text">Settings</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#logs" class="nav-link" role="menuitem" data-view="logs">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                             <span class="nav-text">Logs</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="#help" class="nav-link" role="menuitem" data-view="help">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="nav-text">Help</span>
                         </a>
                     </li>
                 </ul>
             </nav>
-            
-            <div class="sidebar-footer">
-                <button id="reset-button" type="button" class="btn-reset">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span>Reset App</span>
-                </button>
-            </div>
+
+
         </aside>
 
         <!-- Main Content Area -->
@@ -120,13 +134,14 @@
                 <!-- Dashboard View -->
                 <section id="view-dashboard" class="view-container active" aria-labelledby="dashboard-heading">
                     <h2 id="dashboard-heading" class="sr-only">Dashboard Übersicht</h2>
-                    
+
                     <!-- Stats Grid -->
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon import">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                             </div>
                             <div class="stat-content">
@@ -137,7 +152,8 @@
                         <div class="stat-card">
                             <div class="stat-icon process">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
                             <div class="stat-content">
@@ -148,7 +164,8 @@
                         <div class="stat-card">
                             <div class="stat-icon export">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
                             </div>
                             <div class="stat-content">
@@ -159,7 +176,8 @@
                         <div class="stat-card">
                             <div class="stat-icon templates">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                                 </svg>
                             </div>
                             <div class="stat-content">
@@ -178,19 +196,22 @@
                             <div class="quick-actions">
                                 <button type="button" class="quick-action-btn" data-action="import">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
                                     <span>Datei importieren</span>
                                 </button>
                                 <button type="button" class="quick-action-btn" data-action="process" disabled>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
                                     <span>Abrechnung erzeugen</span>
                                 </button>
                                 <button type="button" class="quick-action-btn" data-action="export" disabled>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                     <span>Export herunterladen</span>
                                 </button>
@@ -208,11 +229,13 @@
                                 <div class="activity-item">
                                     <div class="activity-icon info">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
                                     <div class="activity-content">
-                                        <p class="activity-text">Anwendung bereit. Importieren Sie ein Protokoll, um zu beginnen.</p>
+                                        <p class="activity-text">Anwendung bereit. Importieren Sie ein Protokoll, um zu
+                                            beginnen.</p>
                                         <span class="activity-time">Gerade eben</span>
                                     </div>
                                 </div>
@@ -224,35 +247,36 @@
                 <!-- Import View -->
                 <section id="view-import" class="view-container" aria-labelledby="import-heading">
                     <h2 id="import-heading" class="sr-only">Protokoll importieren</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Protokoll importieren</h3>
-                            <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der Vorlage.</p>
+                            <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der
+                                Vorlage.</p>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="file-input" class="form-label">Protokoll-Datei (.xlsx)</label>
+                                <label class="form-label">Protokoll-Datei (.xlsx)</label>
                                 <div class="file-upload-area" id="file-drop-zone">
-                                    <input
-                                        id="file-input"
-                                        type="file"
-                                        accept=".xlsx"
-                                        aria-describedby="file-help"
-                                        class="file-input-hidden"
-                                    />
-                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    <input id="file-input" type="file" accept=".xlsx" aria-describedby="file-help"
+                                        class="file-input-hidden" />
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    <p class="upload-text">Datei hierher ziehen oder <span class="upload-link">durchsuchen</span></p>
-                                    <p class="upload-hint" id="file-help">Die Datei wird nur lokal im Browser verarbeitet.</p>
+                                    <p class="upload-text">Datei hierher ziehen oder <span
+                                            class="upload-link">durchsuchen</span></p>
+                                    <p class="upload-hint" id="file-help">Die Datei wird nur lokal im Browser
+                                        verarbeitet.</p>
                                 </div>
                             </div>
 
                             <div class="form-actions">
-                                <button id="import-button" type="button" class="btn btn-primary">
+                                <button id="import-button" type="button" class="btn btn-primary" disabled>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
                                     <span>Datei importieren</span>
                                 </button>
@@ -260,7 +284,8 @@
 
                             <div class="status-display">
                                 <span class="status-indicator status-idle" id="import-status"></span>
-                                <p id="import-message" class="status-message">Noch keine Datei importiert.</p>
+                                <p id="import-message" class="status-message">Keine Datei ausgewählt. Bitte wählen Sie
+                                    eine Datei aus.</p>
                             </div>
 
                             <div id="import-summary" class="summary-panel" aria-live="polite" hidden></div>
@@ -271,17 +296,19 @@
                 <!-- Process View -->
                 <section id="view-process" class="view-container" aria-labelledby="process-heading">
                     <h2 id="process-heading" class="sr-only">Abrechnung erzeugen</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Abrechnung erzeugen</h3>
-                            <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage übernommen.</p>
+                            <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage
+                                übernommen.</p>
                         </div>
                         <div class="card-body">
                             <div class="form-actions">
                                 <button id="generate-button" type="button" class="btn btn-primary" disabled>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
                                     <span>Abrechnung erzeugen</span>
                                 </button>
@@ -300,7 +327,7 @@
                 <!-- Export View -->
                 <section id="view-export" class="view-container" aria-labelledby="export-heading">
                     <h2 id="export-heading" class="sr-only">Abrechnung exportieren</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Abrechnung exportieren</h3>
@@ -310,7 +337,8 @@
                             <div class="form-actions">
                                 <button id="export-button" type="button" class="btn btn-primary" disabled>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                     <span>Abrechnung herunterladen</span>
                                 </button>
@@ -338,7 +366,7 @@
                 <!-- Templates View -->
                 <section id="view-templates" class="view-container" aria-labelledby="templates-heading">
                     <h2 id="templates-heading" class="sr-only">Templates verwalten</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Verfügbare Templates</h3>
@@ -349,7 +377,8 @@
                                 <div class="template-item">
                                     <div class="template-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
                                     <div class="template-info">
@@ -360,7 +389,8 @@
                                 <div class="template-item">
                                     <div class="template-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
                                     <div class="template-info">
@@ -376,7 +406,7 @@
                 <!-- Settings View -->
                 <section id="view-settings" class="view-container" aria-labelledby="settings-heading">
                     <h2 id="settings-heading" class="sr-only">Einstellungen</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Anwendungseinstellungen</h3>
@@ -390,6 +420,19 @@
                                 </button>
                             </div>
                             <div class="settings-group">
+                                <h4 class="settings-label" style="color: var(--c-danger);">Gefahrenzone</h4>
+                                <p class="settings-desc">Anwendung vollständig zurücksetzen und alle Daten löschen.</p>
+                                <button id="reset-button" type="button" class="btn btn-secondary btn-sm"
+                                    style="color: var(--c-danger); border-color: var(--c-danger);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        style="width: 16px; height: 16px; margin-right: 8px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Reset App
+                                </button>
+                            </div>
+                            <div class="settings-group">
                                 <h4 class="settings-label">Version</h4>
                                 <p class="settings-desc">Abrechnung App v1.0.0</p>
                             </div>
@@ -400,7 +443,7 @@
                 <!-- Logs View -->
                 <section id="view-logs" class="view-container" aria-labelledby="logs-heading">
                     <h2 id="logs-heading" class="sr-only">Protokoll</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Anwendungsprotokoll</h3>
@@ -421,7 +464,7 @@
                 <!-- Help View -->
                 <section id="view-help" class="view-container" aria-labelledby="help-heading">
                     <h2 id="help-heading" class="sr-only">Hilfe</h2>
-                    
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Hilfe & Dokumentation</h3>
@@ -431,7 +474,8 @@
                                 <h4>Workflow</h4>
                                 <ol class="help-steps">
                                     <li><strong>Import:</strong> Laden Sie ein ausgefülltes Prüfprotokoll hoch.</li>
-                                    <li><strong>Process:</strong> Erzeugen Sie die Abrechnung aus den Protokolldaten.</li>
+                                    <li><strong>Process:</strong> Erzeugen Sie die Abrechnung aus den Protokolldaten.
+                                    </li>
                                     <li><strong>Export:</strong> Laden Sie die fertige Abrechnung herunter.</li>
                                 </ol>
                             </div>
@@ -441,7 +485,8 @@
                             </div>
                             <div class="help-section">
                                 <h4>Datenschutz</h4>
-                                <p>Alle Daten werden lokal im Browser verarbeitet. Es werden keine Daten auf externe Server übertragen.</p>
+                                <p>Alle Daten werden lokal im Browser verarbeitet. Es werden keine Daten auf externe
+                                    Server übertragen.</p>
                             </div>
                         </div>
                     </div>
@@ -461,4 +506,5 @@
     <!-- Application Modules -->
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
