@@ -715,3 +715,171 @@ ul { list-style: none; }
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+/* ==================== Sync Settings Styles ==================== */
+
+/* Storage Mode Options */
+.storage-mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.storage-mode-option {
+    display: block;
+    cursor: pointer;
+}
+
+.storage-mode-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.storage-mode-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-surface);
+    border: 2px solid var(--border-base);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.storage-mode-option input[type="radio"]:checked + .storage-mode-content {
+    border-color: var(--c-brand-500);
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.storage-mode-option:hover .storage-mode-content {
+    border-color: var(--border-highlight);
+}
+
+.storage-mode-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+}
+
+.storage-mode-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-muted);
+}
+
+.storage-mode-option input[type="radio"]:checked + .storage-mode-content .storage-mode-icon svg {
+    stroke: var(--c-brand-500);
+}
+
+.storage-mode-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.storage-mode-text strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.storage-mode-text span {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* Sync Status Display */
+.sync-status-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+}
+
+.sync-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.sync-status-indicator .sync-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.sync-status-indicator.syncing .sync-icon {
+    animation: spin 1s linear infinite;
+}
+
+.sync-status-indicator.synced {
+    color: var(--c-success);
+}
+
+.sync-status-indicator.error {
+    color: var(--c-danger);
+}
+
+.sync-status-indicator.offline {
+    color: var(--c-warning);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sync-last-time {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-left: auto;
+}
+
+/* Sync Actions */
+.sync-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* Sync Options */
+.sync-option {
+    margin-top: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--c-brand-500);
+}
+
+/* Backup Actions */
+.backup-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.backup-actions label.btn {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
