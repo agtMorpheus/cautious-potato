@@ -283,7 +283,7 @@ The statistics panel shows:
 **Solutions:**
 - Format dates in Excel as dates (not text)
 - Use ISO format: YYYY-MM-DD
-- Use German format: DD.MM.YYYY
+- Use German format: DD.MM.YYYY or DD/MM/YYYY
 
 ---
 

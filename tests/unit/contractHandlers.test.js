@@ -144,7 +144,7 @@ describe('Contract Handlers Logic (Phase 3 & 4)', () => {
 
             const filtered = testContracts.filter(c => {
                 // Search filter
-                const matchesSearch = c.contractId.toLowerCase().includes(searchLower);
+                const matchesSearch = String(c.contractId || '').toLowerCase().includes(searchLower);
                 // Status filter
                 const matchesStatus = normalizeStatus(c.status) === filters.status;
                 // Date filter

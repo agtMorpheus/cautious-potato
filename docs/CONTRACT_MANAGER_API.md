@@ -427,8 +427,8 @@ Parses various date formats to ISO string.
 - Excel serial numbers (e.g., 45500)
 - ISO strings (e.g., "2025-06-15")
 - ISO datetime (e.g., "2025-06-15T12:00:00Z")
-- DD/MM/YYYY (e.g., "15/06/2025")
-- DD.MM.YYYY German (e.g., "15.06.2025")
+- DD/MM/YYYY format (e.g., "15/06/2025")
+- DD.MM.YYYY format - German (e.g., "15.06.2025")
 - JavaScript Date objects
 
 **Example:**
