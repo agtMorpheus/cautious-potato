@@ -21,6 +21,10 @@ import {
     initializeStaticUI
 } from './ui.js';
 
+// Contract Manager imports (Phase 1)
+import { initializeContractEventListeners, handleContractMappingChange } from './contracts/contractHandlers.js';
+import { initializeContractUI } from './contracts/contractRenderer.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -29,6 +33,7 @@ const VIEW_CONFIG = {
     import: { title: 'Import', subtitle: 'Protokoll-Datei hochladen und verarbeiten' },
     process: { title: 'Process', subtitle: 'Abrechnung aus Protokolldaten erzeugen' },
     export: { title: 'Export', subtitle: 'Fertige Abrechnung herunterladen' },
+    contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
     settings: { title: 'Settings', subtitle: 'Anwendungseinstellungen konfigurieren' },
     logs: { title: 'Logs', subtitle: 'Aktivitäts- und Systemprotokoll' },
@@ -281,6 +286,13 @@ async function initializeApp() {
         onReset: handleResetApplication
     });
     
+    // 5b. Initialize Contract Manager event listeners (Phase 1)
+    initializeContractEventListeners();
+    
+    // 5c. Set up global handler for contract mapping changes
+    // This is used by dynamically rendered mapping selects
+    window._handleMappingChange = handleContractMappingChange;
+    
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
         updateImportUI(nextState);
@@ -312,6 +324,15 @@ async function initializeApp() {
             addActivityLogEntry('Fehler beim Export', 'error');
             addLogEntry('File export failed', 'error');
         }
+        
+        // Log contract import status changes
+        if (nextState.contracts?.importState?.status === 'success') {
+            addActivityLogEntry('Verträge erfolgreich importiert', 'success');
+            addLogEntry('Contract import successful', 'success');
+        } else if (nextState.contracts?.importState?.status === 'error') {
+            addActivityLogEntry('Fehler beim Vertragsimport', 'error');
+            addLogEntry('Contract import failed', 'error');
+        }
     });
     
     // 7. Perform initial render based on loaded state
@@ -320,6 +341,9 @@ async function initializeApp() {
     updateGenerateUI(state);
     updateExportUI(state);
     updateDashboardStats(state);
+    
+    // 7b. Initialize Contract Manager UI (Phase 1)
+    initializeContractUI();
     
     // 8. Add initial log entry
     addLogEntry('Application initialized', 'info');
