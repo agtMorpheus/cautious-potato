@@ -106,17 +106,24 @@
         const offlineIndicator = document.getElementById('offline-indicator');
         const forgotPasswordLink = document.getElementById('forgot-password-link');
 
-        // Check if already logged in
+        // Check if already logged in (check session storage first to avoid unnecessary API calls)
         async function checkExistingSession() {
-            try {
-                const user = await apiClient.getCurrentUser();
-                if (user) {
-                    // Already logged in, redirect to main app
-                    window.location.href = '/index.html';
+            // First check if we have cached user data
+            const cachedUser = sessionStorage.getItem('user');
+            if (cachedUser) {
+                try {
+                    // Verify session is still valid with server
+                    const user = await apiClient.getCurrentUser();
+                    if (user) {
+                        // Session is valid, redirect to main app
+                        window.location.href = '/index.html';
+                        return;
+                    }
+                } catch (err) {
+                    // Session invalid, clear cached data and stay on login
+                    sessionStorage.removeItem('user');
+                    console.log('Session expired, please login');
                 }
-            } catch (err) {
-                // Not logged in, stay on login page
-                console.log('No active session');
             }
         }
 

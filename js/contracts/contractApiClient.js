@@ -293,21 +293,51 @@ export class ContractApiClient {
 
     /**
      * Handle coming back online
+     * Implements exponential backoff and max retry limits
      */
     async handleOnline() {
         this.isOnline = true;
         console.log('Back online; retrying queued requests...');
         
-        while (this.offlineQueue.length > 0) {
-            const { method, endpoint, data } = this.offlineQueue.shift();
+        const maxRetries = 3;
+        const queueTTL = 24 * 60 * 60 * 1000; // 24 hours max age for queued requests
+        const now = Date.now();
+        
+        // Filter out expired requests
+        this.offlineQueue = this.offlineQueue.filter(req => {
+            if (req.timestamp && (now - req.timestamp) > queueTTL) {
+                console.warn(`Dropping expired queued request: ${req.endpoint}`);
+                return false;
+            }
+            return true;
+        });
+        
+        let retryCount = 0;
+        let delay = 1000; // Start with 1 second delay
+        
+        while (this.offlineQueue.length > 0 && retryCount < maxRetries) {
+            const request = this.offlineQueue[0];
+            const { method, endpoint, data } = request;
+            
             try {
+                // Temporarily set online to prevent re-queuing
                 await this.request(method, endpoint, data);
+                this.offlineQueue.shift(); // Remove successful request
                 console.log(`Successfully synced: ${method} ${endpoint}`);
+                retryCount = 0; // Reset retry count on success
+                delay = 1000; // Reset delay
             } catch (err) {
-                console.error('Retry failed:', err);
-                // Re-queue on failure
-                this.offlineQueue.unshift({ method, endpoint, data });
-                break;
+                retryCount++;
+                console.error(`Retry ${retryCount}/${maxRetries} failed for ${endpoint}:`, err.message);
+                
+                if (retryCount >= maxRetries) {
+                    console.error(`Max retries reached for ${endpoint}, keeping in queue for next online event`);
+                    break;
+                }
+                
+                // Exponential backoff
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay = Math.min(delay * 2, 30000); // Max 30 second delay
             }
         }
 

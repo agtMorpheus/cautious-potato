@@ -176,8 +176,18 @@ CREATE TABLE IF NOT EXISTS logs (
 -- ============================================================
 
 -- Insert default admin user
--- Password: admin123 (MUST BE CHANGED IN PRODUCTION!)
--- Password hash generated with PHP password_hash('admin123', PASSWORD_BCRYPT)
+-- ============================================================
+-- SECURITY WARNING: This is a SAMPLE password for development only!
+-- Password: admin123
+-- 
+-- *** CHANGE THIS IMMEDIATELY IN PRODUCTION ***
+-- 
+-- To generate a new password hash in PHP:
+--   php -r "echo password_hash('your_secure_password', PASSWORD_BCRYPT) . PHP_EOL;"
+-- 
+-- The hash below is for development testing only and MUST be replaced
+-- before deploying to any production or internet-accessible environment.
+-- ============================================================
 INSERT INTO users (username, email, password_hash, role, is_active) VALUES 
     ('admin', 'admin@localhost', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', TRUE)
 ON DUPLICATE KEY UPDATE username = username;

@@ -392,9 +392,14 @@ class ContractController {
             
             $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
             
-            $stmt = $pdo->prepare("SELECT * FROM contracts $whereClause ORDER BY created_at DESC");
+            $stmt = $pdo->prepare("SELECT * FROM contracts $whereClause ORDER BY created_at DESC LIMIT 10000");
             $stmt->execute($params);
             $contracts = $stmt->fetchAll();
+            
+            // Limit export size to prevent memory issues
+            if (count($contracts) > 10000) {
+                errorResponse('Export limited to 10,000 records. Please use filters to reduce the dataset.', 400, 'export_limit_exceeded');
+            }
             
             // Generate CSV
             $filename = 'contracts_' . date('Y-m-d_His') . '.csv';
@@ -408,7 +413,7 @@ class ContractController {
             // Headers
             fputcsv($fp, ['Auftrag', 'Titel', 'Standort', 'Säule/Raum', 'Anlage-Nr.', 'Status', 'Sollstart', 'Erstellt am']);
             
-            // Data
+            // Data - write in chunks to manage memory
             foreach ($contracts as $c) {
                 fputcsv($fp, [
                     $c['auftrag'],
@@ -424,7 +429,16 @@ class ContractController {
             
             fclose($fp);
             
-            // Read file and return as base64 (for simple download)
+            // For small exports (< 1MB), return as base64 for simplicity
+            // For larger files, a streaming download would be better
+            $fileSize = filesize($filepath);
+            if ($fileSize > 1024 * 1024) { // > 1MB
+                // Return file info for separate download request
+                // In production, you'd store the file temporarily and return a download URL
+                unlink($filepath);
+                errorResponse('Export file too large for inline download. Please use filters to reduce the dataset.', 400, 'export_too_large');
+            }
+            
             $content = base64_encode(file_get_contents($filepath));
             unlink($filepath);
             

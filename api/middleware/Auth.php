@@ -183,11 +183,17 @@ class Auth {
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE last_activity = CURRENT_TIMESTAMP
             ');
+            
+            // Sanitize user agent - remove null bytes and control characters
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            $userAgent = preg_replace('/[\x00-\x1F\x7F]/', '', $userAgent);
+            $userAgent = substr($userAgent, 0, 500);
+            
             $stmt->execute([
                 $sessionId,
                 $userId,
                 $_SERVER['REMOTE_ADDR'] ?? null,
-                substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500)
+                $userAgent
             ]);
         } catch (Exception $e) {
             // Log but don't fail login
