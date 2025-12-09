@@ -18,6 +18,9 @@ const TEMPLATE_PATHS = {
   abrechnung: '/templates/abrechnung.xlsx'
 };
 
+// Maximum number of positions to fill in template
+const MAX_POSITIONS = 100;
+
 const CELL_MAPPING = {
   protokoll: {
     'metadata.protokollNumber': 'U3',
@@ -215,7 +218,7 @@ function fillProtokollTemplate(workbook, formData) {
 
   // Fill positions (starting at row 30)
   let rowOffset = 30;
-  for (let i = 0; i < formData.positions.length && i < 100; i++) {
+  for (let i = 0; i < formData.positions.length && i < MAX_POSITIONS; i++) {
     const position = formData.positions[i];
     const row = rowOffset + i;
 
@@ -269,10 +272,21 @@ function fillAbrechnungTemplate(workbook, formData) {
     setCellValue(sheet, `B${row}`, agg.positionType);
     setCellValue(sheet, `D${row}`, agg.quantity);
     setCellValue(sheet, `E${row}`, agg.unitPrice || '');
-    setCellValue(sheet, `F${row}`, (agg.quantity * (agg.unitPrice || 0)).toFixed(2));
+    setCellValue(sheet, `F${row}`, calculateLineTotal(agg.quantity, agg.unitPrice));
   }
 
   console.log('✓ Abrechnung template filled');
+}
+
+/**
+ * Calculate line total for billing
+ * @param {number} quantity - Quantity
+ * @param {number|undefined} unitPrice - Unit price
+ * @returns {string} Formatted total
+ */
+function calculateLineTotal(quantity, unitPrice) {
+  const price = unitPrice || 0;
+  return (quantity * price).toFixed(2);
 }
 
 /**

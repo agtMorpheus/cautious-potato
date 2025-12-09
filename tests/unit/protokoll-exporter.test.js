@@ -403,8 +403,11 @@ describe('Protokoll Exporter', () => {
         spannung: { un: 230, fn: 50 },
         messwerte: { riso: 500 }
       });
+      // Set next inspection date to 1 year from now
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
       state.setPrüfungsergebnis({
-        nächsterPrüfungstermin: new Date(Date.now() + 86400000 * 365).toISOString() // 1 year from now
+        nächsterPrüfungstermin: nextYear.toISOString()
       });
     });
 

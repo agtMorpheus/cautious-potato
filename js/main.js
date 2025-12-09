@@ -271,46 +271,46 @@ function initializeSettings() {
  * Sets up state, handlers, renderer, and export functionality
  */
 function initializeProtokollModule() {
-    console.log('\n--- Protokoll Module ---');
+    console.log('Protokoll Module: Initializing...');
     
     // Check if SheetJS library is available
     if (typeof XLSX === 'undefined') {
-        console.warn('⚠ SheetJS library not loaded - Protokoll export may not work');
+        console.warn('Protokoll Module: SheetJS library not loaded - export may not work');
     } else {
-        console.log('✓ SheetJS library available');
+        console.log('Protokoll Module: SheetJS library available');
     }
 
     // Initialize state management
     try {
         protokollState.init();
-        console.log('✓ Protokoll state management initialized');
+        console.log('Protokoll Module: State management initialized');
     } catch (error) {
-        console.error('✗ Protokoll state initialization failed:', error);
+        console.error('Protokoll Module: State initialization failed:', error);
         return false;
     }
 
     // Initialize handlers
     try {
         protokollHandlers.init();
-        console.log('✓ Protokoll event handlers initialized');
+        console.log('Protokoll Module: Event handlers initialized');
     } catch (error) {
-        console.error('✗ Protokoll handler initialization failed:', error);
+        console.error('Protokoll Module: Handler initialization failed:', error);
         return false;
     }
 
     // Initialize renderer
     try {
         protokollRenderer.init();
-        console.log('✓ Protokoll UI renderer initialized');
+        console.log('Protokoll Module: UI renderer initialized');
     } catch (error) {
-        console.error('✗ Protokoll renderer initialization failed:', error);
+        console.error('Protokoll Module: Renderer initialization failed:', error);
         return false;
     }
 
     // Wire up export handlers
     setupProtokollExportHandlers();
 
-    console.log('✓ Protokoll Module fully initialized');
+    console.log('Protokoll Module: Fully initialized');
     return true;
 }
 
