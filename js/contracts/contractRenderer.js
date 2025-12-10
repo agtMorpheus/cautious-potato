@@ -23,6 +23,7 @@ import { getState, subscribe, setContractFilters } from '../state.js';
 import { escapeHtml } from '../handlers.js';
 import { getFilteredContracts, getContractStatistics, getUniqueFieldValues, sortContracts } from './contractRepository.js';
 import { normalizeStatus, VALID_STATUS_VALUES, getContractSummary } from './contractUtils.js';
+import { getAvailableWorkers, getWorkerNameById, isHrIntegrationAvailable } from './hrContractIntegration.js';
 
 /**
  * Initialize contract UI and subscribe to state changes
@@ -546,6 +547,10 @@ function applyContractFiltersAndSort(contracts, filters) {
 function renderContractTableWithActions(contracts, sortKey, sortDir) {
     const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
 
+    // Get available workers from HR module for dropdown
+    const workers = getAvailableWorkers();
+    const hrAvailable = isHrIntegrationAvailable();
+
     const getSortIcon = (key) => {
         if (key !== sortKey) return '';
         return sortDir === 'asc'
@@ -573,6 +578,9 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                         <th class="sortable" data-sort="equipmentId" onclick="window._handleContractSort && window._handleContractSort('equipmentId')">
                             Anlage ${getSortIcon('equipmentId')}
                         </th>
+                        <th class="sortable" data-sort="assignedWorkerId" onclick="window._handleContractSort && window._handleContractSort('assignedWorkerId')">
+                            Mitarbeiter ${getSortIcon('assignedWorkerId')}
+                        </th>
                         <th class="sortable" data-sort="status" onclick="window._handleContractSort && window._handleContractSort('status')">
                             Status ${getSortIcon('status')}
                         </th>
@@ -598,6 +606,9 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
             roomArea: contract.roomArea
         }));
 
+        // Render worker dropdown
+        const workerDropdown = renderWorkerDropdown(contract.id, contract.assignedWorkerId, workers, hrAvailable);
+
         html += `
             <tr data-contract-id="${escapeHtml(contract.id)}" class="${rowClass}">
                 <td>${escapeHtml(contract.contractId || '-')}</td>
@@ -605,6 +616,7 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                 <td>${escapeHtml(contract.location || '-')}</td>
                 <td>${escapeHtml(contract.roomArea || '-')}</td>
                 <td>${escapeHtml(contract.equipmentId || '-')}</td>
+                <td>${workerDropdown}</td>
                 <td>
                     <select 
                         class="status-select ${statusClass}" 
@@ -646,6 +658,38 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
     }
 
     return html;
+}
+
+/**
+ * Render worker dropdown for a contract
+ * @param {string} contractId - Contract UUID
+ * @param {string|null} assignedWorkerId - Currently assigned worker ID
+ * @param {Array} workers - Array of available workers from HR module
+ * @param {boolean} hrAvailable - Whether HR integration is available
+ * @returns {string} HTML string for worker dropdown
+ */
+function renderWorkerDropdown(contractId, assignedWorkerId, workers, hrAvailable) {
+    if (!hrAvailable || workers.length === 0) {
+        // Show placeholder if HR integration is not available
+        const workerName = assignedWorkerId ? getWorkerNameById(assignedWorkerId) : '';
+        return `<span class="worker-placeholder">${escapeHtml(workerName || '-')}</span>`;
+    }
+
+    const selectedWorker = assignedWorkerId || '';
+    
+    return `
+        <select 
+            class="worker-select" 
+            data-contract-id="${escapeHtml(contractId)}"
+            onchange="window._handleContractWorkerChange && window._handleContractWorkerChange('${escapeHtml(contractId)}', this.value)">
+            <option value="">-- Nicht zugewiesen --</option>
+            ${workers.map(worker => `
+                <option value="${escapeHtml(worker.id)}" ${worker.id === selectedWorker ? 'selected' : ''}>
+                    ${escapeHtml(worker.name)}${worker.department ? ` (${escapeHtml(worker.department)})` : ''}
+                </option>
+            `).join('')}
+        </select>
+    `;
 }
 
 /**
