@@ -182,11 +182,11 @@ export class ValidationEngine {
    * @param {Object} options - Validation options { useCache: boolean, validateInputs: boolean }
    * @returns {Object} Validation results with non-conformities
    */
-  validateCircuit(circuitData, options = { useCache: true, validateInputs: true }) {
+  validateCircuit(circuitData, { useCache = true, validateInputs = true } = {}) {
     const startTime = performance.now();
     
     // Check cache first
-    if (options.useCache) {
+    if (useCache) {
       const cacheKey = this._generateCacheKey(circuitData);
       const cachedResult = this._getCachedResult(cacheKey);
       if (cachedResult) {
@@ -214,7 +214,7 @@ export class ValidationEngine {
     };
     
     // Validate inputs if requested
-    if (options.validateInputs) {
+    if (validateInputs) {
       for (const [field, value] of Object.entries(circuitData)) {
         const validation = this.validateInputValue(field, value);
         if (!validation.valid) {
@@ -330,7 +330,7 @@ export class ValidationEngine {
     ).length > 0;
     
     // Cache result
-    if (options.useCache) {
+    if (useCache) {
       const cacheKey = this._generateCacheKey(circuitData);
       this._setCachedResult(cacheKey, results);
     }

@@ -10,6 +10,12 @@
  */
 
 /**
+ * Unit conversion constant: Ω/km to Ω/m
+ * Resistance and reactance values in tables are per kilometer
+ */
+const OHMS_PER_KM_TO_OHMS_PER_M = 1000;
+
+/**
  * Cable type specifications following DIN VDE standards
  * All ampacity values in Amps (A)
  * All resistance values in Ω/m (Ohms per meter) at 20°C
@@ -399,7 +405,7 @@ export class CableLibrary {
   getCableResistance(cableType, gauge) {
     const resistance = this.cableResistance[gauge];
     if (resistance === undefined) return null;
-    return resistance / 1000; // Convert from Ω/km to Ω/m
+    return resistance / OHMS_PER_KM_TO_OHMS_PER_M;
   }
 
   /**
@@ -411,7 +417,7 @@ export class CableLibrary {
   getCableReactance(cableType, gauge) {
     const reactance = this.cableReactance[gauge];
     if (reactance === undefined) return null;
-    return reactance / 1000; // Convert from Ω/km to Ω/m
+    return reactance / OHMS_PER_KM_TO_OHMS_PER_M;
   }
 
   /**

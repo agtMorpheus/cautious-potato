@@ -158,8 +158,8 @@ export function createValidationSystem(options = {}) {
     validateInputs = true
   } = options;
 
-  const { ValidationEngine } = require('./engine/validationEngine.js');
-  
+  // Note: This function is designed for dynamic use cases where the engine
+  // might not be imported at module load time. Using dynamic import pattern.
   const engine = new ValidationEngine();
   const debouncer = new ValidationDebouncer(engine, debounceMs);
 
