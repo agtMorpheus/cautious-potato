@@ -145,6 +145,108 @@ ul {
     align-items: center;
     padding: 0 1.5rem;
     border-bottom: 1px solid var(--border-base);
+    justify-content: space-between;
+    /* Changed to accommodate toggle button */
+}
+
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    transition: all var(--duration-fast);
+}
+
+.sidebar-toggle:hover {
+    background-color: var(--c-slate-800);
+    color: var(--text-main);
+}
+
+/* --- Collapsed State (Manual or Responsive) --- */
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+    display: none;
+    /* Hide toggle when collapsed, or move it? Let's hide text mostly. */
+    /* Update: actually we need the toggle to be visible to uncollapse it! */
+    display: flex;
+    position: absolute;
+    top: 20px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    background-color: var(--bg-sidebar);
+    border: 1px solid var(--border-base);
+}
+
+.sidebar.collapsed .sidebar-logo {
+    display: none;
+    /* Hide logo completely in favor of toggle, or adjust layout */
+}
+
+/* Alternative: Keep logo icon, hide text, move toggle */
+.sidebar.collapsed .sidebar-logo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+    /* Make space if toggle is there */
+}
+
+.sidebar.collapsed .logo-text {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-logo svg {
+    margin: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.sidebar.collapsed .sidebar-nav {
+    padding: 3.5rem 0.5rem 1.5rem;
+    /* Add top padding for toggle/logo space */
+}
+
+.sidebar.collapsed .nav-link {
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+.sidebar.collapsed .nav-link svg {
+    margin: 0;
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 0.75rem;
+    justify-content: center;
+}
+
+.sidebar.collapsed .btn-reset {
+    padding: 0.75rem;
+    font-size: 0;
+    justify-content: center;
+}
+
+.sidebar.collapsed .btn-reset svg {
+    margin: 0;
 }
 
 .sidebar-logo {

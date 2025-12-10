@@ -117,6 +117,37 @@ function initializeNavigation() {
         switchView(initialHash);
     }
 
+    // Sidebar Toggle Logic
+    const sidebarToggle = document.getElementById('sidebar-toggle-btn');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebarToggle && sidebar) {
+        // Load saved state
+        const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            // Update icon to point right (expand)
+            const iconPath = sidebarToggle.querySelector('path');
+            if (iconPath) iconPath.setAttribute('d', 'M9 5l7 7-7 7');
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const collapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebar-collapsed', collapsed);
+
+            // Update icon direction
+            const iconPath = sidebarToggle.querySelector('path');
+            if (iconPath) {
+                if (collapsed) {
+                    iconPath.setAttribute('d', 'M9 5l7 7-7 7'); // Right
+                } else {
+                    iconPath.setAttribute('d', 'M15 19l-7-7 7-7'); // Left
+                }
+            }
+        });
+    }
+
     console.log('✓ Navigation initialized');
 }
 

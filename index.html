@@ -26,6 +26,11 @@
                     </svg>
                     <span class="logo-text">Abrechnung</span>
                 </div>
+                <button id="sidebar-toggle-btn" class="sidebar-toggle" aria-label="Sidebar umschalten">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
             </div>
 
             <nav class="sidebar-nav">
@@ -405,7 +410,8 @@
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                     </svg>
                                     <p>Protokoll-Modul wird geladen...</p>
-                                    <p class="text-muted">Füllen Sie das Formular aus, um ein Prüfprotokoll zu erstellen.</p>
+                                    <p class="text-muted">Füllen Sie das Formular aus, um ein Prüfprotokoll zu
+                                        erstellen.</p>
                                 </div>
                             </div>
 
@@ -710,15 +716,19 @@
                         <div class="card-body">
                             <div class="settings-group">
                                 <h4 class="settings-label">Speichermodus</h4>
-                                <p class="settings-desc">Wählen Sie zwischen lokaler Speicherung und Server-Synchronisation.</p>
-                                
+                                <p class="settings-desc">Wählen Sie zwischen lokaler Speicherung und
+                                    Server-Synchronisation.</p>
+
                                 <div class="storage-mode-options">
                                     <label class="storage-mode-option">
-                                        <input type="radio" name="storage-mode" value="local_only" id="storage-mode-local" checked>
+                                        <input type="radio" name="storage-mode" value="local_only"
+                                            id="storage-mode-local" checked>
                                         <div class="storage-mode-content">
                                             <div class="storage-mode-icon">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </div>
                                             <div class="storage-mode-text">
@@ -727,31 +737,37 @@
                                             </div>
                                         </div>
                                     </label>
-                                    
+
                                     <label class="storage-mode-option">
-                                        <input type="radio" name="storage-mode" value="sync_with_server" id="storage-mode-sync">
+                                        <input type="radio" name="storage-mode" value="sync_with_server"
+                                            id="storage-mode-sync">
                                         <div class="storage-mode-content">
                                             <div class="storage-mode-icon">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                                 </svg>
                                             </div>
                                             <div class="storage-mode-text">
                                                 <strong>Mit Server synchronisieren</strong>
-                                                <span>Lokaler Cache + Server-Backup. Für Zusammenarbeit und Datensicherung.</span>
+                                                <span>Lokaler Cache + Server-Backup. Für Zusammenarbeit und
+                                                    Datensicherung.</span>
                                             </div>
                                         </div>
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <!-- Sync Status (only visible when sync is enabled) -->
                             <div id="sync-status-section" class="settings-group" style="display: none;">
                                 <h4 class="settings-label">Synchronisationsstatus</h4>
                                 <div class="sync-status-display">
                                     <span class="sync-status-indicator" id="sync-status-indicator">
-                                        <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
                                         <span id="sync-status-text">Bereit</span>
                                     </span>
@@ -759,13 +775,15 @@
                                 </div>
                                 <div class="sync-actions">
                                     <button type="button" class="btn btn-primary btn-sm" id="sync-now-btn">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            style="width: 16px; height: 16px; margin-right: 8px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
                                         Jetzt synchronisieren
                                     </button>
                                 </div>
-                                
+
                                 <!-- Auto-sync option -->
                                 <div class="sync-option">
                                     <label class="checkbox-label">
@@ -774,21 +792,26 @@
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <!-- Data Export/Import (always visible) -->
                             <div class="settings-group">
                                 <h4 class="settings-label">Daten-Backup</h4>
-                                <p class="settings-desc">Exportieren Sie Ihre Vertragsdaten als JSON-Backup oder importieren Sie eine vorhandene Sicherung.</p>
+                                <p class="settings-desc">Exportieren Sie Ihre Vertragsdaten als JSON-Backup oder
+                                    importieren Sie eine vorhandene Sicherung.</p>
                                 <div class="backup-actions">
                                     <button type="button" class="btn btn-secondary btn-sm" id="export-backup-btn">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            style="width: 16px; height: 16px; margin-right: 8px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                         </svg>
                                         Backup exportieren
                                     </button>
                                     <label class="btn btn-secondary btn-sm" for="import-backup-input">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            style="width: 16px; height: 16px; margin-right: 8px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                         </svg>
                                         Backup importieren
                                     </label>

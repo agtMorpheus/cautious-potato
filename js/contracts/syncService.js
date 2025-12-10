@@ -277,7 +277,30 @@ export async function performFullSync() {
         if (downloadResult.success && uploadResult.success) {
             updateSyncStatus(SyncStatus.SYNCED);
         } else {
-            updateSyncStatus(SyncStatus.ERROR, 'Partial sync completed');
+            // Build detailed error message
+            const messages = [];
+            
+            if (!downloadResult.success) {
+                const reason = downloadResult.error || downloadResult.reason || 'Unknown error';
+                messages.push(`Download: ${reason}`);
+            } else {
+                messages.push(`Download: ${downloadResult.downloaded || 0} contracts`);
+            }
+            
+            if (!uploadResult.success) {
+                const errorCount = uploadResult.errors?.length || 0;
+                if (errorCount > 0) {
+                    messages.push(`Upload: ${errorCount} failed`);
+                } else {
+                    const reason = uploadResult.error || uploadResult.reason || 'Unknown error';
+                    messages.push(`Upload: ${reason}`);
+                }
+            } else {
+                messages.push(`Upload: ${uploadResult.uploaded || 0} contracts`);
+            }
+            
+            const errorMessage = messages.join(' | ');
+            updateSyncStatus(SyncStatus.ERROR, errorMessage);
         }
         
         return {
