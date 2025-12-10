@@ -217,12 +217,17 @@ export function handleInspectionTypeToggle(type, isSelected) {
 
 /**
  * Handle adding a new position
+ * @param {Object} options - Optional position configuration
+ * @param {string} options.phaseType - Phase type ('mono', 'bi', 'tri')
+ * @param {string} options.parentCircuitId - Parent circuit ID for tree hierarchy
  * @returns {string} Position number of new position
  */
-export function handleAddPosition() {
+export function handleAddPosition(options = {}) {
   const newPosition = {
     stromkreisNr: '',
     zielbezeichnung: '',
+    phaseType: options.phaseType || 'mono',
+    parentCircuitId: options.parentCircuitId || null,
     leitung: { typ: '', anzahl: '', querschnitt: '' },
     spannung: { un: '', fn: 50 },
     überstromschutz: { art: '', inNennstrom: '' },

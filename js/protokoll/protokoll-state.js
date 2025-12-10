@@ -276,6 +276,57 @@ export function getPosition(posNr) {
 }
 
 /**
+ * Get child circuits of a parent circuit (for circuit tree management)
+ * @param {string|null} parentId - Parent circuit posNr, or null for root circuits
+ * @returns {Array} Array of child position objects
+ */
+export function getChildCircuits(parentId = null) {
+  const children = state.positions.filter(p => p.parentCircuitId === parentId);
+  return JSON.parse(JSON.stringify(children));
+}
+
+/**
+ * Get the parent circuit of a given circuit
+ * @param {string} posNr - Position number of the circuit
+ * @returns {Object|null} Parent position object or null
+ */
+export function getParentCircuit(posNr) {
+  const position = state.positions.find(p => p.posNr === posNr);
+  if (!position || !position.parentCircuitId) return null;
+  return getPosition(position.parentCircuitId);
+}
+
+/**
+ * Get circuit ancestry path (for breadcrumb navigation in tree view)
+ * @param {string} posNr - Position number of the circuit
+ * @returns {Array} Array of parent circuits from root to immediate parent
+ */
+export function getCircuitAncestry(posNr) {
+  const ancestry = [];
+  const visited = new Set(); // Track visited circuits to prevent infinite loops
+  let current = getPosition(posNr);
+  
+  while (current && current.parentCircuitId) {
+    // Prevent infinite loop from circular references
+    if (visited.has(current.parentCircuitId)) {
+      console.warn('Circular reference detected in circuit tree:', current.parentCircuitId);
+      break;
+    }
+    visited.add(current.parentCircuitId);
+    
+    const parent = getPosition(current.parentCircuitId);
+    if (parent) {
+      ancestry.unshift(parent);
+      current = parent;
+    } else {
+      break;
+    }
+  }
+  
+  return ancestry;
+}
+
+/**
  * Get inspection results
  * @returns {Object} Prüfungsergebnis object
  */
@@ -425,6 +476,10 @@ export function addPosition(position) {
     posNr: position.posNr || generatePositionNumber(),
     stromkreisNr: position.stromkreisNr || '',
     zielbezeichnung: position.zielbezeichnung || '',
+    // Phase type: 'mono' (1-phase), 'bi' (2-phase), 'tri' (3-phase)
+    phaseType: position.phaseType || 'mono',
+    // Parent circuit reference for circuit tree hierarchy
+    parentCircuitId: position.parentCircuitId || null,
     leitung: {
       typ: position.leitung?.typ || '',
       anzahl: position.leitung?.anzahl || '',

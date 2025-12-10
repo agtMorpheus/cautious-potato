@@ -450,6 +450,7 @@ export function renderPositionsForm() {
                 <th scope="col">Pos.Nr.</th>
                 <th scope="col">Nr.</th>
                 <th scope="col">Zielbezeichnung</th>
+                <th scope="col">Phase</th>
                 <th scope="col">Leitung/Kabel</th>
                 <th scope="col">Un (V)</th>
                 <th scope="col">fn (Hz)</th>
@@ -612,15 +613,17 @@ export function renderReviewForm() {
                   <th scope="col">Nr.</th>
                   <th scope="col">Stromkreis</th>
                   <th scope="col">Zielbezeichnung</th>
+                  <th scope="col">Phase</th>
                   <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
                 ${positions.map((pos, idx) => `
-                  <tr>
+                  <tr${pos.parentCircuitId ? ' class="child-circuit"' : ''}>
                     <td>${idx + 1}</td>
                     <td>${escapeHtml(pos.stromkreisNr || '-')}</td>
                     <td>${escapeHtml(pos.zielbezeichnung || '-')}</td>
+                    <td><span class="phase-badge phase-${escapeHtml(pos.phaseType || 'mono')}">${getPhaseTypeLabel(pos.phaseType)}</span></td>
                     <td><span class="status-badge status-${pos.prüfergebnis?.status || 'nicht-geprüft'}">${escapeHtml(pos.prüfergebnis?.status || 'nicht-geprüft')}</span></td>
                   </tr>
                 `).join('')}
@@ -880,6 +883,22 @@ function renderInspectionRow(fieldPath, label, value = {}) {
 // POSITION ROW RENDERING
 // ============================================
 
+// Phase type display labels
+const PHASE_TYPE_LABELS = {
+  'mono': '1P',
+  'bi': '2P',
+  'tri': '3P'
+};
+
+/**
+ * Get phase type display label
+ * @param {string} phaseType - Phase type ('mono', 'bi', 'tri')
+ * @returns {string} Display label
+ */
+function getPhaseTypeLabel(phaseType) {
+  return PHASE_TYPE_LABELS[phaseType] || PHASE_TYPE_LABELS['mono'];
+}
+
 /**
  * Render a single position row (Stromkreis)
  * Based on vorlage_protokoll.md - German interface
@@ -889,12 +908,15 @@ function renderInspectionRow(fieldPath, label, value = {}) {
  */
 function renderPositionRow(position, index) {
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
+  const phaseLabel = getPhaseTypeLabel(position.phaseType);
+  const hasParent = position.parentCircuitId ? true : false;
   
   return `
-    <tr class="position-row" data-pos-nr="${escapeHtml(position.posNr)}">
+    <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
       <td>${escapeHtml(position.posNr || (index + 1))}</td>
       <td>${escapeHtml(position.stromkreisNr || '-')}</td>
       <td>${escapeHtml(position.zielbezeichnung || '-')}</td>
+      <td><span class="phase-badge phase-${escapeHtml(position.phaseType || 'mono')}">${phaseLabel}</span></td>
       <td>${escapeHtml(position.leitung?.typ || '-')}</td>
       <td>${position.spannung?.un || '-'}</td>
       <td>${position.spannung?.fn || '-'}</td>
@@ -903,6 +925,7 @@ function renderPositionRow(position, index) {
       <td>${position.messwerte?.riso || '-'}</td>
       <td><span class="status-badge status-${status}">${escapeHtml(status)}</span></td>
       <td class="position-actions">
+        ${hasParent ? `<button type="button" class="btn-icon btn-tree" data-action="view-parent" data-pos-nr="${escapeHtml(position.posNr)}" title="Zum Vater-Stromkreis" aria-label="Vater-Stromkreis anzeigen">↑</button>` : ''}
         <button type="button" class="btn-icon" data-action="edit-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Bearbeiten" aria-label="Position bearbeiten">✎</button>
         <button type="button" class="btn-icon btn-danger" data-action="delete-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Löschen" aria-label="Position löschen">✕</button>
       </td>
@@ -919,20 +942,17 @@ export function addPositionRow(position) {
   const tbody = document.getElementById('positionsTableBody');
   if (!tbody) return;
 
-  const tr = document.createElement('tr');
-  tr.className = 'position-row';
-  tr.setAttribute('data-pos-nr', position.posNr);
+  // Use table wrapper to properly parse TR elements (TR is not valid inside a div)
+  const tempTable = document.createElement('table');
+  const tempTbody = document.createElement('tbody');
+  tempTable.appendChild(tempTbody);
+  tempTbody.innerHTML = renderPositionRow(position, tbody.children.length);
   
-  // Get inner HTML from renderPositionRow, removing outer tr tags
-  const tempContainer = document.createElement('div');
-  tempContainer.innerHTML = renderPositionRow(position, tbody.children.length);
-  const newRow = tempContainer.querySelector('tr');
+  const newRow = tempTbody.querySelector('tr');
   if (newRow) {
-    tr.innerHTML = newRow.innerHTML;
+    tbody.appendChild(newRow);
+    attachPositionListeners();
   }
-  
-  tbody.appendChild(tr);
-  attachPositionListeners();
 }
 
 /**
@@ -958,17 +978,38 @@ export function updatePositionRow(posNr, position) {
   if (!row) return;
 
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
+  const phaseLabel = getPhaseTypeLabel(position.phaseType);
+  const hasParent = position.parentCircuitId ? true : false;
   const cells = row.querySelectorAll('td');
   
-  if (cells.length >= 7) {
-    cells[0].textContent = position.stromkreisNr || '-';
-    cells[1].textContent = position.zielbezeichnung || '-';
-    cells[2].textContent = position.leitung?.typ || '-';
-    cells[3].textContent = position.spannung?.un || '-';
-    cells[4].textContent = position.spannung?.fn || '-';
-    cells[5].textContent = position.messwerte?.riso || '-';
+  // Update row class for child circuits
+  row.classList.toggle('child-circuit', hasParent);
+  
+  // Expected number of columns in the positions table
+  // Pos.Nr., Nr., Zielbezeichnung, Phase, Leitung/Kabel, Un, fn, Überstrom-Schutz, In, Riso, Status, Aktionen
+  const POSITIONS_TABLE_COLUMN_COUNT = 12;
+  
+  if (cells.length >= POSITIONS_TABLE_COLUMN_COUNT) {
+    // Column indices: Pos.Nr. (0), Nr. (1), Zielbezeichnung (2), Phase (3), Leitung/Kabel (4), 
+    // Un (5), fn (6), Überstrom-Schutz (7), In (8), Riso (9), Status (10), Aktionen (11)
+    cells[1].textContent = position.stromkreisNr || '-';
+    cells[2].textContent = position.zielbezeichnung || '-';
     
-    const statusBadge = cells[6].querySelector('.status-badge');
+    // Update phase badge
+    const phaseBadge = cells[3].querySelector('.phase-badge');
+    if (phaseBadge) {
+      phaseBadge.className = `phase-badge phase-${position.phaseType || 'mono'}`;
+      phaseBadge.textContent = phaseLabel;
+    }
+    
+    cells[4].textContent = position.leitung?.typ || '-';
+    cells[5].textContent = position.spannung?.un || '-';
+    cells[6].textContent = position.spannung?.fn || '-';
+    cells[7].textContent = position.überstromschutz?.art || '-';
+    cells[8].textContent = position.überstromschutz?.inNennstrom || '-';
+    cells[9].textContent = position.messwerte?.riso || '-';
+    
+    const statusBadge = cells[10].querySelector('.status-badge');
     if (statusBadge) {
       statusBadge.className = `status-badge status-${status}`;
       statusBadge.textContent = status;
