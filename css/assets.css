@@ -1,0 +1,663 @@
+/**
+ * assets.css
+ * 
+ * Styles for the Asset Management Module
+ * Follows the existing design system from styles.css
+ */
+
+/* ==================== Asset Module Container ==================== */
+.asset-module {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ==================== Statistics Grid ==================== */
+.asset-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .asset-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .asset-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.asset-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.asset-stat-card:hover {
+  border-color: var(--border-highlight);
+  box-shadow: var(--shadow-md);
+}
+
+.asset-stat-card .stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.asset-stat-card .stat-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.asset-stat-card .stat-icon.assets {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--c-brand-400);
+}
+
+.asset-stat-card .stat-icon.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--c-success);
+}
+
+.asset-stat-card .stat-icon.plants {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.asset-stat-card .stat-icon.hierarchy {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--c-warning);
+}
+
+.asset-stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.asset-stat-card .stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ==================== Header ==================== */
+.asset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.asset-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.asset-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ==================== Filters ==================== */
+.asset-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-base);
+}
+
+.asset-filters .filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.asset-filters .filter-group--search {
+  flex: 2;
+  min-width: 250px;
+}
+
+.asset-filters .form-input,
+.asset-filters .form-select {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.asset-filters .form-input:focus,
+.asset-filters .form-select:focus {
+  outline: none;
+  border-color: var(--c-brand-500);
+  box-shadow: 0 0 0 3px var(--c-brand-glow);
+}
+
+/* ==================== Asset List Container ==================== */
+.asset-list-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ==================== Empty State ==================== */
+.asset-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.asset-empty-state .empty-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--text-dim);
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.asset-empty-state .empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 0.5rem 0;
+}
+
+.asset-empty-state .empty-text {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ==================== Asset Table ==================== */
+.asset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.asset-table thead {
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.asset-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-base);
+}
+
+.asset-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-base);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.asset-table tbody tr {
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.asset-table tbody tr:hover {
+  background: var(--bg-surface);
+}
+
+.asset-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Asset ID */
+.asset-id {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.8125rem;
+  background: var(--bg-surface);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-premium);
+}
+
+/* Asset Name */
+.asset-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.asset-name strong {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.asset-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Asset Type */
+.asset-type {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+/* Asset Status */
+.asset-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.asset-status.status-active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--c-success);
+}
+
+.asset-status.status-inactive {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--c-warning);
+}
+
+.asset-status.status-decommissioned {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--c-danger);
+}
+
+.asset-status.status-default {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+}
+
+/* Asset Actions */
+.asset-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ==================== List Footer ==================== */
+.asset-list-footer {
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-base);
+}
+
+.asset-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ==================== Modal ==================== */
+.asset-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.asset-modal .modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.asset-modal .modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: auto;
+}
+
+.asset-modal .modal-content--sm {
+  max-width: 480px;
+}
+
+.asset-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-base);
+}
+
+.asset-modal .modal-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.asset-modal .modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.asset-modal .modal-close:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.asset-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.asset-modal .modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-base);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ==================== Form ==================== */
+.asset-form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.asset-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .asset-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.asset-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.asset-form label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.asset-form .required {
+  color: var(--c-danger);
+}
+
+.asset-form .form-control {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.asset-form .form-control:focus {
+  outline: none;
+  border-color: var(--c-brand-500);
+  box-shadow: 0 0 0 3px var(--c-brand-glow);
+}
+
+.asset-form .form-control[readonly] {
+  background: var(--bg-glass);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.asset-form .form-control.error {
+  border-color: var(--c-danger);
+}
+
+.asset-form .form-control.error:focus {
+  box-shadow: 0 0 0 3px var(--c-danger-glow);
+}
+
+.asset-form textarea.form-control {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.asset-form .field-error {
+  font-size: 0.75rem;
+  color: var(--c-danger);
+  display: none;
+}
+
+.asset-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-base);
+}
+
+/* ==================== Import Summary ==================== */
+.import-summary {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.import-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.import-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.import-stat--success .import-stat-value {
+  color: var(--c-success);
+}
+
+.import-stat--error .import-stat-value {
+  color: var(--c-danger);
+}
+
+.import-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.import-errors {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.import-errors h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-danger);
+  margin: 0 0 0.75rem 0;
+}
+
+.import-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.import-errors li {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+}
+
+/* ==================== Message Container ==================== */
+.asset-message-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+}
+
+.asset-message-container .message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.3s var(--ease-out);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.asset-message-container .message-success {
+  background: var(--c-success);
+  color: white;
+}
+
+.asset-message-container .message-error {
+  background: var(--c-danger);
+  color: white;
+}
+
+.asset-message-container .message-warning {
+  background: var(--c-warning);
+  color: #1a1a1a;
+}
+
+.asset-message-container .message-info {
+  background: var(--c-info);
+  color: white;
+}
+
+.asset-message-container .message-text {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.asset-message-container .message-close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.asset-message-container .message-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== Button Styles ==================== */
+.asset-module .btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.asset-module .btn-icon:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border-color: var(--border-highlight);
+}
+
+.asset-module .btn-icon.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--c-danger);
+  border-color: var(--c-danger);
+}

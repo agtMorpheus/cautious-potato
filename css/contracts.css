@@ -975,3 +975,71 @@
     display: flex;
     gap: 0.5rem;
 }
+
+/* ==================== Contract Actions Column ==================== */
+.contract-actions {
+    white-space: nowrap;
+}
+
+.contract-actions .btn-sm {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.contract-actions .btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.create-protokoll-btn {
+    background: var(--c-brand-500, #3b82f6);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.create-protokoll-btn:hover {
+    background: var(--c-brand-600, #2563eb);
+}
+
+.create-protokoll-btn svg {
+    flex-shrink: 0;
+}
+
+/* ==================== Worker/Employee Dropdown in Contract Table ==================== */
+.worker-select {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 180px;
+    font-weight: 400;
+}
+
+.worker-select:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-surface);
+}
+
+.worker-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Worker placeholder when HR integration not available */
+.worker-placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 0.875rem;
+}

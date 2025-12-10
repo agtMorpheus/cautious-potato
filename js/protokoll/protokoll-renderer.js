@@ -3,10 +3,13 @@
  * 
  * Handles all UI rendering and updates for the Protokoll module.
  * Dynamically generates form HTML and updates DOM based on state changes.
+ * Based on vorlage_protokoll.md - VDE 0100 Prüfprotokoll
+ * German interface language
  */
 
 import * as state from './protokoll-state.js';
 import * as handlers from './protokoll-handlers.js';
+import * as messgeraetState from '../messgeraet/messgeraet-state.js';
 
 // ============================================
 // CONSTANTS
@@ -14,12 +17,26 @@ import * as handlers from './protokoll-handlers.js';
 
 const CONTAINER_ID = 'protokollFormContainer';
 const MESSAGE_CONTAINER_ID = 'messageContainer';
-const STEPS = ['metadata', 'positions', 'results', 'review'];
+const STEPS = ['metadata', 'besichtigung', 'erproben', 'messen', 'positions', 'results', 'review'];
 const FORM_IDS = {
   metadata: 'metadataForm',
+  besichtigung: 'besichtigungForm',
+  erproben: 'erprobenForm',
+  messen: 'messenForm',
   positions: 'positionsForm',
   results: 'resultsForm',
   review: 'reviewForm'
+};
+
+// German step labels
+const STEP_LABELS = {
+  metadata: 'Kopfdaten',
+  besichtigung: 'Besichtigung',
+  erproben: 'Erproben',
+  messen: 'Messen',
+  positions: 'Stromkreise',
+  results: 'Ergebnis',
+  review: 'Übersicht'
 };
 
 // ============================================
@@ -116,6 +133,15 @@ export function renderStep(step) {
     case 'metadata':
       renderMetadataForm();
       break;
+    case 'besichtigung':
+      renderBesichtigungForm();
+      break;
+    case 'erproben':
+      renderErprobenForm();
+      break;
+    case 'messen':
+      renderMessenForm();
+      break;
     case 'positions':
       renderPositionsForm();
       break;
@@ -135,7 +161,8 @@ export function renderStep(step) {
 }
 
 /**
- * Render metadata form (Step 1)
+ * Render metadata form (Step 1) - Kopfdaten
+ * Based on vorlage_protokoll.md - German interface
  * @returns {void}
  */
 export function renderMetadataForm() {
@@ -149,64 +176,95 @@ export function renderMetadataForm() {
       ${renderProgressIndicator('metadata')}
 
       <fieldset>
-        <legend>Protocol Information</legend>
+        <legend>Prüfprotokoll VDE 0100</legend>
         <div class="form-row">
-          ${renderTextField('metadata.protokollNumber', 'Protocol Number', metadata.protokollNumber, {
+          ${renderTextField('metadata.protokollNumber', 'Prüfprotokoll Nr.', metadata.protokollNumber, {
             required: true,
-            pattern: '^[A-Z0-9]{3,20}$',
-            placeholder: 'e.g., EDB101120250925'
+            placeholder: 'z.B. EDM221020251123'
           })}
-          ${renderDateField('metadata.datum', 'Date', metadata.datum, { required: true })}
+          ${renderDateField('metadata.datum', 'Datum', metadata.datum, { required: true })}
         </div>
-        ${renderTextField('metadata.auftraggeber', 'Client', metadata.auftraggeber, { required: true })}
-        ${renderTextareaField('metadata.auftraggaberAdresse', 'Client Address', metadata.auftraggaberAdresse)}
         <div class="form-row">
-          ${renderTextField('metadata.auftragnummer', 'Order Number', metadata.auftragnummer)}
-          ${renderTextField('metadata.kundennummer', 'Customer Number', metadata.kundennummer)}
+          ${renderTextField('metadata.blatt', 'Blatt', metadata.blatt, { placeholder: '1' })}
+          ${renderTextField('metadata.blattVon', 'von', metadata.blattVon, { placeholder: '3' })}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Facility Information</legend>
-        ${renderTextField('metadata.facility.name', 'Facility Name', metadata.facility.name, { required: true })}
-        ${renderTextareaField('metadata.facility.address', 'Facility Address', metadata.facility.address, { required: true })}
-        ${renderTextField('metadata.facility.anlage', 'Installation', metadata.facility.anlage)}
-        ${renderTextField('metadata.facility.location', 'Location', metadata.facility.location)}
-        ${renderTextField('metadata.facility.inventory', 'Inventory Number', metadata.facility.inventory)}
-      </fieldset>
-
-      <fieldset>
-        <legend>Network Information</legend>
+        <legend>Auftraggeber</legend>
         <div class="form-row">
-          ${renderSelectField('metadata.facility.netzspannung', 'Network Voltage', 
-            ['230/400', '400/230', '230V', '400V'], 
-            metadata.facility.netzspannung
-          )}
-          ${renderSelectField('metadata.facility.netzform', 'Network Form',
-            ['TN-C', 'TN-S', 'TN-C-S', 'TT', 'IT'],
-            metadata.facility.netzform
-          )}
+          ${renderTextField('metadata.auftraggeber', 'Auftraggeber', metadata.auftraggeber, { required: true })}
+          ${renderTextField('metadata.auftragnummer', 'Auftrag Nr.', metadata.auftragnummer)}
         </div>
-        ${renderTextField('metadata.facility.netzbetreiber', 'Network Provider', metadata.facility.netzbetreiber)}
+        ${renderTextField('metadata.kundennummer', 'Kunden Nr.', metadata.kundennummer)}
       </fieldset>
 
       <fieldset>
-        <legend>Inspection Types</legend>
+        <legend>Auftragnehmer</legend>
+        ${renderTextField('metadata.auftragnehmer', 'Firma', metadata.auftragnehmer)}
+        ${renderTextField('metadata.auftragnehmerOrt', 'Ort', metadata.auftragnehmerOrt)}
+      </fieldset>
+
+      <fieldset>
+        <legend>Kunde / Prüfobjekt</legend>
+        ${renderTextField('metadata.kunde', 'Kunde', metadata.kunde, { placeholder: 'z.B. Volkswagen AG, Werk Wolfsburg' })}
+        ${renderTextField('metadata.kundeOrt', 'Kunde Ort', metadata.kundeOrt, { placeholder: 'z.B. Berliner Ring 2, 38436 Wolfsburg' })}
+        ${renderTextField('metadata.firma', 'Firma', metadata.firma, { placeholder: 'z.B. EAW Wolfsburg' })}
+        ${renderTextField('metadata.firmaOrt', 'Firma Ort', metadata.firmaOrt, { placeholder: 'z.B. Dieselstraße 27, 38446 Wolfsburg' })}
+      </fieldset>
+
+      <fieldset>
+        <legend>Anlage</legend>
+        ${renderTextField('metadata.facility.anlage', 'Anlage', metadata.facility?.anlage || '', { placeholder: 'z.B. LVUM-Fc34' })}
+        ${renderTextField('metadata.facility.ort', 'Ort', metadata.facility?.ort || '', { placeholder: 'z.B. Halle 3' })}
+        ${renderTextField('metadata.facility.inv', 'INV (Inventar-Nr.)', metadata.facility?.inv || '', { placeholder: 'z.B. E03150AP17000093243' })}
+      </fieldset>
+
+      <fieldset>
+        <legend>Prüfen nach</legend>
         <div class="checkbox-group">
-          ${renderCheckboxField('prüfArt-neuanlage', (metadata.facility.prüfArt || []).includes('Neuanlage'), 'New Installation')}
-          ${renderCheckboxField('prüfArt-erweiterung', (metadata.facility.prüfArt || []).includes('Erweiterung'), 'Expansion')}
-          ${renderCheckboxField('prüfArt-änderung', (metadata.facility.prüfArt || []).includes('Änderung'), 'Modification')}
-          ${renderCheckboxField('prüfArt-instandsetzung', (metadata.facility.prüfArt || []).includes('Instandsetzung'), 'Repair')}
-          ${renderCheckboxField('prüfArt-wiederholung', (metadata.facility.prüfArt || []).includes('Wiederholungsprüfung'), 'Periodic Inspection')}
+          ${renderCheckboxField('metadata.prüfenNach.dinVde0100Gruppe700', metadata.prüfenNach?.dinVde0100Gruppe700, 'DIN VDE 0100 Gruppe 700')}
+          ${renderCheckboxField('metadata.prüfenNach.dinVde01000600', metadata.prüfenNach?.dinVde01000600, 'DIN VDE 0100-0600')}
+          ${renderCheckboxField('metadata.prüfenNach.dinVde01050100', metadata.prüfenNach?.dinVde01050100, 'DIN VDE 0105-0100')}
+        </div>
+        <div class="checkbox-group" style="margin-top: 0.5rem;">
+          ${renderCheckboxField('metadata.dguvV3', metadata.dguvV3, 'DGUV V3')}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Inspector Information</legend>
-        <div class="form-row">
-          ${renderTextField('metadata.prüfer.name', 'Inspector Name', metadata.prüfer.name, { required: true })}
-          ${renderTextField('metadata.prüfer.titel', 'Inspector Title', metadata.prüfer.titel)}
+        <legend>Prüfungsart</legend>
+        <div class="checkbox-group">
+          ${renderCheckboxField('metadata.neuanlage', metadata.neuanlage, 'Neuanlage')}
+          ${renderCheckboxField('metadata.erweiterung', metadata.erweiterung, 'Erweiterung')}
+          ${renderCheckboxField('metadata.änderung', metadata.änderung, 'Änderung')}
+          ${renderCheckboxField('metadata.instandsetzung', metadata.instandsetzung, 'Instandsetzung')}
+          ${renderCheckboxField('metadata.wiederholungsprüfung', metadata.wiederholungsprüfung, 'Wiederholungsprüfung')}
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Netz</legend>
+        <div class="form-row">
+          ${renderSelectField('metadata.facility.netzspannung', 'Netzspannung', 
+            ['230 / 400 V', '400 / 230 V', '230V', '400V'], 
+            metadata.facility?.netzspannung || '230 / 400 V'
+          )}
+          ${renderSelectField('metadata.facility.netzform', 'Netzform',
+            ['TN-C', 'TN-S', 'TN-C-S', 'TT', 'IT'],
+            metadata.facility?.netzform || 'TN-S'
+          )}
+        </div>
+        ${renderTextField('metadata.facility.netzbetreiber', 'Netzbetreiber', metadata.facility?.netzbetreiber || '')}
+      </fieldset>
+
+      <fieldset>
+        <legend>Verantwortlicher Prüfer</legend>
+        <div class="form-row">
+          ${renderTextField('metadata.prüfer.name', 'Name', metadata.prüfer?.name || '', { required: true })}
+          ${renderTextField('metadata.prüfer.titel', 'Titel', metadata.prüfer?.titel || '')}
+        </div>
+        ${renderTextField('metadata.prüfer.ort', 'Ort', metadata.prüfer?.ort || '')}
       </fieldset>
 
       ${renderFormNavigation('metadata')}
@@ -218,7 +276,182 @@ export function renderMetadataForm() {
 }
 
 /**
- * Render positions form (Step 2)
+ * Render Besichtigung form (Step 2) - Visual Inspection
+ * Based on vorlage_protokoll.md - German interface
+ * @returns {void}
+ */
+export function renderBesichtigungForm() {
+  const container = document.getElementById(CONTAINER_ID);
+  if (!container) return;
+
+  const besichtigung = state.getBesichtigung();
+
+  const html = `
+    <form id="${FORM_IDS.besichtigung}" class="protokoll-form besichtigung-form">
+      ${renderProgressIndicator('besichtigung')}
+
+      <fieldset>
+        <legend>Besichtigung</legend>
+        <p class="fieldset-description">Sichtprüfung der elektrischen Anlage - i.O. = in Ordnung, n.i.O. = nicht in Ordnung</p>
+        
+        <div class="inspection-table">
+          <div class="inspection-header">
+            <span class="inspection-label-header">Prüfpunkt</span>
+            <span class="inspection-io-header">i.O.</span>
+            <span class="inspection-nio-header">n.i.O.</span>
+          </div>
+          
+          ${renderInspectionRow('besichtigung.auswahlBetriebsmittel', 'Auswahl der Betriebsmittel', besichtigung.auswahlBetriebsmittel)}
+          ${renderInspectionRow('besichtigung.trennSchaltgeräte', 'Trenn- und Schaltgeräte', besichtigung.trennSchaltgeräte)}
+          ${renderInspectionRow('besichtigung.brandabschottungen', 'Brandabschottungen', besichtigung.brandabschottungen)}
+          ${renderInspectionRow('besichtigung.gebäudesystemtechnik', 'Gebäudesystemtechnik', besichtigung.gebäudesystemtechnik)}
+          ${renderInspectionRow('besichtigung.kabelLeitungenStromschienen', 'Kabel, Leitungen, Stromschienen', besichtigung.kabelLeitungenStromschienen)}
+          ${renderInspectionRow('besichtigung.kennzStromkrBetriebsmittel', 'Kennz., Stromkr., Betriebsmittel', besichtigung.kennzStromkrBetriebsmittel)}
+          ${renderInspectionRow('besichtigung.kennzeichnungNPELeiter', 'Kennzeichnung N- und PE-Leiter', besichtigung.kennzeichnungNPELeiter)}
+          ${renderInspectionRow('besichtigung.leiterverbindungen', 'Leiterverbindungen', besichtigung.leiterverbindungen)}
+          ${renderInspectionRow('besichtigung.schutzÜberwachungseinrichtungen', 'Schutz- und Überwachungseinrichtungen', besichtigung.schutzÜberwachungseinrichtungen)}
+          ${renderInspectionRow('besichtigung.basisschutzDirektBerühren', 'Basisschutz, Schutz gegen direkt. Berühren', besichtigung.basisschutzDirektBerühren)}
+          ${renderInspectionRow('besichtigung.zugänglichkeit', 'Zugänglichkeit', besichtigung.zugänglichkeit)}
+          ${renderInspectionRow('besichtigung.schutzpotentialausgleich', 'Schutzpotentialausgleich', besichtigung.schutzpotentialausgleich)}
+          ${renderInspectionRow('besichtigung.zusÖrtlPotentialausgleich', 'zus. örtl. Potentialausgleich', besichtigung.zusÖrtlPotentialausgleich)}
+          ${renderInspectionRow('besichtigung.dokumentation', 'Dokumentation', besichtigung.dokumentation)}
+          ${renderInspectionRow('besichtigung.reinigungSchaltschrank', 'Reinigung des Schaltschranks', besichtigung.reinigungSchaltschrank)}
+        </div>
+
+        <div class="checkbox-group" style="margin-top: 1rem;">
+          ${renderCheckboxField('besichtigung.ergänzungsblätter', besichtigung.ergänzungsblätter, 'siehe Ergänzungsblätter')}
+        </div>
+      </fieldset>
+
+      ${renderFormNavigation('besichtigung')}
+    </form>
+  `;
+
+  container.innerHTML = html;
+  attachFieldListeners();
+}
+
+/**
+ * Render Erproben form (Step 3) - Testing
+ * Based on vorlage_protokoll.md - German interface
+ * @returns {void}
+ */
+export function renderErprobenForm() {
+  const container = document.getElementById(CONTAINER_ID);
+  if (!container) return;
+
+  const erproben = state.getErproben();
+
+  const html = `
+    <form id="${FORM_IDS.erproben}" class="protokoll-form erproben-form">
+      ${renderProgressIndicator('erproben')}
+
+      <fieldset>
+        <legend>Erproben</legend>
+        <p class="fieldset-description">Funktionsprüfungen - i.O. = in Ordnung, n.i.O. = nicht in Ordnung</p>
+        
+        <div class="inspection-table">
+          <div class="inspection-header">
+            <span class="inspection-label-header">Prüfpunkt</span>
+            <span class="inspection-io-header">i.O.</span>
+            <span class="inspection-nio-header">n.i.O.</span>
+          </div>
+          
+          ${renderInspectionRow('erproben.funktionsprüfungAnlage', 'Funktionsprüfung der Anlage', erproben.funktionsprüfungAnlage)}
+          ${renderInspectionRow('erproben.rcdSchutzschalter', 'RCD-Schutzschalter', erproben.rcdSchutzschalter)}
+          ${renderInspectionRow('erproben.schraubverbKlemmstellen', 'Schraubverb. u. Klemmstellen auf festen Sitz', erproben.schraubverbKlemmstellen)}
+          ${renderInspectionRow('erproben.funktionSchutzSicherheitsÜberwachung', 'Funktion der Schutz-, Sicherheits- und Überwachungseinrichtungen', erproben.funktionSchutzSicherheitsÜberwachung)}
+          ${renderInspectionRow('erproben.drehrichtungMotoren', 'Drehrichtung der Motoren', erproben.drehrichtungMotoren)}
+          ${renderInspectionRow('erproben.rechtsdrehfelderDrehstromsteckdose', 'Rechtsdrehfelder der Drehstromsteckdose', erproben.rechtsdrehfelderDrehstromsteckdose)}
+          ${renderInspectionRow('erproben.gebäudesystemtechnikErproben', 'Gebäudesystemtechnik', erproben.gebäudesystemtechnikErproben)}
+        </div>
+      </fieldset>
+
+      ${renderFormNavigation('erproben')}
+    </form>
+  `;
+
+  container.innerHTML = html;
+  attachFieldListeners();
+}
+
+/**
+ * Render Messen form (Step 4) - Measurement
+ * Based on vorlage_protokoll.md - German interface
+ * @returns {void}
+ */
+export function renderMessenForm() {
+  const container = document.getElementById(CONTAINER_ID);
+  if (!container) return;
+
+  const messen = state.getMessen();
+  const messgeräte = state.getMessgeräte();
+  
+  // Get available devices from Messgerät module
+  let deviceDropdownOptions = '';
+  try {
+    const devices = messgeraetState.getDevicesForDropdown();
+    if (devices && devices.length > 0) {
+      deviceDropdownOptions = devices.map(d => {
+        const expiredClass = d.isExpired ? ' (Abgelaufen)' : '';
+        return `<option value="${escapeHtml(d.id)}" data-device='${escapeHtml(JSON.stringify(d))}'>${escapeHtml(d.label)}${expiredClass}</option>`;
+      }).join('');
+    }
+  } catch (error) {
+    console.warn('Messgerät module not available:', error);
+  }
+
+  const html = `
+    <form id="${FORM_IDS.messen}" class="protokoll-form messen-form">
+      ${renderProgressIndicator('messen')}
+
+      <fieldset>
+        <legend>Messen</legend>
+        <div class="checkbox-group">
+          ${renderCheckboxField('messen.durchgängigkeitPotentialausgleich', messen.durchgängigkeitPotentialausgleich, 'Durchgängigkeit des Potentialausgleich (≤ 0,1Ω nachgewiesen)')}
+          ${renderCheckboxField('messen.gebäudekonstruktion', messen.gebäudekonstruktion, 'Gebäudekonstruktion')}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Verwendete Messgeräte nach DIN VDE 0413</legend>
+        ${deviceDropdownOptions ? `
+          <div class="form-group">
+            <label for="messgeraet-select">Messgerät aus Datenbank wählen</label>
+            <select id="messgeraet-select" class="form-control" data-action="select-device">
+              <option value="">-- Manuell eingeben oder Gerät wählen --</option>
+              ${deviceDropdownOptions}
+            </select>
+            <p class="field-hint">Wählen Sie ein Messgerät aus der Datenbank oder geben Sie die Daten manuell ein.</p>
+          </div>
+          <hr class="form-divider">
+        ` : `
+          <div class="form-notice">
+            <p>Keine Messgeräte in der Datenbank. <a href="#messgeraet" data-view="messgeraet">Messgeräte verwalten →</a></p>
+          </div>
+        `}
+        <div class="form-row">
+          ${renderTextField('messgeräte.fabrikat', 'Fabrikat', messgeräte.fabrikat, { placeholder: 'z.B. Fluke' })}
+          ${renderTextField('messgeräte.typ', 'Typ', messgeräte.typ, { placeholder: 'z.B. 1654b' })}
+        </div>
+        <div class="form-row">
+          ${renderTextField('messgeräte.nächsteKalibrierung', 'Nächste Kalibrierung', messgeräte.nächsteKalibrierung, { placeholder: 'z.B. 01.05.26' })}
+          ${renderTextField('messgeräte.identNr', 'Ident-Nr.', messgeräte.identNr, { placeholder: 'z.B. 4312061' })}
+        </div>
+      </fieldset>
+
+      ${renderFormNavigation('messen')}
+    </form>
+  `;
+
+  container.innerHTML = html;
+  attachFieldListeners();
+  attachDeviceSelectListener();
+}
+
+/**
+ * Render positions form (Step 5) - Stromkreise
+ * Based on vorlage_protokoll.md - German interface
  * @returns {void}
  */
 export function renderPositionsForm() {
@@ -226,25 +459,37 @@ export function renderPositionsForm() {
   if (!container) return;
 
   const positions = state.getPositions();
+  const einspeisung = state.getEinspeisung();
 
   const html = `
     <form id="${FORM_IDS.positions}" class="protokoll-form positions-form">
       ${renderProgressIndicator('positions')}
 
+      <fieldset>
+        <legend>Einspeisung</legend>
+        ${renderTextField('einspeisung', 'Einspeisung', einspeisung, { placeholder: 'z.B. KV-Fc30/AF2; KAV-Fb42/BF22;' })}
+      </fieldset>
+
       <div class="positions-section">
-        <h3>Circuit Positions</h3>
+        <h3>Stromkreise</h3>
+        <p class="section-description">Messwerte und Prüfergebnisse der einzelnen Stromkreise</p>
+        
         <div class="positions-table-wrapper">
-          <table class="positions-table" role="grid" aria-label="Circuit positions table">
+          <table class="positions-table" role="grid" aria-label="Stromkreis-Tabelle">
             <thead>
               <tr>
-                <th scope="col">Circuit No.</th>
-                <th scope="col">Description</th>
-                <th scope="col">Cable Type</th>
-                <th scope="col">Voltage (V)</th>
-                <th scope="col">Frequency (Hz)</th>
-                <th scope="col">Insulation (MΩ)</th>
+                <th scope="col">Pos.Nr.</th>
+                <th scope="col">Nr.</th>
+                <th scope="col">Zielbezeichnung</th>
+                <th scope="col">Phase</th>
+                <th scope="col">Leitung/Kabel</th>
+                <th scope="col">Un (V)</th>
+                <th scope="col">fn (Hz)</th>
+                <th scope="col">Überstrom-Schutz</th>
+                <th scope="col">In (A)</th>
+                <th scope="col">Riso (MΩ)</th>
                 <th scope="col">Status</th>
-                <th scope="col">Actions</th>
+                <th scope="col">Aktionen</th>
               </tr>
             </thead>
             <tbody id="positionsTableBody">
@@ -254,7 +499,7 @@ export function renderPositionsForm() {
         </div>
 
         <button type="button" class="btn btn-secondary" data-action="add-position">
-          + Add Position
+          + Position hinzufügen
         </button>
       </div>
 
@@ -268,7 +513,8 @@ export function renderPositionsForm() {
 }
 
 /**
- * Render results form (Step 3)
+ * Render results form (Step 6) - Prüfungsergebnis
+ * Based on vorlage_protokoll.md - German interface
  * @returns {void}
  */
 export function renderResultsForm() {
@@ -276,48 +522,43 @@ export function renderResultsForm() {
   if (!container) return;
 
   const results = state.getPrüfungsergebnis();
+  const mängel = state.getMängel();
 
   const html = `
     <form id="${FORM_IDS.results}" class="protokoll-form results-form">
       ${renderProgressIndicator('results')}
 
       <fieldset>
-        <legend>Inspection Results</legend>
-        <div class="radio-group">
-          ${renderRadioButtonGroup('results.mängelFestgestellt', 
-            [
-              { value: 'false', label: 'No defects found' },
-              { value: 'true', label: 'Defects found' }
-            ],
-            String(results.mängelFestgestellt)
-          )}
+        <legend>Prüfungsergebnis</legend>
+        <div class="checkbox-group">
+          ${renderCheckboxField('prüfungsergebnis.keineMängelFestgestellt', results.keineMängelFestgestellt, 'keine Mängel festgestellt')}
+          ${renderCheckboxField('prüfungsergebnis.mängelFestgestellt', results.mängelFestgestellt, 'Mängel festgestellt')}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Testing Certificate</legend>
-        <div class="radio-group">
-          ${renderRadioButtonGroup('results.plakette',
-            [
-              { value: 'ja', label: 'Certificate placed' },
-              { value: 'nein', label: 'No certificate' }
-            ],
-            results.plakette
-          )}
+        <legend>Prüfplakette angebracht</legend>
+        <div class="checkbox-group">
+          ${renderCheckboxField('prüfungsergebnis.plaketteJa', results.plaketteJa, 'ja')}
+          ${renderCheckboxField('prüfungsergebnis.plaketteNein', results.plaketteNein, 'nein')}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Next Inspection Date</legend>
-        ${renderDateField('results.nächsterPrüfungstermin', 'Date', results.nächsterPrüfungstermin, { 
-          required: true,
-          future: true 
+        <legend>Nächster Prüfungstermin</legend>
+        ${renderTextField('prüfungsergebnis.nächsterPrüfungstermin', 'Nächster Prüfungstermin', results.nächsterPrüfungstermin, { 
+          placeholder: 'z.B. set./ 2027'
         })}
       </fieldset>
 
       <fieldset>
-        <legend>Remarks</legend>
-        ${renderTextareaField('results.bemerkung', 'Additional Remarks', results.bemerkung)}
+        <legend>Bemerkung</legend>
+        ${renderTextareaField('prüfungsergebnis.bemerkung', 'Bemerkung', results.bemerkung, { placeholder: 'Zusätzliche Bemerkungen...' })}
+      </fieldset>
+
+      <fieldset>
+        <legend>Mängel</legend>
+        ${renderTextareaField('mängel', 'Mängel', mängel, { placeholder: 'Beschreibung der festgestellten Mängel...' })}
       </fieldset>
 
       ${renderFormNavigation('results')}
@@ -329,7 +570,8 @@ export function renderResultsForm() {
 }
 
 /**
- * Render review form (Step 4)
+ * Render review form (Step 7) - Übersicht
+ * Based on vorlage_protokoll.md - German interface
  * @returns {void}
  */
 export function renderReviewForm() {
@@ -337,83 +579,116 @@ export function renderReviewForm() {
   if (!container) return;
 
   const metadata = state.getMetadata();
+  const besichtigung = state.getBesichtigung();
+  const erproben = state.getErproben();
+  const messen = state.getMessen();
+  const messgeräte = state.getMessgeräte();
   const positions = state.getPositions();
   const results = state.getPrüfungsergebnis();
+  const einspeisung = state.getEinspeisung();
+  const mängel = state.getMängel();
 
   const html = `
     <div id="${FORM_IDS.review}" class="protokoll-form review-form">
       ${renderProgressIndicator('review')}
 
       <div class="review-section">
-        <h3>Review Your Protocol</h3>
+        <h3>Protokoll Übersicht</h3>
         
         <div class="review-block">
-          <h4>Protocol Information</h4>
+          <h4>Kopfdaten</h4>
           <dl class="review-dl">
-            <dt>Protocol Number:</dt>
+            <dt>Prüfprotokoll Nr.:</dt>
             <dd>${escapeHtml(metadata.protokollNumber || '-')}</dd>
-            <dt>Client:</dt>
+            <dt>Datum:</dt>
+            <dd>${escapeHtml(metadata.datum ? formatDate(metadata.datum) : '-')}</dd>
+            <dt>Auftraggeber:</dt>
             <dd>${escapeHtml(metadata.auftraggeber || '-')}</dd>
-            <dt>Facility:</dt>
-            <dd>${escapeHtml(metadata.facility.name || '-')}</dd>
-            <dt>Address:</dt>
-            <dd>${escapeHtml(metadata.facility.address || '-')}</dd>
-            <dt>Inspector:</dt>
-            <dd>${escapeHtml(metadata.prüfer.name || '-')}</dd>
+            <dt>Auftrag Nr.:</dt>
+            <dd>${escapeHtml(metadata.auftragnummer || '-')}</dd>
+            <dt>Kunde:</dt>
+            <dd>${escapeHtml(metadata.kunde || '-')}</dd>
+            <dt>Kunde Ort:</dt>
+            <dd>${escapeHtml(metadata.kundeOrt || '-')}</dd>
+            <dt>Anlage:</dt>
+            <dd>${escapeHtml(metadata.facility?.anlage || '-')}</dd>
+            <dt>Ort:</dt>
+            <dd>${escapeHtml(metadata.facility?.ort || '-')}</dd>
+            <dt>INV:</dt>
+            <dd>${escapeHtml(metadata.facility?.inv || '-')}</dd>
+            <dt>Prüfer:</dt>
+            <dd>${escapeHtml(metadata.prüfer?.name || '-')}</dd>
           </dl>
         </div>
 
         <div class="review-block">
-          <h4>Positions (${positions.length})</h4>
+          <h4>Messgeräte</h4>
+          <dl class="review-dl">
+            <dt>Fabrikat:</dt>
+            <dd>${escapeHtml(messgeräte.fabrikat || '-')}</dd>
+            <dt>Typ:</dt>
+            <dd>${escapeHtml(messgeräte.typ || '-')}</dd>
+            <dt>Nächste Kalibrierung:</dt>
+            <dd>${escapeHtml(messgeräte.nächsteKalibrierung || '-')}</dd>
+            <dt>Ident-Nr.:</dt>
+            <dd>${escapeHtml(messgeräte.identNr || '-')}</dd>
+          </dl>
+        </div>
+
+        <div class="review-block">
+          <h4>Stromkreise (${positions.length})</h4>
           ${positions.length > 0 ? `
-            <table class="review-table" role="grid" aria-label="Positions review table">
+            <table class="review-table" role="grid" aria-label="Stromkreis-Übersicht">
               <thead>
                 <tr>
-                  <th scope="col">No.</th>
-                  <th scope="col">Circuit</th>
-                  <th scope="col">Description</th>
+                  <th scope="col">Nr.</th>
+                  <th scope="col">Stromkreis</th>
+                  <th scope="col">Zielbezeichnung</th>
+                  <th scope="col">Phase</th>
                   <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
                 ${positions.map((pos, idx) => `
-                  <tr>
+                  <tr${pos.parentCircuitId ? ' class="child-circuit"' : ''}>
                     <td>${idx + 1}</td>
                     <td>${escapeHtml(pos.stromkreisNr || '-')}</td>
                     <td>${escapeHtml(pos.zielbezeichnung || '-')}</td>
+                    <td><span class="phase-badge phase-${escapeHtml(pos.phaseType || 'mono')}">${getPhaseTypeLabel(pos.phaseType)}</span></td>
                     <td><span class="status-badge status-${pos.prüfergebnis?.status || 'nicht-geprüft'}">${escapeHtml(pos.prüfergebnis?.status || 'nicht-geprüft')}</span></td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
-          ` : '<p class="no-positions">No positions added yet.</p>'}
+          ` : '<p class="no-positions">Keine Stromkreise hinzugefügt.</p>'}
         </div>
 
         <div class="review-block">
-          <h4>Results</h4>
+          <h4>Prüfungsergebnis</h4>
           <dl class="review-dl">
-            <dt>Defects Found:</dt>
-            <dd>${results.mängelFestgestellt ? 'Yes' : 'No'}</dd>
-            <dt>Certificate:</dt>
-            <dd>${results.plakette === 'ja' ? 'Yes' : 'No'}</dd>
-            <dt>Next Inspection:</dt>
-            <dd>${escapeHtml(results.nächsterPrüfungstermin ? formatDate(results.nächsterPrüfungstermin) : '-')}</dd>
-            ${results.bemerkung ? `<dt>Remarks:</dt><dd>${escapeHtml(results.bemerkung)}</dd>` : ''}
+            <dt>Mängel:</dt>
+            <dd>${results.keineMängelFestgestellt ? 'Keine Mängel festgestellt' : results.mängelFestgestellt ? 'Mängel festgestellt' : '-'}</dd>
+            <dt>Prüfplakette:</dt>
+            <dd>${results.plaketteJa ? 'Ja' : results.plaketteNein ? 'Nein' : '-'}</dd>
+            <dt>Nächster Prüfungstermin:</dt>
+            <dd>${escapeHtml(results.nächsterPrüfungstermin || '-')}</dd>
+            ${results.bemerkung ? `<dt>Bemerkung:</dt><dd>${escapeHtml(results.bemerkung)}</dd>` : ''}
+            ${mängel ? `<dt>Mängelbeschreibung:</dt><dd>${escapeHtml(mängel)}</dd>` : ''}
           </dl>
         </div>
       </div>
 
       <div class="export-section">
-        <h3>Export Your Protocol</h3>
+        <h3>Protokoll exportieren</h3>
         <div class="export-buttons">
           <button type="button" class="btn btn-primary" data-action="export-protokoll">
-            Export Protokoll.xlsx
+            Protokoll.xlsx exportieren
           </button>
           <button type="button" class="btn btn-primary" data-action="export-abrechnung">
-            Export Abrechnung.xlsx
+            Abrechnung.xlsx exportieren
           </button>
           <button type="button" class="btn btn-success" data-action="export-both">
-            Export Both Files
+            Beide Dateien exportieren
           </button>
         </div>
       </div>
@@ -596,31 +871,94 @@ function renderRadioButtonGroup(fieldPath, options, selected) {
   `).join('');
 }
 
+/**
+ * Render an inspection row with i.O. / n.i.O. checkboxes
+ * @param {string} fieldPath - Field path for data binding (e.g., 'besichtigung.auswahlBetriebsmittel')
+ * @param {string} label - Row label
+ * @param {Object} value - Object with {io: boolean, nio: boolean}
+ * @returns {string} HTML string
+ */
+function renderInspectionRow(fieldPath, label, value = {}) {
+  const id = fieldPath.replace(/\./g, '-');
+  const ioChecked = value?.io ? 'checked' : '';
+  const nioChecked = value?.nio ? 'checked' : '';
+  
+  return `
+    <div class="inspection-row">
+      <span class="inspection-label">${escapeHtml(label)}</span>
+      <span class="inspection-io">
+        <input
+          type="checkbox"
+          id="${id}-io"
+          data-field="${fieldPath}.io"
+          ${ioChecked}
+          class="form-checkbox inspection-checkbox"
+          aria-label="${escapeHtml(label)} - in Ordnung"
+        >
+      </span>
+      <span class="inspection-nio">
+        <input
+          type="checkbox"
+          id="${id}-nio"
+          data-field="${fieldPath}.nio"
+          ${nioChecked}
+          class="form-checkbox inspection-checkbox"
+          aria-label="${escapeHtml(label)} - nicht in Ordnung"
+        >
+      </span>
+    </div>
+  `;
+}
+
 // ============================================
 // POSITION ROW RENDERING
 // ============================================
 
+// Phase type display labels
+const PHASE_TYPE_LABELS = {
+  'mono': '1P',
+  'bi': '2P',
+  'tri': '3P'
+};
+
 /**
- * Render a single position row
+ * Get phase type display label
+ * @param {string} phaseType - Phase type ('mono', 'bi', 'tri')
+ * @returns {string} Display label
+ */
+function getPhaseTypeLabel(phaseType) {
+  return PHASE_TYPE_LABELS[phaseType] || PHASE_TYPE_LABELS['mono'];
+}
+
+/**
+ * Render a single position row (Stromkreis)
+ * Based on vorlage_protokoll.md - German interface
  * @param {Object} position - Position object
  * @param {number} index - Row index
  * @returns {string} HTML string
  */
 function renderPositionRow(position, index) {
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
+  const phaseLabel = getPhaseTypeLabel(position.phaseType);
+  const hasParent = position.parentCircuitId ? true : false;
   
   return `
-    <tr class="position-row" data-pos-nr="${escapeHtml(position.posNr)}">
+    <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
+      <td>${escapeHtml(position.posNr || (index + 1))}</td>
       <td>${escapeHtml(position.stromkreisNr || '-')}</td>
       <td>${escapeHtml(position.zielbezeichnung || '-')}</td>
+      <td><span class="phase-badge phase-${escapeHtml(position.phaseType || 'mono')}">${phaseLabel}</span></td>
       <td>${escapeHtml(position.leitung?.typ || '-')}</td>
       <td>${position.spannung?.un || '-'}</td>
       <td>${position.spannung?.fn || '-'}</td>
+      <td>${escapeHtml(position.überstromschutz?.art || '-')}</td>
+      <td>${position.überstromschutz?.inNennstrom || '-'}</td>
       <td>${position.messwerte?.riso || '-'}</td>
       <td><span class="status-badge status-${status}">${escapeHtml(status)}</span></td>
       <td class="position-actions">
-        <button type="button" class="btn-icon" data-action="edit-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Edit" aria-label="Edit position">✎</button>
-        <button type="button" class="btn-icon btn-danger" data-action="delete-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Delete" aria-label="Delete position">✕</button>
+        ${hasParent ? `<button type="button" class="btn-icon btn-tree" data-action="view-parent" data-pos-nr="${escapeHtml(position.posNr)}" title="Zum Vater-Stromkreis" aria-label="Vater-Stromkreis anzeigen">↑</button>` : ''}
+        <button type="button" class="btn-icon" data-action="edit-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Bearbeiten" aria-label="Position bearbeiten">✎</button>
+        <button type="button" class="btn-icon btn-danger" data-action="delete-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Löschen" aria-label="Position löschen">✕</button>
       </td>
     </tr>
   `;
@@ -635,20 +973,17 @@ export function addPositionRow(position) {
   const tbody = document.getElementById('positionsTableBody');
   if (!tbody) return;
 
-  const tr = document.createElement('tr');
-  tr.className = 'position-row';
-  tr.setAttribute('data-pos-nr', position.posNr);
+  // Use table wrapper to properly parse TR elements (TR is not valid inside a div)
+  const tempTable = document.createElement('table');
+  const tempTbody = document.createElement('tbody');
+  tempTable.appendChild(tempTbody);
+  tempTbody.innerHTML = renderPositionRow(position, tbody.children.length);
   
-  // Get inner HTML from renderPositionRow, removing outer tr tags
-  const tempContainer = document.createElement('div');
-  tempContainer.innerHTML = renderPositionRow(position, tbody.children.length);
-  const newRow = tempContainer.querySelector('tr');
+  const newRow = tempTbody.querySelector('tr');
   if (newRow) {
-    tr.innerHTML = newRow.innerHTML;
+    tbody.appendChild(newRow);
+    attachPositionListeners();
   }
-  
-  tbody.appendChild(tr);
-  attachPositionListeners();
 }
 
 /**
@@ -674,17 +1009,38 @@ export function updatePositionRow(posNr, position) {
   if (!row) return;
 
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
+  const phaseLabel = getPhaseTypeLabel(position.phaseType);
+  const hasParent = position.parentCircuitId ? true : false;
   const cells = row.querySelectorAll('td');
   
-  if (cells.length >= 7) {
-    cells[0].textContent = position.stromkreisNr || '-';
-    cells[1].textContent = position.zielbezeichnung || '-';
-    cells[2].textContent = position.leitung?.typ || '-';
-    cells[3].textContent = position.spannung?.un || '-';
-    cells[4].textContent = position.spannung?.fn || '-';
-    cells[5].textContent = position.messwerte?.riso || '-';
+  // Update row class for child circuits
+  row.classList.toggle('child-circuit', hasParent);
+  
+  // Expected number of columns in the positions table
+  // Pos.Nr., Nr., Zielbezeichnung, Phase, Leitung/Kabel, Un, fn, Überstrom-Schutz, In, Riso, Status, Aktionen
+  const POSITIONS_TABLE_COLUMN_COUNT = 12;
+  
+  if (cells.length >= POSITIONS_TABLE_COLUMN_COUNT) {
+    // Column indices: Pos.Nr. (0), Nr. (1), Zielbezeichnung (2), Phase (3), Leitung/Kabel (4), 
+    // Un (5), fn (6), Überstrom-Schutz (7), In (8), Riso (9), Status (10), Aktionen (11)
+    cells[1].textContent = position.stromkreisNr || '-';
+    cells[2].textContent = position.zielbezeichnung || '-';
     
-    const statusBadge = cells[6].querySelector('.status-badge');
+    // Update phase badge
+    const phaseBadge = cells[3].querySelector('.phase-badge');
+    if (phaseBadge) {
+      phaseBadge.className = `phase-badge phase-${position.phaseType || 'mono'}`;
+      phaseBadge.textContent = phaseLabel;
+    }
+    
+    cells[4].textContent = position.leitung?.typ || '-';
+    cells[5].textContent = position.spannung?.un || '-';
+    cells[6].textContent = position.spannung?.fn || '-';
+    cells[7].textContent = position.überstromschutz?.art || '-';
+    cells[8].textContent = position.überstromschutz?.inNennstrom || '-';
+    cells[9].textContent = position.messwerte?.riso || '-';
+    
+    const statusBadge = cells[10].querySelector('.status-badge');
     if (statusBadge) {
       statusBadge.className = `status-badge status-${status}`;
       statusBadge.textContent = status;
@@ -697,17 +1053,17 @@ export function updatePositionRow(posNr, position) {
 // ============================================
 
 /**
- * Render progress indicator
+ * Render progress indicator with German labels
  * @param {string} currentStep - Current active step
  * @returns {string} HTML string
  */
 function renderProgressIndicator(currentStep) {
   return `
-    <nav class="progress-indicator" aria-label="Form progress">
+    <nav class="progress-indicator" aria-label="Formular-Fortschritt">
       ${STEPS.map((step, idx) => {
         const isActive = step === currentStep;
         const isCompleted = STEPS.indexOf(step) < STEPS.indexOf(currentStep);
-        const stepLabel = step.charAt(0).toUpperCase() + step.slice(1);
+        const stepLabel = STEP_LABELS[step] || step;
         
         return `
           <div class="progress-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
@@ -715,7 +1071,7 @@ function renderProgressIndicator(currentStep) {
                role="button"
                tabindex="0"
                aria-current="${isActive ? 'step' : 'false'}"
-               aria-label="${stepLabel}${isCompleted ? ' (completed)' : isActive ? ' (current)' : ''}">
+               aria-label="${stepLabel}${isCompleted ? ' (abgeschlossen)' : isActive ? ' (aktuell)' : ''}">
             <span class="step-number">${idx + 1}</span>
             <span class="step-label">${stepLabel}</span>
           </div>
@@ -746,7 +1102,7 @@ export function updateProgressIndicator(currentStep) {
 }
 
 /**
- * Render form navigation buttons
+ * Render form navigation buttons (German labels)
  * @param {string} currentStep - Current step
  * @returns {string} HTML string
  */
@@ -758,10 +1114,10 @@ function renderFormNavigation(currentStep) {
 
   return `
     <div class="form-navigation">
-      ${showPrevious ? '<button type="button" class="btn btn-secondary" data-action="previous-step">← Previous</button>' : '<div></div>'}
+      ${showPrevious ? '<button type="button" class="btn btn-secondary" data-action="previous-step">← Zurück</button>' : '<div></div>'}
       <div></div>
-      ${showNext ? '<button type="button" class="btn btn-primary" data-action="next-step">Next →</button>' : ''}
-      ${showExport ? '<button type="button" class="btn btn-success" data-action="export-both">Export →</button>' : ''}
+      ${showNext ? '<button type="button" class="btn btn-primary" data-action="next-step">Weiter →</button>' : ''}
+      ${showExport ? '<button type="button" class="btn btn-success" data-action="export-both">Exportieren →</button>' : ''}
     </div>
   `;
 }
@@ -1033,6 +1389,67 @@ function attachExportListeners() {
 
   // Navigation buttons
   attachFieldListeners();
+}
+
+/**
+ * Attach device select listener for Messgerät dropdown
+ * @returns {void}
+ */
+function attachDeviceSelectListener() {
+  const deviceSelect = document.getElementById('messgeraet-select');
+  if (!deviceSelect) return;
+
+  deviceSelect.addEventListener('change', (e) => {
+    const selectedOption = e.target.selectedOptions[0];
+    if (!selectedOption || !selectedOption.value) return;
+
+    try {
+      const deviceDataAttr = selectedOption.getAttribute('data-device');
+      if (!deviceDataAttr) return;
+
+      const deviceData = JSON.parse(deviceDataAttr);
+      
+      // Populate the form fields with device data
+      // Note: In the protokoll form:
+      // - fabrikat = manufacturer/brand (e.g., "Fluke")
+      // - typ = device model/type (e.g., "1654b")
+      const fabrikatField = document.querySelector('[data-field="messgeräte.fabrikat"]');
+      const typField = document.querySelector('[data-field="messgeräte.typ"]');
+      const kalibField = document.querySelector('[data-field="messgeräte.nächsteKalibrierung"]');
+      const identField = document.querySelector('[data-field="messgeräte.identNr"]');
+
+      // Use fabrikat if available, otherwise fall back to name
+      const fabrikatValue = deviceData.fabrikat || deviceData.name || '';
+      if (fabrikatField && fabrikatValue) {
+        fabrikatField.value = fabrikatValue;
+        handlers.handleMetadataChange('messgeräte.fabrikat', fabrikatValue);
+      }
+      if (typField && deviceData.type) {
+        typField.value = deviceData.type;
+        handlers.handleMetadataChange('messgeräte.typ', deviceData.type);
+      }
+      if (kalibField && deviceData.calibrationDate) {
+        // Format date for display (DD.MM.YY)
+        const date = new Date(deviceData.calibrationDate);
+        const formatted = date.toLocaleDateString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        });
+        kalibField.value = formatted;
+        handlers.handleMetadataChange('messgeräte.nächsteKalibrierung', formatted);
+      }
+      if (identField && deviceData.identNr) {
+        identField.value = deviceData.identNr;
+        handlers.handleMetadataChange('messgeräte.identNr', deviceData.identNr);
+      }
+
+      // Show success message
+      displayMessage('success', `Messgerät "${deviceData.name}" ausgewählt`);
+    } catch (error) {
+      console.error('Error populating device data:', error);
+    }
+  });
 }
 
 console.log('✓ Protokoll Renderer module loaded');

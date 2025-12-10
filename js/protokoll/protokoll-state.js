@@ -57,53 +57,137 @@ export function init() {
 
 /**
  * Set up default state structure
+ * Based on vorlage_protokoll.md - VDE 0100 Prüfprotokoll
  * @returns {void}
  */
 function initializeDefaults() {
   state = {
     metadata: {
+      // Kopfdaten (Header)
+      protokollTitle: 'Prüfung stationärer Anlagen, Prüfprotokoll VDE 0100',
       protokollNumber: '',
+      blatt: '1',
+      blattVon: '3',
       datum: new Date().toISOString(),
+      
+      // Auftraggeber (Client)
       auftraggeber: '',
-      auftraggaberAdresse: '',
       auftragnummer: '',
       kundennummer: '',
+      
+      // Auftragnehmer (Contractor)
       auftragnehmer: '',
-      auftragnehmerAdresse: '',
+      auftragnehmerOrt: '',
+      
+      // Kunde (Customer)
+      kunde: '',
+      kundeOrt: '',
+      
+      // Firma (Company)
+      firma: '',
+      firmaOrt: '',
+      
+      // Anlage (Facility)
       facility: {
-        name: '',
-        address: '',
         anlage: '',
-        location: '',
-        inventory: '',
+        ort: '',
+        inv: '',
         prüfArt: [],
-        netzspannung: '230/400',
+        netzspannung: '230 / 400 V',
         netzform: 'TN-S',
         netzbetreiber: ''
       },
+      
+      // Prüfen nach (Standards)
+      prüfenNach: {
+        dinVde0100Gruppe700: false,
+        dinVde01000600: false,
+        dinVde01050100: false
+      },
+      dguvV3: false,
+      
+      // Prüfungsart
+      neuanlage: false,
+      erweiterung: false,
+      änderung: false,
+      instandsetzung: false,
+      wiederholungsprüfung: false,
+      
+      // Prüfer (Inspector)
       prüfer: {
         name: '',
         titel: '',
-        unterschrift: ''
-      },
-      zeuge: {
-        name: '',
-        titel: '',
+        ort: '',
         unterschrift: ''
       }
     },
 
+    // Besichtigung (Visual Inspection)
+    besichtigung: {
+      auswahlBetriebsmittel: { io: false, nio: false },
+      trennSchaltgeräte: { io: false, nio: false },
+      brandabschottungen: { io: false, nio: false },
+      gebäudesystemtechnik: { io: false, nio: false },
+      kabelLeitungenStromschienen: { io: false, nio: false },
+      kennzStromkrBetriebsmittel: { io: false, nio: false },
+      kennzeichnungNPELeiter: { io: false, nio: false },
+      leiterverbindungen: { io: false, nio: false },
+      schutzÜberwachungseinrichtungen: { io: false, nio: false },
+      basisschutzDirektBerühren: { io: false, nio: false },
+      zugänglichkeit: { io: false, nio: false },
+      schutzpotentialausgleich: { io: false, nio: false },
+      zusÖrtlPotentialausgleich: { io: false, nio: false },
+      dokumentation: { io: false, nio: false },
+      reinigungSchaltschrank: { io: false, nio: false },
+      ergänzungsblätter: false
+    },
+
+    // Erproben (Testing)
+    erproben: {
+      funktionsprüfungAnlage: { io: false, nio: false },
+      rcdSchutzschalter: { io: false, nio: false },
+      schraubverbKlemmstellen: { io: false, nio: false },
+      funktionSchutzSicherheitsÜberwachung: { io: false, nio: false },
+      drehrichtungMotoren: { io: false, nio: false },
+      rechtsdrehfelderDrehstromsteckdose: { io: false, nio: false },
+      gebäudesystemtechnikErproben: { io: false, nio: false }
+    },
+
+    // Messen (Measurement)
+    messen: {
+      durchgängigkeitPotentialausgleich: false,
+      gebäudekonstruktion: false
+    },
+
+    // Messgeräte (Measurement Devices)
+    messgeräte: {
+      fabrikat: '',
+      typ: '',
+      nächsteKalibrierung: '',
+      identNr: ''
+    },
+
+    // Einspeisung
+    einspeisung: '',
+
+    // Positionen / Stromkreise (Circuit Positions)
     positions: [],
 
+    // Prüfungsergebnis (Inspection Results)
     prüfungsergebnis: {
+      keineMängelFestgestellt: false,
       mängelFestgestellt: false,
-      plakette: 'ja',
+      plaketteJa: false,
+      plaketteNein: false,
       nächsterPrüfungstermin: '',
       bemerkung: ''
     },
 
+    // Mängel (Defects)
+    mängel: '',
+
     formState: {
-      currentStep: 'metadata', // 'metadata'|'positions'|'results'|'review'
+      currentStep: 'metadata', // 'metadata'|'besichtigung'|'erproben'|'messen'|'positions'|'results'|'review'
       positionCount: 0,
       unsavedChanges: false,
       validationErrors: {}, // { fieldPath: 'error message' }
@@ -192,11 +276,110 @@ export function getPosition(posNr) {
 }
 
 /**
+ * Get child circuits of a parent circuit (for circuit tree management)
+ * @param {string|null} parentId - Parent circuit posNr, or null for root circuits
+ * @returns {Array} Array of child position objects
+ */
+export function getChildCircuits(parentId = null) {
+  const children = state.positions.filter(p => p.parentCircuitId === parentId);
+  return JSON.parse(JSON.stringify(children));
+}
+
+/**
+ * Get the parent circuit of a given circuit
+ * @param {string} posNr - Position number of the circuit
+ * @returns {Object|null} Parent position object or null
+ */
+export function getParentCircuit(posNr) {
+  const position = state.positions.find(p => p.posNr === posNr);
+  if (!position || !position.parentCircuitId) return null;
+  return getPosition(position.parentCircuitId);
+}
+
+/**
+ * Get circuit ancestry path (for breadcrumb navigation in tree view)
+ * @param {string} posNr - Position number of the circuit
+ * @returns {Array} Array of parent circuits from root to immediate parent
+ */
+export function getCircuitAncestry(posNr) {
+  const ancestry = [];
+  const visited = new Set(); // Track visited circuits to prevent infinite loops
+  let current = getPosition(posNr);
+  
+  while (current && current.parentCircuitId) {
+    // Prevent infinite loop from circular references
+    if (visited.has(current.parentCircuitId)) {
+      console.warn('Circular reference detected in circuit tree:', current.parentCircuitId);
+      break;
+    }
+    visited.add(current.parentCircuitId);
+    
+    const parent = getPosition(current.parentCircuitId);
+    if (parent) {
+      ancestry.unshift(parent);
+      current = parent;
+    } else {
+      break;
+    }
+  }
+  
+  return ancestry;
+}
+
+/**
  * Get inspection results
  * @returns {Object} Prüfungsergebnis object
  */
 export function getPrüfungsergebnis() {
   return JSON.parse(JSON.stringify(state.prüfungsergebnis));
+}
+
+/**
+ * Get Besichtigung (Visual Inspection) data
+ * @returns {Object} Besichtigung object
+ */
+export function getBesichtigung() {
+  return JSON.parse(JSON.stringify(state.besichtigung || {}));
+}
+
+/**
+ * Get Erproben (Testing) data
+ * @returns {Object} Erproben object
+ */
+export function getErproben() {
+  return JSON.parse(JSON.stringify(state.erproben || {}));
+}
+
+/**
+ * Get Messen (Measurement) data
+ * @returns {Object} Messen object
+ */
+export function getMessen() {
+  return JSON.parse(JSON.stringify(state.messen || {}));
+}
+
+/**
+ * Get Messgeräte (Measurement Devices) data
+ * @returns {Object} Messgeräte object
+ */
+export function getMessgeräte() {
+  return JSON.parse(JSON.stringify(state.messgeräte || {}));
+}
+
+/**
+ * Get Einspeisung
+ * @returns {string} Einspeisung value
+ */
+export function getEinspeisung() {
+  return state.einspeisung || '';
+}
+
+/**
+ * Get Mängel (Defects)
+ * @returns {string} Mängel value
+ */
+export function getMängel() {
+  return state.mängel || '';
 }
 
 /**
@@ -293,6 +476,10 @@ export function addPosition(position) {
     posNr: position.posNr || generatePositionNumber(),
     stromkreisNr: position.stromkreisNr || '',
     zielbezeichnung: position.zielbezeichnung || '',
+    // Phase type: 'mono' (1-phase), 'bi' (2-phase), 'tri' (3-phase)
+    phaseType: position.phaseType || 'mono',
+    // Parent circuit reference for circuit tree hierarchy
+    parentCircuitId: position.parentCircuitId || null,
     leitung: {
       typ: position.leitung?.typ || '',
       anzahl: position.leitung?.anzahl || '',
@@ -398,12 +585,154 @@ export function setPrüfungsergebnis(results) {
 }
 
 /**
+ * Set Besichtigung (Visual Inspection) data
+ * @param {Object} besichtigung - Besichtigung object
+ * @returns {void}
+ */
+export function setBesichtigung(besichtigung) {
+  state.besichtigung = {
+    ...state.besichtigung,
+    ...besichtigung
+  };
+  
+  markUnsaved();
+  emit('besichtigungChanged', { besichtigung: getBesichtigung() });
+  saveToLocalStorage();
+}
+
+/**
+ * Set Erproben (Testing) data
+ * @param {Object} erproben - Erproben object
+ * @returns {void}
+ */
+export function setErproben(erproben) {
+  state.erproben = {
+    ...state.erproben,
+    ...erproben
+  };
+  
+  markUnsaved();
+  emit('erprobenChanged', { erproben: getErproben() });
+  saveToLocalStorage();
+}
+
+/**
+ * Set Messen (Measurement) data
+ * @param {Object} messen - Messen object
+ * @returns {void}
+ */
+export function setMessen(messen) {
+  state.messen = {
+    ...state.messen,
+    ...messen
+  };
+  
+  markUnsaved();
+  emit('messenChanged', { messen: getMessen() });
+  saveToLocalStorage();
+}
+
+/**
+ * Set Messgeräte (Measurement Devices) data
+ * @param {Object} messgeräte - Messgeräte object
+ * @returns {void}
+ */
+export function setMessgeräte(messgeräte) {
+  state.messgeräte = {
+    ...state.messgeräte,
+    ...messgeräte
+  };
+  
+  markUnsaved();
+  emit('messgeräteChanged', { messgeräte: getMessgeräte() });
+  saveToLocalStorage();
+}
+
+/**
+ * Set Einspeisung
+ * @param {string} einspeisung - Einspeisung value
+ * @returns {void}
+ */
+export function setEinspeisung(einspeisung) {
+  state.einspeisung = einspeisung;
+  
+  markUnsaved();
+  emit('einspeisungChanged', { einspeisung });
+  saveToLocalStorage();
+}
+
+/**
+ * Set Mängel (Defects)
+ * @param {string} mängel - Mängel value
+ * @returns {void}
+ */
+export function setMängel(mängel) {
+  state.mängel = mängel;
+  
+  markUnsaved();
+  emit('mängelChanged', { mängel });
+  saveToLocalStorage();
+}
+
+/**
+ * Load data from a contract object to pre-fill the protokoll form
+ * @param {Object} contract - Contract object from contract list
+ * @returns {void}
+ */
+export function loadFromContract(contract) {
+  if (!contract || typeof contract !== 'object') {
+    console.error('Invalid contract data:', contract);
+    return;
+  }
+  
+  console.log('Loading protokoll data from contract:', contract);
+  
+  // Map contract fields to protokoll metadata
+  state.metadata.auftragnummer = contract.contractId || '';
+  state.metadata.auftraggeber = contract.contractTitle || '';
+  state.metadata.kundennummer = contract.contractId || '';
+  
+  // Map location information
+  if (contract.location) {
+    state.metadata.facility.ort = contract.location;
+  }
+  
+  if (contract.equipmentId) {
+    state.metadata.facility.inv = contract.equipmentId;
+  }
+  
+  if (contract.equipmentDescription) {
+    state.metadata.facility.anlage = contract.equipmentDescription;
+  }
+  
+  if (contract.roomArea) {
+    state.metadata.facility.anlage = state.metadata.facility.anlage 
+      ? `${state.metadata.facility.anlage} - ${contract.roomArea}`
+      : contract.roomArea;
+  }
+  
+  // Set the current date
+  state.metadata.datum = new Date().toISOString();
+  
+  // Reset form state
+  state.formState.currentStep = 'metadata';
+  state.formState.isDirty = true;
+  state.formState.unsavedChanges = true;
+  
+  emit('contractLoaded', { contract });
+  emit('metadataChanged', { metadata: getMetadata() });
+  saveToLocalStorage();
+  
+  console.log('✓ Contract data loaded into protokoll');
+}
+
+/**
  * Set current form step
- * @param {string} step - Step: 'metadata'|'positions'|'results'|'review'
+ * @param {string} step - Step: 'metadata'|'besichtigung'|'erproben'|'messen'|'positions'|'results'|'review'
  * @returns {void}
  */
 export function setFormStep(step) {
-  const validSteps = ['metadata', 'positions', 'results', 'review'];
+  const validSteps = ['metadata', 'besichtigung', 'erproben', 'messen', 'positions', 'results', 'review'];
   
   if (!validSteps.includes(step)) {
     console.error(`Invalid step: ${step}`);

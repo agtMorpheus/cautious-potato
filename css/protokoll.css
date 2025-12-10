@@ -349,6 +349,84 @@
 }
 
 /* ============================================
+   INSPECTION TABLE (Besichtigung/Erproben)
+   ============================================ */
+
+.inspection-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+}
+
+.inspection-header {
+  display: grid;
+  grid-template-columns: 1fr 60px 60px;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--c-slate-800, #1e293b);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.inspection-header .inspection-io-header,
+.inspection-header .inspection-nio-header {
+  text-align: center;
+}
+
+.inspection-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 60px;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid var(--border-base, #1e293b);
+  align-items: center;
+}
+
+.inspection-row:last-child {
+  border-bottom: none;
+}
+
+.inspection-row:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.inspection-label {
+  font-size: 0.875rem;
+  color: var(--text-main, #f8fafc);
+}
+
+.inspection-io,
+.inspection-nio {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inspection-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}
+
+/* Fieldset description */
+.fieldset-description {
+  font-size: 0.8125rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 1rem;
+}
+
+/* Section description */
+.section-description {
+  font-size: 0.875rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 1rem;
+}
+
+/* ============================================
    ERROR MESSAGES
    ============================================ */
 
@@ -796,4 +874,129 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+}
+
+/* ============================================
+   PHASE BADGES
+   ============================================ */
+
+.phase-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Monophase (1-phase) */
+.phase-mono {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: var(--c-brand-500, #3b82f6);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Biphase (2-phase) */
+.phase-bi {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--c-warning, #f59e0b);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Triphase (3-phase) */
+.phase-tri {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* ============================================
+   CHILD CIRCUIT STYLING (Circuit Tree)
+   ============================================ */
+
+.position-row.child-circuit {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.position-row.child-circuit td:first-child {
+  padding-left: 2rem;
+  position: relative;
+}
+
+.position-row.child-circuit td:first-child::before {
+  content: '└─';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--text-dim, #475569);
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.review-table tr.child-circuit {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.review-table tr.child-circuit td:first-child {
+  padding-left: 2rem;
+  position: relative;
+}
+
+.review-table tr.child-circuit td:first-child::before {
+  content: '└─';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--text-dim, #475569);
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+/* Tree navigation button */
+.btn-icon.btn-tree {
+  color: var(--c-brand-500, #3b82f6);
+}
+
+.btn-icon.btn-tree:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--c-brand-500, #3b82f6);
+}
+
+/* ============================================
+   DEVICE SELECTION
+   ============================================ */
+
+.protokoll-form .form-divider {
+  border: none;
+  border-top: 1px solid var(--border-base, #1e293b);
+  margin: 1rem 0;
+}
+
+.protokoll-form .field-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim, #475569);
+  margin-top: 0.25rem;
+}
+
+.protokoll-form .form-notice {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-md, 6px);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.protokoll-form .form-notice p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.protokoll-form .form-notice a {
+  color: var(--c-brand-500, #3b82f6);
+  text-decoration: none;
+}
+
+.protokoll-form .form-notice a:hover {
+  text-decoration: underline;
 }

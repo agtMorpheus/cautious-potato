@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="css/contracts.css" />
     <link rel="stylesheet" href="css/cell-mapper.css" />
     <link rel="stylesheet" href="css/protokoll.css" />
+    <link rel="stylesheet" href="css/hr-module.css" />
+    <link rel="stylesheet" href="css/messgeraet.css" />
+    <link rel="stylesheet" href="css/assets.css" />
 </head>
 
 <body>
@@ -67,6 +70,16 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
+                        <a href="#messgeraet" class="nav-link" role="menuitem" data-view="messgeraet">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                            </svg>
+                            <span class="nav-text">Messgeräte</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
                         <a href="#contracts" class="nav-link" role="menuitem" data-view="contracts">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -74,6 +87,26 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span class="nav-text">Contracts</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#hr" class="nav-link" role="menuitem" data-view="hr">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="nav-text">HR</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#assets" class="nav-link" role="menuitem" data-view="assets">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span class="nav-text">Assets</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
@@ -399,6 +432,32 @@
                     </div>
                 </section>
 
+                <!-- Messgerät (Measurement Devices) View -->
+                <section id="view-messgeraet" class="view-container" aria-labelledby="messgeraet-heading">
+                    <h2 id="messgeraet-heading" class="sr-only">Messgeräte-Verwaltung</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Messgeräte</h3>
+                            <p class="card-description">Messgeräte verwalten und Kalibrierungsdaten erfassen</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Messgerät Module Container - dynamically populated -->
+                            <div id="messgeraetContainer">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="empty-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                    </svg>
+                                    <p>Messgeräte-Modul wird geladen...</p>
+                                    <p class="text-muted">Verwalten Sie hier Ihre Messgeräte und deren Kalibrierungsdaten.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Contract Manager View (Phase 1 & Phase 3) -->
                 <section id="view-contracts" class="view-container" aria-labelledby="contracts-heading">
                     <h2 id="contracts-heading" class="sr-only">Contract Manager</h2>
@@ -675,6 +734,208 @@
                                         <h4 class="template-name">abrechnung.xlsx</h4>
                                         <p class="template-desc">Abrechnungs-Vorlage</p>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HR Management View -->
+                <section id="view-hr" class="view-container" aria-labelledby="hr-heading">
+                    <h2 id="hr-heading" class="sr-only">HR Management</h2>
+
+                    <!-- HR Module Header -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">HR Management System</h3>
+                            <p class="card-description">Manage employees, attendance, schedules, and vacation requests</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- HR Navigation Tabs -->
+                            <nav class="hr-header__nav" style="margin-bottom: 1.5rem;">
+                                <button class="hr-nav-btn active" data-hr-tab="employees" title="Manage employees">
+                                    <span class="hr-nav-icon">👥</span>
+                                    <span class="hr-nav-label">Employees</span>
+                                </button>
+                                <button class="hr-nav-btn" data-hr-tab="attendance" title="Track attendance">
+                                    <span class="hr-nav-icon">📋</span>
+                                    <span class="hr-nav-label">Attendance</span>
+                                </button>
+                                <button class="hr-nav-btn" data-hr-tab="schedule" title="Manage schedules">
+                                    <span class="hr-nav-icon">⏰</span>
+                                    <span class="hr-nav-label">Schedule</span>
+                                </button>
+                                <button class="hr-nav-btn" data-hr-tab="vacation" title="Plan vacation">
+                                    <span class="hr-nav-icon">🏖️</span>
+                                    <span class="hr-nav-label">Vacation</span>
+                                </button>
+                            </nav>
+
+                            <!-- HR Tab Content -->
+                            <div id="hr-tab-content">
+                                <!-- Employees Tab -->
+                                <div id="hr-employees-tab" class="hr-tab hr-tab--active">
+                                    <div class="hr-tab__header">
+                                        <h4>Employee Management</h4>
+                                        <button class="hr-btn hr-btn-primary" id="hr-add-employee-btn">
+                                            <span>+ New Employee</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Statistics -->
+                                    <div id="hr-employee-stats" class="hr-stats-grid">
+                                        <div class="hr-stat-card">
+                                            <div class="hr-stat-icon employees">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                            <span class="hr-stat-value" id="hr-total-employees">0</span>
+                                            <span class="hr-stat-label">Total Employees</span>
+                                        </div>
+                                        <div class="hr-stat-card">
+                                            <div class="hr-stat-icon active">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <span class="hr-stat-value" id="hr-active-employees">0</span>
+                                            <span class="hr-stat-label">Active</span>
+                                        </div>
+                                        <div class="hr-stat-card">
+                                            <div class="hr-stat-icon departments">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <span class="hr-stat-value" id="hr-departments">0</span>
+                                            <span class="hr-stat-label">Departments</span>
+                                        </div>
+                                        <div class="hr-stat-card">
+                                            <div class="hr-stat-icon inactive">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <span class="hr-stat-value" id="hr-pending-requests">0</span>
+                                            <span class="hr-stat-label">Pending Requests</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Filters -->
+                                    <div class="hr-filters">
+                                        <input 
+                                            type="search" 
+                                            id="hr-employee-search" 
+                                            class="hr-filters__input"
+                                            placeholder="Search by name, email, or ID..."
+                                            aria-label="Search employees"
+                                        >
+                                        <select id="hr-department-filter" class="hr-filters__select" aria-label="Filter by department">
+                                            <option value="">All Departments</option>
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Sales">Sales</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Human Resources">Human Resources</option>
+                                            <option value="Finance">Finance</option>
+                                        </select>
+                                        <select id="hr-status-filter" class="hr-filters__select" aria-label="Filter by status">
+                                            <option value="">All Status</option>
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Employee List -->
+                                    <div id="hr-employee-list" class="hr-table-container">
+                                        <div class="hr-empty-state">
+                                            <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <p class="hr-empty-title">No employees found</p>
+                                            <p class="hr-empty-text">Add your first employee to get started</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Attendance Tab -->
+                                <div id="hr-attendance-tab" class="hr-tab">
+                                    <div class="hr-tab__header">
+                                        <h4>Attendance Management</h4>
+                                        <button class="hr-btn hr-btn-primary" id="hr-record-attendance-btn">
+                                            <span>+ Record Attendance</span>
+                                        </button>
+                                    </div>
+                                    <div id="hr-attendance-content" class="hr-empty-state">
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                        </svg>
+                                        <p class="hr-empty-title">Attendance Tracking</p>
+                                        <p class="hr-empty-text">Record and manage employee attendance here</p>
+                                    </div>
+                                </div>
+
+                                <!-- Schedule Tab -->
+                                <div id="hr-schedule-tab" class="hr-tab">
+                                    <div class="hr-tab__header">
+                                        <h4>Schedule Management</h4>
+                                        <button class="hr-btn hr-btn-primary" id="hr-create-schedule-btn">
+                                            <span>+ Create Schedule</span>
+                                        </button>
+                                    </div>
+                                    <div id="hr-schedule-content" class="hr-empty-state">
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="hr-empty-title">Weekly Schedules</p>
+                                        <p class="hr-empty-text">Plan and manage employee weekly schedules</p>
+                                    </div>
+                                </div>
+
+                                <!-- Vacation Tab -->
+                                <div id="hr-vacation-tab" class="hr-tab">
+                                    <div class="hr-tab__header">
+                                        <h4>Vacation Planning</h4>
+                                        <button class="hr-btn hr-btn-primary" id="hr-request-vacation-btn">
+                                            <span>+ Request Vacation</span>
+                                        </button>
+                                    </div>
+                                    <div id="hr-vacation-content" class="hr-empty-state">
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 004 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p class="hr-empty-title">Vacation Requests</p>
+                                        <p class="hr-empty-text">Manage vacation requests and balances</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HR Alerts -->
+                    <div id="hr-alerts" class="hr-alerts-container" role="status" aria-live="polite"></div>
+                </section>
+
+                <!-- Asset Management View -->
+                <section id="view-assets" class="view-container" aria-labelledby="assets-heading">
+                    <h2 id="assets-heading" class="sr-only">Asset-Verwaltung</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Distribution Board Asset Management</h3>
+                            <p class="card-description">Import, manage, and track electrical distribution board assets</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Asset Module Container - dynamically populated -->
+                            <div id="assetContainer">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="empty-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <p>Asset-Modul wird geladen...</p>
+                                    <p class="text-muted">Verwalten Sie hier Ihre Verteiler-Assets.</p>
                                 </div>
                             </div>
                         </div>
