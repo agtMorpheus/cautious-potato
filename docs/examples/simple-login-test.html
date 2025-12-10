@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        input { padding: 8px; width: 200px; }
+        button { padding: 10px 20px; }
+        .result { margin: 20px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Simple Login Test</h1>
+    
+    <form id="login-form">
+        <div class="form-group">
+            <label>Username:</label><br>
+            <input type="text" id="username" value="admin" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Password:</label><br>
+            <input type="password" id="password" value="admin123" required>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" id="login-btn">Login</button>
+        </div>
+    </form>
+    
+    <div id="result"></div>
+    
+    <div id="debug-info">
+        <h3>Debug Info:</h3>
+        <div id="debug-log"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const resultDiv = document.getElementById('result');
+        const debugLog = document.getElementById('debug-log');
+        
+        function log(message) {
+            console.log(message);
+            debugLog.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+        
+        function showResult(message, type) {
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        log('Script loaded');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            log('Form submitted');
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            log(`Username: ${username}, Password length: ${password.length}`);
+            
+            if (!username || !password) {
+                showResult('Please enter username and password', 'error');
+                return;
+            }
+            
+            showResult('Logging in...', 'loading');
+            loginBtn.disabled = true;
+            
+            try {
+                log('Making API request...');
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                log(`Response status: ${response.status}`);
+                log(`Response headers: ${JSON.stringify([...response.headers])}`);
+                
+                const data = await response.json();
+                log(`Response data: ${JSON.stringify(data)}`);
+                
+                if (response.ok) {
+                    showResult(`Login successful! User: ${data.user?.username}`, 'success');
+                    log('Login successful');
+                    
+                    // Store user data
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 2000);
+                } else {
+                    showResult(`Login failed: ${data.message || 'Unknown error'}`, 'error');
+                    log(`Login failed: ${data.message}`);
+                }
+                
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                showResult(`Error: ${error.message}`, 'error');
+            } finally {
+                loginBtn.disabled = false;
+            }
+        });
+        
+        log('Event listener attached');
+    </script>
+</body>
+</html>

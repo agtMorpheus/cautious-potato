@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Handling Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Session Handling Test</h1>
+    <p>This page tests the session management fixes for 401 handling, CORS credentials, and session timeout.</p>
+
+    <div class="test-section">
+        <h2>1. CORS & Credentials Test</h2>
+        <p>Tests if API calls include credentials and handle CORS properly.</p>
+        <button onclick="testCorsCredentials()">Test CORS with Credentials</button>
+        <div id="cors-result" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Session Validation Test</h2>
+        <p>Tests session validation and 401 handling.</p>
+        <button onclick="testSessionValidation()">Test Session Validation</button>
+        <div id="session-result" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Session Timeout Simulation</h2>
+        <p>Simulates session timeout behavior (for testing only).</p>
+        <button onclick="simulateSessionTimeout()">Simulate Session Timeout</button>
+        <div id="timeout-result" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Session Warning Test</h2>
+        <p>Tests the session warning system (shortened timer for testing).</p>
+        <button onclick="testSessionWarning()">Test Session Warning (10s)</button>
+        <div id="warning-result" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <div id="test-log" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script type="module">
+        import { ContractApiClient } from '../js/contracts/contractApiClient.js';
+
+        // Create test API client
+        const testClient = new ContractApiClient('/api');
+        
+        // Override session timeout for testing
+        testClient.sessionTimeout = 15000; // 15 seconds
+        testClient.warningTime = 5000; // 5 seconds warning
+
+        let logElement = document.getElementById('test-log');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(logEntry);
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        // Test 1: CORS & Credentials
+        window.testCorsCredentials = async function() {
+            log('Testing CORS with credentials...');
+            showResult('cors-result', 'Testing...', 'warning');
+            
+            try {
+                // Test a simple API call that should include credentials
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                log(`Health check response: ${response.status}`);
+                
+                // Check response headers
+                const corsOrigin = response.headers.get('Access-Control-Allow-Origin');
+                const corsCredentials = response.headers.get('Access-Control-Allow-Credentials');
+                
+                log(`CORS Origin: ${corsOrigin}`);
+                log(`CORS Credentials: ${corsCredentials}`);
+                
+                if (corsCredentials === 'true') {
+                    showResult('cors-result', 'CORS credentials properly configured', 'success');
+                    log('CORS test PASSED');
+                } else {
+                    showResult('cors-result', 'CORS credentials not enabled', 'error');
+                    log('CORS test FAILED');
+                }
+                
+            } catch (error) {
+                log(`CORS test error: ${error.message}`);
+                showResult('cors-result', `Error: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 2: Session Validation
+        window.testSessionValidation = async function() {
+            log('Testing session validation...');
+            showResult('session-result', 'Testing...', 'warning');
+            
+            try {
+                // Try to get current user (should fail if not logged in)
+                const user = await testClient.getCurrentUser();
+                
+                if (user) {
+                    log(`Session valid for user: ${user.username}`);
+                    showResult('session-result', `Session valid for: ${user.username}`, 'success');
+                } else {
+                    log('No active session (expected if not logged in)');
+                    showResult('session-result', 'No active session (not logged in)', 'warning');
+                }
+                
+            } catch (error) {
+                log(`Session validation error: ${error.message} (Status: ${error.status})`);
+                
+                if (error.status === 401) {
+                    showResult('session-result', '401 Unauthorized - Session handling working', 'success');
+                    log('401 handling test PASSED');
+                } else {
+                    showResult('session-result', `Unexpected error: ${error.message}`, 'error');
+                }
+            }
+        };
+
+        // Test 3: Session Timeout Simulation
+        window.simulateSessionTimeout = function() {
+            log('Simulating session timeout...');
+            showResult('timeout-result', 'Simulating timeout...', 'warning');
+            
+            // Simulate session expiry by calling the handler directly
+            setTimeout(() => {
+                log('Triggering session timeout handler...');
+                testClient.handleSessionExpiry();
+                showResult('timeout-result', 'Session timeout simulation completed', 'success');
+            }, 2000);
+        };
+
+        // Test 4: Session Warning
+        window.testSessionWarning = function() {
+            log('Testing session warning system...');
+            showResult('warning-result', 'Starting warning test...', 'warning');
+            
+            // Simulate being logged in
+            sessionStorage.setItem('user', JSON.stringify({ username: 'testuser' }));
+            
+            // Start session timer with short duration for testing
+            testClient.sessionTimeout = 10000; // 10 seconds
+            testClient.warningTime = 5000; // 5 seconds warning
+            testClient.startSessionTimer();
+            
+            log('Session timer started (10s total, 5s warning)');
+            showResult('warning-result', 'Session timer started - warning should appear in 5s', 'success');
+        };
+
+        // Clear log
+        window.clearLog = function() {
+            logElement.textContent = '';
+        };
+
+        // Initialize
+        log('Session handling test page loaded');
+        log('API Client initialized with test timeouts');
+        
+        // Listen for session events
+        window.addEventListener('apiClientOffline', () => {
+            log('API Client went offline');
+        });
+        
+        window.addEventListener('apiClientOnline', (event) => {
+            log(`API Client back online (queue: ${event.detail.queueLength})`);
+        });
+    </script>
+</body>
+</html>

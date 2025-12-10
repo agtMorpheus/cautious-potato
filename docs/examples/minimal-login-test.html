@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal Login Test</title>
+</head>
+<body>
+    <h1>Minimal Login Test</h1>
+    <button id="test-btn">Test Login</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('test-btn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log('Starting login test...');
+                
+                // Test 1: Simple fetch to health endpoint
+                console.log('Testing health endpoint...');
+                const healthResponse = await fetch('/api/health');
+                console.log('Health response:', healthResponse.status, await healthResponse.text());
+                
+                // Test 2: Login API call
+                console.log('Testing login endpoint...');
+                const loginResponse = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                console.log('Login response status:', loginResponse.status);
+                const loginData = await loginResponse.json();
+                console.log('Login response data:', loginData);
+                
+                if (loginResponse.ok) {
+                    resultDiv.innerHTML = `<div style="color: green;">Login successful: ${JSON.stringify(loginData)}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div style="color: red;">Login failed: ${loginData.message}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                resultDiv.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

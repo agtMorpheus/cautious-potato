@@ -11,14 +11,30 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/middleware/Auth.php';
 require_once __DIR__ . '/lib/Logger.php';
 
+// Configure session before starting
+ini_set('session.cookie_lifetime', SESSION_COOKIE_LIFETIME);
+ini_set('session.cookie_httponly', SESSION_COOKIE_HTTPONLY);
+ini_set('session.cookie_secure', SESSION_COOKIE_SECURE);
+ini_set('session.cookie_samesite', SESSION_COOKIE_SAMESITE);
+ini_set('session.use_strict_mode', 1);
+ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
+
 // Start session
 session_name(SESSION_NAME);
 session_start();
 
-// Set CORS headers
-header('Access-Control-Allow-Origin: ' . CORS_ORIGIN);
+// Set CORS headers - Fixed for credentials
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = explode(',', CORS_ORIGIN);
+
+if (in_array($origin, $allowedOrigins) || CORS_ORIGIN === '*') {
+    header('Access-Control-Allow-Origin: ' . ($origin ?: 'http://localhost:3000'));
+} else {
+    header('Access-Control-Allow-Origin: http://localhost:3000'); // fallback
+}
+
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization, X-CSRF-Token');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Max-Age: 86400');
 

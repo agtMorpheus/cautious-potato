@@ -12,15 +12,7 @@ class Auth {
      */
     public static function requireLogin() {
         if (!isset($_SESSION['user_id'])) {
-            http_response_code(401);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'status' => 'error',
-                'code' => 401,
-                'error' => 'unauthorized',
-                'message' => 'Authentication required'
-            ]);
-            exit;
+            self::sendUnauthorizedResponse('unauthorized', 'Authentication required');
         }
         
         // Check session timeout
@@ -28,20 +20,90 @@ class Auth {
             $inactiveTime = time() - $_SESSION['last_activity'];
             if ($inactiveTime > SESSION_TIMEOUT) {
                 self::destroySession();
-                http_response_code(401);
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'status' => 'error',
-                    'code' => 401,
-                    'error' => 'session_expired',
-                    'message' => 'Session expired'
-                ]);
-                exit;
+                self::sendUnauthorizedResponse('session_expired', 'Session expired due to inactivity');
             }
+        }
+        
+        // Check if session exists in database (additional security)
+        if (!self::validateSessionInDatabase()) {
+            self::destroySession();
+            self::sendUnauthorizedResponse('session_invalid', 'Session no longer valid');
         }
         
         // Update last activity
         $_SESSION['last_activity'] = time();
+        
+        // Update database session timestamp
+        self::updateSessionActivity();
+    }
+    
+    /**
+     * Send standardized unauthorized response
+     */
+    private static function sendUnauthorizedResponse($errorCode, $message) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        
+        $response = [
+            'status' => 'error',
+            'code' => 401,
+            'error' => $errorCode,
+            'message' => $message,
+            'session_expired' => true // Flag for client handling
+        ];
+        
+        echo json_encode($response);
+        exit;
+    }
+    
+    /**
+     * Validate session exists in database
+     */
+    private static function validateSessionInDatabase() {
+        try {
+            $pdo = db();
+            $stmt = $pdo->prepare('
+                SELECT user_id, last_activity 
+                FROM sessions 
+                WHERE id = ? AND user_id = ?
+            ');
+            $stmt->execute([session_id(), $_SESSION['user_id']]);
+            $session = $stmt->fetch();
+            
+            if (!$session) {
+                return false;
+            }
+            
+            // Check database session timeout
+            $lastActivity = strtotime($session['last_activity']);
+            if ((time() - $lastActivity) > SESSION_TIMEOUT) {
+                // Clean up expired session
+                self::removeSession(session_id());
+                return false;
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            Logger::warning('Session validation failed', ['error' => $e->getMessage()]);
+            return false; // Fail secure
+        }
+    }
+    
+    /**
+     * Update session activity in database
+     */
+    private static function updateSessionActivity() {
+        try {
+            $pdo = db();
+            $stmt = $pdo->prepare('
+                UPDATE sessions 
+                SET last_activity = CURRENT_TIMESTAMP 
+                WHERE id = ? AND user_id = ?
+            ');
+            $stmt->execute([session_id(), $_SESSION['user_id']]);
+        } catch (Exception $e) {
+            Logger::warning('Failed to update session activity', ['error' => $e->getMessage()]);
+        }
     }
     
     /**

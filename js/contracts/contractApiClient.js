@@ -22,10 +22,17 @@ export class ContractApiClient {
         this.offlineQueue = [];
         this.maxRetries = 3;
         this.retryDelay = 1000; // ms
+        this.sessionTimeout = 7200000; // 2 hours in milliseconds
+        this.warningTime = 600000; // Show warning 10 minutes before expiry
+        this.sessionTimer = null;
+        this.warningTimer = null;
         
         // Set up online/offline listeners
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
+        
+        // Set up session monitoring
+        this.initializeSessionMonitoring();
     }
 
     /**
@@ -57,7 +64,7 @@ export class ContractApiClient {
             if (!response.ok) {
                 if (response.status === 401) {
                     // Session expired; redirect to login
-                    this.handleUnauthorized();
+                    this.handleUnauthorized(json);
                     return null;
                 }
                 const errorMessage = json.message || `HTTP ${response.status}`;
@@ -89,11 +96,67 @@ export class ContractApiClient {
     /**
      * Handle unauthorized response
      */
-    handleUnauthorized() {
+    handleUnauthorized(errorData = {}) {
         // Clear any stored auth data
         sessionStorage.removeItem('user');
-        // Redirect to login page
-        window.location.href = '/login.html';
+        localStorage.removeItem('sessionWarningShown');
+        
+        // Show session expired message if applicable
+        if (errorData.session_expired) {
+            this.showSessionExpiredMessage(errorData.error);
+        }
+        
+        // Redirect to login page after a brief delay
+        setTimeout(() => {
+            window.location.href = '/login.html';
+        }, errorData.session_expired ? 2000 : 0);
+    }
+    
+    /**
+     * Show session expired message
+     */
+    showSessionExpiredMessage(errorType) {
+        const messages = {
+            'session_expired': 'Ihre Sitzung ist aufgrund von Inaktivität abgelaufen.',
+            'session_invalid': 'Ihre Sitzung ist nicht mehr gültig.',
+            'unauthorized': 'Sie sind nicht angemeldet.'
+        };
+        
+        const message = messages[errorType] || 'Ihre Sitzung ist abgelaufen.';
+        
+        // Create and show notification
+        const notification = document.createElement('div');
+        notification.className = 'session-expired-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <strong>Sitzung abgelaufen</strong>
+                <p>${message} Sie werden zur Anmeldung weitergeleitet.</p>
+            </div>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            max-width: 400px;
+            z-index: 10000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after redirect
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
     }
 
     // ============================================================
@@ -240,6 +303,7 @@ export class ContractApiClient {
         const result = await this.request('POST', '/auth/login', { username, password });
         if (result && result.user) {
             sessionStorage.setItem('user', JSON.stringify(result.user));
+            this.startSessionTimer(); // Start session monitoring
         }
         return result;
     }
@@ -249,6 +313,7 @@ export class ContractApiClient {
      * @returns {Promise<Object>} Logout confirmation
      */
     async logout() {
+        this.clearSessionTimers(); // Clear session monitoring
         const result = await this.request('POST', '/auth/logout');
         sessionStorage.removeItem('user');
         return result;
@@ -285,6 +350,179 @@ export class ContractApiClient {
     getCachedUser() {
         const userData = sessionStorage.getItem('user');
         return userData ? JSON.parse(userData) : null;
+    }
+    
+    // ============================================================
+    // Session Management
+    // ============================================================
+    
+    /**
+     * Initialize session monitoring
+     */
+    initializeSessionMonitoring() {
+        // Reset timers when user becomes active
+        const resetSessionTimer = () => {
+            if (this.isAuthenticated()) {
+                this.startSessionTimer();
+            }
+        };
+        
+        // Listen for user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+            document.addEventListener(event, resetSessionTimer, { passive: true });
+        });
+        
+        // Start timer if already authenticated
+        if (this.isAuthenticated()) {
+            this.startSessionTimer();
+        }
+    }
+    
+    /**
+     * Start session timeout timer
+     */
+    startSessionTimer() {
+        // Clear existing timers
+        if (this.sessionTimer) clearTimeout(this.sessionTimer);
+        if (this.warningTimer) clearTimeout(this.warningTimer);
+        
+        // Set warning timer (10 minutes before expiry)
+        this.warningTimer = setTimeout(() => {
+            this.showSessionWarning();
+        }, this.sessionTimeout - this.warningTime);
+        
+        // Set session expiry timer
+        this.sessionTimer = setTimeout(() => {
+            this.handleSessionExpiry();
+        }, this.sessionTimeout);
+    }
+    
+    /**
+     * Show session expiry warning
+     */
+    showSessionWarning() {
+        // Don't show multiple warnings
+        if (localStorage.getItem('sessionWarningShown') === 'true') {
+            return;
+        }
+        
+        localStorage.setItem('sessionWarningShown', 'true');
+        
+        const warning = document.createElement('div');
+        warning.className = 'session-warning-modal';
+        warning.innerHTML = `
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <h3>Sitzung läuft ab</h3>
+                    <p>Ihre Sitzung läuft in 10 Minuten ab. Möchten Sie die Sitzung verlängern?</p>
+                    <div class="modal-actions">
+                        <button id="extend-session" class="btn btn--primary">Sitzung verlängern</button>
+                        <button id="logout-now" class="btn btn--secondary">Jetzt abmelden</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        warning.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10001;
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .session-warning-modal .modal-overlay {
+                background: rgba(0,0,0,0.5);
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .session-warning-modal .modal-content {
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                max-width: 400px;
+                text-align: center;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            }
+            .session-warning-modal .modal-actions {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+            .session-warning-modal .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+            .session-warning-modal .btn--primary {
+                background: #007bff;
+                color: white;
+            }
+            .session-warning-modal .btn--secondary {
+                background: #6c757d;
+                color: white;
+            }
+        `;
+        
+        document.head.appendChild(style);
+        document.body.appendChild(warning);
+        
+        // Handle actions
+        document.getElementById('extend-session').addEventListener('click', async () => {
+            try {
+                // Make a simple API call to refresh session
+                await this.getCurrentUser();
+                this.startSessionTimer(); // Restart timer
+                localStorage.removeItem('sessionWarningShown');
+                document.body.removeChild(warning);
+                document.head.removeChild(style);
+            } catch (err) {
+                console.error('Failed to extend session:', err);
+                this.handleUnauthorized();
+            }
+        });
+        
+        document.getElementById('logout-now').addEventListener('click', async () => {
+            try {
+                await this.logout();
+            } catch (err) {
+                console.error('Logout failed:', err);
+            }
+            window.location.href = '/login.html';
+        });
+    }
+    
+    /**
+     * Handle session expiry
+     */
+    handleSessionExpiry() {
+        localStorage.removeItem('sessionWarningShown');
+        this.handleUnauthorized({ session_expired: true, error: 'session_expired' });
+    }
+    
+    /**
+     * Clear session timers
+     */
+    clearSessionTimers() {
+        if (this.sessionTimer) {
+            clearTimeout(this.sessionTimer);
+            this.sessionTimer = null;
+        }
+        if (this.warningTimer) {
+            clearTimeout(this.warningTimer);
+            this.warningTimer = null;
+        }
+        localStorage.removeItem('sessionWarningShown');
     }
 
     // ============================================================

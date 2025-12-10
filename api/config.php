@@ -42,8 +42,12 @@ define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? true, FILTER_VALIDATE_BOOLE
 /**
  * Session configuration
  */
-define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 3600)); // 1 hour default
+define('SESSION_TIMEOUT', (int)($_ENV['SESSION_TIMEOUT'] ?? 7200)); // 2 hours default (increased)
 define('SESSION_NAME', 'contract_manager_session');
+define('SESSION_COOKIE_LIFETIME', (int)($_ENV['SESSION_COOKIE_LIFETIME'] ?? 0)); // 0 = until browser closes
+define('SESSION_COOKIE_HTTPONLY', true);
+define('SESSION_COOKIE_SECURE', filter_var($_ENV['SESSION_SECURE_COOKIE'] ?? false, FILTER_VALIDATE_BOOLEAN));
+define('SESSION_COOKIE_SAMESITE', $_ENV['SESSION_SAMESITE'] ?? 'Lax');
 
 /**
  * Security configuration
@@ -52,9 +56,9 @@ define('CSRF_ENABLED', filter_var($_ENV['CSRF_TOKEN_ENABLED'] ?? false, FILTER_V
 define('SECURE_COOKIES', filter_var($_ENV['SESSION_SECURE_COOKIE'] ?? false, FILTER_VALIDATE_BOOLEAN));
 
 /**
- * CORS configuration
+ * CORS configuration - Fixed for credentials
  */
-define('CORS_ORIGIN', $_ENV['CORS_ORIGIN'] ?? '*');
+define('CORS_ORIGIN', $_ENV['CORS_ORIGIN'] ?? 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000');
 
 /**
  * Logging configuration

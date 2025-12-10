@@ -107,12 +107,13 @@ CREATE TABLE IF NOT EXISTS import_errors (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     import_id INT UNSIGNED NOT NULL,
     row_number INT UNSIGNED,
-    error_type VARCHAR(50),  -- 'missing_field', 'invalid_type', 'duplicate', etc.
+    error_type VARCHAR(50),
     error_message TEXT,
     affected_fields JSON,
     
     INDEX idx_import_id (import_id),
     FOREIGN KEY (import_id) REFERENCES imports(id) ON DELETE CASCADE
+)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
