@@ -8,12 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/contracts.css" />
     <link rel="stylesheet" href="css/cell-mapper.css" />
     <link rel="stylesheet" href="css/protokoll.css" />
     <link rel="stylesheet" href="css/hr-module.css" />
     <link rel="stylesheet" href="css/messgeraet.css" />
+    <link rel="stylesheet" href="css/dashboard.css" /> <!-- Moved dashboard.css here -->
     <link rel="stylesheet" href="css/assets.css" />
 </head>
 
@@ -24,8 +26,7 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <span class="logo-text">Abrechnung</span>
                 </div>
@@ -44,7 +45,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             <span class="nav-text">Dashboard</span>
                         </a>
@@ -54,7 +55,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 17V7m0 10a2 2 0 01-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span class="nav-text">Abrechnung</span>
                         </a>
@@ -64,7 +65,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="nav-text">Protokoll</span>
                         </a>
@@ -74,7 +75,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                    d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <span class="nav-text">Messgeräte</span>
                         </a>
@@ -84,7 +85,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             <span class="nav-text">Contracts</span>
                         </a>
@@ -94,7 +95,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             <span class="nav-text">HR</span>
                         </a>
@@ -104,7 +105,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                             <span class="nav-text">Assets</span>
                         </a>
@@ -114,7 +115,7 @@
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span class="nav-text">Templates</span>
                         </a>
@@ -153,8 +154,13 @@
                     </li>
                 </ul>
             </nav>
-
-
+            <div class="sidebar-footer">
+                <button id="theme-toggle-btn" class="btn btn-secondary btn-sm" title="Toggle Dark Mode"
+                    style="width: 100%;">
+                    <!-- Icon will be injected by JS -->
+                    <span>Theme</span>
+                </button>
+            </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -166,6 +172,12 @@
                     <p class="header-subtitle">Übersicht aller Module und aktueller Status</p>
                 </div>
                 <div class="header-actions">
+                    <div class="header-status-indicator"
+                        style="display: flex; align-items: center; gap: 8px; margin-right: 16px;">
+                        <span class="status-dot online"
+                            style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+                        <span class="status-text" style="font-size: 0.8rem; color: var(--text-muted);">Online</span>
+                    </div>
                     <div id="global-messages" class="messages" aria-live="assertive"></div>
                 </div>
             </header>
@@ -176,97 +188,125 @@
                 <section id="view-dashboard" class="view-container active" aria-labelledby="dashboard-heading">
                     <h2 id="dashboard-heading" class="sr-only">Dashboard Übersicht</h2>
 
-                    <!-- Stats Grid -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon import">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    <div class="dashboard-grid">
+                        <!-- Welcome / Header Section -->
+                        <div class="dashboard-header-card">
+                            <div class="header-content">
+                                <h3>Willkommen zurück</h3>
+                                <p>Das System ist bereit. Importieren Sie neue Protokolle oder verwalten Sie bestehende
+                                    Daten.</p>
+                            </div>
+                            <div class="header-decoration">
+                                <!-- Abstract decorative SVG or Pattern -->
+                                <svg viewBox="0 0 100 100" fill="none" class="decoration-svg">
+                                    <circle cx="90" cy="10" r="30" fill="var(--primary-main)" opacity="0.1" />
+                                    <circle cx="70" cy="80" r="40" fill="var(--primary-main)" opacity="0.05" />
                                 </svg>
                             </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Import Status</span>
-                                <span class="stat-value" id="stat-import-status">Bereit</span>
-                            </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon process">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Positionen</span>
-                                <span class="stat-value" id="stat-positions">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon export">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Exporte</span>
-                                <span class="stat-value" id="stat-exports">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon templates">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                                </svg>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Templates</span>
-                                <span class="stat-value" id="stat-templates">2</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Quick Actions -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Schnellstart</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="quick-actions">
-                                <button type="button" class="quick-action-btn" data-action="import">
+                        <!-- Main Metrics Row -->
+                        <div class="dashboard-metrics">
+                            <!-- Import Status -->
+                            <div class="metric-card">
+                                <div class="metric-icon-wrapper import">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    <span>Datei importieren</span>
-                                </button>
-                                <button type="button" class="quick-action-btn" data-action="process" disabled>
+                                </div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Import Status</span>
+                                    <span class="metric-value" id="stat-import-status">Bereit</span>
+                                </div>
+                            </div>
+
+                            <!-- Positions -->
+                            <div class="metric-card">
+                                <div class="metric-icon-wrapper process">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
-                                    <span>Abrechnung erzeugen</span>
-                                </button>
-                                <button type="button" class="quick-action-btn" data-action="export" disabled>
+                                </div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Positionen</span>
+                                    <span class="metric-value" id="stat-positions">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Exports -->
+                            <div class="metric-card">
+                                <div class="metric-icon-wrapper export">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
-                                    <span>Export herunterladen</span>
+                                </div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Exporte</span>
+                                    <span class="metric-value" id="stat-exports">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Templates (Hidden ID for compatibility or visible if needed) -->
+                            <div class="metric-card">
+                                <div class="metric-icon-wrapper templates">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                    </svg>
+                                </div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Templates</span>
+                                    <span class="metric-value" id="stat-templates">2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Hub -->
+                        <div class="dashboard-actions">
+                            <h3 class="section-title">Schnellzugriff</h3>
+                            <div class="action-cards-grid">
+                                <button type="button" class="action-card quick-action-btn" data-action="import">
+                                    <div class="action-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <span class="action-text">Neuer Import</span>
+                                    <span class="action-subtext">Starten Sie einen neuen Workflow</span>
+                                </button>
+
+                                <button type="button" class="action-card quick-action-btn" data-action="process">
+                                    <div class="action-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                        </svg>
+                                    </div>
+                                    <span class="action-text">Abrechnung</span>
+                                    <span class="action-subtext">Verarbeiten Sie importierte Daten</span>
+                                </button>
+
+                                <button type="button" class="action-card quick-action-btn" data-action="export">
+                                    <div class="action-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                    </div>
+                                    <span class="action-text">Export</span>
+                                    <span class="action-subtext">Herunterladen der Ergebnisse</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Recent Activity -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Letzte Aktivitäten</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="activity-log" class="activity-list">
+                        <!-- Activity Feed -->
+                        <div class="dashboard-activity">
+                            <h3 class="section-title">Letzte Aktivitäten</h3>
+                            <div id="activity-log" class="activity-feed-list">
+                                <!-- Activity Items Injected Here -->
                                 <div class="activity-item">
                                     <div class="activity-icon info">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -275,8 +315,7 @@
                                         </svg>
                                     </div>
                                     <div class="activity-content">
-                                        <p class="activity-text">Anwendung bereit. Importieren Sie ein Protokoll, um zu
-                                            beginnen.</p>
+                                        <p class="activity-text">System bereit.</p>
                                         <span class="activity-time">Gerade eben</span>
                                     </div>
                                 </div>
@@ -451,7 +490,8 @@
                                             d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                                     </svg>
                                     <p>Messgeräte-Modul wird geladen...</p>
-                                    <p class="text-muted">Verwalten Sie hier Ihre Messgeräte und deren Kalibrierungsdaten.</p>
+                                    <p class="text-muted">Verwalten Sie hier Ihre Messgeräte und deren
+                                        Kalibrierungsdaten.</p>
                                 </div>
                             </div>
                         </div>
@@ -748,7 +788,8 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">HR Management System</h3>
-                            <p class="card-description">Manage employees, attendance, schedules, and vacation requests</p>
+                            <p class="card-description">Manage employees, attendance, schedules, and vacation requests
+                            </p>
                         </div>
                         <div class="card-body">
                             <!-- HR Navigation Tabs -->
@@ -786,8 +827,10 @@
                                     <div id="hr-employee-stats" class="hr-stats-grid">
                                         <div class="hr-stat-card">
                                             <div class="hr-stat-icon employees">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                             </div>
                                             <span class="hr-stat-value" id="hr-total-employees">0</span>
@@ -795,8 +838,10 @@
                                         </div>
                                         <div class="hr-stat-card">
                                             <div class="hr-stat-icon active">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
                                             <span class="hr-stat-value" id="hr-active-employees">0</span>
@@ -804,8 +849,10 @@
                                         </div>
                                         <div class="hr-stat-card">
                                             <div class="hr-stat-icon departments">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                                 </svg>
                                             </div>
                                             <span class="hr-stat-value" id="hr-departments">0</span>
@@ -813,8 +860,10 @@
                                         </div>
                                         <div class="hr-stat-card">
                                             <div class="hr-stat-icon inactive">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
                                             <span class="hr-stat-value" id="hr-pending-requests">0</span>
@@ -824,14 +873,10 @@
 
                                     <!-- Filters -->
                                     <div class="hr-filters">
-                                        <input 
-                                            type="search" 
-                                            id="hr-employee-search" 
-                                            class="hr-filters__input"
-                                            placeholder="Search by name, email, or ID..."
-                                            aria-label="Search employees"
-                                        >
-                                        <select id="hr-department-filter" class="hr-filters__select" aria-label="Filter by department">
+                                        <input type="search" id="hr-employee-search" class="hr-filters__input"
+                                            placeholder="Search by name, email, or ID..." aria-label="Search employees">
+                                        <select id="hr-department-filter" class="hr-filters__select"
+                                            aria-label="Filter by department">
                                             <option value="">All Departments</option>
                                             <option value="Engineering">Engineering</option>
                                             <option value="Sales">Sales</option>
@@ -839,7 +884,8 @@
                                             <option value="Human Resources">Human Resources</option>
                                             <option value="Finance">Finance</option>
                                         </select>
-                                        <select id="hr-status-filter" class="hr-filters__select" aria-label="Filter by status">
+                                        <select id="hr-status-filter" class="hr-filters__select"
+                                            aria-label="Filter by status">
                                             <option value="">All Status</option>
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
@@ -849,8 +895,10 @@
                                     <!-- Employee List -->
                                     <div id="hr-employee-list" class="hr-table-container">
                                         <div class="hr-empty-state">
-                                            <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                             <p class="hr-empty-title">No employees found</p>
                                             <p class="hr-empty-text">Add your first employee to get started</p>
@@ -867,8 +915,10 @@
                                         </button>
                                     </div>
                                     <div id="hr-attendance-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                         </svg>
                                         <p class="hr-empty-title">Attendance Tracking</p>
                                         <p class="hr-empty-text">Record and manage employee attendance here</p>
@@ -884,8 +934,10 @@
                                         </button>
                                     </div>
                                     <div id="hr-schedule-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <p class="hr-empty-title">Weekly Schedules</p>
                                         <p class="hr-empty-text">Plan and manage employee weekly schedules</p>
@@ -901,8 +953,10 @@
                                         </button>
                                     </div>
                                     <div id="hr-vacation-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 004 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 004 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <p class="hr-empty-title">Vacation Requests</p>
                                         <p class="hr-empty-text">Manage vacation requests and balances</p>
@@ -923,7 +977,8 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Distribution Board Asset Management</h3>
-                            <p class="card-description">Import, manage, and track electrical distribution board assets</p>
+                            <p class="card-description">Import, manage, and track electrical distribution board assets
+                            </p>
                         </div>
                         <div class="card-body">
                             <!-- Asset Module Container - dynamically populated -->
@@ -1160,6 +1215,7 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4/dist/exceljs.min.js"></script>
 
     <!-- Application Modules -->
+    <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 

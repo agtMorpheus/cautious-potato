@@ -1,0 +1,166 @@
+/**
+ * Design Tokens & Variables
+ * 
+ * Defines the core design system values for the application.
+ * Supports Light and Dark modes via CSS variables.
+ */
+
+:root {
+    /* --- Typography --- */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-size-base: 14px;
+    --line-height-base: 1.5;
+
+    /* --- Spacing --- */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* --- Border Radius --- */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* --- Transitions --- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+
+    /* --- Layout --- */
+    --sidebar-width: 260px;
+    --sidebar-width-collapsed: 64px;
+    --header-height: 64px;
+
+    /* --- Colors (Light Mode Default) --- */
+    /* Neutrals */
+    --c-neutral-50: #f9fafb;
+    --c-neutral-100: #f3f4f6;
+    --c-neutral-200: #e5e7eb;
+    --c-neutral-300: #d1d5db;
+    --c-neutral-400: #9ca3af;
+    --c-neutral-500: #6b7280;
+    --c-neutral-600: #4b5563;
+    --c-neutral-700: #374151;
+    --c-neutral-800: #1f2937;
+    --c-neutral-900: #111827;
+    --c-neutral-950: #030712;
+
+    /* Brand / Primary */
+    --c-primary-50: #eff6ff;
+    --c-primary-100: #dbeafe;
+    --c-primary-200: #bfdbfe;
+    --c-primary-300: #93c5fd;
+    --c-primary-400: #60a5fa;
+    --c-primary-500: #3b82f6;
+    --c-primary-600: #2563eb;
+    --c-primary-700: #1d4ed8;
+    --c-primary-800: #1e40af;
+    --c-primary-900: #1e3a8a;
+
+    /* Semantic Colors (Light Mode Mappings) */
+    --bg-app: var(--c-neutral-50);
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-hover: var(--c-neutral-100);
+    --bg-active: var(--c-neutral-200);
+
+    --text-main: var(--c-neutral-900);
+    --text-muted: var(--c-neutral-500);
+    --text-inverse: #ffffff;
+
+    --border-base: var(--c-neutral-200);
+    --border-highlight: var(--c-neutral-300);
+
+    --primary-main: var(--c-primary-600);
+    --primary-hover: var(--c-primary-700);
+    --primary-light: var(--c-primary-100);
+
+    /* Status */
+    --c-success: #10b981;
+    --c-warning: #f59e0b;
+    --c-danger: #ef4444;
+    --c-info: #06b6d4;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* --- Legacy Compatibility (Mappings for older modules) --- */
+    --color-bg-tertiary: var(--bg-surface);
+    --color-bg-secondary: var(--bg-hover);
+    --color-surface: var(--bg-card);
+    --color-primary: var(--primary-main);
+    --color-primary-light: var(--primary-light);
+    --color-text: var(--text-main);
+    --color-text-muted: var(--text-muted);
+    --text-secondary: var(--text-muted);
+    --color-border: var(--border-base);
+    --border-subtle: var(--border-base);
+    --bg-panel: var(--bg-card);
+
+    --color-success: var(--c-success);
+    --color-warning: var(--c-warning);
+    --color-info: var(--c-info);
+    --color-error: var(--c-danger);
+
+    /* Re-map status bg colors if needed or define them */
+    --color-success-bg: rgba(16, 185, 129, 0.1);
+    --color-warning-bg: rgba(245, 158, 11, 0.1);
+    --color-info-bg: rgba(6, 182, 212, 0.1);
+    --color-error-bg: rgba(239, 68, 68, 0.1);
+
+    /* Legacy Font Sizes */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+
+    --transition-fast: var(--duration-fast);
+}
+
+/* --- Dark Mode Overrides --- */
+[data-theme="dark"] {
+    /* Neutrals are inverted conceptually for background */
+    --bg-app: #0f172a;
+    /* slate-900 */
+    --bg-sidebar: #020617;
+    /* slate-950 */
+    --bg-card: #1e293b;
+    /* slate-800 */
+    --bg-surface: #1e293b;
+    --bg-hover: #334155;
+    /* slate-700 */
+    --bg-active: #475569;
+    /* slate-600 */
+
+    --text-main: #f8fafc;
+    /* slate-50 */
+    --text-muted: #94a3b8;
+    /* slate-400 */
+    --text-inverse: #020617;
+
+    --border-base: #334155;
+    /* slate-700 */
+    --border-highlight: #475569;
+    /* slate-600 */
+
+    --primary-main: #60a5fa;
+    /* primary-400 - lighter for dark mode */
+    --primary-hover: #93c5fd;
+    /* primary-300 */
+    --primary-light: rgba(59, 130, 246, 0.2);
+
+    /* Adjust shadows for dark mode visibility */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}

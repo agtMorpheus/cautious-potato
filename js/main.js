@@ -142,20 +142,37 @@ function initializeNavigation() {
     // Sidebar Toggle Logic
     const sidebarToggle = document.getElementById('sidebar-toggle-btn');
     const sidebar = document.querySelector('.sidebar');
+    const appContainer = document.querySelector('.app-container');
 
     if (sidebarToggle && sidebar) {
-        // Load saved state
-        const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        // Load saved state or default to collapsed on wide screens
+        const storedState = localStorage.getItem('sidebar-collapsed');
+        const isWideScreen = window.innerWidth > 1600;
+
+        let isCollapsed;
+        if (storedState !== null) {
+            isCollapsed = storedState === 'true';
+        } else {
+            // Default behavior: always collapsed as new standard
+            isCollapsed = true;
+        }
+
+        // Apply initial state
         if (isCollapsed) {
-            sidebar.classList.add('collapsed');
+            appContainer.classList.add('sidebar-collapsed');
             // Update icon to point right (expand)
             const iconPath = sidebarToggle.querySelector('path');
             if (iconPath) iconPath.setAttribute('d', 'M9 5l7 7-7 7');
         }
 
+        // Apply workspace wide mode if wide screen
+        if (isWideScreen && appContainer) {
+            appContainer.classList.add('workspace-wide');
+        }
+
         sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            const collapsed = sidebar.classList.contains('collapsed');
+            appContainer.classList.toggle('sidebar-collapsed');
+            const collapsed = appContainer.classList.contains('sidebar-collapsed');
             localStorage.setItem('sidebar-collapsed', collapsed);
 
             // Update icon direction
@@ -500,7 +517,7 @@ function updateHRDashboardStats(state) {
         totalEl.textContent = state.employees?.length || 0;
     }
     if (activeEl) {
-        const activeCount = (state.employees || []).filter(e => 
+        const activeCount = (state.employees || []).filter(e =>
             e.employmentStatus === 'active' && !e.archived
         ).length;
         activeEl.textContent = activeCount;
@@ -579,7 +596,7 @@ function initializeHREventHandlers() {
     document.addEventListener('click', (e) => {
         const editBtn = e.target.closest('[data-hr-action="edit"]');
         const deleteBtn = e.target.closest('[data-hr-action="delete"]');
-        
+
         if (editBtn) {
             const employeeId = editBtn.dataset.hrEmployeeId;
             showHREmployeeForm(employeeId);
@@ -615,7 +632,7 @@ function renderHREmployeeList() {
     const statusFilter = document.getElementById('hr-status-filter')?.value || '';
 
     if (searchTerm) {
-        employees = employees.filter(e => 
+        employees = employees.filter(e =>
             `${e.firstName} ${e.lastName}`.toLowerCase().includes(searchTerm) ||
             e.email?.toLowerCase().includes(searchTerm) ||
             e.id?.toLowerCase().includes(searchTerm)
@@ -1202,21 +1219,21 @@ async function initializeApp() {
         try {
             // Decode the URL-encoded JSON string
             const contractDataJson = decodeURIComponent(contractDataEncoded);
-            const contractData = typeof contractDataJson === 'string' 
-                ? JSON.parse(contractDataJson) 
+            const contractData = typeof contractDataJson === 'string'
+                ? JSON.parse(contractDataJson)
                 : contractDataJson;
-            
+
             console.log('Creating protokoll from contract:', contractData);
-            
+
             // Load contract data into protokoll state
             protokollState.loadFromContract(contractData);
-            
+
             // Re-render the protokoll form
             protokollRenderer.renderStep('metadata');
-            
+
             // Switch to protokoll view
             switchView('protokoll');
-            
+
             // Show success message
             protokollRenderer.displayMessage('success', 'Protokoll aus Vertrag erstellt. Daten wurden übernommen.');
             addActivityLogEntry(`Protokoll erstellt für Auftrag ${contractData.contractId}`, 'success');
