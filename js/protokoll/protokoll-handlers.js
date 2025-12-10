@@ -308,7 +308,7 @@ export function handleResultsChange(fieldPath, value) {
 // FORM NAVIGATION
 // ============================================
 
-const FORM_STEPS = ['metadata', 'positions', 'results', 'review'];
+const FORM_STEPS = ['metadata', 'besichtigung', 'erproben', 'messen', 'positions', 'results', 'review'];
 
 /**
  * Handle going to previous step
@@ -364,6 +364,7 @@ export function handleNextStep() {
       return false;
     }
   }
+  // Note: besichtigung, erproben, messen steps don't require strict validation
 
   // Move to next step
   if (currentIndex < FORM_STEPS.length - 1) {

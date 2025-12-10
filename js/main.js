@@ -683,6 +683,37 @@ async function initializeApp() {
     // This is used by dynamically rendered mapping selects
     window._handleMappingChange = handleContractMappingChange;
 
+    // 5c2. Set up global handler for creating protokoll from contract
+    window._handleCreateProtokollFromContract = (contractDataEncoded) => {
+        try {
+            // Decode the URL-encoded JSON string
+            const contractDataJson = decodeURIComponent(contractDataEncoded);
+            const contractData = typeof contractDataJson === 'string' 
+                ? JSON.parse(contractDataJson) 
+                : contractDataJson;
+            
+            console.log('Creating protokoll from contract:', contractData);
+            
+            // Load contract data into protokoll state
+            protokollState.loadFromContract(contractData);
+            
+            // Re-render the protokoll form
+            protokollRenderer.renderStep('metadata');
+            
+            // Switch to protokoll view
+            switchView('protokoll');
+            
+            // Show success message
+            protokollRenderer.displayMessage('success', 'Protokoll aus Vertrag erstellt. Daten wurden übernommen.');
+            addActivityLogEntry(`Protokoll erstellt für Auftrag ${contractData.contractId}`, 'success');
+            addLogEntry(`Protokoll created from contract ${contractData.contractId}`, 'success');
+        } catch (error) {
+            console.error('Failed to create protokoll from contract:', error);
+            protokollRenderer.displayMessage('error', 'Fehler beim Erstellen des Protokolls.');
+            addLogEntry(`Failed to create protokoll: ${error.message}`, 'error');
+        }
+    };
+
     // 5d. Initialize Protokoll Module (Phase 4)
     initializeProtokollModule();
 

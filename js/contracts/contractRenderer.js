@@ -579,6 +579,7 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                         <th class="sortable" data-sort="plannedStart" onclick="window._handleContractSort && window._handleContractSort('plannedStart')">
                             Sollstart ${getSortIcon('plannedStart')}
                         </th>
+                        <th>Aktionen</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -587,6 +588,15 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
     displayContracts.forEach(contract => {
         const statusClass = getStatusClass(contract.status);
         const rowClass = getRowClassForStatus(contract.status);
+        // Use encodeURIComponent for safe JSON storage in data attribute
+        const contractDataEncoded = encodeURIComponent(JSON.stringify({
+            contractId: contract.contractId,
+            contractTitle: contract.contractTitle,
+            location: contract.location,
+            equipmentId: contract.equipmentId,
+            equipmentDescription: contract.equipmentDescription,
+            roomArea: contract.roomArea
+        }));
 
         html += `
             <tr data-contract-id="${escapeHtml(contract.id)}" class="${rowClass}">
@@ -608,6 +618,19 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                     </select>
                 </td>
                 <td>${escapeHtml(contract.plannedStart || '-')}</td>
+                <td class="contract-actions">
+                    <button 
+                        type="button" 
+                        class="btn btn-sm btn-primary create-protokoll-btn"
+                        data-contract="${contractDataEncoded}"
+                        onclick="window._handleCreateProtokollFromContract && window._handleCreateProtokollFromContract(this.dataset.contract)"
+                        title="Neues Protokoll erstellen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Protokoll
+                    </button>
+                </td>
             </tr>
         `;
     });
