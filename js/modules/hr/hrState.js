@@ -4,12 +4,30 @@
  * Centralized state for HR Management Module
  * Implements event-driven architecture for reactive UI updates
  * 
+ * Phase 2: State Management & Data Layer
+ * - Full CRUD operations with validation
+ * - localStorage persistence with backup system
+ * - Event-driven state changes with CustomEvents
+ * - Undo/Redo support
+ * 
  * @module hrState
  * @version 1.0.0
  */
 
 // Storage key for HR module state persistence
 const HR_STORAGE_KEY = 'hrModuleState_v1';
+
+// Default departments for HR module
+const DEFAULT_DEPARTMENTS = [
+  'Engineering',
+  'Sales',
+  'Marketing',
+  'Human Resources',
+  'Finance',
+  'Operations',
+  'Support',
+  'Management'
+];
 
 /**
  * Initial state structure for HR module
@@ -20,6 +38,7 @@ const initialHrState = {
   attendance: [],
   schedules: [],
   vacation: [],
+  departments: [...DEFAULT_DEPARTMENTS],
   filters: {
     selectedEmployee: null,
     dateRange: {
@@ -27,21 +46,33 @@ const initialHrState = {
       end: null
     },
     department: null,
-    status: null
+    status: null,
+    searchTerm: ''
   },
   ui: {
     activeTab: 'employees',
     editingRecordId: null,
     showModal: false,
     modalType: null,
+    modalData: {},
     isLoading: false,
-    error: null
+    error: null,
+    success: null
   },
   metadata: {
     lastSync: null,
+    lastBackup: null,
     totalEmployees: 0,
     activeEmployees: 0,
-    version: '1.0.0'
+    pendingApprovals: 0,
+    dataIntegrity: true,
+    version: '1.0.0',
+    migrationLog: []
+  },
+  history: {
+    stack: [],
+    currentIndex: -1,
+    maxSize: 50
   }
 };
 
@@ -393,7 +424,11 @@ export function createVacationRequest(vacationData) {
   };
   
   return setHrState({
-    vacation: [...currentHrState.vacation, newRequest]
+    vacation: [...currentHrState.vacation, newRequest],
+    metadata: {
+      ...currentHrState.metadata,
+      pendingApprovals: currentHrState.metadata.pendingApprovals + 1
+    }
   });
 }
 
@@ -404,8 +439,11 @@ export function createVacationRequest(vacationData) {
  * @returns {Object} New state snapshot
  */
 export function approveVacationRequest(vacationId, approvedBy = 'HR_ADMIN') {
+  let wasPending = false;
+  
   const vacation = currentHrState.vacation.map(req => {
     if (req.id === vacationId) {
+      wasPending = req.status === 'pending';
       return {
         ...req,
         status: 'approved',
@@ -416,7 +454,15 @@ export function approveVacationRequest(vacationId, approvedBy = 'HR_ADMIN') {
     return req;
   });
   
-  return setHrState({ vacation });
+  return setHrState({ 
+    vacation,
+    metadata: {
+      ...currentHrState.metadata,
+      pendingApprovals: wasPending 
+        ? Math.max(0, currentHrState.metadata.pendingApprovals - 1) 
+        : currentHrState.metadata.pendingApprovals
+    }
+  });
 }
 
 /**
@@ -427,8 +473,11 @@ export function approveVacationRequest(vacationId, approvedBy = 'HR_ADMIN') {
  * @returns {Object} New state snapshot
  */
 export function rejectVacationRequest(vacationId, rejectedBy = 'HR_ADMIN', reason = '') {
+  let wasPending = false;
+  
   const vacation = currentHrState.vacation.map(req => {
     if (req.id === vacationId) {
+      wasPending = req.status === 'pending';
       return {
         ...req,
         status: 'rejected',
@@ -440,7 +489,15 @@ export function rejectVacationRequest(vacationId, rejectedBy = 'HR_ADMIN', reaso
     return req;
   });
   
-  return setHrState({ vacation });
+  return setHrState({ 
+    vacation,
+    metadata: {
+      ...currentHrState.metadata,
+      pendingApprovals: wasPending 
+        ? Math.max(0, currentHrState.metadata.pendingApprovals - 1) 
+        : currentHrState.metadata.pendingApprovals
+    }
+  });
 }
 
 // ============================================================
@@ -614,4 +671,418 @@ export function resetFilters() {
   return setHrState({
     filters: structuredClone(initialHrState.filters)
   });
+}
+
+// ============================================================
+// Department Helper Functions
+// ============================================================
+
+/**
+ * Get all departments
+ * @returns {Array} List of departments
+ */
+export function getDepartments() {
+  return [...currentHrState.departments];
+}
+
+/**
+ * Add a new department
+ * @param {string} departmentName - Department name to add
+ * @returns {Object} New state snapshot
+ */
+export function addDepartment(departmentName) {
+  if (!departmentName || currentHrState.departments.includes(departmentName)) {
+    return getHrState();
+  }
+  
+  return setHrState({
+    departments: [...currentHrState.departments, departmentName]
+  });
+}
+
+/**
+ * Remove a department
+ * @param {string} departmentName - Department name to remove
+ * @returns {Object} New state snapshot
+ */
+export function removeDepartment(departmentName) {
+  return setHrState({
+    departments: currentHrState.departments.filter(d => d !== departmentName)
+  });
+}
+
+// ============================================================
+// Success/Error Message Helper Functions
+// ============================================================
+
+/**
+ * Set success message
+ * @param {string|null} message - Success message or null to clear
+ * @returns {Object} New state snapshot
+ */
+export function setSuccess(message) {
+  return setHrState({
+    ui: {
+      ...currentHrState.ui,
+      success: message,
+      error: null
+    }
+  });
+}
+
+/**
+ * Clear both error and success messages
+ * @returns {Object} New state snapshot
+ */
+export function clearMessages() {
+  return setHrState({
+    ui: {
+      ...currentHrState.ui,
+      error: null,
+      success: null
+    }
+  });
+}
+
+/**
+ * Set modal data
+ * @param {Object} data - Data to pass to modal
+ * @returns {Object} New state snapshot
+ */
+export function setModalData(data) {
+  return setHrState({
+    ui: {
+      ...currentHrState.ui,
+      modalData: data || {}
+    }
+  });
+}
+
+// ============================================================
+// Metadata Helper Functions
+// ============================================================
+
+/**
+ * Update pending approvals count
+ * @param {number} delta - Change in pending approvals (+1 or -1)
+ * @returns {Object} New state snapshot
+ */
+export function updatePendingApprovals(delta) {
+  const newCount = Math.max(0, currentHrState.metadata.pendingApprovals + delta);
+  return setHrState({
+    metadata: {
+      ...currentHrState.metadata,
+      pendingApprovals: newCount
+    }
+  });
+}
+
+/**
+ * Set data integrity flag
+ * @param {boolean} isIntact - Whether data integrity is intact
+ * @returns {Object} New state snapshot
+ */
+export function setDataIntegrity(isIntact) {
+  return setHrState({
+    metadata: {
+      ...currentHrState.metadata,
+      dataIntegrity: isIntact
+    }
+  });
+}
+
+/**
+ * Add migration log entry
+ * @param {Object} logEntry - Migration log entry
+ * @returns {Object} New state snapshot
+ */
+export function addMigrationLog(logEntry) {
+  return setHrState({
+    metadata: {
+      ...currentHrState.metadata,
+      migrationLog: [
+        ...currentHrState.metadata.migrationLog,
+        {
+          ...logEntry,
+          timestamp: new Date().toISOString()
+        }
+      ]
+    }
+  });
+}
+
+// ============================================================
+// Backup and Restore Functions
+// ============================================================
+
+/**
+ * Create a backup of current state
+ * @returns {Object} Backup data with timestamp
+ */
+export function createBackup() {
+  const backup = {
+    timestamp: new Date().toISOString(),
+    employees: structuredClone(currentHrState.employees),
+    attendance: structuredClone(currentHrState.attendance),
+    schedules: structuredClone(currentHrState.schedules),
+    vacation: structuredClone(currentHrState.vacation),
+    departments: structuredClone(currentHrState.departments)
+  };
+
+  // Update lastBackup timestamp
+  setHrState({
+    metadata: {
+      ...currentHrState.metadata,
+      lastBackup: backup.timestamp
+    }
+  }, { silent: true });
+
+  // Store backup in localStorage
+  try {
+    window.localStorage.setItem(`${HR_STORAGE_KEY}_backup`, JSON.stringify(backup));
+  } catch (error) {
+    console.error('Failed to save backup to localStorage:', error);
+  }
+
+  return backup;
+}
+
+/**
+ * Restore state from backup
+ * @returns {Object} Restored state snapshot
+ */
+export function restoreFromBackup() {
+  try {
+    const backupStr = window.localStorage.getItem(`${HR_STORAGE_KEY}_backup`);
+    if (!backupStr) {
+      console.warn('No backup found to restore');
+      return getHrState();
+    }
+
+    const backup = JSON.parse(backupStr);
+    
+    return setHrState({
+      employees: backup.employees || [],
+      attendance: backup.attendance || [],
+      schedules: backup.schedules || [],
+      vacation: backup.vacation || [],
+      departments: backup.departments || [...DEFAULT_DEPARTMENTS],
+      metadata: {
+        ...currentHrState.metadata,
+        totalEmployees: (backup.employees || []).length,
+        activeEmployees: (backup.employees || []).filter(e => e.employmentStatus === 'active').length
+      }
+    });
+  } catch (error) {
+    console.error('Failed to restore from backup:', error);
+    return getHrState();
+  }
+}
+
+// ============================================================
+// Export/Import State Functions
+// ============================================================
+
+/**
+ * Export current state as JSON string
+ * @returns {string} JSON string of exportable state
+ */
+export function exportState() {
+  return JSON.stringify({
+    employees: currentHrState.employees,
+    attendance: currentHrState.attendance,
+    schedules: currentHrState.schedules,
+    vacation: currentHrState.vacation,
+    departments: currentHrState.departments,
+    metadata: currentHrState.metadata,
+    exportedAt: new Date().toISOString()
+  }, null, 2);
+}
+
+/**
+ * Import state from JSON string
+ * @param {string} jsonData - JSON string to import
+ * @returns {Object} Result { success: boolean, error?: string }
+ */
+export function importState(jsonData) {
+  try {
+    const data = JSON.parse(jsonData);
+    
+    // Validate required fields
+    if (!Array.isArray(data.employees)) {
+      return { success: false, error: 'Invalid JSON format: employees array missing' };
+    }
+
+    setHrState({
+      employees: data.employees || [],
+      attendance: data.attendance || [],
+      schedules: data.schedules || [],
+      vacation: data.vacation || [],
+      departments: data.departments || [...DEFAULT_DEPARTMENTS],
+      metadata: {
+        ...currentHrState.metadata,
+        totalEmployees: (data.employees || []).length,
+        activeEmployees: (data.employees || []).filter(e => e.employmentStatus === 'active').length,
+        pendingApprovals: (data.vacation || []).filter(v => v.status === 'pending').length
+      }
+    });
+
+    // Trigger import event
+    document.dispatchEvent(new CustomEvent('hrStateChanged', {
+      detail: { eventType: 'state:imported', data: {}, timestamp: new Date().toISOString() }
+    }));
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to import state:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================================
+// History (Undo/Redo) Functions
+// ============================================================
+
+/**
+ * Save current state to history stack
+ * @param {string} action - Description of the action
+ */
+export function saveToHistory(action) {
+  const snapshot = {
+    action,
+    timestamp: new Date().toISOString(),
+    state: {
+      employees: structuredClone(currentHrState.employees),
+      attendance: structuredClone(currentHrState.attendance),
+      schedules: structuredClone(currentHrState.schedules),
+      vacation: structuredClone(currentHrState.vacation)
+    }
+  };
+
+  const history = currentHrState.history;
+  
+  // Remove any redo states beyond current index
+  const newStack = history.stack.slice(0, history.currentIndex + 1);
+  newStack.push(snapshot);
+
+  // Limit stack size
+  if (newStack.length > history.maxSize) {
+    newStack.shift();
+  }
+
+  setHrState({
+    history: {
+      ...history,
+      stack: newStack,
+      currentIndex: newStack.length - 1
+    }
+  }, { silent: true });
+}
+
+/**
+ * Undo last action
+ * @returns {boolean} True if undo was successful
+ */
+export function undo() {
+  const history = currentHrState.history;
+  
+  if (history.currentIndex <= 0) {
+    console.log('Nothing to undo');
+    return false;
+  }
+
+  const previousIndex = history.currentIndex - 1;
+  const previousState = history.stack[previousIndex];
+
+  if (previousState) {
+    setHrState({
+      employees: previousState.state.employees,
+      attendance: previousState.state.attendance,
+      schedules: previousState.state.schedules,
+      vacation: previousState.state.vacation,
+      history: {
+        ...history,
+        currentIndex: previousIndex
+      }
+    });
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Redo previously undone action
+ * @returns {boolean} True if redo was successful
+ */
+export function redo() {
+  const history = currentHrState.history;
+  
+  if (history.currentIndex >= history.stack.length - 1) {
+    console.log('Nothing to redo');
+    return false;
+  }
+
+  const nextIndex = history.currentIndex + 1;
+  const nextState = history.stack[nextIndex];
+
+  if (nextState) {
+    setHrState({
+      employees: nextState.state.employees,
+      attendance: nextState.state.attendance,
+      schedules: nextState.state.schedules,
+      vacation: nextState.state.vacation,
+      history: {
+        ...history,
+        currentIndex: nextIndex
+      }
+    });
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if undo is available
+ * @returns {boolean}
+ */
+export function canUndo() {
+  return currentHrState.history.currentIndex > 0;
+}
+
+/**
+ * Check if redo is available
+ * @returns {boolean}
+ */
+export function canRedo() {
+  return currentHrState.history.currentIndex < currentHrState.history.stack.length - 1;
+}
+
+/**
+ * Clear history stack
+ */
+export function clearHistory() {
+  setHrState({
+    history: {
+      stack: [],
+      currentIndex: -1,
+      maxSize: 50
+    }
+  }, { silent: true });
+}
+
+// ============================================================
+// Custom Event Trigger Helper
+// ============================================================
+
+/**
+ * Trigger a custom HR state event
+ * @param {string} eventType - Event type (e.g., 'employee:added')
+ * @param {Object} data - Event data
+ */
+export function triggerHrEvent(eventType, data) {
+  document.dispatchEvent(new CustomEvent('hrStateChanged', {
+    detail: { eventType, data, timestamp: new Date().toISOString() }
+  }));
 }
