@@ -25,7 +25,11 @@ class Auth {
         }
         
         // Check if session exists in database (additional security)
-        if (!self::validateSessionInDatabase()) {
+        $validationResult = self::validateSessionInDatabase();
+        if ($validationResult === 'db_error') {
+            // Database connection error - send proper error response
+            self::sendDatabaseErrorResponse();
+        } else if ($validationResult === false) {
             self::destroySession();
             self::sendUnauthorizedResponse('session_invalid', 'Session no longer valid');
         }
@@ -35,6 +39,24 @@ class Auth {
         
         // Update database session timestamp
         self::updateSessionActivity();
+    }
+    
+    /**
+     * Send database error response
+     */
+    private static function sendDatabaseErrorResponse() {
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+        
+        $response = [
+            'status' => 'error',
+            'code' => 503,
+            'error' => 'database_unavailable',
+            'message' => 'Database service temporarily unavailable'
+        ];
+        
+        echo json_encode($response);
+        exit;
     }
     
     /**
@@ -58,6 +80,7 @@ class Auth {
     
     /**
      * Validate session exists in database
+     * @return bool|string True if valid, false if invalid, 'db_error' if database error
      */
     private static function validateSessionInDatabase() {
         try {
@@ -83,9 +106,13 @@ class Auth {
             }
             
             return true;
+        } catch (DatabaseConnectionException $e) {
+            // Database connection error - don't fail the user for infrastructure issues
+            Logger::error('Database connection error during session validation', ['error' => $e->getMessage()]);
+            return 'db_error';
         } catch (Exception $e) {
             Logger::warning('Session validation failed', ['error' => $e->getMessage()]);
-            return false; // Fail secure
+            return false; // Fail secure for other errors
         }
     }
     

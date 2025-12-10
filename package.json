@@ -8,6 +8,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:php": "phpunit --testdox",
+    "test:all": "npm run test && npm run test:php",
     "electron": "electron .",
     "electron:dev": "NODE_ENV=development electron .",
     "electron:build": "electron-builder",
