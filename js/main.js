@@ -684,8 +684,10 @@ async function initializeApp() {
     window._handleMappingChange = handleContractMappingChange;
 
     // 5c2. Set up global handler for creating protokoll from contract
-    window._handleCreateProtokollFromContract = (contractDataJson) => {
+    window._handleCreateProtokollFromContract = (contractDataEncoded) => {
         try {
+            // Decode the URL-encoded JSON string
+            const contractDataJson = decodeURIComponent(contractDataEncoded);
             const contractData = typeof contractDataJson === 'string' 
                 ? JSON.parse(contractDataJson) 
                 : contractDataJson;

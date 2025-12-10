@@ -588,7 +588,8 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
     displayContracts.forEach(contract => {
         const statusClass = getStatusClass(contract.status);
         const rowClass = getRowClassForStatus(contract.status);
-        const contractDataJson = escapeHtml(JSON.stringify({
+        // Use encodeURIComponent for safe JSON storage in data attribute
+        const contractDataEncoded = encodeURIComponent(JSON.stringify({
             contractId: contract.contractId,
             contractTitle: contract.contractTitle,
             location: contract.location,
@@ -621,7 +622,7 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
                     <button 
                         type="button" 
                         class="btn btn-sm btn-primary create-protokoll-btn"
-                        data-contract='${contractDataJson}'
+                        data-contract="${contractDataEncoded}"
                         onclick="window._handleCreateProtokollFromContract && window._handleCreateProtokollFromContract(this.dataset.contract)"
                         title="Neues Protokoll erstellen">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
