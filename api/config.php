@@ -102,32 +102,76 @@ date_default_timezone_set('Europe/Berlin');
 /**
  * Database connection singleton
  */
+/**
+ * Custom exception for database connection errors
+ */
+class DatabaseConnectionException extends Exception {
+    public function __construct($message = 'Database connection failed', $code = 0, Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
+
 class Database {
     private static $instance = null;
     private $pdo;
+    private $dsn;
+    private $options;
     
     private function __construct() {
+        $this->dsn = sprintf(
+            'mysql:host=%s;dbname=%s;charset=%s',
+            DB_HOST,
+            DB_NAME,
+            DB_CHARSET
+        );
+        
+        $this->options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_TIMEOUT => 5, // Connection timeout in seconds
+        ];
+        
+        $this->connect();
+    }
+    
+    /**
+     * Establish database connection
+     * @throws DatabaseConnectionException
+     */
+    private function connect() {
         try {
-            $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
-                DB_HOST,
-                DB_NAME,
-                DB_CHARSET
-            );
-            
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ];
-            
-            $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            $this->pdo = new PDO($this->dsn, DB_USER, DB_PASS, $this->options);
         } catch (PDOException $e) {
-            if (APP_DEBUG) {
-                throw new Exception('Database connection failed: ' . $e->getMessage());
-            }
-            throw new Exception('Database connection failed');
+            $message = APP_DEBUG ? 'Database connection failed: ' . $e->getMessage() : 'Database connection failed';
+            throw new DatabaseConnectionException($message, (int)$e->getCode(), $e);
         }
+    }
+    
+    /**
+     * Check if connection is alive and reconnect if needed
+     * @return bool
+     */
+    public function isConnected() {
+        if ($this->pdo === null) {
+            return false;
+        }
+        
+        try {
+            $this->pdo->query('SELECT 1');
+            return true;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Reconnect to database if connection was lost
+     * @throws DatabaseConnectionException
+     */
+    public function reconnect() {
+        $this->pdo = null;
+        $this->connect();
     }
     
     public static function getInstance() {
@@ -137,8 +181,36 @@ class Database {
         return self::$instance;
     }
     
+    /**
+     * Get database connection, reconnecting if necessary
+     * @return PDO
+     * @throws DatabaseConnectionException
+     */
     public function getConnection() {
+        if (!$this->isConnected()) {
+            $this->reconnect();
+        }
         return $this->pdo;
+    }
+    
+    /**
+     * Test database connection
+     * @return bool True if connection is successful
+     */
+    public static function testConnection() {
+        try {
+            $instance = self::getInstance();
+            return $instance->isConnected();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Reset singleton instance (useful for testing)
+     */
+    public static function resetInstance() {
+        self::$instance = null;
     }
     
     // Prevent cloning and unserialization
@@ -151,6 +223,7 @@ class Database {
 /**
  * Get database connection
  * @return PDO
+ * @throws DatabaseConnectionException
  */
 function db() {
     return Database::getInstance()->getConnection();
