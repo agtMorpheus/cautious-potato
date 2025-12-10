@@ -149,7 +149,7 @@ describe('HR-Contract Integration (hrContractIntegration.js)', () => {
             expect(formatWorkerName(employee)).toBe('John');
         });
 
-        test('returns "Unbekannt" for missing both names', () => {
+        test('returns employee ID as fallback when name is missing', () => {
             const employee = { id: 'EMP001' };
             
             expect(formatWorkerName(employee)).toBe('EMP001');
