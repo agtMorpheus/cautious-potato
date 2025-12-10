@@ -961,3 +961,42 @@
   border-color: rgba(59, 130, 246, 0.3);
   color: var(--c-brand-500, #3b82f6);
 }
+
+/* ============================================
+   DEVICE SELECTION
+   ============================================ */
+
+.protokoll-form .form-divider {
+  border: none;
+  border-top: 1px solid var(--border-base, #1e293b);
+  margin: 1rem 0;
+}
+
+.protokoll-form .field-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim, #475569);
+  margin-top: 0.25rem;
+}
+
+.protokoll-form .form-notice {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-md, 6px);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.protokoll-form .form-notice p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.protokoll-form .form-notice a {
+  color: var(--c-brand-500, #3b82f6);
+  text-decoration: none;
+}
+
+.protokoll-form .form-notice a:hover {
+  text-decoration: underline;
+}

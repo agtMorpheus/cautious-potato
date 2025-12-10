@@ -9,6 +9,7 @@
 
 import * as state from './protokoll-state.js';
 import * as handlers from './protokoll-handlers.js';
+import * as messgeraetState from '../messgeraet/messgeraet-state.js';
 
 // ============================================
 // CONSTANTS
@@ -385,6 +386,20 @@ export function renderMessenForm() {
 
   const messen = state.getMessen();
   const messgeräte = state.getMessgeräte();
+  
+  // Get available devices from Messgerät module
+  let deviceDropdownOptions = '';
+  try {
+    const devices = messgeraetState.getDevicesForDropdown();
+    if (devices && devices.length > 0) {
+      deviceDropdownOptions = devices.map(d => {
+        const expiredClass = d.isExpired ? ' (Abgelaufen)' : '';
+        return `<option value="${escapeHtml(d.id)}" data-device='${escapeHtml(JSON.stringify(d))}'>${escapeHtml(d.label)}${expiredClass}</option>`;
+      }).join('');
+    }
+  } catch (error) {
+    console.warn('Messgerät module not available:', error);
+  }
 
   const html = `
     <form id="${FORM_IDS.messen}" class="protokoll-form messen-form">
@@ -400,6 +415,21 @@ export function renderMessenForm() {
 
       <fieldset>
         <legend>Verwendete Messgeräte nach DIN VDE 0413</legend>
+        ${deviceDropdownOptions ? `
+          <div class="form-group">
+            <label for="messgeraet-select">Messgerät aus Datenbank wählen</label>
+            <select id="messgeraet-select" class="form-control" data-action="select-device">
+              <option value="">-- Manuell eingeben oder Gerät wählen --</option>
+              ${deviceDropdownOptions}
+            </select>
+            <p class="field-hint">Wählen Sie ein Messgerät aus der Datenbank oder geben Sie die Daten manuell ein.</p>
+          </div>
+          <hr class="form-divider">
+        ` : `
+          <div class="form-notice">
+            <p>Keine Messgeräte in der Datenbank. <a href="#messgeraet" data-view="messgeraet">Messgeräte verwalten →</a></p>
+          </div>
+        `}
         <div class="form-row">
           ${renderTextField('messgeräte.fabrikat', 'Fabrikat', messgeräte.fabrikat, { placeholder: 'z.B. Fluke' })}
           ${renderTextField('messgeräte.typ', 'Typ', messgeräte.typ, { placeholder: 'z.B. 1654b' })}
@@ -416,6 +446,7 @@ export function renderMessenForm() {
 
   container.innerHTML = html;
   attachFieldListeners();
+  attachDeviceSelectListener();
 }
 
 /**
@@ -1358,6 +1389,67 @@ function attachExportListeners() {
 
   // Navigation buttons
   attachFieldListeners();
+}
+
+/**
+ * Attach device select listener for Messgerät dropdown
+ * @returns {void}
+ */
+function attachDeviceSelectListener() {
+  const deviceSelect = document.getElementById('messgeraet-select');
+  if (!deviceSelect) return;
+
+  deviceSelect.addEventListener('change', (e) => {
+    const selectedOption = e.target.selectedOptions[0];
+    if (!selectedOption || !selectedOption.value) return;
+
+    try {
+      const deviceDataAttr = selectedOption.getAttribute('data-device');
+      if (!deviceDataAttr) return;
+
+      const deviceData = JSON.parse(deviceDataAttr);
+      
+      // Populate the form fields with device data
+      // Note: In the protokoll form:
+      // - fabrikat = manufacturer/brand (e.g., "Fluke")
+      // - typ = device model/type (e.g., "1654b")
+      const fabrikatField = document.querySelector('[data-field="messgeräte.fabrikat"]');
+      const typField = document.querySelector('[data-field="messgeräte.typ"]');
+      const kalibField = document.querySelector('[data-field="messgeräte.nächsteKalibrierung"]');
+      const identField = document.querySelector('[data-field="messgeräte.identNr"]');
+
+      // Use fabrikat if available, otherwise fall back to name
+      const fabrikatValue = deviceData.fabrikat || deviceData.name || '';
+      if (fabrikatField && fabrikatValue) {
+        fabrikatField.value = fabrikatValue;
+        handlers.handleMetadataChange('messgeräte.fabrikat', fabrikatValue);
+      }
+      if (typField && deviceData.type) {
+        typField.value = deviceData.type;
+        handlers.handleMetadataChange('messgeräte.typ', deviceData.type);
+      }
+      if (kalibField && deviceData.calibrationDate) {
+        // Format date for display (DD.MM.YY)
+        const date = new Date(deviceData.calibrationDate);
+        const formatted = date.toLocaleDateString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        });
+        kalibField.value = formatted;
+        handlers.handleMetadataChange('messgeräte.nächsteKalibrierung', formatted);
+      }
+      if (identField && deviceData.identNr) {
+        identField.value = deviceData.identNr;
+        handlers.handleMetadataChange('messgeräte.identNr', deviceData.identNr);
+      }
+
+      // Show success message
+      displayMessage('success', `Messgerät "${deviceData.name}" ausgewählt`);
+    } catch (error) {
+      console.error('Error populating device data:', error);
+    }
+  });
 }
 
 console.log('✓ Protokoll Renderer module loaded');
