@@ -52,9 +52,7 @@ import {
  */
 const VIEW_CONFIG = {
     dashboard: { title: 'Dashboard', subtitle: 'Übersicht aller Module und aktueller Status' },
-    import: { title: 'Import', subtitle: 'Protokoll-Datei hochladen und verarbeiten' },
-    process: { title: 'Process', subtitle: 'Abrechnung aus Protokolldaten erzeugen' },
-    export: { title: 'Export', subtitle: 'Fertige Abrechnung herunterladen' },
+    workflow: { title: 'Abrechnung', subtitle: 'Abrechnung Workflow: Import, Prozess & Export' },
     protokoll: { title: 'Protokoll', subtitle: 'VDE 0100 Prüfprotokoll erstellen und exportieren' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
@@ -84,16 +82,16 @@ function initializeNavigation() {
         btn.addEventListener('click', () => {
             const action = btn.dataset.action;
             if (action === 'import') {
-                switchView('import');
+                switchView('workflow');
             } else if (action === 'process') {
-                switchView('process');
+                switchView('workflow');
                 // Also trigger the generate action
                 const generateBtn = document.getElementById('generate-button');
                 if (generateBtn && !generateBtn.disabled) {
                     handleGenerateAbrechnung();
                 }
             } else if (action === 'export') {
-                switchView('export');
+                switchView('workflow');
                 // Also trigger the export action
                 const exportBtn = document.getElementById('export-button');
                 if (exportBtn && !exportBtn.disabled) {

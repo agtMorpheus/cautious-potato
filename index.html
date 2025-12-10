@@ -47,33 +47,13 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#import" class="nav-link" role="menuitem" data-view="import">
+                        <a href="#workflow" class="nav-link" role="menuitem" data-view="workflow">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    d="M9 17V7m0 10a2 2 0 01-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                             </svg>
-                            <span class="nav-text">Import</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" role="none">
-                        <a href="#process" class="nav-link" role="menuitem" data-view="process">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                            <span class="nav-text">Process</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" role="none">
-                        <a href="#export" class="nav-link" role="menuitem" data-view="export">
-                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            <span class="nav-text">Export</span>
+                            <span class="nav-text">Abrechnung</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
@@ -272,121 +252,119 @@
                     </div>
                 </section>
 
-                <!-- Import View -->
-                <section id="view-import" class="view-container" aria-labelledby="import-heading">
-                    <h2 id="import-heading" class="sr-only">Protokoll importieren</h2>
+                <!-- Workflow View (Unified) -->
+                <section id="view-workflow" class="view-container" aria-labelledby="workflow-heading">
+                    <h2 id="workflow-heading" class="sr-only">Abrechnung Workflow</h2>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Protokoll importieren</h3>
-                            <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der
-                                Vorlage.</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="form-label">Protokoll-Datei (.xlsx)</label>
-                                <div class="file-upload-area" id="file-drop-zone">
-                                    <input id="file-input" type="file" accept=".xlsx" aria-describedby="file-help"
-                                        class="file-input-hidden" />
-                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <p class="upload-text">Datei hierher ziehen oder <span
-                                            class="upload-link">durchsuchen</span></p>
-                                    <p class="upload-hint" id="file-help">Die Datei wird nur lokal im Browser
-                                        verarbeitet.</p>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <!-- Import Card -->
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">1. Import</h3>
+                                <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der
+                                    Vorlage.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Protokoll-Datei (.xlsx)</label>
+                                    <div class="file-upload-area" id="file-drop-zone">
+                                        <input id="file-input" type="file" accept=".xlsx" aria-describedby="file-help"
+                                            class="file-input-hidden" />
+                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <p class="upload-text">Datei hierher ziehen oder <span
+                                                class="upload-link">durchsuchen</span></p>
+                                        <p class="upload-hint" id="file-help">Die Datei wird nur lokal im Browser
+                                            verarbeitet.</p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="form-actions">
-                                <button id="import-button" type="button" class="btn btn-primary" disabled>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <span>Datei importieren</span>
-                                </button>
-                            </div>
-
-                            <div class="status-display">
-                                <span class="status-indicator status-idle" id="import-status"></span>
-                                <p id="import-message" class="status-message">Keine Datei ausgewählt. Bitte wählen Sie
-                                    eine Datei aus.</p>
-                            </div>
-
-                            <div id="import-summary" class="summary-panel" aria-live="polite" hidden></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Process View -->
-                <section id="view-process" class="view-container" aria-labelledby="process-heading">
-                    <h2 id="process-heading" class="sr-only">Abrechnung erzeugen</h2>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Abrechnung erzeugen</h3>
-                            <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage
-                                übernommen.</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-actions">
-                                <button id="generate-button" type="button" class="btn btn-primary" disabled>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
-                                    <span>Abrechnung erzeugen</span>
-                                </button>
-                            </div>
-
-                            <div class="status-display">
-                                <span class="status-indicator status-idle" id="generate-status"></span>
-                                <p id="generate-message" class="status-message">Noch keine Abrechnung erzeugt.</p>
-                            </div>
-
-                            <div id="generate-summary" class="summary-panel" aria-live="polite" hidden></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Export View -->
-                <section id="view-export" class="view-container" aria-labelledby="export-heading">
-                    <h2 id="export-heading" class="sr-only">Abrechnung exportieren</h2>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Abrechnung exportieren</h3>
-                            <p class="card-description">Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-actions">
-                                <button id="export-button" type="button" class="btn btn-primary" disabled>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    <span>Abrechnung herunterladen</span>
-                                </button>
-                            </div>
-
-                            <div class="status-display">
-                                <span class="status-indicator status-idle" id="export-status"></span>
-                                <p id="export-message" class="status-message">Noch keine Datei exportiert.</p>
-                            </div>
-
-                            <dl id="export-summary" class="summary-panel" aria-live="polite" hidden>
-                                <div class="summary-row">
-                                    <dt>Letzter Export</dt>
-                                    <dd id="export-last-date">–</dd>
+                                <div class="form-actions">
+                                    <button id="import-button" type="button" class="btn btn-primary" disabled>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <span>Datei importieren</span>
+                                    </button>
                                 </div>
-                                <div class="summary-row">
-                                    <dt>Dateigröße</dt>
-                                    <dd id="export-last-size">–</dd>
+
+                                <div class="status-display">
+                                    <span class="status-indicator status-idle" id="import-status"></span>
+                                    <p id="import-message" class="status-message">Keine Datei ausgewählt. Bitte wählen
+                                        Sie
+                                        eine Datei aus.</p>
                                 </div>
-                            </dl>
+
+                                <div id="import-summary" class="summary-panel" aria-live="polite" hidden></div>
+                            </div>
+                        </div>
+
+                        <!-- Process Card -->
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">2. Prozess</h3>
+                                <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage
+                                    übernommen.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-actions">
+                                    <button id="generate-button" type="button" class="btn btn-primary" disabled>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>Abrechnung erzeugen</span>
+                                    </button>
+                                </div>
+
+                                <div class="status-display">
+                                    <span class="status-indicator status-idle" id="generate-status"></span>
+                                    <p id="generate-message" class="status-message">Noch keine Abrechnung erzeugt.</p>
+                                </div>
+
+                                <div id="generate-summary" class="summary-panel" aria-live="polite" hidden></div>
+                            </div>
+                        </div>
+
+                        <!-- Export Card -->
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">3. Export</h3>
+                                <p class="card-description">Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-actions">
+                                    <button id="export-button" type="button" class="btn btn-primary" disabled>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        <span>Abrechnung herunterladen</span>
+                                    </button>
+                                </div>
+
+                                <div class="status-display">
+                                    <span class="status-indicator status-idle" id="export-status"></span>
+                                    <p id="export-message" class="status-message">Noch keine Datei exportiert.</p>
+                                </div>
+
+                                <dl id="export-summary" class="summary-panel" aria-live="polite" hidden>
+                                    <div class="summary-row">
+                                        <dt>Letzter Export</dt>
+                                        <dd id="export-last-date">–</dd>
+                                    </div>
+                                    <div class="summary-row">
+                                        <dt>Dateigröße</dt>
+                                        <dd id="export-last-size">–</dd>
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
                     </div>
                 </section>
