@@ -113,7 +113,6 @@ CREATE TABLE IF NOT EXISTS import_errors (
     
     INDEX idx_import_id (import_id),
     FOREIGN KEY (import_id) REFERENCES imports(id) ON DELETE CASCADE
-)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
