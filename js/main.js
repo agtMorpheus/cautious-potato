@@ -62,6 +62,12 @@ import * as messgeraetState from './messgeraet/messgeraet-state.js';
 import * as messgeraetHandlers from './messgeraet/messgeraet-handlers.js';
 import * as messgeraetRenderer from './messgeraet/messgeraet-renderer.js';
 
+// Asset Module imports
+import * as assetState from './modules/assets/asset-state.js';
+import * as assetHandlers from './modules/assets/asset-handlers.js';
+import * as assetRenderer from './modules/assets/asset-renderer.js';
+import assetDb from './modules/assets/asset-db.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -74,6 +80,7 @@ const VIEW_CONFIG = {
     messgeraet: { title: 'Messgeräte', subtitle: 'Messgeräte verwalten und Kalibrierungsdaten erfassen' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
     hr: { title: 'HR Management', subtitle: 'Employees, attendance, schedules, and vacation' },
+    assets: { title: 'Asset Management', subtitle: 'Verteiler-Assets importieren und verwalten' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
     settings: { title: 'Settings', subtitle: 'Anwendungseinstellungen konfigurieren' },
     logs: { title: 'Logs', subtitle: 'Aktivitäts- und Systemprotokoll' },
@@ -859,6 +866,76 @@ function initializeMessgeraetModule() {
 }
 
 /**
+ * Initialize Asset Management Module
+ * Sets up state, handlers, and renderer for asset management
+ */
+function initializeAssetModule() {
+    console.log('Asset Module: Initializing...');
+
+    // Initialize state management
+    try {
+        assetState.init();
+        console.log('Asset Module: State management initialized');
+    } catch (error) {
+        console.error('Asset Module: State initialization failed:', error);
+        return false;
+    }
+
+    // Initialize IndexedDB
+    try {
+        assetDb.init().then(() => {
+            console.log('Asset Module: IndexedDB initialized');
+        }).catch(err => {
+            console.warn('Asset Module: IndexedDB init failed, using localStorage only:', err);
+        });
+    } catch (error) {
+        console.warn('Asset Module: IndexedDB init failed, using localStorage only:', error);
+    }
+
+    // Initialize handlers
+    try {
+        assetHandlers.init();
+        console.log('Asset Module: Event handlers initialized');
+    } catch (error) {
+        console.error('Asset Module: Handler initialization failed:', error);
+        return false;
+    }
+
+    // Initialize renderer
+    try {
+        assetRenderer.init();
+        console.log('Asset Module: UI renderer initialized');
+    } catch (error) {
+        console.error('Asset Module: Renderer initialization failed:', error);
+        return false;
+    }
+
+    // Subscribe to asset changes for activity logging
+    assetState.on('assetAdded', ({ asset }) => {
+        addActivityLogEntry(`Asset hinzugefügt: ${asset.name}`, 'success');
+        addLogEntry(`Asset added: ${asset.name}`, 'success');
+    });
+
+    assetState.on('assetUpdated', ({ asset }) => {
+        addActivityLogEntry(`Asset aktualisiert: ${asset?.name || 'Unknown'}`, 'info');
+        addLogEntry(`Asset updated: ${asset?.name || 'Unknown'}`, 'info');
+    });
+
+    assetState.on('assetDeleted', ({ assetId }) => {
+        addActivityLogEntry('Asset gelöscht', 'warning');
+        addLogEntry(`Asset deleted: ${assetId}`, 'warning');
+    });
+
+    assetState.on('assetsImported', ({ total, successful, failed }) => {
+        addActivityLogEntry(`${successful} von ${total} Assets importiert`, failed > 0 ? 'warning' : 'success');
+        addLogEntry(`Imported ${successful} of ${total} assets (${failed} failed)`, failed > 0 ? 'warning' : 'success');
+    });
+
+    console.log('✓ Asset Module initialized');
+    return true;
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
@@ -1161,6 +1238,9 @@ async function initializeApp() {
 
     // 5f. Initialize Messgerät Module
     initializeMessgeraetModule();
+
+    // 5g. Initialize Asset Module
+    initializeAssetModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
