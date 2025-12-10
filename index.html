@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/cell-mapper.css" />
     <link rel="stylesheet" href="css/protokoll.css" />
     <link rel="stylesheet" href="css/hr-module.css" />
+    <link rel="stylesheet" href="css/messgeraet.css" />
 </head>
 
 <body>
@@ -85,6 +86,16 @@
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
                             <span class="nav-text">Protokoll</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="#messgeraet" class="nav-link" role="menuitem" data-view="messgeraet">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                            </svg>
+                            <span class="nav-text">Messgeräte</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
@@ -428,6 +439,32 @@
 
                             <!-- Message Container for Protokoll -->
                             <div id="messageContainer" class="message-container" role="status" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Messgerät (Measurement Devices) View -->
+                <section id="view-messgeraet" class="view-container" aria-labelledby="messgeraet-heading">
+                    <h2 id="messgeraet-heading" class="sr-only">Messgeräte-Verwaltung</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Messgeräte</h3>
+                            <p class="card-description">Messgeräte verwalten und Kalibrierungsdaten erfassen</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Messgerät Module Container - dynamically populated -->
+                            <div id="messgeraetContainer">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="empty-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                    </svg>
+                                    <p>Messgeräte-Modul wird geladen...</p>
+                                    <p class="text-muted">Verwalten Sie hier Ihre Messgeräte und deren Kalibrierungsdaten.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

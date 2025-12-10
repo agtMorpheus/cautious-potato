@@ -57,6 +57,11 @@ import {
     deleteEmployee
 } from './modules/hr/hrState.js';
 
+// Messgerät Module imports
+import * as messgeraetState from './messgeraet/messgeraet-state.js';
+import * as messgeraetHandlers from './messgeraet/messgeraet-handlers.js';
+import * as messgeraetRenderer from './messgeraet/messgeraet-renderer.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -66,6 +71,7 @@ const VIEW_CONFIG = {
     process: { title: 'Process', subtitle: 'Abrechnung aus Protokolldaten erzeugen' },
     export: { title: 'Export', subtitle: 'Fertige Abrechnung herunterladen' },
     protokoll: { title: 'Protokoll', subtitle: 'VDE 0100 Prüfprotokoll erstellen und exportieren' },
+    messgeraet: { title: 'Messgeräte', subtitle: 'Messgeräte verwalten und Kalibrierungsdaten erfassen' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
     hr: { title: 'HR Management', subtitle: 'Employees, attendance, schedules, and vacation' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
@@ -799,6 +805,60 @@ function showHREmployeeForm(employeeId = null) {
 }
 
 /**
+ * Initialize Messgerät (Measurement Devices) Module
+ * Sets up state, handlers, and renderer for device management
+ */
+function initializeMessgeraetModule() {
+    console.log('Messgerät Module: Initializing...');
+
+    // Initialize state management
+    try {
+        messgeraetState.init();
+        console.log('Messgerät Module: State management initialized');
+    } catch (error) {
+        console.error('Messgerät Module: State initialization failed:', error);
+        return false;
+    }
+
+    // Initialize handlers
+    try {
+        messgeraetHandlers.init();
+        console.log('Messgerät Module: Event handlers initialized');
+    } catch (error) {
+        console.error('Messgerät Module: Handler initialization failed:', error);
+        return false;
+    }
+
+    // Initialize renderer
+    try {
+        messgeraetRenderer.init();
+        console.log('Messgerät Module: UI renderer initialized');
+    } catch (error) {
+        console.error('Messgerät Module: Renderer initialization failed:', error);
+        return false;
+    }
+
+    // Subscribe to device changes for activity logging
+    messgeraetState.on('deviceAdded', ({ device }) => {
+        addActivityLogEntry(`Messgerät hinzugefügt: ${device.name}`, 'success');
+        addLogEntry(`Device added: ${device.name}`, 'success');
+    });
+
+    messgeraetState.on('deviceUpdated', ({ device }) => {
+        addActivityLogEntry(`Messgerät aktualisiert: ${device?.name || 'Unknown'}`, 'info');
+        addLogEntry(`Device updated: ${device?.name || 'Unknown'}`, 'info');
+    });
+
+    messgeraetState.on('deviceDeleted', ({ deviceId }) => {
+        addActivityLogEntry('Messgerät gelöscht', 'warning');
+        addLogEntry(`Device deleted: ${deviceId}`, 'warning');
+    });
+
+    console.log('✓ Messgerät Module initialized');
+    return true;
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
@@ -1098,6 +1158,9 @@ async function initializeApp() {
 
     // 5e. Initialize HR Module (Phase 5)
     initializeHRModule();
+
+    // 5f. Initialize Messgerät Module
+    initializeMessgeraetModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
