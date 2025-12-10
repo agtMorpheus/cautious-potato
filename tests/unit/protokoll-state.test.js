@@ -861,4 +861,178 @@ describe('Protokoll State Management', () => {
       expect(metadata.auftragnehmer).toBe('Test Firma GmbH');
     });
   });
+
+  // ========== LOAD FROM ASSET ==========
+  describe('loadFromAsset()', () => {
+    let consoleSpy;
+
+    beforeEach(() => {
+      state.init();
+    });
+
+    afterEach(() => {
+      // Ensure console spy is always restored
+      if (consoleSpy) {
+        consoleSpy.mockRestore();
+        consoleSpy = null;
+      }
+    });
+
+    test('should load asset data into protokoll metadata', () => {
+      const assetData = {
+        assetId: 'E03150AP17000093243',
+        assetName: 'LVUM-17',
+        assetType: 'LVUM',
+        location: 'Halle 3',
+        plant: 'Werk 1100',
+        description: 'Hauptverteiler Fertigung'
+      };
+
+      state.loadFromAsset(assetData);
+
+      const metadata = state.getMetadata();
+      expect(metadata.linkedAssetId).toBe('E03150AP17000093243');
+      expect(metadata.linkedAssetName).toBe('LVUM-17');
+      expect(metadata.facility.inv).toBe('E03150AP17000093243');
+      expect(metadata.facility.ort).toBe('Halle 3');
+      expect(metadata.facility.anlage).toContain('LVUM-17');
+      expect(metadata.facility.anlage).toContain('Hauptverteiler Fertigung');
+      expect(metadata.firmaOrt).toBe('Werk 1100');
+    });
+
+    test('should include asset type in facility description', () => {
+      const assetData = {
+        assetId: 'TEST-001',
+        assetName: 'Test Asset',
+        assetType: 'UV'
+      };
+
+      state.loadFromAsset(assetData);
+
+      const metadata = state.getMetadata();
+      expect(metadata.facility.anlage).toContain('Verteilertyp: UV');
+    });
+
+    test('should set current date when loading from asset', () => {
+      const assetData = {
+        assetId: 'TEST-001',
+        assetName: 'Test Asset'
+      };
+
+      const beforeLoad = new Date();
+      state.loadFromAsset(assetData);
+      const afterLoad = new Date();
+
+      const metadata = state.getMetadata();
+      const datumDate = new Date(metadata.datum);
+      
+      expect(datumDate.getTime()).toBeGreaterThanOrEqual(beforeLoad.getTime() - 1000);
+      expect(datumDate.getTime()).toBeLessThanOrEqual(afterLoad.getTime() + 1000);
+    });
+
+    test('should reset form state to metadata step', () => {
+      state.setFormStep('positions');
+      
+      const assetData = {
+        assetId: 'TEST-001',
+        assetName: 'Test Asset'
+      };
+
+      state.loadFromAsset(assetData);
+
+      expect(state.getCurrentStep()).toBe('metadata');
+    });
+
+    test('should mark state as dirty and having unsaved changes', () => {
+      state.clearUnsaved();
+      
+      const assetData = {
+        assetId: 'TEST-001',
+        assetName: 'Test Asset'
+      };
+
+      state.loadFromAsset(assetData);
+
+      expect(state.hasUnsavedChanges()).toBe(true);
+      expect(state.isDirty()).toBe(true);
+    });
+
+    test('should handle asset with partial data', () => {
+      const assetData = {
+        assetId: 'PARTIAL-001',
+        assetName: 'Partial Asset'
+        // Missing: location, plant, description, assetType
+      };
+
+      state.loadFromAsset(assetData);
+
+      const metadata = state.getMetadata();
+      expect(metadata.linkedAssetId).toBe('PARTIAL-001');
+      expect(metadata.linkedAssetName).toBe('Partial Asset');
+      expect(metadata.facility.inv).toBe('PARTIAL-001');
+    });
+
+    test('should emit assetLoaded event', () => {
+      const mockHandler = jest.fn();
+      state.on('assetLoaded', mockHandler);
+
+      const assetData = {
+        assetId: 'EVENT-001',
+        assetName: 'Event Test Asset'
+      };
+
+      state.loadFromAsset(assetData);
+
+      expect(mockHandler).toHaveBeenCalledWith({ assetData });
+    });
+
+    test('should emit metadataChanged event', () => {
+      const mockHandler = jest.fn();
+      state.on('metadataChanged', mockHandler);
+
+      const assetData = {
+        assetId: 'EVENT-002',
+        assetName: 'Metadata Event Asset'
+      };
+
+      state.loadFromAsset(assetData);
+
+      expect(mockHandler).toHaveBeenCalled();
+      const callArgs = mockHandler.mock.calls[0][0];
+      expect(callArgs.metadata).toBeDefined();
+      expect(callArgs.metadata.linkedAssetId).toBe('EVENT-002');
+    });
+
+    test('should reject null asset data', () => {
+      consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      state.loadFromAsset(null);
+
+      expect(consoleSpy).toHaveBeenCalledWith('Invalid asset data:', null);
+    });
+
+    test('should reject non-object asset data', () => {
+      consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      state.loadFromAsset('string-asset');
+
+      expect(consoleSpy).toHaveBeenCalledWith('Invalid asset data:', 'string-asset');
+    });
+
+    test('should handle empty string values gracefully', () => {
+      const assetData = {
+        assetId: '',
+        assetName: '',
+        location: '',
+        plant: ''
+      };
+
+      // Should not throw
+      state.loadFromAsset(assetData);
+
+      const metadata = state.getMetadata();
+      expect(metadata.linkedAssetId).toBe('');
+      expect(metadata.linkedAssetName).toBe('');
+    });
+  });
 });

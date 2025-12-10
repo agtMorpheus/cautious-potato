@@ -517,9 +517,85 @@ function handleButtonClick(e) {
       // Form submission is handled by the form submit event
       break;
 
+    case 'view-detail':
+      // Prevent default link behavior if it's a link
+      e.preventDefault();
+      if (assetId) {
+        handleViewAssetDetail(assetId);
+      }
+      break;
+
+    case 'create-protocol':
+      if (assetId) {
+        handleCreateProtocolFromAsset(assetId);
+      }
+      break;
+
+    case 'back-to-list':
+      handleBackToList();
+      break;
+
     default:
       console.warn(`Unknown asset action: ${action}`);
   }
+}
+
+// ============================================
+// DETAIL VIEW HANDLERS
+// ============================================
+
+/**
+ * Handle navigating to asset detail view
+ * @param {string} assetId - Asset ID
+ * @returns {void}
+ */
+export function handleViewAssetDetail(assetId) {
+  document.dispatchEvent(new CustomEvent('asset:showDetail', {
+    detail: { assetId }
+  }));
+}
+
+/**
+ * Handle going back to asset list from detail view
+ * @returns {void}
+ */
+export function handleBackToList() {
+  document.dispatchEvent(new CustomEvent('asset:hideDetail', {}));
+}
+
+/**
+ * Handle creating a new protocol from an asset
+ * @param {string} assetId - Asset ID
+ * @returns {void}
+ */
+export function handleCreateProtocolFromAsset(assetId) {
+  const asset = state.getAsset(assetId);
+  if (!asset) {
+    document.dispatchEvent(new CustomEvent('asset:message', {
+      detail: { type: 'error', message: 'Asset nicht gefunden.' }
+    }));
+    return;
+  }
+
+  // Prepare asset data for protokoll
+  const assetData = {
+    assetId: asset.id,
+    assetName: asset.name,
+    assetType: asset.type,
+    location: asset.location,
+    plant: asset.plant,
+    description: asset.description,
+    parentId: asset.parentId
+  };
+
+  // Dispatch event to create protokoll from asset
+  document.dispatchEvent(new CustomEvent('asset:createProtocol', {
+    detail: { assetData }
+  }));
+
+  document.dispatchEvent(new CustomEvent('asset:message', {
+    detail: { type: 'info', message: 'Protokoll wird erstellt...' }
+  }));
 }
 
 /**

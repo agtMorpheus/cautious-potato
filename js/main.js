@@ -66,6 +66,7 @@ import * as messgeraetRenderer from './messgeraet/messgeraet-renderer.js';
 import * as assetState from './modules/assets/asset-state.js';
 import * as assetHandlers from './modules/assets/asset-handlers.js';
 import * as assetRenderer from './modules/assets/asset-renderer.js';
+import * as assetDetailRenderer from './modules/assets/asset-detail-renderer.js';
 import assetDb from './modules/assets/asset-db.js';
 
 /**
@@ -908,6 +909,23 @@ function initializeAssetModule() {
         return false;
     }
 
+    // Initialize detail renderer
+    try {
+        assetDetailRenderer.init();
+        console.log('Asset Module: Detail renderer initialized');
+    } catch (error) {
+        console.error('Asset Module: Detail renderer initialization failed:', error);
+        return false;
+    }
+
+    // Set up listener for creating protokoll from asset
+    document.addEventListener('asset:createProtocol', (e) => {
+        const { assetData } = e.detail;
+        if (assetData) {
+            handleCreateProtokollFromAsset(assetData);
+        }
+    });
+
     // Subscribe to asset changes for activity logging
     assetState.on('assetAdded', ({ asset }) => {
         addActivityLogEntry(`Asset hinzugefügt: ${asset.name}`, 'success');
@@ -931,6 +949,34 @@ function initializeAssetModule() {
 
     console.log('✓ Asset Module initialized');
     return true;
+}
+
+/**
+ * Handle creating a protokoll from asset data
+ * @param {Object} assetData - Asset data object
+ */
+function handleCreateProtokollFromAsset(assetData) {
+    try {
+        console.log('Creating protokoll from asset:', assetData);
+        
+        // Load asset data into protokoll state
+        protokollState.loadFromAsset(assetData);
+        
+        // Re-render the protokoll form
+        protokollRenderer.renderStep('metadata');
+        
+        // Switch to protokoll view
+        switchView('protokoll');
+        
+        // Show success message
+        protokollRenderer.displayMessage('success', `Protokoll für Asset "${assetData.assetName}" erstellt. Daten wurden übernommen.`);
+        addActivityLogEntry(`Protokoll erstellt für Asset ${assetData.assetId}`, 'success');
+        addLogEntry(`Protokoll created from asset ${assetData.assetId}`, 'success');
+    } catch (error) {
+        console.error('Failed to create protokoll from asset:', error);
+        protokollRenderer.displayMessage('error', 'Fehler beim Erstellen des Protokolls.');
+        addLogEntry(`Failed to create protokoll from asset: ${error.message}`, 'error');
+    }
 }
 
 /**

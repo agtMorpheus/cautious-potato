@@ -316,7 +316,9 @@ function renderAssetRow(asset) {
       </td>
       <td>
         <div class="asset-name">
-          <strong>${escapeHtml(asset.name)}</strong>
+          <a href="#" class="asset-name-link" data-asset-action="view-detail" data-asset-id="${escapeHtml(asset.id)}">
+            <strong>${escapeHtml(asset.name)}</strong>
+          </a>
           ${asset.description && asset.description !== asset.name ? `
             <span class="asset-description">${escapeHtml(truncate(asset.description, 60))}</span>
           ` : ''}
@@ -332,6 +334,31 @@ function renderAssetRow(asset) {
       <td>${escapeHtml(asset.plant || '-')}</td>
       <td>
         <div class="asset-actions">
+          <button 
+            type="button" 
+            class="btn-icon" 
+            data-asset-action="view-detail" 
+            data-asset-id="${escapeHtml(asset.id)}"
+            title="Details anzeigen"
+            aria-label="Asset-Details anzeigen"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          <button 
+            type="button" 
+            class="btn-icon btn-protocol" 
+            data-asset-action="create-protocol" 
+            data-asset-id="${escapeHtml(asset.id)}"
+            title="Neues Protokoll erstellen"
+            aria-label="Neues Protokoll aus Asset erstellen"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </button>
           <button 
             type="button" 
             class="btn-icon" 
