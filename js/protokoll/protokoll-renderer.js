@@ -942,20 +942,17 @@ export function addPositionRow(position) {
   const tbody = document.getElementById('positionsTableBody');
   if (!tbody) return;
 
-  const tr = document.createElement('tr');
-  tr.className = 'position-row';
-  tr.setAttribute('data-pos-nr', position.posNr);
+  // Use table wrapper to properly parse TR elements (TR is not valid inside a div)
+  const tempTable = document.createElement('table');
+  const tempTbody = document.createElement('tbody');
+  tempTable.appendChild(tempTbody);
+  tempTbody.innerHTML = renderPositionRow(position, tbody.children.length);
   
-  // Get inner HTML from renderPositionRow, removing outer tr tags
-  const tempContainer = document.createElement('div');
-  tempContainer.innerHTML = renderPositionRow(position, tbody.children.length);
-  const newRow = tempContainer.querySelector('tr');
+  const newRow = tempTbody.querySelector('tr');
   if (newRow) {
-    tr.innerHTML = newRow.innerHTML;
+    tbody.appendChild(newRow);
+    attachPositionListeners();
   }
-  
-  tbody.appendChild(tr);
-  attachPositionListeners();
 }
 
 /**
