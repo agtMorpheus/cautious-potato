@@ -505,4 +505,186 @@ describe('Protokoll State Management', () => {
       expect(position.messwerte.riso).toBe('> 500MΩ');
     });
   });
+
+  // ========== CONTRACT INTEGRATION ==========
+  describe('loadFromContract()', () => {
+    beforeEach(() => {
+      state.init();
+    });
+
+    test('should load contract data into protokoll metadata', () => {
+      const contract = {
+        contractId: 'VW-2024-001',
+        contractTitle: 'Volkswagen AG Prüfung',
+        location: 'Halle 3',
+        equipmentId: 'E03150AP17000093243',
+        equipmentDescription: 'LVUM-Fc34',
+        roomArea: 'Säule A5'
+      };
+
+      state.loadFromContract(contract);
+
+      const metadata = state.getMetadata();
+      expect(metadata.auftragnummer).toBe('VW-2024-001');
+      expect(metadata.auftraggeber).toBe('Volkswagen AG Prüfung');
+      expect(metadata.kundennummer).toBe('VW-2024-001');
+      expect(metadata.facility.ort).toBe('Halle 3');
+      expect(metadata.facility.inv).toBe('E03150AP17000093243');
+      expect(metadata.facility.anlage).toContain('LVUM-Fc34');
+      expect(metadata.facility.anlage).toContain('Säule A5');
+    });
+
+    test('should set current date when loading from contract', () => {
+      const contract = {
+        contractId: 'TEST-001',
+        contractTitle: 'Test Contract'
+      };
+
+      const beforeLoad = new Date();
+      state.loadFromContract(contract);
+      const afterLoad = new Date();
+
+      const metadata = state.getMetadata();
+      const datumDate = new Date(metadata.datum);
+      
+      expect(datumDate.getTime()).toBeGreaterThanOrEqual(beforeLoad.getTime() - 1000);
+      expect(datumDate.getTime()).toBeLessThanOrEqual(afterLoad.getTime() + 1000);
+    });
+
+    test('should reset form state to metadata step', () => {
+      state.setFormStep('positions');
+      
+      const contract = {
+        contractId: 'TEST-001',
+        contractTitle: 'Test Contract'
+      };
+
+      state.loadFromContract(contract);
+
+      expect(state.getCurrentStep()).toBe('metadata');
+    });
+
+    test('should mark state as dirty and having unsaved changes', () => {
+      state.clearUnsaved();
+      
+      const contract = {
+        contractId: 'TEST-001',
+        contractTitle: 'Test Contract'
+      };
+
+      state.loadFromContract(contract);
+
+      expect(state.hasUnsavedChanges()).toBe(true);
+      expect(state.isDirty()).toBe(true);
+    });
+
+    test('should handle contract with partial data', () => {
+      const contract = {
+        contractId: 'PARTIAL-001',
+        contractTitle: 'Partial Contract'
+        // Missing: location, equipmentId, equipmentDescription, roomArea
+      };
+
+      state.loadFromContract(contract);
+
+      const metadata = state.getMetadata();
+      expect(metadata.auftragnummer).toBe('PARTIAL-001');
+      expect(metadata.auftraggeber).toBe('Partial Contract');
+      expect(metadata.facility.ort).toBe(''); // Should be empty, not undefined
+    });
+
+    test('should handle contract with only roomArea (no equipmentDescription)', () => {
+      const contract = {
+        contractId: 'ROOM-001',
+        contractTitle: 'Room Only Contract',
+        roomArea: 'Säule B2'
+      };
+
+      state.loadFromContract(contract);
+
+      const metadata = state.getMetadata();
+      expect(metadata.facility.anlage).toBe('Säule B2');
+    });
+
+    test('should emit contractLoaded event', (done) => {
+      const contract = {
+        contractId: 'EVENT-001',
+        contractTitle: 'Event Test Contract'
+      };
+
+      state.on('contractLoaded', (data) => {
+        expect(data.contract.contractId).toBe('EVENT-001');
+        done();
+      });
+
+      state.loadFromContract(contract);
+    });
+
+    test('should emit metadataChanged event', (done) => {
+      const contract = {
+        contractId: 'META-001',
+        contractTitle: 'Metadata Event Test'
+      };
+
+      state.on('metadataChanged', (data) => {
+        expect(data.metadata.auftragnummer).toBe('META-001');
+        done();
+      });
+
+      state.loadFromContract(contract);
+    });
+
+    test('should reject null contract', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      state.loadFromContract(null);
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Invalid contract data:', null);
+      consoleSpy.mockRestore();
+    });
+
+    test('should reject non-object contract', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      state.loadFromContract('string-contract');
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Invalid contract data:', 'string-contract');
+      consoleSpy.mockRestore();
+    });
+
+    test('should handle empty string values gracefully', () => {
+      const contract = {
+        contractId: '',
+        contractTitle: '',
+        location: '',
+        equipmentId: ''
+      };
+
+      state.loadFromContract(contract);
+
+      const metadata = state.getMetadata();
+      expect(metadata.auftragnummer).toBe('');
+      expect(metadata.auftraggeber).toBe('');
+    });
+
+    test('should preserve existing metadata fields not overwritten by contract', () => {
+      // Set some initial metadata
+      state.setMetadataField('prüfer.name', 'Max Mustermann');
+      state.setMetadataField('auftragnehmer', 'Test Firma GmbH');
+
+      const contract = {
+        contractId: 'PRESERVE-001',
+        contractTitle: 'Preserve Test'
+      };
+
+      state.loadFromContract(contract);
+
+      const metadata = state.getMetadata();
+      // Contract data should be loaded
+      expect(metadata.auftragnummer).toBe('PRESERVE-001');
+      // Pre-existing data should be preserved
+      expect(metadata.prüfer.name).toBe('Max Mustermann');
+      expect(metadata.auftragnehmer).toBe('Test Firma GmbH');
+    });
+  });
 });
