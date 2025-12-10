@@ -28,6 +28,8 @@ build/
 
 # Test coverage
 coverage/
+.phpunit.result.cache
+.phpunit.cache/
 
 # Temporary files
 tmp/
