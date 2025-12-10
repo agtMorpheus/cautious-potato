@@ -727,6 +727,74 @@ export function loadFromContract(contract) {
 }
 
 /**
+ * Load data from an asset object to pre-fill the protokoll form
+ * Links the protocol to the asset for traceability
+ * @param {Object} assetData - Asset data object from Asset Management
+ * @returns {void}
+ */
+export function loadFromAsset(assetData) {
+  if (!assetData || typeof assetData !== 'object') {
+    console.error('Invalid asset data:', assetData);
+    return;
+  }
+  
+  console.log('Loading protokoll data from asset:', assetData);
+  
+  // Map asset fields to protokoll metadata
+  // Store asset reference for linking
+  state.metadata.linkedAssetId = assetData.assetId || '';
+  state.metadata.linkedAssetName = assetData.assetName || '';
+  
+  // Map facility information from asset
+  if (assetData.assetName) {
+    state.metadata.facility.anlage = assetData.assetName;
+  }
+  
+  if (assetData.description) {
+    // Append description if facility already has a name
+    state.metadata.facility.anlage = state.metadata.facility.anlage
+      ? `${state.metadata.facility.anlage} - ${assetData.description}`
+      : assetData.description;
+  }
+  
+  if (assetData.location) {
+    state.metadata.facility.ort = assetData.location;
+  }
+  
+  if (assetData.assetId) {
+    state.metadata.facility.inv = assetData.assetId;
+  }
+  
+  // Map plant information
+  if (assetData.plant) {
+    state.metadata.firmaOrt = assetData.plant;
+  }
+  
+  // Set asset type information for reference
+  if (assetData.assetType) {
+    // Store type info in facility description or as additional metadata
+    const typeInfo = `Verteilertyp: ${assetData.assetType}`;
+    state.metadata.facility.anlage = state.metadata.facility.anlage
+      ? `${state.metadata.facility.anlage} (${typeInfo})`
+      : typeInfo;
+  }
+  
+  // Set the current date
+  state.metadata.datum = new Date().toISOString();
+  
+  // Reset form state and start fresh
+  state.formState.currentStep = 'metadata';
+  state.formState.isDirty = true;
+  state.formState.unsavedChanges = true;
+  
+  emit('assetLoaded', { assetData });
+  emit('metadataChanged', { metadata: getMetadata() });
+  saveToLocalStorage();
+  
+  console.log('✓ Asset data loaded into protokoll');
+}
+
+/**
  * Set current form step
  * @param {string} step - Step: 'metadata'|'besichtigung'|'erproben'|'messen'|'positions'|'results'|'review'
  * @returns {void}
