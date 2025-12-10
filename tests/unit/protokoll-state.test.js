@@ -508,8 +508,18 @@ describe('Protokoll State Management', () => {
 
   // ========== CONTRACT INTEGRATION ==========
   describe('loadFromContract()', () => {
+    let consoleSpy;
+
     beforeEach(() => {
       state.init();
+    });
+
+    afterEach(() => {
+      // Ensure console spy is always restored
+      if (consoleSpy) {
+        consoleSpy.mockRestore();
+        consoleSpy = null;
+      }
     });
 
     test('should load contract data into protokoll metadata', () => {
@@ -590,7 +600,8 @@ describe('Protokoll State Management', () => {
       const metadata = state.getMetadata();
       expect(metadata.auftragnummer).toBe('PARTIAL-001');
       expect(metadata.auftraggeber).toBe('Partial Contract');
-      expect(metadata.facility.ort).toBe(''); // Should be empty, not undefined
+      // facility.ort remains at default value since location was not provided
+      expect(metadata.facility.ort).toBe('');
     });
 
     test('should handle contract with only roomArea (no equipmentDescription)', () => {
@@ -635,21 +646,19 @@ describe('Protokoll State Management', () => {
     });
 
     test('should reject null contract', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       state.loadFromContract(null);
       
       expect(consoleSpy).toHaveBeenCalledWith('Invalid contract data:', null);
-      consoleSpy.mockRestore();
     });
 
     test('should reject non-object contract', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       state.loadFromContract('string-contract');
       
       expect(consoleSpy).toHaveBeenCalledWith('Invalid contract data:', 'string-contract');
-      consoleSpy.mockRestore();
     });
 
     test('should handle empty string values gracefully', () => {
