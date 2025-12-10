@@ -62,6 +62,11 @@ import * as messgeraetState from './messgeraet/messgeraet-state.js';
 import * as messgeraetHandlers from './messgeraet/messgeraet-handlers.js';
 import * as messgeraetRenderer from './messgeraet/messgeraet-renderer.js';
 
+// Assets Module imports
+import * as assetState from './assets/asset-state.js';
+import * as assetHandlers from './assets/asset-handlers.js';
+import * as assetRenderer from './assets/asset-renderer.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -73,6 +78,7 @@ const VIEW_CONFIG = {
     protokoll: { title: 'Protokoll', subtitle: 'VDE 0100 Prüfprotokoll erstellen und exportieren' },
     messgeraet: { title: 'Messgeräte', subtitle: 'Messgeräte verwalten und Kalibrierungsdaten erfassen' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
+    assets: { title: 'Assets', subtitle: 'Anlagen und Betriebsmittel verwalten' },
     hr: { title: 'HR Management', subtitle: 'Employees, attendance, schedules, and vacation' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
     settings: { title: 'Settings', subtitle: 'Anwendungseinstellungen konfigurieren' },
@@ -859,6 +865,65 @@ function initializeMessgeraetModule() {
 }
 
 /**
+ * Initialize Assets Module
+ * Sets up state, handlers, and renderer for asset management
+ */
+function initializeAssetsModule() {
+    console.log('Assets Module: Initializing...');
+
+    // Initialize state management
+    try {
+        assetState.init();
+        console.log('Assets Module: State management initialized');
+    } catch (error) {
+        console.error('Assets Module: State initialization failed:', error);
+        return false;
+    }
+
+    // Initialize handlers
+    try {
+        assetHandlers.init();
+        console.log('Assets Module: Event handlers initialized');
+    } catch (error) {
+        console.error('Assets Module: Handler initialization failed:', error);
+        return false;
+    }
+
+    // Initialize renderer
+    try {
+        assetRenderer.init();
+        console.log('Assets Module: UI renderer initialized');
+    } catch (error) {
+        console.error('Assets Module: Renderer initialization failed:', error);
+        return false;
+    }
+
+    // Subscribe to asset changes for activity logging
+    assetState.on('assetAdded', ({ asset }) => {
+        addActivityLogEntry(`Asset hinzugefügt: ${asset.name}`, 'success');
+        addLogEntry(`Asset added: ${asset.name} (${asset.id})`, 'success');
+    });
+
+    assetState.on('assetUpdated', ({ asset }) => {
+        addActivityLogEntry(`Asset aktualisiert: ${asset?.name || 'Unknown'}`, 'info');
+        addLogEntry(`Asset updated: ${asset?.name || 'Unknown'}`, 'info');
+    });
+
+    assetState.on('assetDeleted', ({ assetId }) => {
+        addActivityLogEntry('Asset gelöscht', 'warning');
+        addLogEntry(`Asset deleted: ${assetId}`, 'warning');
+    });
+
+    assetState.on('assetsImported', ({ total, successful, failed }) => {
+        addActivityLogEntry(`${successful} Assets importiert`, 'success');
+        addLogEntry(`Assets imported: ${successful}/${total} successful`, 'success');
+    });
+
+    console.log('✓ Assets Module initialized');
+    return true;
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
@@ -1161,6 +1226,9 @@ async function initializeApp() {
 
     // 5f. Initialize Messgerät Module
     initializeMessgeraetModule();
+
+    // 5g. Initialize Assets Module
+    initializeAssetsModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
