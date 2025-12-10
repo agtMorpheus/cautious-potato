@@ -46,6 +46,29 @@ export {
   generateStatusBadgeHTML
 } from './engine/resultFormatter.js';
 
+// UI Integration (Phase 4)
+export {
+  validateAndUpdateUI,
+  scheduleValidation,
+  showIssueDetail,
+  closeIssueDetailModal,
+  handleCircuitFieldChange,
+  updateValidationSummary,
+  validateAllCircuits,
+  registerValidationHandlers,
+  getValidationMetrics,
+  resetValidation
+} from './circuitsUI.js';
+
+// Production Monitoring (Phase 4)
+export {
+  ProductionMonitoring,
+  productionMonitor,
+  withMonitoring,
+  setupHealthCheck,
+  getPerformanceDashboard
+} from './monitoring/productionMonitoring.js';
+
 /**
  * ValidationDebouncer class for real-time validation with debouncing
  * Prevents excessive validation calls during rapid user input

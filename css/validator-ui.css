@@ -1,0 +1,759 @@
+/**
+ * Circuit Measurement Validator - UI Styles
+ * Real-time error indicators, status badges, and issue display
+ * Follows existing Premium Dark Interface design system
+ */
+
+/* ==================== Circuits Table Container ==================== */
+.circuits-container {
+    padding: 24px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-base);
+    margin-bottom: 1.75rem;
+}
+
+.circuits-header {
+    margin-bottom: 24px;
+}
+
+.circuits-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+}
+
+.circuits-header .subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* ==================== Validation Controls ==================== */
+.circuits-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-base);
+    flex-wrap: wrap;
+}
+
+.circuits-controls > button {
+    flex-shrink: 0;
+}
+
+.validation-summary {
+    display: flex;
+    gap: 32px;
+    margin-left: auto;
+}
+
+.summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.summary-stat .stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-stat .stat-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-top: 4px;
+}
+
+.summary-stat .stat-value.valid {
+    color: var(--c-success);
+}
+
+.summary-stat .stat-value.warning {
+    color: var(--c-warning);
+}
+
+.summary-stat .stat-value.critical {
+    color: var(--c-danger);
+}
+
+/* ==================== Circuits Table ==================== */
+.circuits-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-base);
+    backdrop-filter: blur(8px);
+}
+
+.circuits-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.circuits-table thead {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(30, 41, 59, 0.6));
+    border-bottom: 2px solid var(--border-base);
+}
+
+.circuits-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 0.75rem;
+}
+
+.circuits-table tbody tr {
+    border-bottom: 1px solid var(--border-base);
+    transition: all var(--duration-fast) var(--ease-premium);
+}
+
+.circuits-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.03);
+}
+
+.circuits-table tbody tr.circuit-row--valid {
+    border-left: 3px solid var(--c-success);
+}
+
+.circuits-table tbody tr.circuit-row--warning {
+    border-left: 3px solid var(--c-warning);
+}
+
+.circuits-table tbody tr.circuit-row--critical {
+    border-left: 3px solid var(--c-danger);
+}
+
+.circuits-table td {
+    padding: 12px 16px;
+    color: var(--text-main);
+}
+
+/* Column widths */
+.circuits-table .col-select { width: 40px; }
+.circuits-table .col-name { width: 150px; }
+.circuits-table .col-voltage { width: 80px; }
+.circuits-table .col-current { width: 80px; }
+.circuits-table .col-cable { width: 100px; }
+.circuits-table .col-gauge { width: 90px; }
+.circuits-table .col-distance { width: 90px; }
+.circuits-table .col-protection { width: 120px; }
+.circuits-table .col-status { width: 100px; }
+.circuits-table .col-issues { width: 150px; }
+.circuits-table .col-actions { width: 90px; }
+
+/* ==================== Input Validation States ==================== */
+.circuits-table input[data-validation-state="valid"],
+.circuits-table select[data-validation-state="valid"] {
+    border-color: var(--c-success);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+}
+
+.circuits-table input[data-validation-state="warning"],
+.circuits-table select[data-validation-state="warning"] {
+    border-color: var(--c-warning);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2'%3E%3Cpath d='M12 9v4M12 17h.01M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+    box-shadow: 0 0 0 3px var(--c-warning-glow);
+}
+
+.circuits-table input[data-validation-state="error"],
+.circuits-table select[data-validation-state="error"] {
+    border-color: var(--c-danger);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+    box-shadow: 0 0 0 3px var(--c-danger-glow);
+}
+
+/* ==================== Status Badge ==================== */
+.validation-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.validation-status-badge::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.validation-status-badge.status-valid {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--c-success);
+    border: 1px solid var(--c-success);
+}
+
+.validation-status-badge.status-valid::before {
+    background: var(--c-success);
+    box-shadow: 0 0 6px var(--c-success);
+}
+
+.validation-status-badge.status-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--c-warning);
+    border: 1px solid var(--c-warning);
+}
+
+.validation-status-badge.status-warning::before {
+    background: var(--c-warning);
+    box-shadow: 0 0 6px var(--c-warning);
+}
+
+.validation-status-badge.status-critical {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--c-danger);
+    border: 1px solid var(--c-danger);
+}
+
+.validation-status-badge.status-critical::before {
+    background: var(--c-danger);
+    box-shadow: 0 0 6px var(--c-danger);
+}
+
+.validation-status-badge.status-pending {
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
+    border: 1px solid var(--c-slate-500);
+}
+
+.validation-status-badge.status-pending::before {
+    background: var(--c-slate-500);
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+/* ==================== Issue Stack (Non-Conformities) ==================== */
+.issue-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 200px;
+}
+
+.issue-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-standard);
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.issue-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.issue-badge.severity-critical {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--c-danger);
+    border: 1px solid var(--c-danger);
+}
+
+.issue-badge.severity-critical:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.issue-badge.severity-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--c-warning);
+    border: 1px solid var(--c-warning);
+}
+
+.issue-badge.severity-warning:hover {
+    background: rgba(245, 158, 11, 0.3);
+}
+
+.issue-badge.severity-info {
+    background: rgba(6, 182, 212, 0.2);
+    color: var(--c-info);
+    border: 1px solid var(--c-info);
+}
+
+/* Issue count badge */
+.issue-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.issue-count.critical {
+    background: var(--c-danger);
+    color: white;
+}
+
+.issue-count.warning {
+    background: var(--c-warning);
+    color: white;
+}
+
+/* ==================== Issue Tooltip ==================== */
+.issue-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    background: var(--bg-card-elevated);
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.issue-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border-highlight);
+}
+
+.issue-badge:hover .issue-tooltip {
+    opacity: 1;
+}
+
+/* ==================== Issue Detail Modal ==================== */
+.issue-detail-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--duration-normal) var(--ease-premium);
+}
+
+.issue-detail-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.issue-detail-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    transform: scale(0.95) translateY(20px);
+    transition: transform var(--duration-normal) var(--ease-premium);
+}
+
+.issue-detail-modal.active .issue-detail-content {
+    transform: scale(1) translateY(0);
+}
+
+.issue-detail-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-base);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.issue-detail-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.issue-detail-header .issue-code {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'SF Mono', monospace;
+}
+
+.issue-detail-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    transition: all var(--duration-fast);
+}
+
+.issue-detail-close:hover {
+    background: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.issue-detail-body {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(85vh - 150px);
+}
+
+.issue-section {
+    margin-bottom: 20px;
+}
+
+.issue-section:last-child {
+    margin-bottom: 0;
+}
+
+.issue-section h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.issue-section p,
+.issue-section .value {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+.issue-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.issue-metric {
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-base);
+}
+
+.issue-metric .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.issue-metric .value {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.issue-metric .value.actual {
+    color: var(--c-danger);
+}
+
+.issue-metric .value.limit {
+    color: var(--c-success);
+}
+
+.issue-remedy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.issue-remedy-list li {
+    position: relative;
+    padding: 10px 16px 10px 32px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+    border-left: 3px solid var(--c-brand-500);
+}
+
+.issue-remedy-list li::before {
+    content: counter(list-item);
+    counter-increment: list-item;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--c-brand-500);
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 50%;
+}
+
+.issue-remedy-list {
+    counter-reset: list-item;
+}
+
+.issue-reference {
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    color: var(--c-brand-400);
+    padding: 8px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ==================== Circuit Form ==================== */
+.circuit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.circuit-form fieldset {
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin: 0;
+}
+
+.circuit-form legend {
+    padding: 0 12px;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.circuit-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.circuit-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.circuit-form .form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.circuit-form .form-group label .required-icon {
+    color: var(--c-danger);
+}
+
+.circuit-form .form-group label .hint {
+    font-weight: 400;
+    color: var(--text-dim);
+    font-size: 11px;
+}
+
+.circuit-form .form-group small {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+.circuit-form input,
+.circuit-form select {
+    padding: 10px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: 14px;
+    transition: all var(--duration-fast);
+}
+
+.circuit-form input:focus,
+.circuit-form select:focus {
+    outline: none;
+    border-color: var(--c-brand-500);
+    box-shadow: 0 0 0 3px var(--c-brand-glow);
+}
+
+.circuit-form .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-base);
+}
+
+/* ==================== Loading/Validation Progress ==================== */
+.validation-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.validation-loading .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-highlight);
+    border-top-color: var(--c-brand-500);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== Action Buttons in Table ==================== */
+.circuit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.circuit-actions button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    transition: all var(--duration-fast);
+    font-size: 16px;
+}
+
+.circuit-actions button:hover {
+    background: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.circuit-actions button.btn-edit:hover {
+    color: var(--c-brand-500);
+}
+
+.circuit-actions button.btn-delete:hover {
+    color: var(--c-danger);
+}
+
+/* ==================== Non-Conformity Summary Panel ==================== */
+.nc-summary-panel {
+    padding: 20px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-base);
+    margin-top: 24px;
+}
+
+.nc-summary-panel h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.nc-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.nc-summary-card {
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border-left: 4px solid transparent;
+}
+
+.nc-summary-card.critical {
+    border-left-color: var(--c-danger);
+}
+
+.nc-summary-card.warning {
+    border-left-color: var(--c-warning);
+}
+
+.nc-summary-card .nc-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.nc-summary-card .nc-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* ==================== Responsive Adjustments ==================== */
+@media (max-width: 1024px) {
+    .circuits-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .validation-summary {
+        margin-left: 0;
+        justify-content: space-around;
+    }
+    
+    .issue-comparison {
+        grid-template-columns: 1fr;
+    }
+}
