@@ -47,6 +47,16 @@ import {
     importContractsFromJson
 } from './contracts/syncService.js';
 
+// HR Module imports (Phase 5)
+import { hrIntegration } from './modules/hr/hrIntegration.js';
+import {
+    getHrState,
+    subscribeHr,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee
+} from './modules/hr/hrState.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -57,6 +67,7 @@ const VIEW_CONFIG = {
     export: { title: 'Export', subtitle: 'Fertige Abrechnung herunterladen' },
     protokoll: { title: 'Protokoll', subtitle: 'VDE 0100 Prüfprotokoll erstellen und exportieren' },
     contracts: { title: 'Contract Manager', subtitle: 'Verträge importieren und verwalten' },
+    hr: { title: 'HR Management', subtitle: 'Employees, attendance, schedules, and vacation' },
     templates: { title: 'Templates', subtitle: 'Excel-Vorlagen verwalten' },
     settings: { title: 'Settings', subtitle: 'Anwendungseinstellungen konfigurieren' },
     logs: { title: 'Logs', subtitle: 'Aktivitäts- und Systemprotokoll' },
@@ -420,6 +431,374 @@ function setupProtokollExportHandlers() {
 }
 
 /**
+ * Initialize HR Module (Phase 5)
+ * Sets up HR dashboard with tab navigation and CRUD operations
+ */
+function initializeHRModule() {
+    console.log('HR Module: Initializing...');
+
+    // Initialize HR tab navigation within the HR view
+    const hrNavBtns = document.querySelectorAll('[data-hr-tab]');
+    hrNavBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabName = e.currentTarget.dataset.hrTab;
+            switchHRTab(tabName);
+        });
+    });
+
+    // Subscribe to HR state changes
+    subscribeHr((state) => {
+        updateHRDashboardStats(state);
+    });
+
+    // Initialize HR event handlers
+    initializeHREventHandlers();
+
+    // Initial render
+    updateHRDashboardStats(getHrState());
+
+    console.log('✓ HR Module initialized');
+    return true;
+}
+
+/**
+ * Switch HR tab within the HR view
+ */
+function switchHRTab(tabName) {
+    // Update active nav button
+    document.querySelectorAll('[data-hr-tab]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.hrTab === tabName);
+    });
+
+    // Update tab visibility
+    document.querySelectorAll('#hr-tab-content .hr-tab').forEach(tab => {
+        tab.classList.toggle('hr-tab--active', tab.id === `hr-${tabName}-tab`);
+    });
+}
+
+/**
+ * Update HR dashboard statistics
+ */
+function updateHRDashboardStats(state) {
+    const totalEl = document.getElementById('hr-total-employees');
+    const activeEl = document.getElementById('hr-active-employees');
+    const deptsEl = document.getElementById('hr-departments');
+    const pendingEl = document.getElementById('hr-pending-requests');
+
+    if (totalEl) {
+        totalEl.textContent = state.employees?.length || 0;
+    }
+    if (activeEl) {
+        const activeCount = (state.employees || []).filter(e => 
+            e.employmentStatus === 'active' && !e.archived
+        ).length;
+        activeEl.textContent = activeCount;
+    }
+    if (deptsEl) {
+        const depts = new Set((state.employees || []).map(e => e.department).filter(Boolean));
+        deptsEl.textContent = depts.size;
+    }
+    if (pendingEl) {
+        pendingEl.textContent = state.metadata?.pendingApprovals || 0;
+    }
+}
+
+/**
+ * Escape HTML to prevent XSS attacks
+ */
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/**
+ * Initialize HR event handlers for the embedded HR dashboard
+ */
+function initializeHREventHandlers() {
+    // Add employee button - opens a simple modal form
+    const addEmployeeBtn = document.getElementById('hr-add-employee-btn');
+    if (addEmployeeBtn) {
+        addEmployeeBtn.addEventListener('click', () => {
+            showHREmployeeForm();
+        });
+    }
+
+    // Record attendance button
+    const recordAttendanceBtn = document.getElementById('hr-record-attendance-btn');
+    if (recordAttendanceBtn) {
+        recordAttendanceBtn.addEventListener('click', () => {
+            addActivityLogEntry('Full attendance features available in HR Dashboard', 'info');
+        });
+    }
+
+    // Create schedule button
+    const createScheduleBtn = document.getElementById('hr-create-schedule-btn');
+    if (createScheduleBtn) {
+        createScheduleBtn.addEventListener('click', () => {
+            addActivityLogEntry('Full schedule features available in HR Dashboard', 'info');
+        });
+    }
+
+    // Request vacation button
+    const requestVacationBtn = document.getElementById('hr-request-vacation-btn');
+    if (requestVacationBtn) {
+        requestVacationBtn.addEventListener('click', () => {
+            addActivityLogEntry('Full vacation features available in HR Dashboard', 'info');
+        });
+    }
+
+    // Search and filter handlers
+    const searchInput = document.getElementById('hr-employee-search');
+    const deptFilter = document.getElementById('hr-department-filter');
+    const statusFilter = document.getElementById('hr-status-filter');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => renderHREmployeeList());
+    }
+    if (deptFilter) {
+        deptFilter.addEventListener('change', () => renderHREmployeeList());
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => renderHREmployeeList());
+    }
+
+    // Event delegation for employee actions
+    document.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-hr-action="edit"]');
+        const deleteBtn = e.target.closest('[data-hr-action="delete"]');
+        
+        if (editBtn) {
+            const employeeId = editBtn.dataset.hrEmployeeId;
+            showHREmployeeForm(employeeId);
+        }
+        if (deleteBtn) {
+            const employeeId = deleteBtn.dataset.hrEmployeeId;
+            if (confirm('Are you sure you want to delete this employee?')) {
+                try {
+                    deleteEmployee(employeeId);
+                    addActivityLogEntry('Employee deleted successfully', 'success');
+                    renderHREmployeeList();
+                } catch (error) {
+                    addActivityLogEntry(`Error: ${error.message}`, 'error');
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Render HR employee list with proper HTML escaping
+ */
+function renderHREmployeeList() {
+    const container = document.getElementById('hr-employee-list');
+    if (!container) return;
+
+    const state = getHrState();
+    let employees = state.employees || [];
+
+    // Apply filters
+    const searchTerm = document.getElementById('hr-employee-search')?.value?.toLowerCase() || '';
+    const deptFilter = document.getElementById('hr-department-filter')?.value || '';
+    const statusFilter = document.getElementById('hr-status-filter')?.value || '';
+
+    if (searchTerm) {
+        employees = employees.filter(e => 
+            `${e.firstName} ${e.lastName}`.toLowerCase().includes(searchTerm) ||
+            e.email?.toLowerCase().includes(searchTerm) ||
+            e.id?.toLowerCase().includes(searchTerm)
+        );
+    }
+    if (deptFilter) {
+        employees = employees.filter(e => e.department === deptFilter);
+    }
+    if (statusFilter) {
+        employees = employees.filter(e => e.employmentStatus === statusFilter);
+    }
+
+    // Filter out archived
+    employees = employees.filter(e => !e.archived);
+
+    if (employees.length === 0) {
+        container.innerHTML = `
+            <div class="hr-empty-state">
+                <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <p class="hr-empty-title">No employees found</p>
+                <p class="hr-empty-text">Add your first employee to get started</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Render employee table with escaped HTML
+    const tableRows = employees.map(emp => {
+        const firstName = escapeHtml(emp.firstName || '');
+        const lastName = escapeHtml(emp.lastName || '');
+        const email = escapeHtml(emp.email || '');
+        const department = escapeHtml(emp.department || '-');
+        const position = escapeHtml(emp.position || '-');
+        const status = escapeHtml(emp.employmentStatus || 'active');
+        const initials = `${(emp.firstName || '')[0] || ''}${(emp.lastName || '')[0] || ''}`;
+        const empId = escapeHtml(emp.id || '');
+
+        return `
+            <tr>
+                <td>
+                    <div class="hr-employee-name">
+                        <div class="hr-employee-avatar">${escapeHtml(initials)}</div>
+                        <div>
+                            <div>${firstName} ${lastName}</div>
+                            <span class="hr-employee-email">${email}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>${department}</td>
+                <td>${position}</td>
+                <td><span class="hr-status-badge hr-status-${status}">${status}</span></td>
+                <td>
+                    <div class="hr-action-buttons">
+                        <button class="hr-btn-icon" title="Edit" data-hr-action="edit" data-hr-employee-id="${empId}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                        <button class="hr-btn-icon hr-btn-danger" title="Delete" data-hr-action="delete" data-hr-employee-id="${empId}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <table class="hr-data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+    `;
+}
+
+/**
+ * Show HR employee form modal for add/edit
+ */
+function showHREmployeeForm(employeeId = null) {
+    const state = getHrState();
+    const employee = employeeId ? state.employees.find(e => e.id === employeeId) : null;
+    const title = employee ? 'Edit Employee' : 'Add New Employee';
+
+    // Create modal HTML
+    const modalHtml = `
+        <div id="hr-employee-modal" class="hr-modal" role="dialog" aria-labelledby="hr-modal-title">
+            <div class="hr-modal__overlay"></div>
+            <div class="hr-modal__content">
+                <div class="hr-modal__header">
+                    <h3 id="hr-modal-title">${escapeHtml(title)}</h3>
+                    <button class="hr-modal__close" aria-label="Close">&times;</button>
+                </div>
+                <form id="hr-employee-form" class="hr-form">
+                    <div class="hr-form-row">
+                        <div class="hr-form-group">
+                            <label for="hr-emp-firstname">First Name *</label>
+                            <input type="text" id="hr-emp-firstname" name="firstName" required value="${escapeHtml(employee?.firstName || '')}">
+                        </div>
+                        <div class="hr-form-group">
+                            <label for="hr-emp-lastname">Last Name *</label>
+                            <input type="text" id="hr-emp-lastname" name="lastName" required value="${escapeHtml(employee?.lastName || '')}">
+                        </div>
+                    </div>
+                    <div class="hr-form-group">
+                        <label for="hr-emp-email">Email *</label>
+                        <input type="email" id="hr-emp-email" name="email" required value="${escapeHtml(employee?.email || '')}">
+                    </div>
+                    <div class="hr-form-row">
+                        <div class="hr-form-group">
+                            <label for="hr-emp-department">Department *</label>
+                            <select id="hr-emp-department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Engineering" ${employee?.department === 'Engineering' ? 'selected' : ''}>Engineering</option>
+                                <option value="Sales" ${employee?.department === 'Sales' ? 'selected' : ''}>Sales</option>
+                                <option value="Marketing" ${employee?.department === 'Marketing' ? 'selected' : ''}>Marketing</option>
+                                <option value="Human Resources" ${employee?.department === 'Human Resources' ? 'selected' : ''}>Human Resources</option>
+                                <option value="Finance" ${employee?.department === 'Finance' ? 'selected' : ''}>Finance</option>
+                            </select>
+                        </div>
+                        <div class="hr-form-group">
+                            <label for="hr-emp-position">Position</label>
+                            <input type="text" id="hr-emp-position" name="position" value="${escapeHtml(employee?.position || 'Employee')}">
+                        </div>
+                    </div>
+                    <div class="hr-form-actions">
+                        <button type="button" class="hr-btn hr-btn-secondary" data-action="cancel">Cancel</button>
+                        <button type="submit" class="hr-btn hr-btn-primary">${employee ? 'Update' : 'Add'} Employee</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    // Add modal to DOM
+    const existingModal = document.getElementById('hr-employee-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    const modal = document.getElementById('hr-employee-modal');
+    const form = document.getElementById('hr-employee-form');
+    const closeBtn = modal.querySelector('.hr-modal__close');
+    const cancelBtn = modal.querySelector('[data-action="cancel"]');
+    const overlay = modal.querySelector('.hr-modal__overlay');
+
+    // Close handlers
+    const closeModal = () => modal.remove();
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    // Form submit handler
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            if (employee) {
+                updateEmployee(employeeId, data);
+                addActivityLogEntry('Employee updated successfully', 'success');
+            } else {
+                addEmployee({
+                    ...data,
+                    hoursPerWeek: 40,
+                    startDate: new Date().toISOString().split('T')[0],
+                    employmentStatus: 'active'
+                });
+                addActivityLogEntry('Employee added successfully', 'success');
+            }
+            closeModal();
+            renderHREmployeeList();
+        } catch (error) {
+            addActivityLogEntry(`Error: ${error.message}`, 'error');
+        }
+    });
+}
+
+/**
  * Initialize sync settings functionality (Hybrid Approach - Option 3)
  */
 function initializeSyncSettings() {
@@ -716,6 +1095,9 @@ async function initializeApp() {
 
     // 5d. Initialize Protokoll Module (Phase 4)
     initializeProtokollModule();
+
+    // 5e. Initialize HR Module (Phase 5)
+    initializeHRModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
