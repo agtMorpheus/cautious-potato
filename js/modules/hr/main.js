@@ -11,7 +11,6 @@
 // State Management
 import {
   getHrState,
-  loadHrStateFromStorage,
   subscribeHr,
   setActiveTab,
   setModalState,
@@ -363,7 +362,8 @@ function renderVacationTab() {
         }
       },
       onDateClick: (date) => {
-        console.log('Date clicked:', date);
+        // Store selected date and potentially open a detail view
+        dashboardState.selectedDate = date;
       }
     });
   }
