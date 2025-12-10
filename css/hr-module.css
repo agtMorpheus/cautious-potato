@@ -1,0 +1,1073 @@
+/**
+ * HR Module Styles
+ * 
+ * Styling for HR Management Module components
+ * Design tokens extend the main application styles
+ * 
+ * @version 1.0.0
+ */
+
+/* ==================== HR Module Design Tokens ==================== */
+:root {
+  /* Status Colors */
+  --hr-color-present: #22c55e;      /* Green */
+  --hr-color-absent: #ef4444;       /* Red */
+  --hr-color-vacation: #3b82f6;     /* Blue */
+  --hr-color-sick: #f59e0b;         /* Amber */
+  --hr-color-pending: #8b5cf6;      /* Purple */
+  --hr-color-approved: #10b981;     /* Emerald */
+  --hr-color-rejected: #dc2626;     /* Dark Red */
+  --hr-color-home: #6366f1;         /* Indigo */
+  --hr-color-draft: #64748b;        /* Slate */
+  
+  /* Component Sizing */
+  --hr-calendar-cell-height: 60px;
+  --hr-table-row-height: 48px;
+  --hr-avatar-size: 40px;
+  --hr-avatar-size-large: 80px;
+  
+  /* Spacing */
+  --hr-gap-small: 8px;
+  --hr-gap-medium: 16px;
+  --hr-gap-large: 24px;
+}
+
+/* ==================== HR Layout ==================== */
+.hr-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-large);
+}
+
+.hr-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--hr-gap-large);
+}
+
+/* ==================== HR Cards ==================== */
+.hr-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.hr-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-base);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hr-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.hr-card-body {
+  padding: 1.5rem;
+}
+
+/* ==================== HR Statistics ==================== */
+.hr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--hr-gap-medium);
+  margin-bottom: var(--hr-gap-large);
+}
+
+.hr-stat-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.hr-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.hr-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.hr-stat-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.hr-stat-icon.employees {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--c-brand-500);
+}
+
+.hr-stat-icon.active {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--hr-color-present);
+}
+
+.hr-stat-icon.inactive {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--hr-color-absent);
+}
+
+.hr-stat-icon.departments {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: var(--hr-color-pending);
+}
+
+.hr-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.hr-stat-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Mini stats for summaries */
+.hr-mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+}
+
+.hr-mini-stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.hr-mini-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ==================== HR Tables ==================== */
+.hr-table-container {
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.hr-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.hr-data-table th {
+  background-color: var(--c-slate-800);
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-base);
+  white-space: nowrap;
+}
+
+.hr-data-table th[data-sort] {
+  cursor: pointer;
+}
+
+.hr-data-table th[data-sort]:hover {
+  color: var(--text-main);
+}
+
+.hr-data-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-base);
+  color: var(--text-main);
+}
+
+.hr-data-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.hr-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==================== HR Employee Name Cell ==================== */
+.hr-employee-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hr-employee-avatar {
+  width: var(--hr-avatar-size);
+  height: var(--hr-avatar-size);
+  border-radius: 50%;
+  background-color: var(--c-brand-500);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.hr-employee-avatar-large {
+  width: var(--hr-avatar-size-large);
+  height: var(--hr-avatar-size-large);
+  border-radius: 50%;
+  background-color: var(--c-brand-500);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.hr-employee-email {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ==================== HR Status Badges ==================== */
+.hr-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.hr-status-present, .hr-status-active, .hr-status-approved {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--hr-color-approved);
+}
+
+.hr-status-absent, .hr-status-rejected {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--hr-color-absent);
+}
+
+.hr-status-vacation {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: var(--hr-color-vacation);
+}
+
+.hr-status-sick {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--hr-color-sick);
+}
+
+.hr-status-pending, .hr-status-submitted {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: var(--hr-color-pending);
+}
+
+.hr-status-home {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: var(--hr-color-home);
+}
+
+.hr-status-draft, .hr-status-inactive, .hr-status-default {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: var(--text-muted);
+}
+
+/* ==================== HR Action Buttons ==================== */
+.hr-action-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.hr-btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.hr-btn-icon:hover {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.hr-btn-icon.hr-btn-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--hr-color-absent);
+}
+
+/* HR Buttons */
+.hr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.hr-btn-primary {
+  background-color: var(--c-brand-500);
+  color: white;
+}
+
+.hr-btn-primary:hover {
+  background-color: var(--c-brand-600);
+}
+
+.hr-btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--border-highlight);
+  color: var(--text-main);
+}
+
+.hr-btn-secondary:hover {
+  background-color: var(--bg-surface);
+}
+
+.hr-btn-success {
+  background-color: var(--hr-color-approved);
+  color: white;
+}
+
+.hr-btn-success:hover {
+  background-color: #059669;
+}
+
+.hr-btn-danger {
+  background-color: var(--hr-color-absent);
+  color: white;
+}
+
+.hr-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.hr-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.hr-btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border-highlight);
+  color: var(--text-main);
+}
+
+/* ==================== HR Forms ==================== */
+.hr-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-form-section {
+  border-bottom: 1px solid var(--border-base);
+  padding-bottom: var(--hr-gap-medium);
+}
+
+.hr-form-section:last-of-type {
+  border-bottom: none;
+}
+
+.hr-form-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: var(--hr-gap-medium);
+}
+
+.hr-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--hr-gap-medium);
+}
+
+.hr-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.hr-form-group label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.hr-form-group input,
+.hr-form-group select,
+.hr-form-group textarea {
+  padding: 0.625rem 0.875rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  transition: border-color var(--duration-fast);
+}
+
+.hr-form-group input:focus,
+.hr-form-group select:focus,
+.hr-form-group textarea:focus {
+  outline: none;
+  border-color: var(--c-brand-500);
+  box-shadow: 0 0 0 2px var(--c-brand-glow);
+}
+
+.hr-form-group input:disabled,
+.hr-form-group select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hr-form-actions {
+  display: flex;
+  gap: var(--hr-gap-small);
+  justify-content: flex-end;
+  padding-top: var(--hr-gap-medium);
+  border-top: 1px solid var(--border-base);
+}
+
+/* ==================== HR Empty State ==================== */
+.hr-empty-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.hr-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  color: var(--text-dim);
+}
+
+.hr-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.hr-empty-text {
+  font-size: 0.875rem;
+}
+
+/* ==================== HR Employee Detail ==================== */
+.hr-employee-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-large);
+}
+
+.hr-detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-employee-header-info h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.hr-employee-header-info p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.hr-detail-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--hr-gap-medium);
+}
+
+.hr-detail-section {
+  background-color: var(--bg-surface);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+}
+
+.hr-detail-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.hr-detail-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.hr-detail-list dt {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.hr-detail-list dd {
+  color: var(--text-main);
+  font-size: 0.875rem;
+}
+
+/* ==================== HR Attendance ==================== */
+.hr-attendance-daily {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hr-date-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hr-date-input {
+  padding: 0.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+}
+
+.hr-attendance-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--hr-gap-small);
+}
+
+.hr-attendance-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ==================== HR Calendar ==================== */
+.hr-calendar-grid,
+.hr-vacation-calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hr-calendar-weekdays,
+.hr-vacation-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+}
+
+.hr-calendar-days,
+.hr-vacation-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.hr-calendar-cell,
+.hr-vacation-cell {
+  min-height: var(--hr-calendar-cell-height);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.hr-calendar-cell:hover,
+.hr-vacation-cell:hover {
+  background-color: var(--c-slate-700);
+}
+
+.hr-calendar-empty,
+.hr-vacation-empty {
+  background-color: transparent;
+  cursor: default;
+}
+
+.hr-calendar-empty:hover,
+.hr-vacation-empty:hover {
+  background-color: transparent;
+}
+
+.hr-calendar-day,
+.hr-vacation-day-num {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.hr-calendar-weekend,
+.hr-vacation-weekend {
+  opacity: 0.6;
+}
+
+.hr-calendar-has-record,
+.hr-vacation-has-data {
+  border-left: 3px solid var(--c-brand-500);
+}
+
+.hr-calendar-legend,
+.hr-vacation-calendar-footer {
+  display: flex;
+  gap: 1rem;
+  padding-top: var(--hr-gap-medium);
+  flex-wrap: wrap;
+}
+
+.hr-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hr-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* ==================== HR Schedule Grid ==================== */
+.hr-schedule-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hr-week-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hr-week-label {
+  font-weight: 600;
+  min-width: 200px;
+  text-align: center;
+}
+
+.hr-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hr-schedule-table th,
+.hr-schedule-table td {
+  border: 1px solid var(--border-base);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.hr-schedule-employee-col {
+  width: 200px;
+  text-align: left !important;
+}
+
+.hr-schedule-employee-cell {
+  text-align: left !important;
+}
+
+.hr-schedule-day-col {
+  width: 80px;
+}
+
+.hr-schedule-day-name {
+  font-weight: 600;
+  display: block;
+}
+
+.hr-schedule-day-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hr-schedule-weekend {
+  background-color: rgba(100, 116, 139, 0.1);
+}
+
+.hr-schedule-day-cell {
+  vertical-align: middle;
+}
+
+.hr-schedule-filled {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.hr-schedule-hours {
+  font-weight: 500;
+}
+
+.hr-schedule-actual {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.hr-schedule-total-col {
+  width: 100px;
+}
+
+.hr-schedule-points {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+/* Schedule Form */
+.hr-schedule-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--hr-gap-medium);
+}
+
+.hr-schedule-days-editor {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.hr-schedule-day-editor {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hr-schedule-day-editor.hr-schedule-weekend {
+  opacity: 0.7;
+}
+
+.hr-schedule-day-header {
+  text-align: center;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-base);
+}
+
+.hr-schedule-day-points {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.hr-schedule-totals {
+  display: flex;
+  gap: var(--hr-gap-large);
+  padding: 1rem;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+}
+
+.hr-schedule-total-item {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.hr-total-label {
+  color: var(--text-muted);
+}
+
+.hr-total-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ==================== HR Vacation ==================== */
+.hr-vacation-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--hr-gap-medium);
+}
+
+.hr-vacation-indicators {
+  display: flex;
+  gap: 2px;
+  margin-top: 0.25rem;
+}
+
+.hr-vacation-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--hr-color-vacation);
+}
+
+.hr-vacation-more {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+/* Vacation Balance */
+.hr-vacation-balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-balance-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hr-gap-small);
+}
+
+.hr-balance-card {
+  background-color: var(--bg-surface);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.hr-balance-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: block;
+}
+
+.hr-balance-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hr-balance-used .hr-balance-value { color: var(--hr-color-sick); }
+.hr-balance-pending .hr-balance-value { color: var(--hr-color-pending); }
+.hr-balance-remaining .hr-balance-value { color: var(--hr-color-approved); }
+
+.hr-balance-bar {
+  height: 8px;
+  background-color: var(--bg-surface);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.hr-balance-bar-used {
+  background-color: var(--hr-color-sick);
+}
+
+.hr-balance-bar-pending {
+  background-color: var(--hr-color-pending);
+}
+
+/* Vacation Approvals */
+.hr-vacation-approval-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: var(--hr-gap-small);
+}
+
+.hr-approval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hr-approval-employee {
+  font-weight: 600;
+}
+
+.hr-approval-dates {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.hr-vacation-duration {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.hr-approval-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Team Coverage */
+.hr-team-coverage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-coverage-period {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.hr-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.hr-coverage-day {
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+.hr-coverage-good {
+  background-color: rgba(34, 197, 94, 0.2);
+}
+
+.hr-coverage-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+.hr-coverage-critical {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.hr-coverage-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hr-coverage-count {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* ==================== HR Pending Approvals ==================== */
+.hr-pending-approvals,
+.hr-vacation-approvals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-medium);
+}
+
+.hr-approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-gap-small);
+}
+
+.hr-approval-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hr-approval-week {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.hr-approval-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.hr-approval-submitted {
+  color: var(--text-muted);
+}
+
+/* ==================== Responsive Adjustments ==================== */
+@media (max-width: 768px) {
+  .hr-schedule-days-editor {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .hr-balance-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .hr-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .hr-detail-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hr-schedule-days-editor {
+    grid-template-columns: 1fr;
+  }
+  
+  .hr-balance-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .hr-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
