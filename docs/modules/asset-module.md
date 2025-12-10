@@ -16,6 +16,80 @@ The **Distribution Board Asset Management Module** is a comprehensive system des
 
 ---
 
+## 1.1 Assets Manager: The Source of Truth
+
+The **Assets Manager** serves as the central **source of truth** for all asset-related data in the system. It is the authoritative module that owns and manages the complete lifecycle of assets and their associated components.
+
+### Core Responsibilities
+
+The Assets Manager is responsible for managing the following asset-related components:
+
+| Component | Description | Relationship to Asset |
+|---|---|---|
+| **Circuits** | Electrical circuits associated with the asset (Stromkreise) | One asset can have multiple circuits |
+| **Contracts** | Service contracts, maintenance agreements, and warranties | Linked via asset ID or location |
+| **Documents** | Technical documentation, manuals, certificates, and compliance records | Attached to asset records |
+| **Pictures** | Photos of assets, installation images, and condition reports | Referenced by asset ID |
+| **Protocols** | Inspection protocols (Prüfprotokolle), maintenance logs, and test results | Associated via asset or circuit reference |
+
+### Source of Truth Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     ASSETS MANAGER                              │
+│                  (Source of Truth)                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────┐  ┌───────────┐  ┌───────────┐  ┌──────────────┐  │
+│  │ Circuits │  │ Contracts │  │ Documents │  │   Pictures   │  │
+│  └────┬─────┘  └─────┬─────┘  └─────┬─────┘  └──────┬───────┘  │
+│       │              │              │               │          │
+│       └──────────────┴──────────────┴───────────────┘          │
+│                              │                                  │
+│                        ┌─────┴─────┐                           │
+│                        │ Protocols │                           │
+│                        └───────────┘                           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Data Integrity Principles
+
+1. **Single Source of Truth** - All asset data originates from and is validated by the Assets Manager
+2. **Referential Integrity** - Related components (circuits, contracts, etc.) must reference valid assets
+3. **Cascading Updates** - Changes to asset records propagate to all related components
+4. **Audit Trail** - All modifications are tracked with timestamps and user information
+5. **Data Consistency** - Cross-module queries always return consistent, up-to-date information
+
+### Asset-Component Relationships
+
+```javascript
+// Asset with related components
+{
+  id: "E03150AP17000000001",
+  name: "LVUM-17",
+  // ... core asset fields ...
+  
+  // Related components (managed by Assets Manager)
+  circuits: ["C001", "C002", "C003"],           // Circuit IDs
+  contracts: ["CONTRACT-2025-001"],              // Contract references
+  documents: ["DOC-MANUAL-001", "DOC-CERT-002"], // Document IDs
+  pictures: ["PIC-001", "PIC-002"],              // Picture references
+  protocols: ["PROT-2025-001", "PROT-2025-002"] // Protocol IDs
+}
+```
+
+### Integration with Other Modules
+
+The Assets Manager provides APIs for other modules to query and update asset-related data:
+
+- **Contract Manager** → queries assets to link contracts
+- **Protocol Module** → references assets and circuits for inspection reports
+- **Document Management** → attaches files to asset records
+- **Reporting Module** → aggregates data from all components via Assets Manager
+
+---
+
 ## 2. System Architecture
 
 ### 2.1 Module Structure
@@ -94,6 +168,161 @@ asset-management/
 | Hauptbuchkonto | generalLedgerAccount | String | Optional |
 | Werk | plant | String | Required |
 | VASS-Schlüssel | vassKey | String | Optional |
+
+### 3.3 Managed Component Data Models
+
+The Assets Manager manages the following component data structures:
+
+#### 3.3.1 Circuit Record Structure
+
+```javascript
+{
+  id: "C001",                              // Unique circuit identifier
+  assetId: "E03150AP17000000001",          // Parent asset reference
+  circuitNumber: "F1",                     // Circuit designation (e.g., F1, F2)
+  description: "Beleuchtung Büro 1.OG",    // Circuit description
+  type: "LIGHTING",                        // Type: LIGHTING, POWER, SOCKET, MOTOR
+  ratedCurrent: 16,                        // Rated current in Amperes
+  protectionDevice: "MCB B16",             // Protection device type
+  cableType: "NYM-J 3x1.5",               // Cable specification
+  length: 25.5,                            // Cable length in meters
+  installationDate: "2024-03-15",          // Installation date
+  lastInspectionDate: "2025-01-10",        // Last inspection date
+  status: "ACTIVE",                        // Status: ACTIVE, INACTIVE, FAULT
+  createdAt: "2025-12-10T14:30:00Z",
+  lastUpdated: "2025-12-10T14:30:00Z"
+}
+```
+
+#### 3.3.2 Contract Record Structure
+
+```javascript
+{
+  id: "CONTRACT-2025-001",                 // Unique contract identifier
+  assetId: "E03150AP17000000001",          // Linked asset reference
+  contractNumber: "SVC-2025-1406",         // External contract number
+  type: "MAINTENANCE",                     // Type: MAINTENANCE, WARRANTY, SERVICE
+  provider: "Elektro Service GmbH",        // Service provider name
+  startDate: "2025-01-01",                 // Contract start date
+  endDate: "2025-12-31",                   // Contract end date
+  value: 12500.00,                         // Contract value in EUR
+  currency: "EUR",                         // Currency code
+  status: "ACTIVE",                        // Status: ACTIVE, EXPIRED, PENDING
+  renewalType: "AUTO",                     // AUTO, MANUAL, NONE
+  notes: "Annual maintenance agreement",
+  createdAt: "2025-12-10T14:30:00Z",
+  lastUpdated: "2025-12-10T14:30:00Z"
+}
+```
+
+#### 3.3.3 Document Record Structure
+
+```javascript
+{
+  id: "DOC-MANUAL-001",                    // Unique document identifier
+  assetId: "E03150AP17000000001",          // Linked asset reference
+  title: "Installation Manual LVUM-17",    // Document title
+  type: "MANUAL",                          // Type: MANUAL, CERTIFICATE, DATASHEET, REPORT
+  fileName: "LVUM-17_Manual_DE.pdf",       // Original file name
+  fileSize: 2458624,                       // File size in bytes
+  mimeType: "application/pdf",             // MIME type
+  storagePath: "/documents/assets/E03150AP17000000001/",
+  version: "2.1",                          // Document version
+  language: "DE",                          // Language code
+  validFrom: "2024-01-01",                 // Valid from date
+  validUntil: null,                        // Valid until (null = no expiry)
+  uploadedBy: "admin",                     // Uploaded by user
+  createdAt: "2025-12-10T14:30:00Z",
+  lastUpdated: "2025-12-10T14:30:00Z"
+}
+```
+
+#### 3.3.4 Picture Record Structure
+
+```javascript
+{
+  id: "PIC-001",                           // Unique picture identifier
+  assetId: "E03150AP17000000001",          // Linked asset reference
+  title: "Front View LVUM-17",             // Picture title
+  description: "Front panel view",         // Description
+  type: "INSTALLATION",                    // Type: INSTALLATION, NAMEPLATE, DAMAGE, INSPECTION
+  fileName: "LVUM-17_front_001.jpg",       // Original file name
+  fileSize: 1245678,                       // File size in bytes
+  mimeType: "image/jpeg",                  // MIME type
+  storagePath: "/pictures/assets/E03150AP17000000001/",
+  width: 1920,                             // Image width in pixels
+  height: 1080,                            // Image height in pixels
+  thumbnailPath: "/pictures/thumbnails/",  // Thumbnail storage path
+  takenDate: "2025-01-10",                 // Date photo was taken
+  takenBy: "inspector1",                   // Photographer/user
+  gpsCoordinates: null,                    // Optional GPS data
+  createdAt: "2025-12-10T14:30:00Z",
+  lastUpdated: "2025-12-10T14:30:00Z"
+}
+```
+
+#### 3.3.5 Protocol Record Structure
+
+```javascript
+{
+  id: "PROT-2025-001",                     // Unique protocol identifier
+  assetId: "E03150AP17000000001",          // Linked asset reference
+  circuitIds: ["C001", "C002"],            // Related circuit references
+  protocolNumber: "PP-2025-0142",          // External protocol number
+  type: "VDE0100",                         // Type: VDE0100, DGUV_V3, MAINTENANCE
+  inspectionDate: "2025-01-10",            // Inspection date
+  inspectorName: "Max Mustermann",         // Inspector name
+  inspectorId: "INSP-001",                 // Inspector ID
+  result: "PASSED",                        // Result: PASSED, FAILED, CONDITIONAL
+  nextInspectionDate: "2028-01-10",        // Next scheduled inspection
+  findings: [],                            // Array of findings/defects
+  measurements: {                          // Measurement data
+    insulationResistance: 250,             // MΩ
+    loopImpedance: 0.45,                   // Ω
+    rcdTripTime: 25                        // ms
+  },
+  attachedDocuments: ["DOC-CERT-002"],     // Related document IDs
+  status: "COMPLETED",                     // Status: DRAFT, COMPLETED, ARCHIVED
+  createdAt: "2025-12-10T14:30:00Z",
+  lastUpdated: "2025-12-10T14:30:00Z"
+}
+```
+
+### 3.4 Component Management API
+
+The Assets Manager provides unified APIs for managing all components:
+
+```javascript
+// Circuit Management
+state.addCircuit(assetId, circuit)
+state.getCircuitsByAsset(assetId)
+state.updateCircuit(circuitId, updates)
+state.deleteCircuit(circuitId)
+
+// Contract Management
+state.addContract(assetId, contract)
+state.getContractsByAsset(assetId)
+state.getActiveContracts(assetId)
+state.updateContract(contractId, updates)
+
+// Document Management
+state.addDocument(assetId, document)
+state.getDocumentsByAsset(assetId)
+state.getDocumentsByType(assetId, type)
+state.updateDocument(documentId, updates)
+
+// Picture Management
+state.addPicture(assetId, picture)
+state.getPicturesByAsset(assetId)
+state.getPicturesByType(assetId, type)
+state.updatePicture(pictureId, updates)
+
+// Protocol Management
+state.addProtocol(assetId, protocol)
+state.getProtocolsByAsset(assetId)
+state.getLatestProtocol(assetId)
+state.updateProtocol(protocolId, updates)
+```
 
 ---
 
