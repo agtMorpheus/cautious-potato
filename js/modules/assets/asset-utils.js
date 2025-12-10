@@ -125,15 +125,21 @@ export function inferAssetType(name) {
 // ============================================
 
 /**
- * Read Excel file and extract asset data
- * @param {File} file - Excel file
- * @returns {Promise<Array>} Array of raw row objects
+ * Read Excel file and extract asset data.
+ * 
+ * DEPENDENCY: This function requires the SheetJS (XLSX) library to be loaded
+ * globally. In the main application, this is loaded via CDN in index.html:
+ * <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+ * 
+ * @param {File} file - Excel file (.xlsx or .xls)
+ * @returns {Promise<Array>} Array of raw row objects parsed from the first sheet
+ * @throws {Error} If XLSX library is not loaded or file parsing fails
  */
 export async function readAssetExcel(file) {
   return new Promise((resolve, reject) => {
-    // Check if XLSX is available
+    // Check if XLSX is available (global dependency loaded via CDN)
     if (typeof XLSX === 'undefined') {
-      reject(new Error('SheetJS library (XLSX) is not loaded'));
+      reject(new Error('SheetJS library (XLSX) is not loaded. Ensure the library is included in index.html'));
       return;
     }
     

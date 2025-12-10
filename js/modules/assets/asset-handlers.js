@@ -319,7 +319,7 @@ export async function handleFileImport(event) {
     // Add valid assets to state
     state.setImportState({ progress: 80 });
     const result = state.addAssets(valid);
-    state.save();
+    state.forceSave();
 
     // Also add to IndexedDB
     if (valid.length > 0) {

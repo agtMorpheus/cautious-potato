@@ -185,21 +185,37 @@ export class AssetDatabase {
     
     return new Promise((resolve, reject) => {
       const results = [];
+      const skipped = [];
       const timestamp = new Date().toISOString();
       
       assets.forEach(asset => {
         const assetWithTimestamp = {
           ...asset,
-          createdAt: timestamp,
+          createdAt: asset.createdAt || timestamp,
           lastUpdated: timestamp
         };
         
-        const request = store.put(assetWithTimestamp);
+        // Use add() to prevent overwriting existing assets
+        // This will fail silently for duplicates (handled by onerror)
+        const request = store.add(assetWithTimestamp);
         request.onsuccess = () => results.push(assetWithTimestamp);
-        request.onerror = () => console.error(`Failed to add ${asset.id}:`, request.error);
+        request.onerror = (e) => {
+          // ConstraintError means duplicate key - skip silently
+          if (e.target.error?.name === 'ConstraintError') {
+            skipped.push(asset.id);
+            e.preventDefault(); // Prevent transaction abort
+          } else {
+            console.error(`Failed to add ${asset.id}:`, e.target.error);
+          }
+        };
       });
       
-      tx.oncomplete = () => resolve(results);
+      tx.oncomplete = () => {
+        if (skipped.length > 0) {
+          console.log(`Skipped ${skipped.length} duplicate assets during import`);
+        }
+        resolve(results);
+      };
       tx.onerror = () => reject(tx.error);
     });
   }
