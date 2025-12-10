@@ -1410,14 +1410,19 @@ function attachDeviceSelectListener() {
       const deviceData = JSON.parse(deviceDataAttr);
       
       // Populate the form fields with device data
+      // Note: In the protokoll form:
+      // - fabrikat = manufacturer/brand (e.g., "Fluke")
+      // - typ = device model/type (e.g., "1654b")
       const fabrikatField = document.querySelector('[data-field="messgeräte.fabrikat"]');
       const typField = document.querySelector('[data-field="messgeräte.typ"]');
       const kalibField = document.querySelector('[data-field="messgeräte.nächsteKalibrierung"]');
       const identField = document.querySelector('[data-field="messgeräte.identNr"]');
 
-      if (fabrikatField && deviceData.name) {
-        fabrikatField.value = deviceData.name;
-        handlers.handleMetadataChange('messgeräte.fabrikat', deviceData.name);
+      // Use fabrikat if available, otherwise fall back to name
+      const fabrikatValue = deviceData.fabrikat || deviceData.name || '';
+      if (fabrikatField && fabrikatValue) {
+        fabrikatField.value = fabrikatValue;
+        handlers.handleMetadataChange('messgeräte.fabrikat', fabrikatValue);
       }
       if (typField && deviceData.type) {
         typField.value = deviceData.type;

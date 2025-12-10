@@ -187,6 +187,7 @@ export function getDevicesForDropdown() {
     label: `${d.name} (${d.type}) - ${d.identNr || 'N/A'}`,
     name: d.name,
     type: d.type,
+    fabrikat: d.fabrikat,
     identNr: d.identNr,
     calibrationDate: d.calibrationDate,
     isExpired: isCalibrationExpired(d.calibrationDate)
