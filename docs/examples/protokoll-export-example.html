@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protokoll Export Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4/dist/exceljs.min.js"></script>
+</head>
+<body>
+    <h1>Protokoll Export Example</h1>
+    
+    <p>This example demonstrates how to use the protokoll export functionality.</p>
+    
+    <button id="export-protokoll">Export Sample Protokoll</button>
+    
+    <div id="status"></div>
+    
+    <script type="module">
+        import { createAndExportProtokoll } from '../js/utils-protokoll-export.js';
+        
+        // Sample protokoll data conforming to the mapping specification
+        const sampleProtokollData = {
+            grunddaten: {
+                protokollNr: 'EDB101120250925',
+                blatt: '1',
+                von: '3',
+                auftraggeber: '1406',
+                auftragsNr: 'A7652345',
+                kunde: 'Volkswagen AG, Werk Wolfsburg',
+                kundeOrt: 'Berliner Ring 2, 38436 Wolfsburg',
+                firma: 'EAW Wolfsburg',
+                firmaOrt: 'Dieselstraße 27, 38446 Wolfsburg',
+                anlage: 'LVUM-Fc34',
+                anlageOrt: 'Halle 3, HG',
+                inv: 'E03150AP17000093243'
+            },
+            
+            pruefenNach: {
+                dinVde0100Gruppe700: false,
+                dinVde01000600: false,
+                dinVde01050100: true,
+                dguvV3: true
+            },
+            
+            pruefungsart: {
+                neuanlage: false,
+                erweiterung: false,
+                aenderung: false,
+                instandsetzung: false,
+                wiederholungspruefung: true
+            },
+            
+            netzinfo: {
+                netz1: '230',
+                netz2: '400',
+                tnCS: true  // TN-C-S network form
+            },
+            
+            besichtigung: {
+                auswahlBetriebsmittel: 'io',
+                trennSchaltgeraete: 'io',
+                brandabschottungen: 'io',
+                gebaeudesystemtechnik: 'io',
+                kabelLeitungen: 'io',
+                kennzeichnung: 'io',
+                kennzeichnungNPE: 'io',
+                leiterverbindungen: 'io',
+                schutzUeberwachung: 'io',
+                basisschutz: 'io',
+                zugaenglichkeit: 'io',
+                schutzpotentialausgleich: 'io',
+                zusOertlPotentialausgleich: null, // Not checked
+                dokumentation: 'io',
+                reinigungSchaltschrank: 'io'
+            },
+            
+            erproben: {
+                funktionspruefung: 'io',
+                rcdSchutzschalter: null, // Not applicable
+                schraubverbindungen: 'io',
+                funktionSchutzeinrichtungen: null,
+                drehrichtungMotoren: null,
+                rechtsdrehfelder: null,
+                gebaeudesystemtechnikTest: null
+            },
+            
+            messen: {
+                durchgaengigkeitPotentialausgleich: true,
+                gebaeudeKonstruktion: true
+            },
+            
+            messgeraete: {
+                fabrikat: 'Fluke',
+                typ: '1654b',
+                naechsteKalibrierung: '01.05.2026',
+                identNr: '4312061'
+            },
+            
+            pruefungsergebnis: {
+                keineMaengel: true,
+                maengelFestgestellt: false
+            },
+            
+            pruefplakette: {
+                ja: true,
+                nein: false
+            },
+            
+            weitereInfo: {
+                naechsterPruefungstermin: 'set./ 2027',
+                datum: '01.02.2026'
+            },
+            
+            measurements: [
+                {
+                    posNr: '1',
+                    nr: '1.1',
+                    zielbezeichnung: 'Hauptverteilung',
+                    kabelTyp: 'NYM-J',
+                    leiterAnzahl: 5,
+                    leiterQuerschnitt: '2.5',
+                    un: 400,
+                    fn: 50,
+                    artCharakteristik: 'B',
+                    inA: 16,
+                    zsOhm: 0.15,
+                    znOhm: 0.12,
+                    ikKA: 2.67,
+                    risoOhneVerbraucher: '>999',
+                    risoMitVerbraucher: '>999',
+                    rpeMaxOhm: 0.08,
+                    inARcd: 30,
+                    iDeltaN: 30,
+                    iMess: 15,
+                    ausloesezeitTA: 28,
+                    ulUmess: 42,
+                    diffStrom: 0
+                },
+                {
+                    posNr: '2',
+                    nr: '1.2',
+                    zielbezeichnung: 'Unterverteilung 1',
+                    kabelTyp: 'NYM-J',
+                    leiterAnzahl: 5,
+                    leiterQuerschnitt: '1.5',
+                    un: 230,
+                    fn: 50,
+                    artCharakteristik: 'B',
+                    inA: 10,
+                    zsOhm: 0.22,
+                    znOhm: 0.18,
+                    ikKA: 1.05,
+                    risoOhneVerbraucher: '>999',
+                    risoMitVerbraucher: '>999',
+                    rpeMaxOhm: 0.12
+                }
+            ]
+        };
+        
+        document.getElementById('export-protokoll').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Exporting protokoll...';
+            
+            try {
+                const result = await createAndExportProtokoll(sampleProtokollData);
+                statusDiv.textContent = `✅ Export successful: ${result.fileName} (${result.fileSize} bytes)`;
+                statusDiv.style.color = 'green';
+            } catch (error) {
+                statusDiv.textContent = `❌ Export failed: ${error.message}`;
+                statusDiv.style.color = 'red';
+                console.error('Export error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

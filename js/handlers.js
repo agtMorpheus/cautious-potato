@@ -21,6 +21,11 @@ import {
 import * as utils from './utils.js';
 import { createAndExportAbrechnungExcelJS } from './utils-exceljs.js';
 import { showCellMapperDialog, applyMapping } from './cell-mapper.js';
+import {
+    createAndExportProtokoll,
+    validateProtokollData,
+    generateProtokollFilename
+} from './utils-protokoll-export.js';
 
 // Store selected file reference (not persisted in state)
 let selectedFile = null;
@@ -423,6 +428,65 @@ export async function handleExportAbrechnung() {
             'Export Error',
             `Failed to export file: ${error.message}`
         );
+    }
+}
+
+/**
+ * Handle protokoll export - creates and exports a protokoll Excel file
+ * @param {Object} protokollData - Complete protokoll data object
+ * @returns {Promise<void>}
+ */
+export async function handleExportProtokoll(protokollData) {
+    if (!protokollData) {
+        showErrorAlert(
+            'No Data',
+            'Please provide protokoll data for export.'
+        );
+        return;
+    }
+    
+    // Validate protokoll data
+    const validation = validateProtokollData(protokollData);
+    if (!validation.valid) {
+        showErrorAlert(
+            'Invalid Data',
+            `Protokoll data validation failed: ${validation.errors.join(', ')}`
+        );
+        return;
+    }
+    
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+        console.warn('Protokoll validation warnings:', validation.warnings);
+    }
+    
+    try {
+        console.log('Starting protokoll export...');
+        
+        // Generate filename
+        const filename = generateProtokollFilename(protokollData.grunddaten);
+        
+        // Create and export protokoll
+        const exportMetadata = await createAndExportProtokoll(protokollData, filename);
+        
+        console.log('Protokoll export successful:', exportMetadata);
+        
+        showSuccessAlert(
+            'Export Successful',
+            `Protokoll exported: ${exportMetadata.fileName}`
+        );
+        
+        return exportMetadata;
+        
+    } catch (error) {
+        console.error('Protokoll export failed:', error);
+        
+        showErrorAlert(
+            'Export Error',
+            `Failed to export protokoll: ${error.message}`
+        );
+        
+        throw error;
     }
 }
 
