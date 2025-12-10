@@ -504,6 +504,171 @@ describe('Protokoll State Management', () => {
       expect(position.leitung.querschnitt).toBe('1.5mm²');
       expect(position.messwerte.riso).toBe('> 500MΩ');
     });
+
+    test('addPosition() includes phaseType with default value mono', () => {
+      const posNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Test Circuit'
+      });
+      
+      const position = state.getPosition(posNr);
+      expect(position.phaseType).toBe('mono');
+    });
+
+    test('addPosition() accepts phaseType values mono, bi, tri', () => {
+      const monoPos = state.addPosition({ stromkreisNr: 'F1', phaseType: 'mono' });
+      const biPos = state.addPosition({ stromkreisNr: 'F2', phaseType: 'bi' });
+      const triPos = state.addPosition({ stromkreisNr: 'F3', phaseType: 'tri' });
+      
+      expect(state.getPosition(monoPos).phaseType).toBe('mono');
+      expect(state.getPosition(biPos).phaseType).toBe('bi');
+      expect(state.getPosition(triPos).phaseType).toBe('tri');
+    });
+
+    test('addPosition() includes parentCircuitId with default null', () => {
+      const posNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Test Circuit'
+      });
+      
+      const position = state.getPosition(posNr);
+      expect(position.parentCircuitId).toBeNull();
+    });
+
+    test('addPosition() accepts parentCircuitId for circuit tree', () => {
+      const parentPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Parent Circuit'
+      });
+      
+      const childPosNr = state.addPosition({
+        stromkreisNr: 'F1.1',
+        zielbezeichnung: 'Child Circuit',
+        parentCircuitId: parentPosNr
+      });
+      
+      const childPosition = state.getPosition(childPosNr);
+      expect(childPosition.parentCircuitId).toBe(parentPosNr);
+    });
+  });
+
+  // ========== CIRCUIT TREE OPERATIONS ==========
+  describe('Circuit Tree Operations', () => {
+    beforeEach(() => {
+      state.init();
+    });
+
+    test('getChildCircuits() returns empty array when no children', () => {
+      const posNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Root Circuit'
+      });
+      
+      const children = state.getChildCircuits(posNr);
+      expect(children).toEqual([]);
+    });
+
+    test('getChildCircuits() returns child circuits', () => {
+      const parentPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Parent Circuit'
+      });
+      
+      state.addPosition({
+        stromkreisNr: 'F1.1',
+        zielbezeichnung: 'Child 1',
+        parentCircuitId: parentPosNr
+      });
+      
+      state.addPosition({
+        stromkreisNr: 'F1.2',
+        zielbezeichnung: 'Child 2',
+        parentCircuitId: parentPosNr
+      });
+      
+      const children = state.getChildCircuits(parentPosNr);
+      expect(children.length).toBe(2);
+      expect(children.map(c => c.stromkreisNr)).toContain('F1.1');
+      expect(children.map(c => c.stromkreisNr)).toContain('F1.2');
+    });
+
+    test('getChildCircuits(null) returns root circuits', () => {
+      const rootPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Root Circuit'
+      });
+      
+      state.addPosition({
+        stromkreisNr: 'F1.1',
+        zielbezeichnung: 'Child Circuit',
+        parentCircuitId: rootPosNr
+      });
+      
+      const rootCircuits = state.getChildCircuits(null);
+      expect(rootCircuits.length).toBe(1);
+      expect(rootCircuits[0].stromkreisNr).toBe('F1');
+    });
+
+    test('getParentCircuit() returns parent circuit', () => {
+      const parentPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Parent Circuit'
+      });
+      
+      const childPosNr = state.addPosition({
+        stromkreisNr: 'F1.1',
+        zielbezeichnung: 'Child Circuit',
+        parentCircuitId: parentPosNr
+      });
+      
+      const parent = state.getParentCircuit(childPosNr);
+      expect(parent).not.toBeNull();
+      expect(parent.stromkreisNr).toBe('F1');
+    });
+
+    test('getParentCircuit() returns null for root circuit', () => {
+      const rootPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Root Circuit'
+      });
+      
+      const parent = state.getParentCircuit(rootPosNr);
+      expect(parent).toBeNull();
+    });
+
+    test('getCircuitAncestry() returns empty array for root circuit', () => {
+      const rootPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Root Circuit'
+      });
+      
+      const ancestry = state.getCircuitAncestry(rootPosNr);
+      expect(ancestry).toEqual([]);
+    });
+
+    test('getCircuitAncestry() returns parent chain for nested circuit', () => {
+      const grandparentPosNr = state.addPosition({
+        stromkreisNr: 'F1',
+        zielbezeichnung: 'Grandparent'
+      });
+      
+      const parentPosNr = state.addPosition({
+        stromkreisNr: 'F1.1',
+        zielbezeichnung: 'Parent',
+        parentCircuitId: grandparentPosNr
+      });
+      
+      const childPosNr = state.addPosition({
+        stromkreisNr: 'F1.1.1',
+        zielbezeichnung: 'Child',
+        parentCircuitId: parentPosNr
+      });
+      
+      const ancestry = state.getCircuitAncestry(childPosNr);
+      expect(ancestry.length).toBe(2);
+      expect(ancestry[0].stromkreisNr).toBe('F1');
+      expect(ancestry[1].stromkreisNr).toBe('F1.1');
+    });
   });
 
   // ========== CONTRACT INTEGRATION ==========
