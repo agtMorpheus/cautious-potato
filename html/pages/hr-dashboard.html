@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Management Dashboard - Booking Backend</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Existing styles -->
+    <link rel="stylesheet" href="../../css/styles.css">
+    <!-- HR module styles -->
+    <link rel="stylesheet" href="../../css/hr-module.css">
+</head>
+<body>
+    <div class="hr-app">
+        <!-- Header Navigation -->
+        <header class="hr-header">
+            <div class="hr-header__container">
+                <h1 class="hr-header__title">HR Management System</h1>
+                <nav class="hr-header__nav">
+                    <button class="hr-nav-btn active" data-tab="employees" title="Manage employees">
+                        <span class="hr-nav-icon">👥</span>
+                        <span class="hr-nav-label">Employees</span>
+                    </button>
+                    <button class="hr-nav-btn" data-tab="attendance" title="Track attendance">
+                        <span class="hr-nav-icon">📋</span>
+                        <span class="hr-nav-label">Attendance</span>
+                    </button>
+                    <button class="hr-nav-btn" data-tab="schedule" title="Manage schedules">
+                        <span class="hr-nav-icon">⏰</span>
+                        <span class="hr-nav-label">Schedule</span>
+                    </button>
+                    <button class="hr-nav-btn" data-tab="vacation" title="Plan vacation">
+                        <span class="hr-nav-icon">🏖️</span>
+                        <span class="hr-nav-label">Vacation</span>
+                    </button>
+                </nav>
+                <div class="hr-header__actions">
+                    <button class="hr-btn hr-btn-secondary" id="sync-btn">Sync</button>
+                    <button class="hr-btn hr-btn-outline" id="export-btn">Export</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="hr-main">
+            <!-- Loading Indicator -->
+            <div id="hr-loading" class="hr-loading hidden">
+                <div class="hr-spinner"></div>
+                <p>Loading...</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div id="hr-error-alert" class="hr-alert hr-alert--error hidden" role="alert">
+                <span class="hr-alert__message"></span>
+                <button class="hr-alert__close" aria-label="Close">&times;</button>
+            </div>
+
+            <!-- Success Alert -->
+            <div id="hr-success-alert" class="hr-alert hr-alert--success hidden" role="alert">
+                <span class="hr-alert__message"></span>
+            </div>
+
+            <!-- Employees Tab -->
+            <section id="employees-tab" class="hr-tab hr-tab--active">
+                <div class="hr-tab__header">
+                    <h2>Employee Management</h2>
+                    <button class="hr-btn hr-btn-primary" id="add-employee-btn">
+                        <span>+ New Employee</span>
+                    </button>
+                </div>
+
+                <!-- Statistics -->
+                <div id="employee-stats-container"></div>
+
+                <!-- Search & Filter Bar -->
+                <div class="hr-filters">
+                    <input 
+                        type="search" 
+                        id="employee-search" 
+                        class="hr-filters__input"
+                        placeholder="Search by name, email, or ID..."
+                        aria-label="Search employees"
+                    >
+                    <select id="department-filter" class="hr-filters__select" aria-label="Filter by department">
+                        <option value="">All Departments</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Finance">Finance</option>
+                    </select>
+                    <select id="status-filter" class="hr-filters__select" aria-label="Filter by status">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Employee List Container -->
+                <div id="employee-list-container">
+                    <!-- Populated by renderer -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="employees-empty" class="hr-empty-state hidden">
+                    <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p class="hr-empty-title">No employees found</p>
+                    <p class="hr-empty-text"><a href="#" id="add-employee-empty">Add the first employee</a></p>
+                </div>
+            </section>
+
+            <!-- Attendance Tab -->
+            <section id="attendance-tab" class="hr-tab">
+                <div class="hr-tab__header">
+                    <h2>Attendance Management</h2>
+                    <button class="hr-btn hr-btn-primary" id="record-attendance-btn">
+                        <span>+ Record Attendance</span>
+                    </button>
+                </div>
+
+                <!-- Date Range Picker -->
+                <div class="hr-filters">
+                    <div class="hr-date-range">
+                        <label>From Date:</label>
+                        <input type="date" id="attendance-start-date" class="hr-filters__input">
+                    </div>
+                    <div class="hr-date-range">
+                        <label>To Date:</label>
+                        <input type="date" id="attendance-end-date" class="hr-filters__input">
+                    </div>
+                    <select id="attendance-employee-filter" class="hr-filters__select">
+                        <option value="">All Employees</option>
+                    </select>
+                    <button class="hr-btn hr-btn-secondary" id="attendance-filter-btn">Apply</button>
+                </div>
+
+                <!-- Attendance Calendar -->
+                <div id="attendance-calendar-container">
+                    <!-- Populated by renderer -->
+                </div>
+
+                <!-- Attendance Statistics -->
+                <div id="attendance-stats-container">
+                    <!-- Populated by renderer -->
+                </div>
+            </section>
+
+            <!-- Schedule Tab -->
+            <section id="schedule-tab" class="hr-tab">
+                <div class="hr-tab__header">
+                    <h2>Weekly Schedule Management</h2>
+                    <button class="hr-btn hr-btn-primary" id="create-schedule-btn">
+                        <span>+ Create Schedule</span>
+                    </button>
+                </div>
+
+                <!-- Week Selector -->
+                <div class="hr-filters">
+                    <select id="schedule-employee-select" class="hr-filters__select">
+                        <option value="">Select Employee</option>
+                    </select>
+                    <div class="hr-week-selector">
+                        <button class="hr-btn hr-btn-outline" id="prev-week-btn">&larr; Previous</button>
+                        <input type="date" id="week-start-date" class="hr-filters__input" placeholder="Week start date">
+                        <button class="hr-btn hr-btn-outline" id="next-week-btn">Next &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Schedule Grid -->
+                <div id="schedule-grid-container">
+                    <!-- Populated by renderer -->
+                </div>
+
+                <!-- Schedule Summary -->
+                <div class="hr-schedule-totals" id="schedule-summary">
+                    <div class="hr-schedule-total-item">
+                        <span class="hr-total-label">Total Hours:</span>
+                        <span class="hr-total-value" id="total-hours">0h</span>
+                    </div>
+                    <div class="hr-schedule-total-item">
+                        <span class="hr-total-label">Total Points:</span>
+                        <span class="hr-total-value" id="total-points">0</span>
+                    </div>
+                    <button class="hr-btn hr-btn-primary" id="submit-schedule-btn">Submit for Approval</button>
+                </div>
+
+                <!-- Pending Approvals -->
+                <div id="pending-approvals-container">
+                    <!-- Populated by renderer -->
+                </div>
+            </section>
+
+            <!-- Vacation Tab -->
+            <section id="vacation-tab" class="hr-tab">
+                <div class="hr-tab__header">
+                    <h2>Vacation Planning</h2>
+                    <button class="hr-btn hr-btn-primary" id="request-vacation-btn">
+                        <span>+ Request Vacation</span>
+                    </button>
+                </div>
+
+                <!-- Vacation Calendar -->
+                <div id="vacation-calendar-container">
+                    <!-- Populated by renderer -->
+                </div>
+
+                <!-- Vacation Requests Section -->
+                <div class="hr-card">
+                    <div class="hr-card-header">
+                        <h3 class="hr-card-title">Vacation Requests</h3>
+                    </div>
+                    <div class="hr-card-body">
+                        <div id="vacation-requests-container">
+                            <!-- Populated by renderer -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vacation Balance -->
+                <div id="vacation-balance-container">
+                    <!-- Populated by renderer -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Employee Modal -->
+    <div id="employee-modal" class="hr-modal hidden" aria-hidden="true" role="dialog">
+        <div class="hr-modal__overlay"></div>
+        <div class="hr-modal__content">
+            <div class="hr-modal__header">
+                <h3 id="employee-modal-title">Add Employee</h3>
+                <button class="hr-modal__close" aria-label="Close">&times;</button>
+            </div>
+            <div id="employee-form-container">
+                <!-- Form populated by renderer -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="attendance-modal" class="hr-modal hidden" aria-hidden="true" role="dialog">
+        <div class="hr-modal__overlay"></div>
+        <div class="hr-modal__content">
+            <div class="hr-modal__header">
+                <h3>Record Attendance</h3>
+                <button class="hr-modal__close" aria-label="Close">&times;</button>
+            </div>
+            <div id="attendance-form-container">
+                <!-- Form populated by renderer -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacation Modal -->
+    <div id="vacation-modal" class="hr-modal hidden" aria-hidden="true" role="dialog">
+        <div class="hr-modal__overlay"></div>
+        <div class="hr-modal__content">
+            <div class="hr-modal__header">
+                <h3>Request Vacation</h3>
+                <button class="hr-modal__close" aria-label="Close">&times;</button>
+            </div>
+            <div id="vacation-form-container">
+                <!-- Form populated by renderer -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="hr-modal hidden" aria-hidden="true" role="dialog">
+        <div class="hr-modal__overlay"></div>
+        <div class="hr-modal__content hr-modal__content--wide">
+            <div class="hr-modal__header">
+                <h3>Edit Schedule</h3>
+                <button class="hr-modal__close" aria-label="Close">&times;</button>
+            </div>
+            <div id="schedule-form-container">
+                <!-- Form populated by renderer -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../../js/modules/hr/main.js"></script>
+</body>
+</html>
