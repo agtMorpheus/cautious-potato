@@ -985,8 +985,12 @@ export function updatePositionRow(posNr, position) {
   // Update row class for child circuits
   row.classList.toggle('child-circuit', hasParent);
   
-  if (cells.length >= 12) {
-    // Pos.Nr. (0), Nr. (1), Zielbezeichnung (2), Phase (3), Leitung/Kabel (4), 
+  // Expected number of columns in the positions table
+  // Pos.Nr., Nr., Zielbezeichnung, Phase, Leitung/Kabel, Un, fn, Überstrom-Schutz, In, Riso, Status, Aktionen
+  const POSITIONS_TABLE_COLUMN_COUNT = 12;
+  
+  if (cells.length >= POSITIONS_TABLE_COLUMN_COUNT) {
+    // Column indices: Pos.Nr. (0), Nr. (1), Zielbezeichnung (2), Phase (3), Leitung/Kabel (4), 
     // Un (5), fn (6), Überstrom-Schutz (7), In (8), Riso (9), Status (10), Aktionen (11)
     cells[1].textContent = position.stromkreisNr || '-';
     cells[2].textContent = position.zielbezeichnung || '-';

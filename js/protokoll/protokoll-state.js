@@ -303,9 +303,17 @@ export function getParentCircuit(posNr) {
  */
 export function getCircuitAncestry(posNr) {
   const ancestry = [];
+  const visited = new Set(); // Track visited circuits to prevent infinite loops
   let current = getPosition(posNr);
   
   while (current && current.parentCircuitId) {
+    // Prevent infinite loop from circular references
+    if (visited.has(current.parentCircuitId)) {
+      console.warn('Circular reference detected in circuit tree:', current.parentCircuitId);
+      break;
+    }
+    visited.add(current.parentCircuitId);
+    
     const parent = getPosition(current.parentCircuitId);
     if (parent) {
       ancestry.unshift(parent);
