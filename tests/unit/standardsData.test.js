@@ -256,7 +256,8 @@ describe('StandardsData', () => {
 
   describe('getNextStandardSize()', () => {
     test('returns next MCB size for given current', () => {
-      expect(lib.getNextStandardSize('MCB', 12)).toBe(13);
+      // MCB sizes: 6, 10, 13, 16, 20, 25, 32, 40, 50, 63, 80, 100
+      expect(lib.getNextStandardSize('MCB', 12)).toBe(13); // 13A is next standard size after 12A
       expect(lib.getNextStandardSize('MCB', 17)).toBe(20);
       expect(lib.getNextStandardSize('MCB', 50)).toBe(50);
     });

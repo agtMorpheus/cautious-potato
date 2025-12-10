@@ -515,6 +515,13 @@
     margin: 0;
 }
 
+.issue-remedy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: remedy-counter;
+}
+
 .issue-remedy-list li {
     position: relative;
     padding: 10px 16px 10px 32px;
@@ -524,11 +531,11 @@
     font-size: 14px;
     color: var(--text-main);
     border-left: 3px solid var(--c-brand-500);
+    counter-increment: remedy-counter;
 }
 
 .issue-remedy-list li::before {
-    content: counter(list-item);
-    counter-increment: list-item;
+    content: counter(remedy-counter);
     position: absolute;
     left: 10px;
     top: 50%;
@@ -543,10 +550,6 @@
     color: var(--c-brand-500);
     background: rgba(59, 130, 246, 0.15);
     border-radius: 50%;
-}
-
-.issue-remedy-list {
-    counter-reset: list-item;
 }
 
 .issue-reference {

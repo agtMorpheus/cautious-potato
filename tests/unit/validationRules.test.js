@@ -118,8 +118,8 @@ describe('ValidationRules', () => {
         cableGauge: 7 // Non-standard gauge
       };
       const result = cableAmpacityRule.calculate(badCircuit, cableLib, protLib, standardsData);
-      // Should return error when ampacity cannot be found
-      expect(result.deratedAmpacity === null || result.error !== undefined || result.compliant === false).toBe(true);
+      // Should return non-compliant or error when ampacity cannot be found
+      expect(result.compliant).toBe(false);
     });
   });
 
