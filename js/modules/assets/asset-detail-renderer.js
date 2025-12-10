@@ -7,6 +7,7 @@
  */
 
 import * as state from './asset-state.js';
+import { handleCreateProtocolFromAsset } from './asset-handlers.js';
 
 // ============================================
 // CONSTANTS
@@ -585,12 +586,7 @@ function handleDetailClick(e) {
           handleCreateProtocolFromAsset(assetId);
         }
         break;
-      case 'view-detail':
-        if (assetId) {
-          showAssetDetail(assetId);
-        }
-        break;
-      // Other actions handled by asset-handlers.js
+      // Note: 'view-detail' and 'edit' actions are handled by asset-handlers.js
     }
   }
 }
@@ -616,42 +612,6 @@ function switchTab(tabId) {
   if (asset) {
     renderTabContent(asset, tabId);
   }
-}
-
-/**
- * Handle creating a new protocol from asset data
- * @param {string} assetId - Asset ID
- * @returns {void}
- */
-export function handleCreateProtocolFromAsset(assetId) {
-  const asset = state.getAsset(assetId);
-  if (!asset) {
-    document.dispatchEvent(new CustomEvent('asset:message', {
-      detail: { type: 'error', message: 'Asset nicht gefunden.' }
-    }));
-    return;
-  }
-
-  // Prepare asset data for protokoll
-  const assetData = {
-    assetId: asset.id,
-    assetName: asset.name,
-    assetType: asset.type,
-    location: asset.location,
-    plant: asset.plant,
-    description: asset.description,
-    parentId: asset.parentId
-  };
-
-  // Dispatch event to create protokoll from asset
-  document.dispatchEvent(new CustomEvent('asset:createProtocol', {
-    detail: { assetData }
-  }));
-
-  // Show message
-  document.dispatchEvent(new CustomEvent('asset:message', {
-    detail: { type: 'info', message: 'Protokoll wird erstellt...' }
-  }));
 }
 
 /**
