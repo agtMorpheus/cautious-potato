@@ -1144,6 +1144,15 @@
   border-color: var(--c-brand-600, #1a6670);
 }
 
+/* HR Navigation Tabs in Content Area */
+.hr-nav-tabs {
+  margin: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-base);
+}
+
 .hr-nav-icon {
   font-size: 1.25rem;
 }
