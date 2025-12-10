@@ -235,8 +235,10 @@ export function cancelVacation(vacationId) {
     return { success: false, errors: ['Dieser Urlaub kann nicht storniert werden'] };
   }
   
-  // Update via state (would need to add this function to hrState)
+  // Import setHrState to properly update vacation status
+  const { setHrState } = await import('../hrState.js');
   const state = getHrState();
+  
   const updatedVacation = state.vacation.map(v => {
     if (v.id === vacationId) {
       return {
@@ -248,8 +250,7 @@ export function cancelVacation(vacationId) {
     return v;
   });
   
-  // Note: This would require adding a setVacation function to hrState
-  // For now, this is a placeholder for the full implementation
+  setHrState({ vacation: updatedVacation });
   
   return { success: true };
 }

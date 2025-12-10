@@ -180,7 +180,7 @@
 }
 
 .hr-data-table th {
-  background-color: var(--c-slate-800);
+  background-color: var(--bg-surface);
   padding: 0.875rem 1rem;
   text-align: left;
   font-weight: 600;

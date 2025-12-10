@@ -38,10 +38,17 @@ import {
  * @param {HTMLElement} container - Container element
  * @param {number} year - Year
  * @param {number} month - Month (1-12)
+ * @param {Map} employeeMap - Map of employeeId -> employee data for name display
  */
-export function renderVacationCalendar(container, year, month) {
+export function renderVacationCalendar(container, year, month, employeeMap = new Map()) {
   const calendarData = getVacationCalendarData(year, month);
   const monthName = new Date(year, month - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  
+  // Helper to get employee name from map
+  const getEmployeeName = (empId) => {
+    const emp = employeeMap.get(empId);
+    return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
+  };
   
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
@@ -70,7 +77,7 @@ export function renderVacationCalendar(container, year, month) {
         ${hasVacations ? `
           <div class="hr-vacation-indicators">
             ${dayVacations.slice(0, 3).map(v => `
-              <span class="hr-vacation-indicator" title="${escapeHtml(v.employeeId)}"></span>
+              <span class="hr-vacation-indicator" title="${escapeHtml(getEmployeeName(v.employeeId))}"></span>
             `).join('')}
             ${dayVacations.length > 3 ? `<span class="hr-vacation-more">+${dayVacations.length - 3}</span>` : ''}
           </div>
@@ -236,9 +243,16 @@ export function renderVacationForm(container, request = null, employees = []) {
 /**
  * Render pending vacation approvals
  * @param {HTMLElement} container - Container element
+ * @param {Map} employeeMap - Map of employeeId -> employee data for name display
  */
-export function renderPendingVacationApprovals(container) {
+export function renderPendingVacationApprovals(container, employeeMap = new Map()) {
   const pending = getPendingVacationRequests().map(formatVacationForDisplay);
+  
+  // Helper to get employee name from map
+  const getEmployeeName = (empId) => {
+    const emp = employeeMap.get(empId);
+    return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
+  };
   
   const html = `
     <div class="hr-vacation-approvals">
@@ -249,7 +263,7 @@ export function renderPendingVacationApprovals(container) {
           ${pending.map(request => `
             <div class="hr-vacation-approval-card" data-vacation-id="${request.id}">
               <div class="hr-approval-header">
-                <span class="hr-approval-employee">${escapeHtml(request.employeeId)}</span>
+                <span class="hr-approval-employee">${escapeHtml(getEmployeeName(request.employeeId))}</span>
                 <span class="hr-status-badge ${request.statusClass}">${request.statusText}</span>
               </div>
               <div class="hr-approval-dates">

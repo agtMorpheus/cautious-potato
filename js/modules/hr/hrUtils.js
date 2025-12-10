@@ -299,17 +299,21 @@ export function isValidTime(timeStr) {
 }
 
 /**
- * Check if IBAN is valid (basic check)
+ * Check if German IBAN is valid (basic format check)
+ * Note: Only validates German IBAN format (DE + 2 check digits + 18 digits)
  * @param {string} iban - IBAN to validate
- * @returns {boolean} True if valid format
+ * @returns {boolean} True if valid German IBAN format
  */
-export function isValidIBAN(iban) {
+export function isValidGermanIBAN(iban) {
   if (!iban) return false;
   const cleaned = iban.replace(/\s/g, '').toUpperCase();
-  // Basic German IBAN format check: DE + 20 digits
+  // German IBAN format: DE + 2 check digits + 18 digits (bank code 8 + account 10)
   const ibanRegex = /^DE[0-9]{20}$/;
   return ibanRegex.test(cleaned);
 }
+
+// Alias for backwards compatibility
+export const isValidIBAN = isValidGermanIBAN;
 
 /**
  * Check if German tax ID is valid format

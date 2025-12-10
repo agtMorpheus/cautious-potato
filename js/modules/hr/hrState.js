@@ -367,7 +367,7 @@ export function updateSchedule(scheduleId, scheduleData) {
     const newSchedule = {
       ...scheduleData,
       id: `SCHED${Date.now()}`,
-      status: 'draft'
+      status: scheduleData.status || 'draft'
     };
     schedules = [...currentHrState.schedules, newSchedule];
   }

@@ -246,9 +246,16 @@ export function renderScheduleForm(container, schedule, employee) {
 /**
  * Render pending schedule approvals list
  * @param {HTMLElement} container - Container element
+ * @param {Map} employeeMap - Map of employeeId -> employee data for name display
  */
-export function renderPendingApprovals(container) {
+export function renderPendingApprovals(container, employeeMap = new Map()) {
   const pending = getPendingSchedules().map(formatScheduleForDisplay);
+  
+  // Helper to get employee name from map
+  const getEmployeeName = (empId) => {
+    const emp = employeeMap.get(empId);
+    return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
+  };
   
   const html = `
     <div class="hr-pending-approvals">
@@ -259,7 +266,7 @@ export function renderPendingApprovals(container) {
           ${pending.map(schedule => `
             <div class="hr-approval-card" data-schedule-id="${schedule.id}">
               <div class="hr-approval-header">
-                <span class="hr-approval-employee">${escapeHtml(schedule.employeeId)}</span>
+                <span class="hr-approval-employee">${escapeHtml(getEmployeeName(schedule.employeeId))}</span>
                 <span class="hr-approval-week">${schedule.weekLabel}</span>
               </div>
               <div class="hr-approval-details">

@@ -34,8 +34,9 @@ import {
  * Render daily attendance log
  * @param {HTMLElement} container - Container element
  * @param {string} date - Date to display (YYYY-MM-DD)
+ * @param {Map} employeeMap - Map of employeeId -> employee data for name display
  */
-export function renderDailyAttendanceLog(container, date = new Date().toISOString().split('T')[0]) {
+export function renderDailyAttendanceLog(container, date = new Date().toISOString().split('T')[0], employeeMap = new Map()) {
   const records = getAttendanceByDate(date).map(formatAttendanceForDisplay);
   const summary = getDailyAttendanceSummary(date);
   
@@ -92,7 +93,7 @@ export function renderDailyAttendanceLog(container, date = new Date().toISOStrin
               </tr>
             </thead>
             <tbody>
-              ${records.map(renderAttendanceRow).join('')}
+              ${records.map(r => renderAttendanceRow(r, employeeMap)).join('')}
             </tbody>
           </table>
         </div>
@@ -119,12 +120,18 @@ export function renderDailyAttendanceLog(container, date = new Date().toISOStrin
 /**
  * Render a single attendance table row
  * @param {Object} record - Formatted attendance record
+ * @param {Map} employeeMap - Map of employeeId -> employee data (optional)
  * @returns {string} HTML string
  */
-function renderAttendanceRow(record) {
+function renderAttendanceRow(record, employeeMap = new Map()) {
+  const employee = employeeMap.get(record.employeeId);
+  const displayName = employee 
+    ? `${escapeHtml(employee.lastName)}, ${escapeHtml(employee.firstName)}` 
+    : escapeHtml(record.employeeId);
+  
   return `
     <tr data-attendance-id="${record.id}">
-      <td>${escapeHtml(record.employeeId)}</td>
+      <td>${displayName}</td>
       <td>${record.formattedEntryTime}</td>
       <td>${record.formattedExitTime}</td>
       <td>${record.breakMinutes || 0} min</td>
@@ -341,10 +348,17 @@ export function renderAttendanceCalendar(container, year, month, employeeId = nu
  * @param {HTMLElement} container - Container element
  * @param {number} year - Year
  * @param {number} month - Month (1-12)
+ * @param {Map} employeeMap - Map of employeeId -> employee data for name display
  */
-export function renderAttendanceReport(container, year, month) {
+export function renderAttendanceReport(container, year, month, employeeMap = new Map()) {
   const report = getMonthlyAttendanceReport(year, month);
   const monthName = new Date(year, month - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  
+  // Helper to get employee name from map
+  const getEmployeeName = (empId) => {
+    const emp = employeeMap.get(empId);
+    return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
+  };
   
   const html = `
     <div class="hr-attendance-report">
@@ -389,7 +403,7 @@ export function renderAttendanceReport(container, year, month) {
             <tbody>
               ${report.employeeSummaries.map(emp => `
                 <tr>
-                  <td>${escapeHtml(emp.employeeId)}</td>
+                  <td>${escapeHtml(getEmployeeName(emp.employeeId))}</td>
                   <td>${emp.presentDays}</td>
                   <td>${emp.absentDays}</td>
                   <td>${emp.sickDays}</td>
