@@ -569,6 +569,7 @@ export function initializeContractEventListeners() {
     window._handleContractCancelPreview = handleContractCancelPreview;
     window._highlightPreviewRow = highlightPreviewRow;
     window._handleContractStatusChange = handleContractStatusChange;
+    window._handleContractWorkerChange = handleContractWorkerChange;
 
     // Sub-nav tab handlers
     const subNavButtons = document.querySelectorAll('.sub-nav-btn');
@@ -964,5 +965,29 @@ export function handleContractStatusChange(contractId, newStatus) {
         // The UI will update automatically via state subscription
     } else {
         showErrorAlert('Fehler', 'Vertrag konnte nicht aktualisiert werden.');
+    }
+}
+
+/**
+ * Handle contract worker assignment change from dropdown
+ * Assigns or unassigns a worker (employee) to/from a contract
+ * @param {string} contractId - Contract UUID
+ * @param {string} workerId - Worker/Employee ID (empty string to unassign)
+ */
+export function handleContractWorkerChange(contractId, workerId) {
+    console.log(`Worker assignment change: ${contractId} -> ${workerId || '(unassigned)'}`);
+
+    // Allow empty string to unassign worker
+    const assignedWorkerId = workerId || null;
+
+    // Update contract via repository
+    const updated = updateContract(contractId, { assignedWorkerId });
+
+    if (updated) {
+        console.log(`Contract ${contractId} worker updated to: ${assignedWorkerId || '(none)'}`);
+        // No need to show success alert for every assignment change (too intrusive)
+        // The UI will update automatically via state subscription
+    } else {
+        showErrorAlert('Fehler', 'Mitarbeiterzuweisung konnte nicht aktualisiert werden.');
     }
 }
