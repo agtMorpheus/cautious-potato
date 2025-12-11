@@ -15,7 +15,7 @@ databases:
   - name: contract-manager-db
     databaseName: contract_manager
     user: contract_user
-    plan: starter  # Free tier available, upgrade to starter+ for production
+    plan: starter  # Recommended: starter or higher for production
 
 services:
   # ==========================================================================

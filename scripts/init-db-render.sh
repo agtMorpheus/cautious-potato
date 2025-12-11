@@ -22,9 +22,12 @@ echo "  Database: $DB_NAME"
 echo "  User: $DB_USER"
 echo ""
 
+# Set password via environment variable to avoid exposing it in process list
+export MYSQL_PWD="$DB_PASS"
+
 # Test database connection
 echo "Testing database connection..."
-mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1;" > /dev/null 2>&1
+mysql -h "$DB_HOST" -u "$DB_USER" -e "SELECT 1;" > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "✓ Database connection successful"
 else
@@ -36,7 +39,7 @@ echo ""
 # Initialize main schema
 echo "Initializing main database schema..."
 if [ -f "/var/www/html/db/init_contract_manager_fixed.sql" ]; then
-    mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < /var/www/html/db/init_contract_manager_fixed.sql
+    mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" < /var/www/html/db/init_contract_manager_fixed.sql
     echo "✓ Main schema initialized"
 else
     echo "⚠ Warning: init_contract_manager_fixed.sql not found, skipping"
@@ -46,7 +49,7 @@ echo ""
 # Initialize phase 6 extensions
 echo "Initializing Phase 6 schema extensions..."
 if [ -f "/var/www/html/db/phase6_schema.sql" ]; then
-    mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < /var/www/html/db/phase6_schema.sql
+    mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" < /var/www/html/db/phase6_schema.sql
     echo "✓ Phase 6 extensions initialized"
 else
     echo "⚠ Warning: phase6_schema.sql not found, skipping"
@@ -55,9 +58,12 @@ echo ""
 
 # Verify tables were created
 echo "Verifying database tables..."
-TABLE_COUNT=$(mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "SHOW TABLES;" | wc -l)
+TABLE_COUNT=$(mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" -e "SHOW TABLES;" | wc -l)
 echo "✓ Found $((TABLE_COUNT - 1)) tables in database"
 echo ""
+
+# Clear password from environment
+unset MYSQL_PWD
 
 echo "==================================================================="
 echo "Database initialization complete!"

@@ -6,7 +6,8 @@ FROM mysql:8.0
 
 # Copy database initialization scripts
 # These will run automatically on first container startup
-# Note: Make sure db/ directory exists and contains .sql files
+# IMPORTANT: The db/ directory must exist and contain .sql files
+# or this build will fail. Ensure db/*.sql files are committed to the repo.
 COPY db/*.sql /docker-entrypoint-initdb.d/
 
 # Expose MySQL port

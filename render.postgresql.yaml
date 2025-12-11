@@ -9,6 +9,10 @@
 # 3. Convert database schemas from MySQL to PostgreSQL
 #
 # Note: This requires code changes to support PostgreSQL
+#
+# IMPORTANT: Free tier services spin down after 15 minutes of inactivity.
+# Both database and web service spinning down simultaneously makes the app
+# completely unavailable. For production, use at least starter plan.
 
 databases:
   # ==========================================================================
@@ -17,7 +21,7 @@ databases:
   - name: contract-manager-db
     databaseName: contract_manager
     user: contract_user
-    plan: free  # Free tier available, upgrade to starter for production
+    plan: free  # WARNING: Free tier spins down. Use 'starter' for production
     region: oregon  # or frankfurt, ohio, singapore
 
 services:
@@ -27,7 +31,7 @@ services:
   - type: web
     name: abrechnung-app
     runtime: docker
-    plan: free  # Free tier available, upgrade to starter for production
+    plan: free  # WARNING: Free tier spins down. Use 'starter' for production
     region: oregon  # Use same region as database
     dockerfilePath: ./docker/Dockerfile.php
     dockerContext: .

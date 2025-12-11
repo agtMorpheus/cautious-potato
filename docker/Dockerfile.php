@@ -31,10 +31,8 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 775 /var/www/html/logs
 
-# Create environment file from example if not exists
-RUN if [ ! -f /var/www/html/config/production.env ]; then \
-        cp /var/www/html/config/production.env.example /var/www/html/config/production.env; \
-    fi
+# Note: Production environment variables should be set via Render dashboard
+# Do not bake environment files into the Docker image
 
 # Expose port (Render uses PORT env variable)
 EXPOSE ${PORT:-80}
