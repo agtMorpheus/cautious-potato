@@ -349,4 +349,10 @@ console.warn = (...args) => {
     return;
   }
   originalWarn.apply(console, args);
-};
+};// Polyfill structuredClone
+if (typeof global.structuredClone !== 'function') {
+  global.structuredClone = (obj) => {
+    if (obj === undefined) return undefined;
+    return JSON.parse(JSON.stringify(obj));
+  };
+}

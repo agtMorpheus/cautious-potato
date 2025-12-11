@@ -105,13 +105,7 @@ module.exports = {
   globals: {
     'XLSX': {},
     'localStorage': {},
-    'sessionStorage': {},
-    'performance': {
-      'now': jest.fn(() => Date.now()),
-      'memory': {
-        'usedJSHeapSize': 1000000
-      }
-    }
+    'sessionStorage': {}
   },
   
   // Test results processor

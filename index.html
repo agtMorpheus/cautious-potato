@@ -551,7 +551,7 @@
                     </div>
                 </section>
 
-                <!-- Contract Manager View (Phase 1 & Phase 3) -->
+                <!-- Contract Manager View (Standardized Phase 6) -->
                 <section id="view-contracts" class="view-container" aria-labelledby="contracts-heading">
                     <h2 id="contracts-heading" class="sr-only">Contract Manager</h2>
 
@@ -611,10 +611,10 @@
 
                         <!-- Contract List Card -->
                         <div class="card full-height-card">
-                            <div class="card-header">
-                                <h3 class="card-title">Importierte Verträge</h3>
-                                <div class="card-actions">
-                                    <button type="button" class="btn btn-secondary btn-sm" id="contract-refresh-btn">
+                            <div class="card__header">
+                                <h3 class="card__title">Importierte Verträge</h3>
+                                <div class="card__actions">
+                                    <button type="button" class="btn btn--secondary btn--sm" id="contract-refresh-btn">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             width="16" height="16">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -624,18 +624,18 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <!-- Phase 3: Filter Section -->
+                            <div class="card__body">
+                                <!-- Filter Section -->
                                 <div class="filter-section">
                                     <div class="filter-row">
                                         <div class="filter-group filter-group--search">
-                                            <label for="contract-search-input">Suche</label>
+                                            <label for="contract-search-input" class="form-label">Suche</label>
                                             <input type="text" id="contract-search-input"
-                                                placeholder="Suche in allen Feldern..." class="form-input">
+                                                placeholder="Suche in allen Feldern..." class="form-control">
                                         </div>
                                         <div class="filter-group">
-                                            <label for="contract-status-filter">Status</label>
-                                            <select id="contract-status-filter" class="form-select">
+                                            <label for="contract-status-filter" class="form-label">Status</label>
+                                            <select id="contract-status-filter" class="form-control">
                                                 <option value="">Alle Status</option>
                                                 <option value="Erstellt">Erstellt</option>
                                                 <option value="Geplant">Geplant</option>
@@ -656,16 +656,16 @@
                                             </select>
                                         </div>
                                         <div class="filter-group">
-                                            <label for="contract-filter-from">Von</label>
-                                            <input type="date" id="contract-filter-from" class="form-input">
+                                            <label for="contract-filter-from" class="form-label">Von</label>
+                                            <input type="date" id="contract-filter-from" class="form-control">
                                         </div>
                                         <div class="filter-group">
-                                            <label for="contract-filter-to">Bis</label>
-                                            <input type="date" id="contract-filter-to" class="form-input">
+                                            <label for="contract-filter-to" class="form-label">Bis</label>
+                                            <input type="date" id="contract-filter-to" class="form-control">
                                         </div>
                                         <div class="filter-group filter-group--actions">
                                             <button type="button" id="contract-clear-filters"
-                                                class="btn btn-secondary btn-sm">
+                                                class="btn btn--secondary btn--sm">
                                                 Filter zurücksetzen
                                             </button>
                                         </div>
@@ -696,13 +696,16 @@
                     <div id="contract-subview-import" class="subview-container">
                         <!-- Contract Import Card -->
                         <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Verträge importieren</h3>
-                                <p class="card-description">Laden Sie eine Excel-Datei mit Vertragsdaten hoch (z.B.
+                            <div class="card__header">
+                                <h3 class="card__title">Verträge importieren</h3>
+                                <div class="card__actions">
+                                    <!-- Optional actions here -->
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <p class="card__subtitle" style="margin-bottom: 20px;">Laden Sie eine Excel-Datei mit Vertragsdaten hoch (z.B.
                                     <code>1406-Auftrage-2025.xlsx</code>)
                                 </p>
-                            </div>
-                            <div class="card-body">
                                 <div class="contract-import-section">
                                     <!-- File Upload -->
                                     <div class="form-group">
@@ -724,9 +727,9 @@
                                     </div>
 
                                     <!-- Sheet Selector -->
-                                    <div class="sheet-selector-container">
-                                        <label for="contract-sheet-select">Arbeitsblatt auswählen</label>
-                                        <select id="contract-sheet-select" disabled>
+                                    <div class="sheet-selector-container form-group">
+                                        <label for="contract-sheet-select" class="form-label">Arbeitsblatt auswählen</label>
+                                        <select id="contract-sheet-select" class="form-control" disabled>
                                             <option value="">-- Bitte zuerst eine Datei laden --</option>
                                         </select>
                                     </div>
@@ -756,7 +759,7 @@
 
                                     <!-- Actions -->
                                     <div class="form-actions">
-                                        <button id="contract-import-button" type="button" class="btn btn-primary"
+                                        <button id="contract-import-button" type="button" class="btn btn--primary"
                                             disabled>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -766,7 +769,7 @@
                                             </svg>
                                             <span>Vorschau generieren</span>
                                         </button>
-                                        <button id="contract-reset-button" type="button" class="btn btn-secondary">
+                                        <button id="contract-reset-button" type="button" class="btn btn--secondary">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -780,11 +783,11 @@
 
                         <!-- Phase 3: Import Preview Card -->
                         <div class="card" id="contract-preview-card" style="display: none;">
-                            <div class="card-header">
-                                <h3 class="card-title">Vorschau &amp; Prüfung</h3>
-                                <p class="card-description">Überprüfen Sie die importierten Daten vor dem Speichern</p>
+                            <div class="card__header">
+                                <h3 class="card__title">Vorschau &amp; Prüfung</h3>
+                                <p class="card__subtitle">Überprüfen Sie die importierten Daten vor dem Speichern</p>
                             </div>
-                            <div class="card-body">
+                            <div class="card__body">
                                 <div id="contract-preview-container">
                                     <!-- Preview content populated dynamically by contractRenderer.js -->
                                 </div>
@@ -1295,6 +1298,22 @@
                 </div>
             </footer>
         </main>
+    </div>
+
+    <!-- Contract Detail Modal -->
+    <div id="contract-detail-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 id="contract-modal-title" class="modal__title">Vertragsdetails</h2>
+                <button class="modal__close" aria-label="Schließen" onclick="window._closeContractModal && window._closeContractModal()">×</button>
+            </div>
+            <div class="modal__body" id="contract-modal-body">
+                <!-- Content injected by JS -->
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" onclick="window._closeContractModal && window._closeContractModal()">Schließen</button>
+            </div>
+        </div>
     </div>
 
     <!-- SheetJS Library (for protokoll import) -->
