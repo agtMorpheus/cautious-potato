@@ -417,8 +417,8 @@ export function renderMessenForm() {
         <legend>Verwendete Messgeräte nach DIN VDE 0413</legend>
         ${deviceDropdownOptions ? `
           <div class="form-group">
-            <label for="messgeraet-select">Messgerät aus Datenbank wählen</label>
-            <select id="messgeraet-select" class="form-control" data-action="select-device">
+            <label for="messgeraet-select" class="form-label">Messgerät aus Datenbank wählen</label>
+            <select id="messgeraet-select" class="form-input" data-action="select-device">
               <option value="">-- Manuell eingeben oder Gerät wählen --</option>
               ${deviceDropdownOptions}
             </select>
@@ -719,7 +719,7 @@ function renderTextField(fieldPath, label, value, options = {}) {
   
   return `
     <div class="form-group">
-      <label for="${id}">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
+      <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
       <input
         type="text"
         id="${id}"
@@ -729,7 +729,7 @@ function renderTextField(fieldPath, label, value, options = {}) {
         ${required}
         ${pattern}
         ${options.placeholder ? `placeholder="${escapeHtml(options.placeholder)}"` : ''}
-        class="form-control"
+        class="form-input"
         autocomplete="off"
       >
       <div class="field-error" id="error-${id}" role="alert" aria-live="polite"></div>
@@ -752,7 +752,7 @@ function renderDateField(fieldPath, label, value, options = {}) {
   
   return `
     <div class="form-group">
-      <label for="${id}">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
+      <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
       <input
         type="date"
         id="${id}"
@@ -760,7 +760,7 @@ function renderDateField(fieldPath, label, value, options = {}) {
         data-field="${fieldPath}"
         value="${dateValue}"
         ${required}
-        class="form-control"
+        class="form-input"
       >
       <div class="field-error" id="error-${id}" role="alert" aria-live="polite"></div>
     </div>
@@ -781,14 +781,14 @@ function renderTextareaField(fieldPath, label, value, options = {}) {
   
   return `
     <div class="form-group">
-      <label for="${id}">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
+      <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
       <textarea
         id="${id}"
         name="${fieldPath}"
         data-field="${fieldPath}"
         ${required}
         rows="3"
-        class="form-control"
+        class="form-input"
       >${escapeHtml(value || '')}</textarea>
       <div class="field-error" id="error-${id}" role="alert" aria-live="polite"></div>
     </div>
@@ -808,8 +808,8 @@ function renderSelectField(fieldPath, label, options, selected) {
   
   return `
     <div class="form-group">
-      <label for="${id}">${escapeHtml(label)}</label>
-      <select id="${id}" name="${fieldPath}" data-field="${fieldPath}" class="form-control">
+      <label for="${id}" class="form-label">${escapeHtml(label)}</label>
+      <select id="${id}" name="${fieldPath}" data-field="${fieldPath}" class="form-input">
         <option value="">-- Select --</option>
         ${options.map(opt => `
           <option value="${escapeHtml(String(opt))}" ${opt === selected ? 'selected' : ''}>
@@ -1254,7 +1254,7 @@ export function clearAllFieldErrors() {
     errorDiv.style.display = 'none';
   });
 
-  document.querySelectorAll('.form-control.error').forEach(field => {
+  document.querySelectorAll('.form-input.error').forEach(field => {
     field.classList.remove('error');
     field.removeAttribute('aria-invalid');
     field.removeAttribute('aria-describedby');

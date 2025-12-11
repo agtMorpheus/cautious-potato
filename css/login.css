@@ -15,7 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-family-base, 'Inter', sans-serif);
+    font-family: var(--font-family-base);
     color: var(--text-main);
 }
 
@@ -26,12 +26,12 @@
     max-width: 960px;
     width: 100%;
     margin: 1rem;
-    background: var(--bg-glass, rgba(255, 255, 255, 0.8));
+    background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.2));
-    border-radius: 12px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
 }
 
@@ -64,7 +64,6 @@
     font-size: 1.75rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
-    /* Technical header */
     color: var(--text-main);
     letter-spacing: -0.03em;
 }
@@ -83,55 +82,14 @@
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    position: relative;
-}
-
-.form-group label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
-}
-
-.form-group input[type="text"],
-.form-group input[type="password"] {
-    padding: 0.875rem 1rem;
-    font-size: 1rem;
-    border: 1px solid var(--border-base, #ccc);
-    border-radius: 6px;
-    background: var(--bg-surface, #fff);
-    color: var(--text-main);
-    transition: all 0.2s ease;
-    font-family: 'Inter', sans-serif;
-    /* Keep input readable */
-}
-
-/* Tech-focused focus state */
-.form-group input[type="text"]:focus,
-.form-group input[type="password"]:focus {
-    outline: none;
-    border-color: var(--primary-main);
-    background: var(--bg-card);
-    box-shadow: 0 0 0 1px var(--primary-main), 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.form-group input[type="text"]:disabled,
-.form-group input[type="password"]:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    position: relative; /* For password toggle */
 }
 
 /* Password toggle */
 .password-toggle {
     position: absolute;
     right: 0.75rem;
-    top: 2.35rem;
-    /* adjusted for label height */
+    top: 2.1rem; /* Adjusted for standard label height */
     background: none;
     border: none;
     cursor: pointer;
@@ -149,6 +107,7 @@
 .form-group--checkbox {
     flex-direction: row;
     align-items: center;
+    display: flex;
 }
 
 .checkbox-label {
@@ -166,46 +125,7 @@
     accent-color: var(--primary-main);
 }
 
-/* Submit button - Tech Button Style */
-.btn--full {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    font-family: 'JetBrains Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.btn--primary {
-    background: var(--primary-main, #2563eb);
-    color: #ffffff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.btn--primary:hover:not(:disabled) {
-    background: var(--primary-hover, #1d4ed8);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 12px rgba(var(--primary-rgb), 0.25);
-}
-
-.btn--primary:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.btn--primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    filter: grayscale(0.5);
-}
-
-/* Loading state */
+/* Loading state for button */
 .btn.loading .btn-text {
     opacity: 0;
 }
@@ -234,11 +154,10 @@
     display: none;
     padding: 0.75rem;
     font-size: 0.85rem;
-    color: #ef4444;
-    /* red-500 */
+    color: var(--c-danger);
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     text-align: center;
     margin-top: 0.5rem;
 }
@@ -262,11 +181,9 @@
     border-bottom-color: var(--primary-main);
 }
 
-/* Login info panel (right side) - Command Center Sidebar */
+/* Login info panel (right side) */
 .login-info {
-    /* Glassy overlay on dark bg */
     background: rgba(15, 23, 42, 0.95);
-    /* Slate 900 almost opaque */
     color: #ffffff;
     padding: 3.5rem;
     display: flex;
@@ -276,7 +193,6 @@
     overflow: hidden;
 }
 
-/* Technical grid background effect */
 .login-info::before {
     content: '';
     position: absolute;
@@ -303,7 +219,6 @@
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
     color: var(--primary-main);
-    /* Pop color */
 }
 
 .info-content p {
@@ -312,7 +227,6 @@
     opacity: 0.8;
     line-height: 1.6;
     color: #cbd5e1;
-    /* Slate 300 */
 }
 
 .feature-list {
@@ -332,7 +246,6 @@
     gap: 0.75rem;
     color: #e2e8f0;
     font-family: 'JetBrains Mono', monospace;
-    /* Tech list */
 }
 
 /* Offline indicator */
@@ -342,8 +255,8 @@
     left: 50%;
     transform: translateX(-50%) translateY(200%);
     background: #0f172a;
-    border: 1px solid #dc2626;
-    color: #ef4444;
+    border: 1px solid var(--c-danger);
+    color: var(--c-danger);
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;
     font-size: 0.85rem;
@@ -360,17 +273,8 @@
     transform: translateX(-50%) translateY(0);
 }
 
-/* Dark mode support (Using tokens mostly, but specific overrides if needed) */
-/* The layout is already dark-themed by default mostly, but we handle light mode inputs */
 @media (prefers-color-scheme: dark) {
     .login-body {
         background: #020617;
-        /* Very dark slate */
-    }
-
-    .login-container {
-        /* Glass variables should handle this automatically via variables.css if loaded correctly. 
-           But login.css might load isolated. Let's assume variables.css is active. 
-        */
     }
 }
