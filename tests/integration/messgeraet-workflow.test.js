@@ -8,8 +8,8 @@ import * as messgeraetHandlers from '../../js/messgeraet/messgeraet-handlers.js'
 
 describe('Messgerät E2E Workflow', () => {
   beforeEach(() => {
-    // Reset state
-    messgeraetState.init();
+    // Reset state with cleared localStorage for test isolation
+    messgeraetState.init({ clearStorage: true });
     
     // Setup DOM
     document.body.innerHTML = `

@@ -88,7 +88,8 @@ describe('Messgerät Handlers', () => {
 
   describe('CRUD Handlers', () => {
     test('handleAddDevice calls state.addDevice on valid input', () => {
-      state.addDevice.mockReturnValue('new-id');
+      const newDevice = { id: 'new-id', name: 'New Device', type: 'Type' };
+      state.addDevice.mockReturnValue(newDevice);
 
       const device = { name: 'New Device', type: 'Type' };
       const result = handleAddDevice(device);

@@ -56,7 +56,7 @@ describe('Messgerät State', () => {
     
     describe('addDevice()', () => {
       test('adds a new device with generated ID', () => {
-        const deviceId = state.addDevice({
+        const device = state.addDevice({
           name: 'Fluke 1654b',
           type: 'Kombinationsprüfgerät',
           fabrikat: 'Fluke',
@@ -64,8 +64,9 @@ describe('Messgerät State', () => {
           identNr: '4312061'
         });
 
-        expect(deviceId).toBeTruthy();
-        expect(deviceId).toMatch(/^MG-/);
+        expect(device).toBeTruthy();
+        expect(device.id).toBeTruthy();
+        expect(device.id).toMatch(/^MG-/);
 
         const devices = state.getDevices();
         expect(devices.length).toBe(1);
@@ -87,12 +88,12 @@ describe('Messgerät State', () => {
 
     describe('getDevice()', () => {
       test('returns device by ID', () => {
-        const deviceId = state.addDevice({
+        const addedDevice = state.addDevice({
           name: 'Test Device',
           type: 'Multimeter'
         });
 
-        const device = state.getDevice(deviceId);
+        const device = state.getDevice(addedDevice.id);
         expect(device).not.toBeNull();
         expect(device.name).toBe('Test Device');
       });
@@ -105,18 +106,18 @@ describe('Messgerät State', () => {
 
     describe('updateDevice()', () => {
       test('updates device fields', () => {
-        const deviceId = state.addDevice({
+        const addedDevice = state.addDevice({
           name: 'Original Name',
           type: 'Multimeter'
         });
 
-        const success = state.updateDevice(deviceId, {
+        const success = state.updateDevice(addedDevice.id, {
           name: 'Updated Name',
           identNr: 'UPDATED123'
         });
 
         expect(success).toBe(true);
-        const device = state.getDevice(deviceId);
+        const device = state.getDevice(addedDevice.id);
         expect(device.name).toBe('Updated Name');
         expect(device.identNr).toBe('UPDATED123');
       });
@@ -127,12 +128,12 @@ describe('Messgerät State', () => {
       });
 
       test('sets updatedAt timestamp on update', () => {
-        const deviceId = state.addDevice({ name: 'Test' });
-        const deviceBefore = state.getDevice(deviceId);
+        const device = state.addDevice({ name: 'Test' });
+        const deviceBefore = state.getDevice(device.id);
 
         // Update the device
-        state.updateDevice(deviceId, { name: 'Updated' });
-        const deviceAfter = state.getDevice(deviceId);
+        state.updateDevice(device.id, { name: 'Updated' });
+        const deviceAfter = state.getDevice(device.id);
 
         // updatedAt should exist and be a valid date
         expect(deviceAfter.updatedAt).toBeTruthy();
@@ -142,10 +143,10 @@ describe('Messgerät State', () => {
 
     describe('deleteDevice()', () => {
       test('removes device from state', () => {
-        const deviceId = state.addDevice({ name: 'To Delete' });
+        const device = state.addDevice({ name: 'To Delete' });
         expect(state.getDevices().length).toBe(1);
 
-        const success = state.deleteDevice(deviceId);
+        const success = state.deleteDevice(device.id);
         expect(success).toBe(true);
         expect(state.getDevices().length).toBe(0);
       });
@@ -208,10 +209,10 @@ describe('Messgerät State', () => {
   describe('Form State', () => {
     
     test('setEditingDevice updates editing state', () => {
-      const deviceId = state.addDevice({ name: 'Test' });
-      state.setEditingDevice(deviceId);
+      const device = state.addDevice({ name: 'Test' });
+      state.setEditingDevice(device.id);
 
-      expect(state.getFormState().editingDeviceId).toBe(deviceId);
+      expect(state.getFormState().editingDeviceId).toBe(device.id);
     });
 
     test('setSearchTerm updates search state', () => {
@@ -312,11 +313,11 @@ describe('Messgerät State', () => {
       const callback = jest.fn();
       state.on('deviceUpdated', callback);
 
-      const deviceId = state.addDevice({ name: 'Test' });
-      state.updateDevice(deviceId, { name: 'Updated' });
+      const device = state.addDevice({ name: 'Test' });
+      state.updateDevice(device.id, { name: 'Updated' });
 
       expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        deviceId
+        deviceId: device.id
       }));
     });
 
@@ -324,10 +325,10 @@ describe('Messgerät State', () => {
       const callback = jest.fn();
       state.on('deviceDeleted', callback);
 
-      const deviceId = state.addDevice({ name: 'Test' });
-      state.deleteDevice(deviceId);
+      const device = state.addDevice({ name: 'Test' });
+      state.deleteDevice(device.id);
 
-      expect(callback).toHaveBeenCalledWith({ deviceId });
+      expect(callback).toHaveBeenCalledWith({ deviceId: device.id });
     });
   });
 
@@ -342,11 +343,11 @@ describe('Messgerät State', () => {
     });
 
     test('getDevice returns a copy', () => {
-      const deviceId = state.addDevice({ name: 'Test' });
-      const device = state.getDevice(deviceId);
+      const addedDevice = state.addDevice({ name: 'Test' });
+      const device = state.getDevice(addedDevice.id);
       device.name = 'Modified';
 
-      expect(state.getDevice(deviceId).name).toBe('Test');
+      expect(state.getDevice(addedDevice.id).name).toBe('Test');
     });
   });
 });

@@ -143,27 +143,27 @@ describe('Messgerät Handlers', () => {
   describe('handleUpdateDevice()', () => {
     
     test('updates existing device', () => {
-      const deviceId = state.addDevice({
+      const device = state.addDevice({
         name: 'Original',
         type: 'Multimeter'
       });
 
-      const success = handlers.handleUpdateDevice(deviceId, {
+      const success = handlers.handleUpdateDevice(device.id, {
         name: 'Updated',
         type: 'Multimeter'
       });
 
       expect(success).toBe(true);
-      expect(state.getDevice(deviceId).name).toBe('Updated');
+      expect(state.getDevice(device.id).name).toBe('Updated');
     });
 
     test('returns false for invalid data', () => {
-      const deviceId = state.addDevice({
+      const device = state.addDevice({
         name: 'Original',
         type: 'Multimeter'
       });
 
-      const success = handlers.handleUpdateDevice(deviceId, {
+      const success = handlers.handleUpdateDevice(device.id, {
         name: '',
         type: 'Multimeter'
       });
@@ -176,13 +176,13 @@ describe('Messgerät Handlers', () => {
   describe('handleDeleteDevice()', () => {
     
     test('deletes device when confirmed', () => {
-      const deviceId = state.addDevice({
+      const device = state.addDevice({
         name: 'To Delete',
         type: 'Multimeter'
       });
 
       // Skip confirmation
-      const success = handlers.handleDeleteDevice(deviceId, true);
+      const success = handlers.handleDeleteDevice(device.id, true);
 
       expect(success).toBe(true);
       expect(state.getDevices().length).toBe(0);
@@ -198,10 +198,10 @@ describe('Messgerät Handlers', () => {
   describe('handleEditDevice()', () => {
     
     test('sets editing device ID', () => {
-      const deviceId = state.addDevice({ name: 'Test' });
-      handlers.handleEditDevice(deviceId);
+      const device = state.addDevice({ name: 'Test' });
+      handlers.handleEditDevice(device.id);
 
-      expect(state.getFormState().editingDeviceId).toBe(deviceId);
+      expect(state.getFormState().editingDeviceId).toBe(device.id);
     });
   });
 
@@ -262,11 +262,11 @@ describe('Messgerät Handlers', () => {
     });
 
     test('updates device when editing', () => {
-      const deviceId = state.addDevice({
+      const device = state.addDevice({
         name: 'Original',
         type: 'Multimeter'
       });
-      state.setEditingDevice(deviceId);
+      state.setEditingDevice(device.id);
 
       const form = document.createElement('form');
       form.innerHTML = `
@@ -280,7 +280,7 @@ describe('Messgerät Handlers', () => {
       const event = { preventDefault: jest.fn() };
       handlers.handleFormSubmit(event, form);
 
-      expect(state.getDevice(deviceId).name).toBe('Updated');
+      expect(state.getDevice(device.id).name).toBe('Updated');
     });
   });
 });
