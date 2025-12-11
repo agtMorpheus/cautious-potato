@@ -736,6 +736,10 @@ export function initializeEventListeners(handlers = {}) {
     } else {
         console.warn('File input (#file-input) not found in DOM');
     }
+
+    // Enhance File Drop Zone (Drag & Drop + Click/Keyboard)
+    setupDragAndDrop('file-drop-zone', 'file-input');
+    setupClickAndKeyboard('file-drop-zone', 'file-input');
     
     // Import button handler
     const importButton = document.querySelector('#import-button');
@@ -775,4 +779,88 @@ export function initializeEventListeners(handlers = {}) {
     
     listenersInitialized = true;
     console.log('Event listeners initialized');
+}
+
+/**
+ * Set up drag and drop functionality for a file input
+ * @param {string} dropZoneId - ID of the drop zone element
+ * @param {string} inputId - ID of the file input element
+ */
+export function setupDragAndDrop(dropZoneId, inputId) {
+    const dropZone = document.getElementById(dropZoneId);
+    const fileInput = document.getElementById(inputId);
+
+    if (!dropZone || !fileInput) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropZone.classList.add('drag-over');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('drag-over');
+    }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files && files.length > 0) {
+            fileInput.files = files;
+            // Trigger change event manually
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+        }
+    }
+}
+
+/**
+ * Set up click and keyboard accessibility for a file drop zone
+ * @param {string} dropZoneId - ID of the drop zone element
+ * @param {string} inputId - ID of the file input element
+ */
+export function setupClickAndKeyboard(dropZoneId, inputId) {
+    const dropZone = document.getElementById(dropZoneId);
+    const fileInput = document.getElementById(inputId);
+
+    if (!dropZone || !fileInput) return;
+
+    // Click handling
+    dropZone.addEventListener('click', () => {
+        // Prevent recursive triggering if input is inside dropZone
+        // Since input is hidden/z-index -1, users click dropZone
+        fileInput.click();
+    });
+
+    // Keyboard accessibility
+    dropZone.setAttribute('tabindex', '0');
+    dropZone.setAttribute('role', 'button');
+    if (!dropZone.hasAttribute('aria-label')) {
+        dropZone.setAttribute('aria-label', 'Datei hochladen: Klicken oder Datei hierher ziehen');
+    }
+
+    dropZone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInput.click();
+        }
+    });
 }
