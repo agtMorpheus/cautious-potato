@@ -1,0 +1,17 @@
+# MySQL Docker Configuration for Render.com
+FROM mysql:8.0
+
+# Set environment variables
+ENV MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+ENV MYSQL_DATABASE=${MYSQL_DATABASE}
+ENV MYSQL_USER=${MYSQL_USER}
+ENV MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+# Copy database initialization scripts
+COPY db/*.sql /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306
+
+# MySQL will automatically run scripts in /docker-entrypoint-initdb.d/
+# on first startup

@@ -1,0 +1,82 @@
+# Render.com Blueprint Configuration
+# This file defines the infrastructure for deploying the Abrechnung App on Render.com
+#
+# The application consists of:
+# 1. MySQL Database - For contract management data
+# 2. Web Service - Combined frontend + backend (PHP + static files)
+#
+# Deployment Instructions:
+# See docs/RENDER_DEPLOYMENT.md for detailed setup instructions
+
+databases:
+  # ==========================================================================
+  # MySQL Database - Contract Manager
+  # ==========================================================================
+  - name: contract-manager-db
+    databaseName: contract_manager
+    user: contract_user
+    plan: starter  # Free tier available, upgrade to starter+ for production
+
+services:
+  # ==========================================================================
+  # Combined Web Service - Frontend + Backend API
+  # ==========================================================================
+  - type: web
+    name: abrechnung-app
+    runtime: docker
+    plan: starter  # Upgrade to standard for production
+    dockerfilePath: ./docker/Dockerfile.php
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      # Database Configuration
+      - key: DB_HOST
+        fromDatabase:
+          name: contract-manager-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: contract-manager-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: contract-manager-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: contract-manager-db
+          property: password
+      
+      # Application Configuration
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      
+      # Session Configuration
+      - key: SESSION_TIMEOUT
+        value: 7200
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: SESSION_SAMESITE
+        value: Strict
+      - key: SESSION_COOKIE_LIFETIME
+        value: 0
+      
+      # CORS Configuration (update with your domain)
+      - key: CORS_ORIGIN
+        sync: false  # Set this manually in Render dashboard
+      
+      # Security Configuration
+      - key: CSRF_TOKEN_ENABLED
+        value: true
+      
+      # Logging Configuration
+      - key: LOG_LEVEL
+        value: warning
+      - key: LOG_FILE
+        value: /tmp/app.log
+      
+      # Rate Limiting
+      - key: RATE_LIMIT
+        value: 100
