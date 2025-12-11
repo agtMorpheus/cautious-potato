@@ -1283,16 +1283,8 @@ function attachFieldListeners() {
   const form = document.querySelector('.protokoll-form');
   if (!form) return;
 
-  // Change event for form fields
-  form.addEventListener('change', (e) => {
-    const target = e.target;
-    const fieldPath = target.getAttribute('data-field');
-    
-    if (fieldPath) {
-      const value = target.type === 'checkbox' ? target.checked : target.value;
-      handlers.handleMetadataChange(fieldPath, value);
-    }
-  });
+  // Note: Input and change events are handled by event delegation in protokoll-handlers.js
+  // This function now only handles navigation and action buttons
 
   // Navigation button clicks
   form.addEventListener('click', (e) => {

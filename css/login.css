@@ -1,8 +1,8 @@
 /**
- * Login Page Styles (Phase 5)
+ * Login Page Styles (Command Center Theme)
  * 
  * Styles for the Contract Manager authentication page.
- * Follows the existing design system with CSS variables.
+ * Implements Glassmorphism and specialized Technical aesthetic.
  */
 
 /* Login body */
@@ -10,32 +10,37 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--color-primary, #2563eb) 0%, var(--color-primary-dark, #1d4ed8) 100%);
+    /* Dark abstract/technical background */
+    background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+    font-family: var(--font-family-base, 'Inter', sans-serif);
+    color: var(--text-main);
 }
 
 /* Login container */
 .login-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    max-width: 900px;
+    max-width: 960px;
     width: 100%;
     margin: 1rem;
-    background: var(--color-surface, #ffffff);
-    border-radius: 1rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: var(--bg-glass, rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.2));
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .login-container {
         grid-template-columns: 1fr;
-        max-width: 400px;
+        max-width: 420px;
     }
-    
+
     .login-info {
         display: none;
     }
@@ -43,32 +48,38 @@
 
 /* Login panel (left side) */
 .login-panel {
-    padding: 3rem;
+    padding: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .login-header {
-    margin-bottom: 2rem;
-    text-align: center;
+    margin-bottom: 2.5rem;
+    text-align: left;
 }
 
 .login-header h1 {
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--color-text-primary, #1f2937);
+    font-family: 'JetBrains Mono', monospace;
+    /* Technical header */
+    color: var(--text-main);
+    letter-spacing: -0.03em;
 }
 
 .login-subtitle {
     margin: 0;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary, #6b7280);
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
 
 /* Form styles */
 #login-form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.5rem;
 }
 
 .form-group {
@@ -79,32 +90,39 @@
 }
 
 .form-group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text-primary, #374151);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .form-group input[type="text"],
 .form-group input[type="password"] {
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     font-size: 1rem;
-    border: 1px solid var(--color-border, #d1d5db);
-    border-radius: 0.5rem;
-    background: var(--color-surface, #ffffff);
-    color: var(--color-text-primary, #1f2937);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid var(--border-base, #ccc);
+    border-radius: 6px;
+    background: var(--bg-surface, #fff);
+    color: var(--text-main);
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    /* Keep input readable */
 }
 
+/* Tech-focused focus state */
 .form-group input[type="text"]:focus,
 .form-group input[type="password"]:focus {
     outline: none;
-    border-color: var(--color-primary, #2563eb);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-main);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 1px var(--primary-main), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .form-group input[type="text"]:disabled,
 .form-group input[type="password"]:disabled {
-    background: var(--color-background, #f3f4f6);
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -112,14 +130,15 @@
 .password-toggle {
     position: absolute;
     right: 0.75rem;
-    top: 2.25rem;
+    top: 2.35rem;
+    /* adjusted for label height */
     background: none;
     border: none;
     cursor: pointer;
     padding: 0.25rem;
-    font-size: 1rem;
-    opacity: 0.6;
-    transition: opacity 0.15s ease;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    color: var(--text-main);
 }
 
 .password-toggle:hover {
@@ -135,48 +154,55 @@
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary, #6b7280);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
-    accent-color: var(--color-primary, #2563eb);
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary-main);
 }
 
-/* Submit button */
+/* Submit button - Tech Button Style */
 .btn--full {
     width: 100%;
-    padding: 0.875rem 1.5rem;
+    padding: 1rem;
     font-size: 1rem;
     font-weight: 600;
-    border-radius: 0.5rem;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .btn--primary {
-    background: var(--color-primary, #2563eb);
-    color: var(--color-text-inverse, #ffffff);
+    background: var(--primary-main, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn--primary:hover:not(:disabled) {
-    background: var(--color-primary-dark, #1d4ed8);
+    background: var(--primary-hover, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(var(--primary-rgb), 0.25);
 }
 
 .btn--primary:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: translateY(0);
 }
 
 .btn--primary:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+    filter: grayscale(0.5);
 }
 
 /* Loading state */
@@ -191,7 +217,7 @@
     transform: translate(-50%, -50%);
     width: 1.25rem;
     height: 1.25rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-top-color: #ffffff;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -206,96 +232,127 @@
 /* Error message */
 .status--error {
     display: none;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    color: var(--color-error, #dc2626);
-    background: var(--color-error-bg, #fef2f2);
-    border: 1px solid var(--color-error-border, #fecaca);
-    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    color: #ef4444;
+    /* red-500 */
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
     text-align: center;
+    margin-top: 0.5rem;
 }
 
 /* Login footer */
 .login-footer {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     text-align: center;
 }
 
-.login-hint {
-    margin: 0;
-    font-size: 0.875rem;
-}
-
 .login-hint a {
-    color: var(--color-primary, #2563eb);
+    color: var(--text-muted);
+    font-size: 0.85rem;
     text-decoration: none;
-    transition: color 0.15s ease;
+    border-bottom: 1px dotted var(--text-muted);
+    transition: all 0.2s;
 }
 
 .login-hint a:hover {
-    color: var(--color-primary-dark, #1d4ed8);
-    text-decoration: underline;
+    color: var(--primary-main);
+    border-bottom-color: var(--primary-main);
 }
 
-/* Login info panel (right side) */
+/* Login info panel (right side) - Command Center Sidebar */
 .login-info {
-    background: linear-gradient(135deg, var(--color-primary, #2563eb) 0%, var(--color-primary-dark, #1d4ed8) 100%);
-    color: var(--color-text-inverse, #ffffff);
-    padding: 3rem;
+    /* Glassy overlay on dark bg */
+    background: rgba(15, 23, 42, 0.95);
+    /* Slate 900 almost opaque */
+    color: #ffffff;
+    padding: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Technical grid background effect */
+.login-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
 }
 
 .info-content {
-    max-width: 300px;
+    max-width: 320px;
+    position: relative;
+    z-index: 2;
 }
 
 .info-content h2 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.5rem 0;
     font-size: 1.5rem;
     font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--primary-main);
+    /* Pop color */
 }
 
 .info-content p {
-    margin: 0 0 1.5rem 0;
-    font-size: 0.9375rem;
-    opacity: 0.9;
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    opacity: 0.8;
     line-height: 1.6;
+    color: #cbd5e1;
+    /* Slate 300 */
 }
 
 .feature-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
 }
 
 .feature-list li {
-    padding: 0.5rem 0;
-    font-size: 0.875rem;
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
     opacity: 0.9;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    /* Tech list */
 }
 
 /* Offline indicator */
 .offline-indicator {
     position: fixed;
-    bottom: 1rem;
+    bottom: 2rem;
     left: 50%;
-    transform: translateX(-50%) translateY(100%);
-    background: var(--color-warning, #f59e0b);
-    color: var(--color-text-inverse, #ffffff);
+    transform: translateX(-50%) translateY(200%);
+    background: #0f172a;
+    border: 1px solid #dc2626;
+    color: #ef4444;
     padding: 0.75rem 1.5rem;
-    border-radius: 2rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease;
+    gap: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 1000;
 }
 
@@ -303,86 +360,17 @@
     transform: translateX(-50%) translateY(0);
 }
 
-.offline-icon {
-    font-size: 1rem;
-}
-
-/* Dark mode support */
+/* Dark mode support (Using tokens mostly, but specific overrides if needed) */
+/* The layout is already dark-themed by default mostly, but we handle light mode inputs */
 @media (prefers-color-scheme: dark) {
     .login-body {
-        background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+        background: #020617;
+        /* Very dark slate */
     }
-    
-    .login-panel {
-        background: #1f2937;
-    }
-    
-    .login-header h1 {
-        color: #f9fafb;
-    }
-    
-    .login-subtitle {
-        color: #9ca3af;
-    }
-    
-    .form-group label {
-        color: #e5e7eb;
-    }
-    
-    .form-group input[type="text"],
-    .form-group input[type="password"] {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f9fafb;
-    }
-    
-    .form-group input[type="text"]:focus,
-    .form-group input[type="password"]:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    
-    .checkbox-label {
-        color: #9ca3af;
-    }
-    
-    .status--error {
-        background: #450a0a;
-        border-color: #991b1b;
-        color: #fca5a5;
-    }
-    
-    .login-hint a {
-        color: #60a5fa;
-    }
-    
+
     .login-container {
-        background: #1f2937;
-    }
-}
-
-/* Accessibility */
-.form-group input:focus-visible {
-    outline: 2px solid var(--color-primary, #2563eb);
-    outline-offset: 2px;
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--color-primary, #2563eb);
-    outline-offset: 2px;
-}
-
-/* Print styles */
-@media print {
-    .login-body {
-        background: none;
-    }
-    
-    .login-container {
-        box-shadow: none;
-    }
-    
-    .login-info {
-        display: none;
+        /* Glass variables should handle this automatically via variables.css if loaded correctly. 
+           But login.css might load isolated. Let's assume variables.css is active. 
+        */
     }
 }

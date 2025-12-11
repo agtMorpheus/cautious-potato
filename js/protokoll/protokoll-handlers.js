@@ -132,14 +132,30 @@ function handleFieldInput(e) {
   
   if (!fieldPath) return;
 
-  // Real-time validation
-  const value = target.value;
-  const result = validator.validateField(fieldPath, value);
+  const value = target.type === 'checkbox' ? target.checked : target.value;
 
-  if (!result.isValid) {
-    state.setValidationError(fieldPath, result.error);
+  // Update state in real-time for text inputs
+  if (target.type === 'text' || target.type === 'email' || target.type === 'tel') {
+    // Route to appropriate handler
+    if (fieldPath.startsWith('metadata.')) {
+      handleMetadataChange(fieldPath, value);
+    } else if (fieldPath.startsWith('position.')) {
+      const posNr = target.closest('[data-pos-nr]')?.getAttribute('data-pos-nr');
+      if (posNr) {
+        handlePositionChange(posNr, fieldPath, value);
+      }
+    } else if (fieldPath.startsWith('results.')) {
+      handleResultsChange(fieldPath, value);
+    }
   } else {
-    state.setValidationError(fieldPath, null);
+    // For non-text inputs, just do validation
+    const result = validator.validateField(fieldPath, value);
+
+    if (!result.isValid) {
+      state.setValidationError(fieldPath, result.error);
+    } else {
+      state.setValidationError(fieldPath, null);
+    }
   }
 }
 

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Input Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input { padding: 8px; width: 300px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Protocol Text Input Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Basic HTML Input Test</h2>
+        <div class="form-group">
+            <label for="basic-test">Basic Text Input:</label>
+            <input type="text" id="basic-test" placeholder="Type here to test basic input">
+        </div>
+        <p id="basic-result">Status: Ready</p>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Protocol Form Simulation</h2>
+        <div id="protokollFormContainer">
+            <!-- This will be populated by JavaScript -->
+        </div>
+        <p id="protocol-result">Status: Not loaded</p>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Event Listener Test</h2>
+        <div class="form-group">
+            <label for="event-test">Event Test Input:</label>
+            <input type="text" id="event-test" data-field="test.field" placeholder="Type to test events">
+        </div>
+        <p id="event-result">Status: Ready</p>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Console Logs</h2>
+        <div id="console-logs"></div>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <script>
+        // Override console.log to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logs = [];
+        
+        function addLog(type, message) {
+            logs.push({ type, message, time: new Date().toLocaleTimeString() });
+            updateLogDisplay();
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog('log', args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog('error', args.join(' '));
+        };
+        
+        function updateLogDisplay() {
+            const container = document.getElementById('console-logs');
+            container.innerHTML = logs.map(log => 
+                `<div style="color: ${log.type === 'error' ? 'red' : 'black'}">
+                    [${log.time}] ${log.type.toUpperCase()}: ${log.message}
+                </div>`
+            ).join('');
+        }
+        
+        function clearLogs() {
+            logs.length = 0;
+            updateLogDisplay();
+        }
+
+        // Test 1: Basic input
+        document.getElementById('basic-test').addEventListener('input', function(e) {
+            document.getElementById('basic-result').textContent = `Status: Typing "${e.target.value}"`;
+            document.getElementById('basic-result').className = 'success';
+        });
+
+        // Test 3: Event listener test
+        document.getElementById('event-test').addEventListener('input', function(e) {
+            document.getElementById('event-result').textContent = `Status: Field "${e.target.dataset.field}" = "${e.target.value}"`;
+            document.getElementById('event-result').className = 'success';
+        });
+
+        // Test 2: Try to load protocol form
+        function loadProtocolForm() {
+            console.log('Loading protocol form...');
+            
+            // Simulate the protocol form HTML
+            const html = `
+                <form class="protokoll-form metadata-form">
+                    <fieldset>
+                        <legend>Test Protocol Form</legend>
+                        <div class="form-group">
+                            <label for="metadata-protokollNumber">Protokoll Nr. *</label>
+                            <input
+                                type="text"
+                                id="metadata-protokollNumber"
+                                name="metadata.protokollNumber"
+                                data-field="metadata.protokollNumber"
+                                value=""
+                                required
+                                placeholder="z.B. EDM221020251123"
+                                class="form-control"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="metadata-auftraggeber">Auftraggeber *</label>
+                            <input
+                                type="text"
+                                id="metadata-auftraggeber"
+                                name="metadata.auftraggeber"
+                                data-field="metadata.auftraggeber"
+                                value=""
+                                required
+                                class="form-control"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </fieldset>
+                </form>
+            `;
+            
+            const container = document.getElementById('protokollFormContainer');
+            container.innerHTML = html;
+            
+            // Add event listeners
+            const form = container.querySelector('.protokoll-form');
+            if (form) {
+                form.addEventListener('input', function(e) {
+                    const fieldPath = e.target.getAttribute('data-field');
+                    if (fieldPath) {
+                        console.log(`Protocol field changed: ${fieldPath} = "${e.target.value}"`);
+                        document.getElementById('protocol-result').textContent = `Status: ${fieldPath} = "${e.target.value}"`;
+                        document.getElementById('protocol-result').className = 'success';
+                    }
+                });
+                
+                form.addEventListener('change', function(e) {
+                    const fieldPath = e.target.getAttribute('data-field');
+                    if (fieldPath) {
+                        console.log(`Protocol field committed: ${fieldPath} = "${e.target.value}"`);
+                    }
+                });
+                
+                console.log('Protocol form loaded and event listeners attached');
+                document.getElementById('protocol-result').textContent = 'Status: Form loaded, try typing in the fields above';
+                document.getElementById('protocol-result').className = 'success';
+            } else {
+                console.error('Failed to find protocol form after insertion');
+                document.getElementById('protocol-result').textContent = 'Status: Error - Form not found';
+                document.getElementById('protocol-result').className = 'error';
+            }
+        }
+
+        // Load the protocol form when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing tests...');
+            loadProtocolForm();
+        });
+    </script>
+</body>
+</html>

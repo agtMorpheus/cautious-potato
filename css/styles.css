@@ -59,8 +59,8 @@ ul {
 
 /* --- Sidebar --- */
 .sidebar {
-    background: rgba(255, 255, 255, 0.8);
-    border-right: 1px solid var(--border-light);
+    background: var(--bg-glass);
+    border-right: 1px solid var(--border-glass);
     display: flex;
     flex-direction: column;
     z-index: 50;
@@ -68,13 +68,6 @@ ul {
     overflow: hidden;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-}
-
-@media (prefers-color-scheme: dark) {
-    .sidebar {
-        background: rgba(2, 6, 23, 0.8);
-        border-right-color: rgba(255, 255, 255, 0.08);
-    }
 }
 
 .sidebar-header {
@@ -244,10 +237,10 @@ ul {
 /* --- Command Header --- */
 .cmd-header {
     height: var(--header-height);
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--bg-glass);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-glass);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -256,13 +249,6 @@ ul {
     top: 0;
     z-index: 40;
     transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-    .cmd-header {
-        background: rgba(18, 18, 18, 0.8);
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
 }
 
 .cmd-header-start,
@@ -655,10 +641,10 @@ select:focus {
 /* --- Command Footer (Status Bar) --- */
 .cmd-footer {
     height: 32px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-glass);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -667,13 +653,6 @@ select:focus {
     color: var(--text-secondary);
     z-index: 40;
     margin-top: auto;
-}
-
-@media (prefers-color-scheme: dark) {
-    .cmd-footer {
-        background: rgba(18, 18, 18, 0.9);
-        border-top-color: rgba(255, 255, 255, 0.08);
-    }
 }
 
 .cmd-footer-left,

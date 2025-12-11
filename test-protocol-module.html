@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Module Test</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
+    <style>
+        body { margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Protocol Module Test</h1>
+    
+    <div class="test-section">
+        <h2>Module Loading Test</h2>
+        <div id="module-status">Loading...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Protocol Form Container</h2>
+        <div id="protokollFormContainer">
+            <!-- This should be populated by the protocol renderer -->
+        </div>
+        <div id="messageContainer" class="message-container" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Form Test</h2>
+        <form class="protokoll-form metadata-form">
+            <fieldset>
+                <legend>Manual Test Form</legend>
+                <div class="form-group">
+                    <label for="test-input">Test Input:</label>
+                    <input
+                        type="text"
+                        id="test-input"
+                        name="test.field"
+                        data-field="test.field"
+                        value=""
+                        placeholder="Type here to test"
+                        class="form-control"
+                        autocomplete="off"
+                    >
+                </div>
+            </fieldset>
+        </form>
+        <div id="manual-test-result">Ready</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console-output" style="background: #f5f5f5; padding: 10px; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+        <button onclick="clearConsole()">Clear</button>
+    </div>
+
+    <script>
+        // Capture console output
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToConsole(type, args) {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${type.toUpperCase()}: ${Array.from(args).join(' ')}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('log', args);
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', args);
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('warn', args);
+        };
+
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+
+        // Test manual form
+        document.getElementById('test-input').addEventListener('input', function(e) {
+            document.getElementById('manual-test-result').textContent = `Input working: "${e.target.value}"`;
+            document.getElementById('manual-test-result').className = 'success';
+            console.log('Manual input test:', e.target.value);
+        });
+
+        // Test protocol module loading
+        async function testProtocolModule() {
+            const statusDiv = document.getElementById('module-status');
+            
+            try {
+                console.log('Starting protocol module test...');
+                
+                // Test if modules can be imported
+                const protokollState = await import('./js/protokoll/protokoll-state.js');
+                console.log('✓ Protocol state module loaded');
+                
+                const protokollHandlers = await import('./js/protokoll/protokoll-handlers.js');
+                console.log('✓ Protocol handlers module loaded');
+                
+                const protokollRenderer = await import('./js/protokoll/protokoll-renderer.js');
+                console.log('✓ Protocol renderer module loaded');
+                
+                // Initialize modules
+                console.log('Initializing protocol state...');
+                protokollState.init();
+                
+                console.log('Initializing protocol handlers...');
+                protokollHandlers.init();
+                
+                console.log('Initializing protocol renderer...');
+                protokollRenderer.init();
+                
+                console.log('Rendering metadata form...');
+                protokollRenderer.renderStep('metadata');
+                
+                statusDiv.innerHTML = '<span class="success">✓ All modules loaded and initialized successfully</span>';
+                
+                // Test if form was rendered
+                setTimeout(() => {
+                    const form = document.querySelector('#protokollFormContainer .protokoll-form');
+                    if (form) {
+                        console.log('✓ Protocol form rendered successfully');
+                        const inputs = form.querySelectorAll('input[type="text"]');
+                        console.log(`Found ${inputs.length} text inputs in protocol form`);
+                        
+                        // Test first input
+                        if (inputs.length > 0) {
+                            const firstInput = inputs[0];
+                            console.log('Testing first input:', firstInput.id);
+                            
+                            // Try to focus and type
+                            firstInput.focus();
+                            firstInput.value = 'TEST123';
+                            firstInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            firstInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            
+                            console.log('Input test completed, value:', firstInput.value);
+                        }
+                    } else {
+                        console.error('✗ Protocol form not found after rendering');
+                        statusDiv.innerHTML += '<br><span class="error">✗ Form not rendered</span>';
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('Protocol module test failed:', error);
+                statusDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, starting tests...');
+            testProtocolModule();
+        });
+    </script>
+</body>
+</html>

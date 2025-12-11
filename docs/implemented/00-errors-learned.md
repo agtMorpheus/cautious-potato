@@ -11,3 +11,4 @@ This file tracks common errors and their solutions to prevent future issues.
 - Session timeout should include client-side warning system for better UX
 - 401 responses should include error type flags for proper client handling
 - Database session validation prevents session hijacking and provides audit trail
+- **Protocol text inputs not responding**: Event handlers only listening for 'change' events instead of 'input' events made text fields appear non-functional. Users expect real-time feedback when typing. Solution: Handle both 'input' events (for real-time updates) and 'change' events (for final validation) in form event delegation.
