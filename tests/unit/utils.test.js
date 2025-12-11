@@ -16,10 +16,29 @@ import {
   generateExportFilename,
   updateMetadataCellMap,
   getMetadataCellMap,
-  resetMetadataCellMap
+  resetMetadataCellMap,
+  readExcelFile,
+  loadAbrechnungTemplate,
+  createExportWorkbook,
+  safeReadAndParseProtokoll,
+  exportToExcel
 } from '../../js/utils.js';
 
+// Mock fetch globally
+global.fetch = jest.fn();
+
 describe('Utility Functions (utils.js)', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearAbrechnungTemplateCache();
+    // Reset XLSX mocks
+    if (global.XLSX) {
+        global.XLSX.read.mockReturnValue({ SheetNames: ['Sheet1'], Sheets: { 'Sheet1': {} } });
+        global.XLSX.writeFile.mockImplementation(() => {});
+    }
+  });
+
   describe('sumByPosition()', () => {
     test('aggregates quantities by position number', () => {
       const positions = [
@@ -312,6 +331,20 @@ describe('Utility Functions (utils.js)', () => {
       
       expect(positions.length).toBe(1);
       expect(positions[0].posNr).toBe('01.01.0020');
+    });
+
+    test('extracts position with non-standard format (fallback)', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Vorlage': {
+            'A30': { v: 'CustomPos-1' }, // Doesn't match pattern
+            'X30': { v: 5 }
+          }
+        }
+      };
+
+      const positions = extractPositions(mockWorkbook);
+      expect(positions[0].posNr).toBe('CustomPos-1');
     });
   });
 
@@ -643,4 +676,407 @@ describe('Utility Functions (utils.js)', () => {
       expect(summary.maxQuantity).toBe(Number.MAX_SAFE_INTEGER - 1);
     });
   });
+
+  describe('readExcelFile()', () => {
+    let originalFileReader;
+
+    beforeEach(() => {
+      originalFileReader = global.FileReader;
+    });
+
+    afterEach(() => {
+      global.FileReader = originalFileReader;
+    });
+
+    test('resolves with workbook and metadata on success', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+      global.XLSX.read.mockReturnValue({ SheetNames: ['Sheet1'] });
+
+      const file = new File([''], 'test.xlsx');
+      const result = await readExcelFile(file);
+
+      expect(result.workbook).toBeDefined();
+      expect(result.metadata.fileName).toBe('test.xlsx');
+      expect(global.XLSX.read).toHaveBeenCalled();
+    });
+
+    test('rejects if file is invalid type', async () => {
+      const file = new File([''], 'test.txt');
+      await expect(readExcelFile(file)).rejects.toThrow('Ungültiges Dateiformat');
+    });
+
+    test('rejects on file read error', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onerror();
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+
+      const file = new File([''], 'test.xlsx');
+      await expect(readExcelFile(file)).rejects.toThrow('Fehler beim Laden');
+    });
+
+    test('rejects if no file provided', async () => {
+        await expect(readExcelFile(null)).rejects.toThrow('Keine Datei');
+    });
+
+    test('rejects if workbook has no sheets', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+      global.XLSX.read.mockReturnValue({ SheetNames: [] });
+
+      const file = new File([''], 'test.xlsx');
+      await expect(readExcelFile(file)).rejects.toThrow('keine Arbeitsblätter');
+    });
+
+    test('rejects if XLSX reading throws', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+      global.XLSX.read.mockImplementation(() => { throw new Error('XLSX Error'); });
+
+      const file = new File([''], 'test.xlsx');
+      await expect(readExcelFile(file)).rejects.toThrow('Fehler beim Lesen der Excel-Datei');
+    });
+  });
+
+  describe('loadAbrechnungTemplate()', () => {
+    beforeEach(() => {
+        clearAbrechnungTemplateCache();
+        global.fetch.mockClear();
+    });
+
+    test('fetches and caches template', async () => {
+        global.fetch.mockResolvedValue({
+            ok: true,
+            arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
+        });
+        global.XLSX.read.mockReturnValue({ SheetNames: ['EAW'] });
+
+        await loadAbrechnungTemplate();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+
+        await loadAbrechnungTemplate();
+        expect(global.fetch).toHaveBeenCalledTimes(1); // Should be cached
+    });
+
+    test('throws on network error', async () => {
+        global.fetch.mockRejectedValue(new Error('Failed to fetch'));
+        await expect(loadAbrechnungTemplate()).rejects.toThrow('Netzwerkfehler');
+    });
+
+    test('throws on 404', async () => {
+        global.fetch.mockResolvedValue({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found'
+        });
+        await expect(loadAbrechnungTemplate()).rejects.toThrow('nicht gefunden');
+    });
+
+    test('throws on 500', async () => {
+        global.fetch.mockResolvedValue({
+            ok: false,
+            status: 500,
+            statusText: 'Server Error'
+        });
+        await expect(loadAbrechnungTemplate()).rejects.toThrow('Server-Fehler');
+    });
+
+    test('throws if template misses EAW sheet', async () => {
+        global.fetch.mockResolvedValue({
+            ok: true,
+            arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
+        });
+        global.XLSX.read.mockReturnValue({ SheetNames: ['WrongSheet'] });
+
+        await expect(loadAbrechnungTemplate()).rejects.toThrow('Template-Arbeitsmappe fehlt "EAW"');
+    });
+  });
+
+  describe('createExportWorkbook()', () => {
+    beforeEach(() => {
+        clearAbrechnungTemplateCache();
+        global.fetch.mockResolvedValue({
+            ok: true,
+            arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
+        });
+        global.XLSX.read.mockReturnValue({
+            SheetNames: ['EAW'],
+            Sheets: { 'EAW': {} }
+        });
+    });
+
+    test('creates export workbook successfully', async () => {
+        const abrechnungData = {
+            header: { date: '2023-01-01' },
+            positionen: { '01.01.0010': 5 }
+        };
+
+        const wb = await createExportWorkbook(abrechnungData);
+        expect(wb).toBeDefined();
+        expect(wb.SheetNames).toContain('EAW');
+    });
+
+    test('throws if data is invalid', async () => {
+        await expect(createExportWorkbook(null)).rejects.toThrow('Ungültige abrechnungData');
+        await expect(createExportWorkbook({})).rejects.toThrow('Header oder Positionen fehlen');
+    });
+
+    test('handles template load failure', async () => {
+        global.fetch.mockRejectedValue(new Error('Failed to fetch'));
+        const abrechnungData = { header: {}, positionen: {} };
+        await expect(createExportWorkbook(abrechnungData)).rejects.toThrow('Fehler beim Erstellen');
+    });
+  });
+
+  describe('safeReadAndParseProtokoll()', () => {
+     let originalFileReader;
+
+    beforeEach(() => {
+      originalFileReader = global.FileReader;
+    });
+
+    afterEach(() => {
+      global.FileReader = originalFileReader;
+    });
+
+    test('returns success result on valid file', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+
+      const mockWorkbook = {
+          SheetNames: ['Vorlage'],
+          Sheets: {
+              'Vorlage': {
+                  'U3': { v: 'P123' },
+                  'N5': { v: 'O123' },
+                  'A10': { v: 'Anlage' },
+                  'T10': { v: 'Ort' },
+                  'T7': { v: 'Firma' },
+                  'A5': { v: 'AG' },
+                  'A30': { v: '01.01.0010' },
+                  'X30': { v: 5 }
+              }
+          }
+      };
+      global.XLSX.read.mockReturnValue(mockWorkbook);
+
+      const file = new File([''], 'test.xlsx');
+      const result = await safeReadAndParseProtokoll(file);
+
+      expect(result.success).toBe(true);
+      expect(result.metadata.protokollNr).toBe('P123');
+      expect(result.positionen.length).toBe(1);
+      expect(result.positionSums['01.01.0010']).toBe(5);
+    });
+
+    test('returns error on file read failure', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onerror();
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+
+      const file = new File([''], 'test.xlsx');
+      const result = await safeReadAndParseProtokoll(file);
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0]).toContain('Datei-Lesefehler');
+    });
+
+    test('returns error on metadata parse failure', async () => {
+      const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+
+      const mockWorkbook = {
+          SheetNames: ['Vorlage'],
+          Sheets: {
+              'Vorlage': {
+                  // Missing required fields
+                  'U3': { v: 'P123' }
+              }
+          }
+      };
+      global.XLSX.read.mockReturnValue(mockWorkbook);
+
+      const file = new File([''], 'test.xlsx');
+      const result = await safeReadAndParseProtokoll(file);
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0]).toContain('Metadaten-Parsefehler');
+    });
+
+
+    test('collects validation warnings', async () => {
+       const mockReader = {
+        readAsArrayBuffer: jest.fn(function() {
+          this.onload({ target: { result: new ArrayBuffer(8) } });
+        }),
+        onload: null,
+        onerror: null
+      };
+      global.FileReader = jest.fn(() => mockReader);
+
+      const mockWorkbook = {
+          SheetNames: ['Vorlage'],
+          Sheets: {
+              'Vorlage': {
+                  'U3': { v: 'P123' },
+                  'N5': { v: 'O123' },
+                  'A10': { v: 'Anlage' },
+                  'T10': { v: 'Ort' },
+                  'T7': { v: 'Firma' },
+                  'A5': { v: 'AG' },
+                  'A30': { v: '01.01.0010' },
+                  'X30': { v: 5 },
+                  'A31': { v: '01.01.0010' }, // Duplicate
+                  'X31': { v: 3 }
+              }
+          }
+      };
+      global.XLSX.read.mockReturnValue(mockWorkbook);
+
+      const file = new File([''], 'test.xlsx');
+      const result = await safeReadAndParseProtokoll(file);
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings[0]).toContain('erscheint mehrfach');
+    });
+  });
+
+  describe('exportToExcel()', () => {
+    test('calls XLSX.writeFile with correct arguments', () => {
+        const wb = { SheetNames: ['Test'] };
+        const metadata = { orderNumber: '123' };
+
+        exportToExcel(wb, metadata);
+
+        expect(global.XLSX.writeFile).toHaveBeenCalledWith(
+            wb,
+            expect.stringContaining('Abrechnung_123'),
+            expect.objectContaining({ bookType: 'xlsx' })
+        );
+    });
+
+    test('handles string metadata as filename', () => {
+        const wb = { SheetNames: ['Test'] };
+        exportToExcel(wb, 'manual_name.xlsx');
+
+        expect(global.XLSX.writeFile).toHaveBeenCalledWith(
+            wb,
+            'manual_name.xlsx',
+            expect.any(Object)
+        );
+    });
+
+    test('throws on write error', () => {
+        global.XLSX.writeFile.mockImplementation(() => { throw new Error('Write failed'); });
+        expect(() => exportToExcel({}, {})).toThrow('Fehler beim Exportieren');
+    });
+  });
+
+  describe('Flexible Metadata Search', () => {
+    test('finds metadata by pattern when strict mode is false', () => {
+        const mockWorkbook = {
+            Sheets: {
+                'Vorlage': {
+                    'A1': { v: 'Auftrags-Nr.:' }, // Label
+                    'B1': { v: 'FOUND-123' },     // Value next to it
+                    // Others in default locations
+                    'U3': { v: 'P1' },
+                    'A10': { v: 'An' },
+                    'T10': { v: 'Ei' },
+                    'T7': { v: 'Fi' },
+                    'A5': { v: 'Ag' }
+                }
+            }
+        };
+
+        const metadata = parseProtokollMetadata(mockWorkbook, { strictMode: false });
+
+        expect(metadata.auftragsNr).toBe('FOUND-123');
+    });
+
+    test('prioritizes configured cells over pattern search', () => {
+        const mockWorkbook = {
+            Sheets: {
+                'Vorlage': {
+                    'N5': { v: 'PRIORITY-123' }, // Default location
+                    'A1': { v: 'Auftrags-Nr.:' },
+                    'B1': { v: 'PATTERN-456' }
+                }
+            }
+        };
+        // Fill other required fields
+        mockWorkbook.Sheets.Vorlage['U3'] = { v: 'P1' };
+        mockWorkbook.Sheets.Vorlage['A10'] = { v: 'An' };
+        mockWorkbook.Sheets.Vorlage['T10'] = { v: 'Ei' };
+        mockWorkbook.Sheets.Vorlage['T7'] = { v: 'Fi' };
+        mockWorkbook.Sheets.Vorlage['A5'] = { v: 'Ag' };
+
+        const metadata = parseProtokollMetadata(mockWorkbook, { strictMode: false });
+
+        expect(metadata.auftragsNr).toBe('PRIORITY-123');
+    });
+
+    test('ignores label if adjacent cell is also a label (pattern match)', () => {
+         const mockWorkbook = {
+            Sheets: {
+                'Vorlage': {
+                    'A1': { v: 'Auftrags-Nr.:' },
+                    'B1': { v: 'Auftrags-Nr.:' }, // Matches pattern too
+                    'C1': { v: 'REAL-VALUE' }
+                }
+            }
+        };
+        // Fill other required fields
+        mockWorkbook.Sheets.Vorlage['U3'] = { v: 'P1' };
+        mockWorkbook.Sheets.Vorlage['A10'] = { v: 'An' };
+        mockWorkbook.Sheets.Vorlage['T10'] = { v: 'Ei' };
+        mockWorkbook.Sheets.Vorlage['T7'] = { v: 'Fi' };
+        mockWorkbook.Sheets.Vorlage['A5'] = { v: 'Ag' };
+
+        const metadata = parseProtokollMetadata(mockWorkbook, { strictMode: false });
+        expect(metadata.auftragsNr).toBe('REAL-VALUE');
+    });
+  });
+
 });
