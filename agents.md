@@ -282,6 +282,64 @@ Each agent can be tested independently:
 
 ---
 
+## Visual Consistency Guidelines
+
+**Goal:** Maintain unified design language across all pages using the dashboard as source of truth.
+
+### CSS Variable Usage
+
+Always use CSS variables from `css/variables.css`:
+
+```css
+/* ✓ Correct */
+color: var(--primary-main);
+padding: var(--space-md);
+border-radius: var(--radius-md);
+
+/* ✗ Avoid */
+color: #3b82f6;
+padding: 16px;
+border-radius: 8px;
+```
+
+### Design Token Reference
+
+| Category | Variables |
+|----------|-----------|
+| Colors | `--primary-main`, `--c-success`, `--c-warning`, `--c-danger`, `--c-info` |
+| Backgrounds | `--bg-app`, `--bg-surface`, `--bg-card`, `--bg-hover`, `--bg-glass` |
+| Text | `--text-main`, `--text-muted`, `--text-secondary` |
+| Spacing | `--space-xs` (4px), `--space-sm` (8px), `--space-md` (16px), `--space-lg` (24px), `--space-xl` (32px) |
+| Borders | `--border-base`, `--border-highlight`, `--radius-sm/md/lg` |
+| Shadows | `--shadow-sm`, `--shadow-md`, `--shadow-lg` |
+| Transitions | `--duration-fast` (150ms), `--duration-normal` (250ms) |
+
+### Component Patterns
+
+Follow dashboard component styling:
+- **Cards:** Use `.card` class with `--bg-card`, `--border-base`, `--radius-lg`
+- **Buttons:** Use `.btn .btn-primary` or `.btn .btn-secondary`
+- **Inputs:** Use `.form-input` with `--border-base`, `--radius-md`
+- **Typography:** Use `--font-family-base` for text, monospace for code/metrics
+
+### Validation Tools
+
+```bash
+npm run test:visual    # Run visual consistency tests
+npm run audit:visual   # Detect hardcoded values
+```
+
+### Checklist for New Pages
+
+- [ ] Import `variables.css` before other stylesheets
+- [ ] No hardcoded colors (use `--*` variables)
+- [ ] No hardcoded spacing (use `--space-*`)
+- [ ] Components match dashboard styling
+- [ ] Dark mode support via `[data-theme="dark"]`
+- [ ] Run `npm run audit:visual` before commit
+
+---
+
 ## Performance Considerations
 
 - **State Cloning:** `structuredClone()` is fast for small state objects (<10KB)
