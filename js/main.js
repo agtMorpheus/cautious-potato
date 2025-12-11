@@ -52,6 +52,7 @@ import {
 
 // HR Module imports (Phase 5)
 import { hrIntegration } from './modules/hr/hrIntegration.js';
+import { initializeHrDashboard } from './modules/hr/main.js';
 import {
     getHrState,
     subscribeHr,
@@ -459,25 +460,8 @@ function setupProtokollExportHandlers() {
 function initializeHRModule() {
     console.log('HR Module: Initializing...');
 
-    // Initialize HR tab navigation within the HR view
-    const hrNavBtns = document.querySelectorAll('[data-hr-tab]');
-    hrNavBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const tabName = e.currentTarget.dataset.hrTab;
-            switchHRTab(tabName);
-        });
-    });
-
-    // Subscribe to HR state changes
-    subscribeHr((state) => {
-        updateHRDashboardStats(state);
-    });
-
-    // Initialize HR event handlers
-    initializeHREventHandlers();
-
-    // Initial render
-    updateHRDashboardStats(getHrState());
+    // Delegate to the dedicated HR module handler
+    initializeHrDashboard();
 
     console.log('✓ HR Module initialized');
     return true;

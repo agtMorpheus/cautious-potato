@@ -104,12 +104,12 @@ function switchTab(tabName) {
   
   // Update nav button states
   document.querySelectorAll('.hr-nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabName);
+    btn.classList.toggle('active', btn.dataset.hrTab === tabName);
   });
   
   // Update tab visibility
   document.querySelectorAll('.hr-tab').forEach(tab => {
-    tab.classList.toggle('hr-tab--active', tab.id === `${tabName}-tab`);
+    tab.classList.toggle('hr-tab--active', tab.id === `hr-${tabName}-tab`);
   });
   
   // Render active tab content
@@ -148,8 +148,8 @@ function renderTabContent(tabName) {
  * Render employees tab content
  */
 function renderEmployeesTab() {
-  const statsContainer = document.getElementById('employee-stats-container');
-  const listContainer = document.getElementById('employee-list-container');
+  const statsContainer = document.getElementById('hr-employee-stats-container');
+  const listContainer = document.getElementById('hr-employee-list-container');
   
   if (statsContainer) {
     renderEmployeeStats(statsContainer);
@@ -183,9 +183,9 @@ function renderEmployeesTab() {
  * Render attendance tab content
  */
 function renderAttendanceTab() {
-  const calendarContainer = document.getElementById('attendance-calendar-container');
-  const statsContainer = document.getElementById('attendance-stats-container');
-  const employeeSelect = document.getElementById('attendance-employee-filter');
+  const calendarContainer = document.getElementById('hr-attendance-calendar-container');
+  const statsContainer = document.getElementById('hr-attendance-stats-container');
+  const employeeSelect = document.getElementById('hr-attendance-employee-filter');
   
   // Populate employee filter dropdown
   if (employeeSelect) {
@@ -238,9 +238,9 @@ function renderAttendanceTab() {
  * Render schedule tab content
  */
 function renderScheduleTab() {
-  const gridContainer = document.getElementById('schedule-grid-container');
-  const approvalsContainer = document.getElementById('pending-approvals-container');
-  const employeeSelect = document.getElementById('schedule-employee-select');
+  const gridContainer = document.getElementById('hr-schedule-grid-container');
+  const approvalsContainer = document.getElementById('hr-pending-approvals-container');
+  const employeeSelect = document.getElementById('hr-schedule-employee-select');
   
   // Initialize week start if not set
   if (!dashboardState.currentWeekStart) {
@@ -255,7 +255,7 @@ function renderScheduleTab() {
   }
   
   // Update week display
-  const weekInput = document.getElementById('week-start-date');
+  const weekInput = document.getElementById('hr-week-start-date');
   if (weekInput) {
     weekInput.value = dashboardState.currentWeekStart;
   }
@@ -312,9 +312,9 @@ function renderScheduleTab() {
  * Render vacation tab content
  */
 function renderVacationTab() {
-  const calendarContainer = document.getElementById('vacation-calendar-container');
-  const requestsContainer = document.getElementById('vacation-requests-container');
-  const balanceContainer = document.getElementById('vacation-balance-container');
+  const calendarContainer = document.getElementById('hr-vacation-calendar-container');
+  const requestsContainer = document.getElementById('hr-vacation-requests-container');
+  const balanceContainer = document.getElementById('hr-vacation-balance-container');
   
   // Create employee map for name display
   const employeeMap = new Map();
@@ -617,7 +617,7 @@ function openScheduleModal(employeeId = null, weekStart = null, scheduleId = nul
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.remove('hidden');
+    modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
@@ -630,7 +630,7 @@ function openModal(modalId) {
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.add('hidden');
+    modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
@@ -686,8 +686,8 @@ function hideAlert(alertId) {
  */
 function updateEmptyState() {
   const employees = getAllEmployees();
-  const emptyState = document.getElementById('employees-empty');
-  const listContainer = document.getElementById('employee-list-container');
+  const emptyState = document.getElementById('hr-employees-empty');
+  const listContainer = document.getElementById('hr-employee-list-container');
   
   if (employees.length === 0) {
     emptyState?.classList.remove('hidden');
@@ -720,24 +720,24 @@ function bindEventListeners() {
   // Tab navigation
   document.querySelectorAll('.hr-nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const tab = e.currentTarget.dataset.tab;
+      const tab = e.currentTarget.dataset.hrTab;
       if (tab) switchTab(tab);
     });
   });
   
   // Add employee buttons
-  document.getElementById('add-employee-btn')?.addEventListener('click', () => openEmployeeModal());
-  document.getElementById('add-employee-empty')?.addEventListener('click', (e) => {
+  document.getElementById('hr-add-employee-btn')?.addEventListener('click', () => openEmployeeModal());
+  document.getElementById('hr-add-employee-empty')?.addEventListener('click', (e) => {
     e.preventDefault();
     openEmployeeModal();
   });
   
   // Record attendance button
-  document.getElementById('record-attendance-btn')?.addEventListener('click', () => openAttendanceModal());
+  document.getElementById('hr-record-attendance-btn')?.addEventListener('click', () => openAttendanceModal());
   
   // Create schedule button
-  document.getElementById('create-schedule-btn')?.addEventListener('click', () => {
-    const employeeSelect = document.getElementById('schedule-employee-select');
+  document.getElementById('hr-create-schedule-btn')?.addEventListener('click', () => {
+    const employeeSelect = document.getElementById('hr-schedule-employee-select');
     const selectedId = employeeSelect?.value;
     if (selectedId) {
       openScheduleModal(selectedId, dashboardState.currentWeekStart);
@@ -747,59 +747,59 @@ function bindEventListeners() {
   });
   
   // Request vacation button
-  document.getElementById('request-vacation-btn')?.addEventListener('click', () => openVacationModal());
+  document.getElementById('hr-request-vacation-btn')?.addEventListener('click', () => openVacationModal());
   
   // Week navigation
-  document.getElementById('prev-week-btn')?.addEventListener('click', () => {
+  document.getElementById('hr-prev-week-btn')?.addEventListener('click', () => {
     const currentDate = new Date(dashboardState.currentWeekStart);
     currentDate.setDate(currentDate.getDate() - 7);
     dashboardState.currentWeekStart = currentDate.toISOString().split('T')[0];
     renderScheduleTab();
   });
   
-  document.getElementById('next-week-btn')?.addEventListener('click', () => {
+  document.getElementById('hr-next-week-btn')?.addEventListener('click', () => {
     const currentDate = new Date(dashboardState.currentWeekStart);
     currentDate.setDate(currentDate.getDate() + 7);
     dashboardState.currentWeekStart = currentDate.toISOString().split('T')[0];
     renderScheduleTab();
   });
   
-  document.getElementById('week-start-date')?.addEventListener('change', (e) => {
+  document.getElementById('hr-week-start-date')?.addEventListener('change', (e) => {
     dashboardState.currentWeekStart = getWeekStart(new Date(e.target.value)).toISOString().split('T')[0];
     renderScheduleTab();
   });
   
   // Employee filter
-  document.getElementById('employee-search')?.addEventListener('input', (e) => {
+  document.getElementById('hr-employee-search')?.addEventListener('input', (e) => {
     setFilters({ searchTerm: e.target.value });
     renderEmployeesTab();
   });
   
-  document.getElementById('department-filter')?.addEventListener('change', (e) => {
+  document.getElementById('hr-department-filter')?.addEventListener('change', (e) => {
     setFilters({ department: e.target.value || null });
     renderEmployeesTab();
   });
   
-  document.getElementById('status-filter')?.addEventListener('change', (e) => {
+  document.getElementById('hr-status-filter')?.addEventListener('change', (e) => {
     setFilters({ status: e.target.value || null });
     renderEmployeesTab();
   });
   
   // Attendance employee filter
-  document.getElementById('attendance-employee-filter')?.addEventListener('change', (e) => {
+  document.getElementById('hr-attendance-employee-filter')?.addEventListener('change', (e) => {
     dashboardState.selectedEmployeeId = e.target.value || null;
     renderAttendanceTab();
   });
   
   // Schedule employee select
-  document.getElementById('schedule-employee-select')?.addEventListener('change', (e) => {
+  document.getElementById('hr-schedule-employee-select')?.addEventListener('change', (e) => {
     dashboardState.selectedEmployeeId = e.target.value || null;
   });
   
   // Attendance date filters
-  document.getElementById('attendance-filter-btn')?.addEventListener('click', () => {
-    const startDate = document.getElementById('attendance-start-date')?.value;
-    const endDate = document.getElementById('attendance-end-date')?.value;
+  document.getElementById('hr-attendance-filter-btn')?.addEventListener('click', () => {
+    const startDate = document.getElementById('hr-attendance-start-date')?.value;
+    const endDate = document.getElementById('hr-attendance-end-date')?.value;
     if (startDate && endDate) {
       setFilters({
         dateRange: { start: startDate, end: endDate }
@@ -809,9 +809,9 @@ function bindEventListeners() {
   });
   
   // Modal close buttons
-  document.querySelectorAll('.hr-modal__close').forEach(btn => {
+  document.querySelectorAll('.modal__close').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const modal = e.target.closest('.hr-modal');
+      const modal = e.target.closest('.modal');
       if (modal) {
         closeModal(modal.id);
       }
@@ -819,10 +819,9 @@ function bindEventListeners() {
   });
   
   // Modal overlay click to close
-  document.querySelectorAll('.hr-modal__overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-      const modal = e.target.closest('.hr-modal');
-      if (modal) {
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
         closeModal(modal.id);
       }
     });
@@ -839,17 +838,17 @@ function bindEventListeners() {
   });
   
   // Header actions
-  document.getElementById('sync-btn')?.addEventListener('click', () => {
+  document.getElementById('hr-sync-btn')?.addEventListener('click', () => {
     showAlert('info', 'Synchronisation noch nicht implementiert');
   });
   
-  document.getElementById('export-btn')?.addEventListener('click', () => {
+  document.getElementById('hr-export-btn')?.addEventListener('click', () => {
     handleExportHrData();
     showAlert('success', 'Daten exportiert');
   });
   
   // Submit schedule button
-  document.getElementById('submit-schedule-btn')?.addEventListener('click', () => {
+  document.getElementById('hr-submit-schedule-btn')?.addEventListener('click', () => {
     showAlert('info', 'Bitte einen Wochenplan zum Einreichen auswählen');
   });
   
@@ -857,7 +856,7 @@ function bindEventListeners() {
   document.addEventListener('keydown', (e) => {
     // Escape to close modals
     if (e.key === 'Escape') {
-      document.querySelectorAll('.hr-modal:not(.hidden)').forEach(modal => {
+      document.querySelectorAll('.modal.is-open').forEach(modal => {
         closeModal(modal.id);
       });
     }
@@ -893,13 +892,6 @@ function initializeHrDashboard() {
   renderTabContent(dashboardState.currentTab);
   
   console.log('HR Dashboard initialized');
-}
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeHrDashboard);
-} else {
-  initializeHrDashboard();
 }
 
 // Export for testing
