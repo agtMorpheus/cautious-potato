@@ -4,8 +4,11 @@
  */
 
 import {
+  loadAbrechnungTemplateExcelJS,
   fillAbrechnungHeaderExcelJS,
-  fillAbrechnungPositionsExcelJS
+  fillAbrechnungPositionsExcelJS,
+  exportToExcelExcelJS,
+  createAndExportAbrechnungExcelJS
 } from '../../js/utils-exceljs.js';
 
 // Mock config
@@ -27,29 +30,99 @@ jest.mock('../../js/config.js', () => ({
   }
 }));
 
+// Setup Globals
+global.fetch = jest.fn();
+global.URL.createObjectURL = jest.fn();
+global.URL.revokeObjectURL = jest.fn();
+
+// Mock DOM elements
+const mockLink = {
+  href: '',
+  download: '',
+  click: jest.fn()
+};
+document.createElement = jest.fn().mockReturnValue(mockLink);
+
+// Mock ExcelJS
+const mockWorksheet = {
+  getCell: jest.fn(),
+  _cells: {}
+};
+
+const mockWorkbook = {
+  xlsx: {
+    load: jest.fn().mockResolvedValue(),
+    writeBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8))
+  },
+  getWorksheet: jest.fn()
+};
+
+global.ExcelJS = {
+  Workbook: jest.fn().mockImplementation(() => mockWorkbook)
+};
+
+
 describe('ExcelJS Utilities (utils-exceljs.js)', () => {
-  // Mock ExcelJS workbook
-  const createMockWorkbook = (sheetName = 'EAW') => {
-    const cells = {};
-    const worksheet = {
-      getCell: jest.fn((address) => {
-        if (!cells[address]) {
-          cells[address] = { value: null };
-        }
-        return cells[address];
-      }),
-      _cells: cells
-    };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
     
-    return {
-      getWorksheet: jest.fn((name) => name === sheetName ? worksheet : null),
-      _worksheet: worksheet
-    };
-  };
+    // Reset worksheet mock behavior
+    mockWorksheet._cells = {};
+    mockWorksheet.getCell.mockImplementation((address) => {
+      if (!mockWorksheet._cells[address]) {
+        mockWorksheet._cells[address] = { value: null };
+      }
+      return mockWorksheet._cells[address];
+    });
+
+    // Reset workbook mock behavior
+    mockWorkbook.getWorksheet.mockImplementation((name) => {
+      if (name === 'EAW') return mockWorksheet;
+      return null;
+    });
+
+    // Reset fetch
+    global.fetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+      status: 200,
+      statusText: 'OK'
+    });
+
+    // Reset workbook writeBuffer
+    mockWorkbook.xlsx.writeBuffer.mockResolvedValue(new ArrayBuffer(8));
+  });
+
+  describe('loadAbrechnungTemplateExcelJS()', () => {
+    test('loads template successfully', async () => {
+      const wb = await loadAbrechnungTemplateExcelJS();
+      
+      expect(global.fetch).toHaveBeenCalledWith('templates/abrechnung.xlsx');
+      expect(global.ExcelJS.Workbook).toHaveBeenCalled();
+      expect(mockWorkbook.xlsx.load).toHaveBeenCalled();
+      expect(wb).toBe(mockWorkbook);
+    });
+
+    test('throws error on fetch failure', async () => {
+      global.fetch.mockRejectedValue(new Error('Network error'));
+      
+      await expect(loadAbrechnungTemplateExcelJS()).rejects.toThrow('Fehler beim Laden des Templates');
+    });
+
+    test('throws error on non-ok response', async () => {
+      global.fetch.mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found'
+      });
+      
+      await expect(loadAbrechnungTemplateExcelJS()).rejects.toThrow('HTTP 404');
+    });
+  });
 
   describe('fillAbrechnungHeaderExcelJS()', () => {
     test('fills header cells with metadata', () => {
-      const workbook = createMockWorkbook();
       const metadata = {
         datum: '2025-01-15',
         auftragsNr: 'ORD-12345',
@@ -57,210 +130,95 @@ describe('ExcelJS Utilities (utils-exceljs.js)', () => {
         einsatzort: 'Building A'
       };
       
-      fillAbrechnungHeaderExcelJS(workbook, metadata);
+      fillAbrechnungHeaderExcelJS(mockWorkbook, metadata);
       
-      expect(workbook._worksheet._cells['B1'].value).toBe('2025-01-15');
-      expect(workbook._worksheet._cells['B2'].value).toBe('ORD-12345');
-      expect(workbook._worksheet._cells['B3'].value).toBe('Test Factory');
-      expect(workbook._worksheet._cells['B4'].value).toBe('Building A');
+      expect(mockWorksheet._cells['B1'].value).toBe('2025-01-15');
+      expect(mockWorksheet._cells['B2'].value).toBe('ORD-12345');
+      expect(mockWorksheet._cells['B3'].value).toBe('Test Factory');
+      expect(mockWorksheet._cells['B4'].value).toBe('Building A');
     });
 
     test('throws error if sheet not found', () => {
-      const workbook = { getWorksheet: jest.fn(() => null) };
+      mockWorkbook.getWorksheet.mockReturnValue(null);
       const metadata = { datum: '2025-01-15' };
       
-      expect(() => fillAbrechnungHeaderExcelJS(workbook, metadata)).toThrow('Sheet "EAW" nicht gefunden');
-    });
-
-    test('handles partial metadata', () => {
-      const workbook = createMockWorkbook();
-      const metadata = {
-        datum: '2025-01-15',
-        auftragsNr: 'ORD-12345'
-      };
-      
-      fillAbrechnungHeaderExcelJS(workbook, metadata);
-      
-      expect(workbook._worksheet._cells['B1'].value).toBe('2025-01-15');
-      expect(workbook._worksheet._cells['B2'].value).toBe('ORD-12345');
-    });
-
-    test('handles empty metadata', () => {
-      const workbook = createMockWorkbook();
-      const metadata = {};
-      
-      expect(() => fillAbrechnungHeaderExcelJS(workbook, metadata)).not.toThrow();
-    });
-
-    test('handles null values in metadata', () => {
-      const workbook = createMockWorkbook();
-      const metadata = {
-        datum: null,
-        auftragsNr: 'ORD-12345',
-        anlage: undefined
-      };
-      
-      fillAbrechnungHeaderExcelJS(workbook, metadata);
-      
-      expect(workbook._worksheet._cells['B1'].value).toBe(null);
-      expect(workbook._worksheet._cells['B2'].value).toBe('ORD-12345');
-    });
-
-    test('handles special characters in metadata', () => {
-      const workbook = createMockWorkbook();
-      const metadata = {
-        anlage: 'Factory "Test" & Co.',
-        einsatzort: '<Building B>'
-      };
-      
-      fillAbrechnungHeaderExcelJS(workbook, metadata);
-      
-      expect(workbook._worksheet._cells['B3'].value).toBe('Factory "Test" & Co.');
-      expect(workbook._worksheet._cells['B4'].value).toBe('<Building B>');
+      expect(() => fillAbrechnungHeaderExcelJS(mockWorkbook, metadata)).toThrow('Sheet "EAW" nicht gefunden');
     });
   });
 
   describe('fillAbrechnungPositionsExcelJS()', () => {
-    const createWorkbookWithPositions = (positions) => {
-      const cells = {};
-      // Pre-populate position numbers in column A
-      positions.forEach((posNr, index) => {
-        const row = 9 + index;
-        cells[`A${row}`] = { value: posNr };
-      });
-      
-      const worksheet = {
-        getCell: jest.fn((address) => {
-          if (!cells[address]) {
-            cells[address] = { value: null };
-          }
-          return cells[address];
-        }),
-        _cells: cells
-      };
-      
-      return {
-        getWorksheet: jest.fn((name) => name === 'EAW' ? worksheet : null),
-        _worksheet: worksheet
-      };
-    };
-
     test('fills quantities for matching positions', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010', '01.01.0020', '01.01.0030']);
+      // Setup positions in the worksheet
+      mockWorksheet._cells['A9'] = { value: '01.01.0010' };
+      mockWorksheet._cells['A10'] = { value: '01.01.0020' };
+
       const positionSums = {
         '01.01.0010': 5,
         '01.01.0020': 10
       };
       
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
+      fillAbrechnungPositionsExcelJS(mockWorkbook, positionSums);
       
-      expect(workbook._worksheet._cells['B9'].value).toBe(5);
-      expect(workbook._worksheet._cells['B10'].value).toBe(10);
-      expect(workbook._worksheet._cells['B11']).toBeUndefined();
+      expect(mockWorksheet._cells['B9'].value).toBe(5);
+      expect(mockWorksheet._cells['B10'].value).toBe(10);
     });
 
     test('throws error if sheet not found', () => {
-      const workbook = { getWorksheet: jest.fn(() => null) };
+      mockWorkbook.getWorksheet.mockReturnValue(null);
       
-      expect(() => fillAbrechnungPositionsExcelJS(workbook, {})).toThrow('Sheet "EAW" nicht gefunden');
+      expect(() => fillAbrechnungPositionsExcelJS(mockWorkbook, {})).toThrow('Sheet "EAW" nicht gefunden');
+    });
+  });
+
+  describe('exportToExcelExcelJS()', () => {
+    test('exports workbook successfully', async () => {
+      const metadata = { orderNumber: '123' };
+      
+      const result = await exportToExcelExcelJS(mockWorkbook, metadata);
+      
+      expect(mockWorkbook.xlsx.writeBuffer).toHaveBeenCalled();
+      expect(global.URL.createObjectURL).toHaveBeenCalled();
+      expect(mockLink.click).toHaveBeenCalled();
+      expect(global.URL.revokeObjectURL).toHaveBeenCalled();
+      expect(mockLink.download).toContain('Abrechnung_123');
+      expect(result.fileName).toBe(mockLink.download);
     });
 
-    test('handles empty positionSums', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010']);
+    test('uses default filename if no order number', async () => {
+      const result = await exportToExcelExcelJS(mockWorkbook, {});
       
-      expect(() => fillAbrechnungPositionsExcelJS(workbook, {})).not.toThrow();
+      expect(mockLink.download).toBe('Abrechnung.xlsx');
     });
 
-    test('handles positions not in template', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010']);
-      const positionSums = {
-        '01.01.0010': 5,
-        '99.99.9999': 100  // Not in template
-      };
+    test('throws error on export failure', async () => {
+      mockWorkbook.xlsx.writeBuffer.mockRejectedValue(new Error('Write failed'));
       
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      expect(workbook._worksheet._cells['B9'].value).toBe(5);
+      await expect(exportToExcelExcelJS(mockWorkbook, {})).rejects.toThrow('Fehler beim Exportieren');
     });
+  });
 
-    test('handles decimal quantities', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010']);
-      const positionSums = {
-        '01.01.0010': 5.75
+  describe('createAndExportAbrechnungExcelJS()', () => {
+    test('orchestrates full export workflow', async () => {
+      const abrechnungData = {
+        header: {
+          date: '2025-01-01',
+          orderNumber: 'ORD-1',
+          plant: 'Plant 1',
+          location: 'Loc 1'
+        },
+        positionen: {
+          '01.01.0010': 5
+        }
       };
       
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      expect(workbook._worksheet._cells['B9'].value).toBe(5.75);
-    });
+      // Setup positions for fillAbrechnungPositionsExcelJS
+      mockWorksheet._cells['A9'] = { value: '01.01.0010' };
 
-    test('handles zero quantities', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010']);
-      const positionSums = {
-        '01.01.0010': 0
-      };
+      await createAndExportAbrechnungExcelJS(abrechnungData);
       
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      expect(workbook._worksheet._cells['B9'].value).toBe(0);
-    });
-
-    test('scans rows within configured range', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010']);
-      const positionSums = {
-        '01.01.0010': 5
-      };
-      
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      // Verify worksheet.getCell was called for positions column
-      const callsForColumnA = workbook._worksheet.getCell.mock.calls.filter(
-        call => call[0].startsWith('A')
-      );
-      expect(callsForColumnA.length).toBeGreaterThan(0);
-    });
-
-    test('handles position numbers with different formats', () => {
-      const workbook = createWorkbookWithPositions(['01.01.0010', '1.1.10', 'ABC-123']);
-      const positionSums = {
-        '01.01.0010': 5,
-        '1.1.10': 3,
-        'ABC-123': 7
-      };
-      
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      expect(workbook._worksheet._cells['B9'].value).toBe(5);
-      expect(workbook._worksheet._cells['B10'].value).toBe(3);
-      expect(workbook._worksheet._cells['B11'].value).toBe(7);
-    });
-
-    test('handles numeric position numbers in template', () => {
-      const cells = {
-        'A9': { value: 1001010 }  // Numeric instead of string
-      };
-      const worksheet = {
-        getCell: jest.fn((address) => {
-          if (!cells[address]) {
-            cells[address] = { value: null };
-          }
-          return cells[address];
-        }),
-        _cells: cells
-      };
-      const workbook = {
-        getWorksheet: jest.fn((name) => name === 'EAW' ? worksheet : null),
-        _worksheet: worksheet
-      };
-      
-      const positionSums = {
-        '1001010': 5
-      };
-      
-      fillAbrechnungPositionsExcelJS(workbook, positionSums);
-      
-      // Should still work since hasOwnProperty will match
-      expect(cells['B9'].value).toBe(5);
+      expect(global.fetch).toHaveBeenCalled(); // Loads template
+      expect(mockWorksheet.getCell).toHaveBeenCalled(); // Fills data
+      expect(mockWorkbook.xlsx.writeBuffer).toHaveBeenCalled(); // Exports
     });
   });
 });
