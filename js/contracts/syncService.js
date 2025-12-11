@@ -45,6 +45,15 @@ let autoSyncIntervalId = null;
 const statusListeners = new Set();
 
 /**
+ * Configuration constants for sync performance
+ */
+const SYNC_CONFIG = {
+    LARGE_DATASET_THRESHOLD: 500,  // Contracts count threshold for chunk size adjustment
+    DEFAULT_CHUNK_SIZE_LARGE: 50,  // Chunk size for large datasets
+    DEFAULT_CHUNK_SIZE_SMALL: 100  // Chunk size for smaller datasets
+};
+
+/**
  * Get current sync status
  * @returns {Object} Status object with status and error
  */
@@ -94,10 +103,10 @@ function updateSyncStatus(status, error = null) {
 
 /**
  * Sync contracts from localStorage to server
- * @param {Object} options - Sync options { force: boolean }
+ * @param {Object} options - Sync options { force: boolean, chunkSize: number, progressCallback: function }
  * @returns {Promise<Object>} Sync result
  */
-export async function syncToServer(options = { force: false }) {
+export async function syncToServer(options = { force: false, chunkSize: 100 }) {
     // Check if sync is enabled
     if (!isSyncEnabled() && !options.force) {
         return { success: false, reason: 'sync_disabled' };
@@ -121,31 +130,68 @@ export async function syncToServer(options = { force: false }) {
             return { success: true, uploaded: 0 };
         }
         
-        // Upload contracts to server
-        // Note: This implementation uses individual API calls per contract.
-        // For better performance with large datasets, consider implementing
-        // a bulk upsert endpoint on the server that handles existence checking.
+        // Determine optimal chunk size based on dataset size
+        const defaultChunkSize = contracts.length > SYNC_CONFIG.LARGE_DATASET_THRESHOLD 
+            ? SYNC_CONFIG.DEFAULT_CHUNK_SIZE_LARGE 
+            : SYNC_CONFIG.DEFAULT_CHUNK_SIZE_SMALL;
+        const chunkSize = options.chunkSize || defaultChunkSize;
+        
         let uploadedCount = 0;
         const errors = [];
         
-        for (const contract of contracts) {
-            try {
-                // Check if contract exists on server (by ID)
-                // If the server returns an error (404 or other), treat as non-existing
-                const existing = await apiClient.getContract(contract.id).catch(() => null);
-                
-                if (existing) {
-                    // Update existing contract
-                    await apiClient.updateContract(contract.id, contract);
+        // Process contracts in chunks for better performance with large datasets
+        for (let i = 0; i < contracts.length; i += chunkSize) {
+            const chunk = contracts.slice(i, Math.min(i + chunkSize, contracts.length));
+            
+            // Process chunk with Promise.allSettled for better error handling
+            const results = await Promise.allSettled(
+                chunk.map(async (contract) => {
+                    try {
+                        // Check if contract exists on server (by ID)
+                        const existing = await apiClient.getContract(contract.id).catch(() => null);
+                        
+                        if (existing) {
+                            // Update existing contract
+                            await apiClient.updateContract(contract.id, contract);
+                        } else {
+                            // Create new contract
+                            await apiClient.createContract(contract);
+                        }
+                        return { success: true, contract: contract.id };
+                    } catch (error) {
+                        return { success: false, contract: contract.id, error: error.message };
+                    }
+                })
+            );
+            
+            // Process results
+            results.forEach((result, idx) => {
+                if (result.status === 'fulfilled') {
+                    if (result.value.success) {
+                        uploadedCount++;
+                    } else {
+                        errors.push({
+                            contractId: result.value.contract,
+                            error: result.value.error
+                        });
+                    }
                 } else {
-                    // Create new contract
-                    await apiClient.createContract(contract);
+                    // Promise rejected
+                    errors.push({
+                        contractId: chunk[idx].id,
+                        error: result.reason?.message || 'Unknown error'
+                    });
                 }
-                uploadedCount++;
-            } catch (error) {
-                errors.push({
-                    contractId: contract.id,
-                    error: error.message
+            });
+            
+            // Call progress callback if provided
+            if (options.progressCallback) {
+                const progress = Math.min(i + chunkSize, contracts.length);
+                options.progressCallback({
+                    current: progress,
+                    total: contracts.length,
+                    uploaded: uploadedCount,
+                    errors: errors.length
                 });
             }
         }
