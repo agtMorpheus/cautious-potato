@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Stromkreise Table Test</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Simple Stromkreise Table Test</h1>
+    
+    <div class="test-section">
+        <h2>Manual Table Test</h2>
+        <p>This tests the table structure without JavaScript modules.</p>
+        
+        <div class="positions-table-wrapper">
+            <table class="positions-table" role="grid" aria-label="Stromkreis-Tabelle">
+                <thead>
+                    <tr>
+                        <th scope="col" rowspan="2">Pos.Nr.</th>
+                        <th scope="col" rowspan="2">Nr.</th>
+                        <th scope="col" rowspan="2">Zielbezeichnung</th>
+                        <th scope="col" colspan="4">Kabel/Leitung</th>
+                        <th scope="col" colspan="3">Spannung/Frequenz</th>
+                        <th scope="col" colspan="2">Überstrom-Schutz</th>
+                        <th scope="col" colspan="4">Impedanzen</th>
+                        <th scope="col" colspan="3">Isolationswiderstand</th>
+                        <th scope="col" colspan="6">Fehlerstrom-Schutzeinrichtung</th>
+                        <th scope="col" rowspan="2">Status</th>
+                        <th scope="col" rowspan="2">Aktionen</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Kabel Typ</th>
+                        <th scope="col">Leiter Anzahl</th>
+                        <th scope="col">Querschnitt</th>
+                        <th scope="col">RPE (max. 1Ω)</th>
+                        <th scope="col">Un (V)</th>
+                        <th scope="col">fn (Hz)</th>
+                        <th scope="col">Art Charakteristik</th>
+                        <th scope="col">In (A)</th>
+                        <th scope="col">Ik (kA) L-PE</th>
+                        <th scope="col">ZS(Ω) L-PE</th>
+                        <th scope="col">ZN(Ω) L-N</th>
+                        <th scope="col">ohne Verbraucher (MΩ)</th>
+                        <th scope="col">mit Verbraucher (MΩ)</th>
+                        <th scope="col">GEWISS RCD</th>
+                        <th scope="col">In (A)</th>
+                        <th scope="col">I∆n (mA)</th>
+                        <th scope="col">Imess (mA)</th>
+                        <th scope="col">tA (ms)</th>
+                        <th scope="col">UL≤50V (V)</th>
+                        <th scope="col">Diff. Strom (mA)</th>
+                    </tr>
+                </thead>
+                <tbody id="positionsTableBody">
+                    <tr class="position-row" data-pos-nr="test-1">
+                        <!-- Pos.Nr. -->
+                        <td class="editable-cell">
+                            <input type="text" value="01.01.0010" placeholder="01.01.0010" class="table-input pos-nr-input">
+                        </td>
+                        <!-- Nr. -->
+                        <td class="editable-cell">
+                            <input type="text" value="1" placeholder="1" class="table-input">
+                        </td>
+                        <!-- Zielbezeichnung -->
+                        <td class="editable-cell">
+                            <input type="text" value="Test Stromkreis" placeholder="Bezeichnung eingeben" class="table-input">
+                        </td>
+                        <!-- Kabel Typ -->
+                        <td class="editable-cell">
+                            <input type="text" value="NYM-J" placeholder="NYM-J" class="table-input">
+                        </td>
+                        <!-- Leiter Anzahl -->
+                        <td class="editable-cell">
+                            <input type="number" value="3" placeholder="3" min="1" max="10" class="table-input number-input">
+                        </td>
+                        <!-- Leiter Querschnitt -->
+                        <td class="editable-cell">
+                            <input type="text" value="1,5 mm²" placeholder="1,5 mm²" class="table-input">
+                        </td>
+                        <!-- RPE (max. 1Ω) -->
+                        <td class="editable-cell">
+                            <input type="number" value="0.5" placeholder="0.5" min="0" max="1" step="0.01" class="table-input number-input">
+                        </td>
+                        <!-- Un (V) -->
+                        <td class="editable-cell">
+                            <input type="number" value="230" placeholder="230" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- fn (Hz) -->
+                        <td class="editable-cell">
+                            <input type="number" value="50" placeholder="50" min="0" max="100" class="table-input number-input">
+                        </td>
+                        <!-- Art Charakteristik -->
+                        <td class="editable-cell">
+                            <select class="table-select">
+                                <option value="">Auswählen</option>
+                                <option value="B">B</option>
+                                <option value="C" selected>C</option>
+                                <option value="D">D</option>
+                                <option value="K">K</option>
+                            </select>
+                        </td>
+                        <!-- In (A) -->
+                        <td class="editable-cell">
+                            <input type="number" value="16" placeholder="16" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- Ik (kA) L-PE -->
+                        <td class="editable-cell">
+                            <input type="number" value="1.2" placeholder="1.2" min="0" step="0.1" class="table-input number-input">
+                        </td>
+                        <!-- ZS(Ω) L-PE -->
+                        <td class="editable-cell">
+                            <input type="number" value="0.8" placeholder="0.8" min="0" step="0.01" class="table-input number-input">
+                        </td>
+                        <!-- ZN(Ω) L-N -->
+                        <td class="editable-cell">
+                            <input type="number" value="0.5" placeholder="0.5" min="0" step="0.01" class="table-input number-input">
+                        </td>
+                        <!-- Riso ohne Verbraucher (MΩ) -->
+                        <td class="editable-cell">
+                            <input type="number" value="500" placeholder="500" min="0" step="0.1" class="table-input number-input">
+                        </td>
+                        <!-- Riso mit Verbraucher (MΩ) -->
+                        <td class="editable-cell">
+                            <input type="number" value="300" placeholder="300" min="0" step="0.1" class="table-input number-input">
+                        </td>
+                        <!-- GEWISS RCD -->
+                        <td class="editable-cell">
+                            <input type="text" value="GEWISS" placeholder="GEWISS" class="table-input">
+                        </td>
+                        <!-- RCD In (A) -->
+                        <td class="editable-cell">
+                            <input type="number" value="25" placeholder="25" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- I∆n (mA) -->
+                        <td class="editable-cell">
+                            <input type="number" value="30" placeholder="30" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- Imess (mA) -->
+                        <td class="editable-cell">
+                            <input type="number" value="15" placeholder="15" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- Auslösezeit tA (ms) -->
+                        <td class="editable-cell">
+                            <input type="number" value="25" placeholder="25" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- UL≤50V Umess (V) -->
+                        <td class="editable-cell">
+                            <input type="number" value="25" placeholder="25" min="0" max="50" class="table-input number-input">
+                        </td>
+                        <!-- Diff. Strom (mA) -->
+                        <td class="editable-cell">
+                            <input type="number" value="5" placeholder="5" min="0" max="1000" class="table-input number-input">
+                        </td>
+                        <!-- Status -->
+                        <td class="status-cell">
+                            <select class="table-select status-select">
+                                <option value="nicht-geprüft">Nicht geprüft</option>
+                                <option value="i.O." selected>i.O.</option>
+                                <option value="n.i.O.">n.i.O.</option>
+                                <option value="nicht-zugänglich">Nicht zugänglich</option>
+                            </select>
+                        </td>
+                        <!-- Aktionen -->
+                        <td class="position-actions">
+                            <button type="button" class="btn-icon btn-success" title="Unterkreis hinzufügen">+</button>
+                            <button type="button" class="btn-icon btn-danger" title="Löschen">✕</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <button type="button" class="btn btn-secondary" onclick="addTestRow()">+ Position hinzufügen</button>
+    </div>
+
+    <script>
+        function addTestRow() {
+            const tbody = document.getElementById('positionsTableBody');
+            const newRow = tbody.querySelector('tr').cloneNode(true);
+            
+            // Update the position number
+            const posNrInput = newRow.querySelector('.pos-nr-input');
+            const currentValue = posNrInput.value;
+            const parts = currentValue.split('.');
+            const lastPart = parseInt(parts[2]) + 10;
+            posNrInput.value = `${parts[0]}.${parts[1]}.${lastPart.toString().padStart(4, '0')}`;
+            
+            // Clear other values
+            newRow.querySelectorAll('input:not(.pos-nr-input)').forEach(input => {
+                if (input.type === 'number') {
+                    input.value = '';
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Reset selects
+            newRow.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            
+            tbody.appendChild(newRow);
+        }
+    </script>
+</body>
+</html>
