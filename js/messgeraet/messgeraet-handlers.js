@@ -150,9 +150,9 @@ export function handleAddDevice(deviceData) {
   state.clearValidationErrors();
 
   // Add device
-  const deviceId = state.addDevice(deviceData);
+  const device = state.addDevice(deviceData);
 
-  if (deviceId) {
+  if (device) {
     document.dispatchEvent(new CustomEvent('messgeraet:message', {
       detail: { type: 'success', message: 'Messgerät erfolgreich hinzugefügt.' }
     }));
@@ -161,7 +161,7 @@ export function handleAddDevice(deviceData) {
     state.setEditingDevice(null);
   }
 
-  return deviceId;
+  return device?.id || null;
 }
 
 /**

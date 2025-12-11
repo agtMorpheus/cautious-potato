@@ -43,11 +43,26 @@ const DEVICE_TYPES = [
 
 /**
  * Initialize state from localStorage or defaults
- * Called once when app starts
+ * Called once when app starts or to reset state for tests
+ * @param {Object} options - Optional configuration
+ * @param {boolean} options.clearStorage - If true, clears localStorage before initializing (useful for tests)
  * @returns {void}
  */
-export function init() {
+export function init(options = {}) {
   console.log('Initializing Messgerät State Management');
+  
+  // Clear localStorage if requested (for test isolation)
+  if (options.clearStorage) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('✓ localStorage cleared');
+    } catch (error) {
+      console.error('Failed to clear localStorage:', error);
+    }
+  }
+  
+  // Reset listeners to prevent memory leaks in tests
+  stateListeners = {};
   
   // Try to load from localStorage
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -254,7 +269,7 @@ export function getDeviceCount() {
 /**
  * Add a new device
  * @param {Object} device - Device object with name, type, calibrationDate
- * @returns {string} Device ID
+ * @returns {Object} Device object with generated ID
  */
 export function addDevice(device) {
   if (!device || typeof device !== 'object') {
@@ -279,7 +294,7 @@ export function addDevice(device) {
   emit('deviceAdded', { device: newDevice });
   saveToLocalStorage();
 
-  return newDevice.id;
+  return JSON.parse(JSON.stringify(newDevice));
 }
 
 /**
