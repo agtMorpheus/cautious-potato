@@ -256,7 +256,7 @@
 
 .action-card:hover:not(:disabled) .action-icon {
     background: var(--primary-main);
-    color: white;
+    color: var(--text-inverse);
     box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
 }
 

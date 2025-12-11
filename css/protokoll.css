@@ -32,7 +32,7 @@
 .protokoll-form legend {
   font-weight: 600;
   font-size: 1.1rem;
-  color: var(--primary-main, #3b82f6);
+  color: var(--primary-main);
   padding: 0 1rem;
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
@@ -63,35 +63,35 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary);
   font-family: 'JetBrains Mono', monospace;
 }
 
 .protokoll-form .form-input {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border-base, #334155);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-md, 6px);
   font-size: 0.9rem;
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-surface, #1e293b);
-  color: var(--text-main, #f8fafc);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
   transition: all 0.2s ease;
 }
 
 .protokoll-form .form-input:focus {
   outline: none;
-  border-color: var(--primary-main, #3b82f6);
+  border-color: var(--primary-main);
   background-color: var(--bg-card);
   box-shadow: 0 0 0 1px var(--primary-main), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .protokoll-form .form-input.error {
-  border-color: var(--c-danger, #ef4444);
+  border-color: var(--c-danger);
   box-shadow: 0 0 0 1px var(--c-danger);
 }
 
 .protokoll-form .form-input::placeholder {
-  color: var(--text-muted, #475569);
+  color: var(--text-muted);
   opacity: 0.7;
 }
 
@@ -126,7 +126,7 @@
    ============================================ */
 
 .protokoll-form .required {
-  color: var(--c-danger, #ef4444);
+  color: var(--c-danger);
   font-weight: 700;
   margin-left: 4px;
 }
@@ -165,14 +165,14 @@
 .protokoll-form .form-radio {
   width: 1.125rem;
   height: 1.125rem;
-  accent-color: var(--primary-main, #3b82f6);
+  accent-color: var(--primary-main);
   cursor: pointer;
 }
 
 .protokoll-form .checkbox-group-item label,
 .protokoll-form .radio-group-item label {
   font-weight: 500;
-  color: var(--text-main, #f8fafc);
+  color: var(--text-main);
   cursor: pointer;
   font-size: 0.9rem;
 }
@@ -200,8 +200,8 @@
   border-radius: var(--radius-md, 6px);
   font-weight: 600;
   font-size: 0.8rem;
-  color: var(--text-muted, #94a3b8);
-  background-color: var(--bg-surface, #1e293b);
+  color: var(--text-muted);
+  background-color: var(--bg-surface);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--border-base);
@@ -221,8 +221,8 @@
 }
 
 .progress-step.active {
-  color: #fff;
-  background-color: var(--primary-main, #3b82f6);
+  color: var(--text-inverse);
+  background-color: var(--primary-main);
   border-color: var(--primary-main);
   box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
   transform: translateY(-2px);
@@ -250,7 +250,7 @@
 
 .progress-step.completed .step-number {
   background-color: var(--c-success);
-  color: #fff;
+  color: var(--text-inverse);
 }
 
 /* ============================================
@@ -265,7 +265,7 @@
   font-size: 1.25rem;
   font-weight: 500;
   font-family: 'JetBrains Mono', monospace;
-  color: var(--text-main, #f8fafc);
+  color: var(--text-main);
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
@@ -280,7 +280,7 @@
 
 .positions-table-wrapper {
   overflow-x: auto;
-  border: 1px solid var(--border-base, #1e293b);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-lg, 8px);
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -347,9 +347,9 @@
 }
 
 .btn-icon.btn-danger:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--danger-rgb), 0.1);
   color: var(--c-danger);
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(var(--danger-rgb), 0.3);
 }
 
 /* ============================================
@@ -379,9 +379,9 @@
 .status-mängel,
 .status-failed,
 .status-error {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(var(--danger-rgb), 0.15);
   color: var(--c-danger);
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(var(--danger-rgb), 0.2);
 }
 
 .status-nicht-geprüft,
@@ -392,9 +392,9 @@
 }
 
 .status-warning {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(var(--warning-rgb), 0.15);
   color: var(--c-warning);
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(var(--warning-rgb), 0.2);
 }
 
 /* ============================================
@@ -534,7 +534,7 @@
 
 .protokoll-form .btn-primary {
   background: var(--primary-main);
-  color: white;
+  color: var(--text-inverse);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -624,7 +624,7 @@
 }
 
 .positions-table tr:hover {
-  background: var(--bg-hover, rgba(59, 130, 246, 0.1));
+  background: var(--bg-hover, rgba(var(--primary-rgb), 0.1));
 }
 
 /* Editable cell styling */
@@ -648,8 +648,8 @@
 .table-input:focus,
 .table-select:focus {
   outline: none;
-  border-color: var(--primary-main, #3b82f6);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
   background: var(--bg-input-focus, rgba(15, 23, 42, 0.9));
 }
 
@@ -665,7 +665,7 @@
 .pos-nr-input {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 500;
-  color: var(--primary-main, #3b82f6);
+  color: var(--primary-main);
 }
 
 .status-select {
@@ -673,15 +673,15 @@
 }
 
 .status-select option[value="i.O."] {
-  color: var(--success-main, #10b981);
+  color: var(--success-main);
 }
 
 .status-select option[value="n.i.O."] {
-  color: var(--danger-main, #ef4444);
+  color: var(--danger-main);
 }
 
 .status-select option[value="nicht-zugänglich"] {
-  color: var(--warning-main, #f59e0b);
+  color: var(--warning-main);
 }
 
 /* Position actions styling */
@@ -708,41 +708,41 @@
 }
 
 .btn-icon:hover {
-  background: var(--bg-hover, rgba(59, 130, 246, 0.2));
-  border-color: var(--primary-main, #3b82f6);
+  background: var(--bg-hover, rgba(var(--primary-rgb), 0.2));
+  border-color: var(--primary-main);
   transform: translateY(-1px);
 }
 
 .btn-icon.btn-success {
-  color: var(--success-main, #10b981);
-  border-color: var(--success-main, #10b981);
+  color: var(--success-main);
+  border-color: var(--success-main);
 }
 
 .btn-icon.btn-success:hover {
-  background: rgba(16, 185, 129, 0.2);
+  background: rgba(var(--success-rgb), 0.2);
 }
 
 .btn-icon.btn-danger {
-  color: var(--danger-main, #ef4444);
-  border-color: var(--danger-main, #ef4444);
+  color: var(--danger-main);
+  border-color: var(--danger-main);
 }
 
 .btn-icon.btn-danger:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(var(--danger-rgb), 0.2);
 }
 
 .btn-icon.btn-tree {
-  color: var(--warning-main, #f59e0b);
-  border-color: var(--warning-main, #f59e0b);
+  color: var(--warning-main);
+  border-color: var(--warning-main);
 }
 
 .btn-icon.btn-tree:hover {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(var(--warning-rgb), 0.2);
 }
 
 /* Child circuit styling */
 .child-circuit {
-  background: var(--bg-glass-subtle, rgba(59, 130, 246, 0.05));
+  background: var(--bg-glass-subtle, rgba(var(--primary-rgb), 0.05));
 }
 
 .child-circuit .pos-nr-input {
@@ -794,15 +794,15 @@
 
 /* Highlight effect for parent navigation */
 .position-row.highlight {
-  background: var(--primary-main, #3b82f6) !important;
-  color: white;
+  background: var(--primary-main) !important;
+  color: var(--text-inverse);
   transition: background-color 0.3s ease;
 }
 
 .position-row.highlight .table-input,
 .position-row.highlight .table-select {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-inverse);
   border-color: rgba(255, 255, 255, 0.3);
 }
 

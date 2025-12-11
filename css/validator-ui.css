@@ -88,12 +88,12 @@
 
 .summary-stat .stat-value.warning {
     color: var(--c-warning);
-    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    text-shadow: 0 0 10px rgba(var(--warning-rgb), 0.3);
 }
 
 .summary-stat .stat-value.critical {
     color: var(--c-danger);
-    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    text-shadow: 0 0 10px rgba(var(--danger-rgb), 0.3);
 }
 
 /* ==================== Circuits Table ==================== */
@@ -142,12 +142,12 @@
 
 .circuits-table tbody tr.circuit-row--warning {
     border-left: 3px solid var(--c-warning);
-    background: rgba(245, 158, 11, 0.05);
+    background: rgba(var(--warning-rgb), 0.05);
 }
 
 .circuits-table tbody tr.circuit-row--critical {
     border-left: 3px solid var(--c-danger);
-    background: rgba(239, 68, 68, 0.05);
+    background: rgba(var(--danger-rgb), 0.05);
 }
 
 .circuits-table td {
@@ -252,7 +252,7 @@
 }
 
 .validation-status-badge.status-valid {
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(var(--success-rgb), 0.15);
     color: var(--c-success);
     border: 1px solid var(--c-success);
 }
@@ -263,7 +263,7 @@
 }
 
 .validation-status-badge.status-warning {
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(var(--warning-rgb), 0.15);
     color: var(--c-warning);
     border: 1px solid var(--c-warning);
 }
@@ -274,7 +274,7 @@
 }
 
 .validation-status-badge.status-critical {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(var(--danger-rgb), 0.15);
     color: var(--c-danger);
     border: 1px solid var(--c-danger);
 }
@@ -340,27 +340,27 @@
 }
 
 .issue-badge.severity-critical {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(var(--danger-rgb), 0.2);
     color: var(--c-danger);
     border: 1px solid var(--c-danger);
 }
 
 .issue-badge.severity-critical:hover {
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(var(--danger-rgb), 0.3);
 }
 
 .issue-badge.severity-warning {
-    background: rgba(245, 158, 11, 0.2);
+    background: rgba(var(--warning-rgb), 0.2);
     color: var(--c-warning);
     border: 1px solid var(--c-warning);
 }
 
 .issue-badge.severity-warning:hover {
-    background: rgba(245, 158, 11, 0.3);
+    background: rgba(var(--warning-rgb), 0.3);
 }
 
 .issue-badge.severity-info {
-    background: rgba(6, 182, 212, 0.2);
+    background: rgba(var(--info-rgb), 0.2);
     color: var(--c-info);
     border: 1px solid var(--c-info);
 }
@@ -380,12 +380,12 @@
 
 .issue-count.critical {
     background: var(--c-danger);
-    color: white;
+    color: var(--text-inverse);
 }
 
 .issue-count.warning {
     background: var(--c-warning);
-    color: white;
+    color: var(--text-inverse);
 }
 
 /* ==================== Issue Tooltip ==================== */
@@ -601,7 +601,7 @@
     font-size: 10px;
     font-weight: 600;
     color: var(--c-brand-500);
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(var(--primary-rgb), 0.15);
     border-radius: 50%;
 }
 
@@ -610,9 +610,9 @@
     font-size: 13px;
     color: var(--c-brand-400);
     padding: 8px 12px;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
 /* ==================== Circuit Form ==================== */

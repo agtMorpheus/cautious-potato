@@ -22,8 +22,8 @@
 }
 
 .hr-stat-card {
-  background-color: var(--bg-surface, #0f172a);
-  border: 1px solid var(--border-base, #1e293b);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-lg, 8px);
   padding: 1.5rem;
   display: flex;
@@ -59,7 +59,7 @@
 }
 
 .hr-stat-icon.employees {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--primary-rgb), 0.1);
   color: var(--c-brand-500);
 }
 
@@ -69,13 +69,13 @@
 }
 
 .hr-stat-icon.inactive {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(var(--danger-rgb), 0.1);
   color: var(--c-danger);
 }
 
 .hr-stat-icon.departments {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: rgba(var(--folder-purple-rgb), 0.1);
+  color: var(--folder-purple);
 }
 
 .hr-stat-info {
@@ -231,7 +231,7 @@
   border-radius: 8px;
   /* Tech square */
   background: linear-gradient(135deg, var(--c-brand-500), var(--c-brand-700));
-  color: white;
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,7 +260,7 @@
 }
 
 .hr-status-inactive {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(var(--danger-rgb), 0.15);
   color: var(--c-danger);
 }
 
@@ -287,7 +287,7 @@
 
 .hr-btn-primary {
   background: var(--primary-main);
-  color: white;
+  color: var(--text-inverse);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;

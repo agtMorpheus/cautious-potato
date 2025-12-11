@@ -171,9 +171,9 @@ export class ContractApiClient {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: var(--bg-surface);
+            color: var(--c-danger);
+            border: 1px solid var(--c-danger);
             border-radius: 4px;
             padding: 15px;
             max-width: 400px;
@@ -476,12 +476,14 @@ export class ContractApiClient {
                 justify-content: center;
             }
             .session-warning-modal .modal-content {
-                background: white;
+                background: var(--bg-card);
+                color: var(--text-main);
                 padding: 30px;
                 border-radius: 8px;
                 max-width: 400px;
                 text-align: center;
                 box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                border: 1px solid var(--border-base);
             }
             .session-warning-modal .modal-actions {
                 margin-top: 20px;
@@ -497,12 +499,13 @@ export class ContractApiClient {
                 font-size: 14px;
             }
             .session-warning-modal .btn--primary {
-                background: #007bff;
-                color: white;
+                background: var(--primary-main);
+                color: var(--text-inverse);
             }
             .session-warning-modal .btn--secondary {
-                background: #6c757d;
-                color: white;
+                background: var(--bg-surface);
+                color: var(--text-main);
+                border: 1px solid var(--border-base);
             }
         `;
         
