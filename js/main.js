@@ -69,6 +69,9 @@ import * as assetRenderer from './modules/assets/asset-renderer.js';
 import * as assetDetailRenderer from './modules/assets/asset-detail-renderer.js';
 import assetDb from './modules/assets/asset-db.js';
 
+// Dashboard Module imports (Welcome Messages)
+import { initDashboardModule } from './modules/dashboard/index.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -1302,6 +1305,9 @@ async function initializeApp() {
 
     // 5g. Initialize Asset Module
     initializeAssetModule();
+
+    // 5h. Initialize Dashboard Module (Welcome Messages)
+    initDashboardModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
