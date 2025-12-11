@@ -31,7 +31,7 @@ import {
 } from './contractUtils.js';
 import { addContracts, updateContract } from './contractRepository.js';
 import { showErrorAlert, showSuccessAlert, escapeHtml, setupDragAndDrop, setupClickAndKeyboard } from '../handlers.js';
-import { highlightPreviewRow } from './contractRenderer.js';
+import { highlightPreviewRow, openContractModal } from './contractRenderer.js';
 
 // Store selected contract file reference (not persisted in state)
 let selectedContractFile = null;
@@ -863,6 +863,9 @@ export function handleContractActionClick(action, contractId) {
     console.log(`Contract action: ${action} for ${contractId}`);
 
     switch (action) {
+        case 'view':
+            handleContractView(contractId);
+            break;
         case 'edit':
             handleContractEdit(contractId);
             break;
@@ -872,6 +875,23 @@ export function handleContractActionClick(action, contractId) {
         default:
             console.warn(`Unknown contract action: ${action}`);
     }
+}
+
+/**
+ * Handle contract view (Phase 6 - Detail Modal)
+ * @param {string} contractId - Contract ID
+ */
+export function handleContractView(contractId) {
+    const state = getState();
+    const contracts = state.contracts?.records || [];
+    const contract = contracts.find(c => c.id === contractId);
+
+    if (!contract) {
+        showErrorAlert('Fehler', 'Vertrag nicht gefunden');
+        return;
+    }
+
+    openContractModal(contract);
 }
 
 /**
