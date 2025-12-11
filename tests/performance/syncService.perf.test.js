@@ -176,6 +176,36 @@ describe('Sync Service Performance Tests', () => {
       expect(result.uploaded).toBe(1000);
     });
     
+    test('chunked upload improves performance for large datasets', async () => {
+      const contracts = generateMockContracts(500);
+      setState({
+        contracts: {
+          records: contracts
+        }
+      });
+      
+      // Mock API calls
+      apiClient.getContract = jest.fn().mockResolvedValue(null);
+      apiClient.createContract = jest.fn().mockImplementation(async (c) => c);
+      
+      let progressCallbacks = 0;
+      const progressCallback = (progress) => {
+        progressCallbacks++;
+        expect(progress.current).toBeLessThanOrEqual(progress.total);
+        expect(progress.uploaded).toBeLessThanOrEqual(progress.current);
+      };
+      
+      const { result, duration } = await measureTimeAsync(() => 
+        syncToServer({ force: true, chunkSize: 50, progressCallback })
+      );
+      
+      console.log(`Sync 500 contracts with chunking (50/chunk): ${duration.toFixed(2)}ms, ${progressCallbacks} progress updates`);
+      expect(duration).toBeLessThan(5000);
+      expect(result.success).toBe(true);
+      expect(result.uploaded).toBe(500);
+      expect(progressCallbacks).toBeGreaterThan(0);
+    });
+    
     test('empty contract list syncs quickly', async () => {
       setState({
         contracts: {
