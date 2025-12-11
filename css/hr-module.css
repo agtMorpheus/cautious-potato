@@ -326,3 +326,17 @@
   font-weight: 600;
   color: var(--text-main);
 }
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+
+[data-theme="dark"] .hr-stat-card,
+[data-color-scheme="dark"] .hr-stat-card {
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .hr-modal__content,
+[data-color-scheme="dark"] .hr-modal__content {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
