@@ -993,4 +993,74 @@ describe('State Management (state.js)', () => {
       expect(loadState()).toBe(false);
     });
   });
+
+  describe('Additional Coverage Tests', () => {
+    test('resetState works with no arguments (uses defaults)', () => {
+      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
+      localStorage.setItem.mockClear();
+
+      resetState();
+
+      expect(localStorage.setItem).toHaveBeenCalled();
+    });
+
+    test('resetState persists by default when options empty', () => {
+      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
+      localStorage.setItem.mockClear();
+
+      resetState({}); // Should use default persist=true
+
+      expect(localStorage.setItem).toHaveBeenCalled();
+    });
+
+    test('resetState persists when partial options provided', () => {
+      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
+      localStorage.setItem.mockClear();
+
+      resetState({ silent: true }); // Should keep persist=true default
+
+      expect(localStorage.setItem).toHaveBeenCalled();
+    });
+
+    test('addContracts handles missing contracts in state', () => {
+      setState({ contracts: undefined });
+
+      addContracts([{ contractId: 'NEW' }]);
+
+      const state = getState();
+      expect(state.contracts.records).toHaveLength(1);
+    });
+
+    test('addContracts handles missing records in contracts', () => {
+      setState({ contracts: {} });
+
+      addContracts([{ contractId: 'NEW' }]);
+
+      const state = getState();
+      expect(state.contracts.records).toHaveLength(1);
+    });
+
+    test('loadState handles complex nested undefined scenarios', () => {
+      // protokollData undefined
+      localStorage.getItem.mockReturnValue(JSON.stringify({
+        protokollData: undefined,
+        abrechnungData: { positionen: {} }
+      }));
+      expect(loadState()).toBe(false);
+
+      // abrechnungData undefined
+      localStorage.getItem.mockReturnValue(JSON.stringify({
+        protokollData: { positionen: [] },
+        abrechnungData: undefined
+      }));
+      expect(loadState()).toBe(false);
+
+      // both undefined
+       localStorage.getItem.mockReturnValue(JSON.stringify({
+        protokollData: undefined,
+        abrechnungData: undefined
+      }));
+      expect(loadState()).toBe(false);
+    });
+  });
 });
