@@ -14,6 +14,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/cards.css" />
+    <link rel="stylesheet" href="css/tables.css" />
     <link rel="stylesheet" href="css/contracts.css" />
     <link rel="stylesheet" href="css/cell-mapper.css" />
     <link rel="stylesheet" href="css/abrechnung.css" />
@@ -1240,30 +1242,128 @@
 
                 <!-- Help View -->
                 <section id="view-help" class="view-container" aria-labelledby="help-heading">
-                    <h2 id="help-heading" class="sr-only">Hilfe</h2>
+                    <h2 id="help-heading" class="sr-only">Hilfe & Dokumentation</h2>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Hilfe & Dokumentation</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="help-section">
-                                <h4>Workflow</h4>
+                    <div class="help-grid">
+                        <!-- Abrechnung Workflow -->
+                        <div class="card help-card">
+                            <div class="card__header">
+                                <h3 class="card__title">Abrechnung Workflow</h3>
+                            </div>
+                            <div class="card__body">
                                 <ol class="help-steps">
-                                    <li><strong>Import:</strong> Laden Sie ein ausgefülltes Prüfprotokoll hoch.</li>
-                                    <li><strong>Process:</strong> Erzeugen Sie die Abrechnung aus den Protokolldaten.
+                                    <li>
+                                        <strong>Import</strong>
+                                        Laden Sie ein gültiges <code>protokoll.xlsx</code> per Drag & Drop oder
+                                        Dateiauswahl hoch.
                                     </li>
-                                    <li><strong>Export:</strong> Laden Sie die fertige Abrechnung herunter.</li>
+                                    <li>
+                                        <strong>Verarbeitung</strong>
+                                        Das System analysiert die Datei und aggregiert Positionen automatisch.
+                                    </li>
+                                    <li>
+                                        <strong>Export</strong>
+                                        Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.
+                                    </li>
                                 </ol>
                             </div>
-                            <div class="help-section">
-                                <h4>Unterstützte Dateiformate</h4>
-                                <p>Es werden nur <code>.xlsx</code> Dateien unterstützt.</p>
+                        </div>
+
+                        <!-- Module Guides -->
+                        <div class="card help-card">
+                            <div class="card__header">
+                                <h3 class="card__title">Module Übersicht</h3>
                             </div>
-                            <div class="help-section">
-                                <h4>Datenschutz</h4>
-                                <p>Alle Daten werden lokal im Browser verarbeitet. Es werden keine Daten auf externe
-                                    Server übertragen.</p>
+                            <div class="card__body">
+                                <ul class="module-list">
+                                    <li class="module-item">
+                                        <div class="module-icon">📋</div>
+                                        <div class="module-info">
+                                            <strong>Protokoll</strong>
+                                            <p>Erstellen und exportieren von VDE 0100 Prüfprotokollen.</p>
+                                        </div>
+                                    </li>
+                                    <li class="module-item">
+                                        <div class="module-icon">👥</div>
+                                        <div class="module-info">
+                                            <strong>HR Management</strong>
+                                            <p>Verwaltung von Mitarbeitern, Anwesenheit und Urlaub.</p>
+                                        </div>
+                                    </li>
+                                    <li class="module-item">
+                                        <div class="module-icon">📄</div>
+                                        <div class="module-info">
+                                            <strong>Contracts</strong>
+                                            <p>Import und Verwaltung von Vertragsdaten.</p>
+                                        </div>
+                                    </li>
+                                    <li class="module-item">
+                                        <div class="module-icon">📦</div>
+                                        <div class="module-info">
+                                            <strong>Assets</strong>
+                                            <p>Verwaltung von Verteilern und elektrischen Anlagen.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Keyboard Shortcuts -->
+                        <div class="card help-card">
+                            <div class="card__header">
+                                <h3 class="card__title">Tastaturkürzel</h3>
+                            </div>
+                            <div class="card__body">
+                                <table class="table table--striped">
+                                    <tbody class="table__body">
+                                        <tr class="table__tr">
+                                            <td class="table__td"><kbd class="shortcut-key">⌘</kbd> + <kbd
+                                                    class="shortcut-key">K</kbd>
+                                            </td>
+                                            <td class="table__td">Globale Suche öffnen</td>
+                                        </tr>
+                                        <tr class="table__tr">
+                                            <td class="table__td"><kbd class="shortcut-key">Esc</kbd></td>
+                                            <td class="table__td">Modals schließen / Suche abbrechen</td>
+                                        </tr>
+                                        <tr class="table__tr">
+                                            <td class="table__td"><kbd class="shortcut-key">Alt</kbd> + <kbd
+                                                    class="shortcut-key">M</kbd>
+                                            </td>
+                                            <td class="table__td">Springe zum Hauptinhalt</td>
+                                        </tr>
+                                        <tr class="table__tr">
+                                            <td class="table__td"><kbd class="shortcut-key">Alt</kbd> + <kbd
+                                                    class="shortcut-key">N</kbd>
+                                            </td>
+                                            <td class="table__td">Springe zur Navigation</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Support Info -->
+                        <div class="card help-card">
+                            <div class="card__header">
+                                <h3 class="card__title">Support & Info</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="help-section">
+                                    <h4>Version</h4>
+                                    <p>Abrechnung App v1.2.0 (Phase 6)</p>
+                                </div>
+                                <div class="help-section">
+                                    <h4>Datenschutz</h4>
+                                    <p>Diese Anwendung läuft vollständig im Browser. Es werden keine sensiblen Daten an
+                                        externe Server gesendet, es sei denn, die Synchronisation ist explizit
+                                        aktiviert.</p>
+                                </div>
+                                <div class="help-section">
+                                    <h4>Dokumentation</h4>
+                                    <p>Detaillierte Anleitungen finden Sie im <code>docs/</code> Ordner des Projekts.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

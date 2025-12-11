@@ -334,6 +334,7 @@
     --radius-std-base: 6px;    /* Default (buttons, cards) */
     --radius-std-md: 8px;      /* Medium (panels) */
     --radius-std-lg: 12px;     /* Large (modals, large cards) */
+    --radius-std-xl: 16px;     /* Extra Large */
     --radius-std-full: 9999px; /* Pill buttons, avatars */
 
     /* 13. SHADOWS */
