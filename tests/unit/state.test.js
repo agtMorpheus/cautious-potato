@@ -329,6 +329,89 @@ describe('State Management (state.js)', () => {
       
       expect(localStorage.removeItem).toHaveBeenCalled();
     });
+
+    test('saveStateToStorage handles QuotaExceededError', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const quotaError = new Error('Quota exceeded');
+      quotaError.name = 'QuotaExceededError';
+
+      localStorage.setItem.mockImplementationOnce(() => {
+        throw quotaError;
+      });
+
+      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('quota exceeded'));
+
+      consoleSpy.mockRestore();
+    });
+
+    test('saveStateToStorage handles generic errors', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      localStorage.setItem.mockImplementationOnce(() => {
+        throw new Error('Generic storage error');
+      });
+
+      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to save state'), expect.any(Error));
+
+      consoleSpy.mockRestore();
+    });
+
+    test('clearPersistedState handles errors', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      localStorage.removeItem.mockImplementationOnce(() => {
+        throw new Error('Remove error');
+      });
+
+      clearPersistedState();
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to clear persisted state'), expect.any(Error));
+
+      consoleSpy.mockRestore();
+    });
+
+    test('loadStateFromStorage validation fails with invalid state structure', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Create invalid state (missing meta.version)
+      const invalidState = {
+        protokollData: { metadata: {}, positionen: [] },
+        abrechnungData: { header: {}, positionen: {} },
+        ui: { import: {}, generate: {}, export: {} },
+        meta: { lastUpdated: null } // Missing version
+      };
+
+      localStorage.getItem.mockReturnValue(JSON.stringify(invalidState));
+
+      const loaded = loadStateFromStorage();
+
+      // Should reset to initial state (empty positions)
+      expect(loaded.protokollData.positionen).toEqual([]);
+      // Should warn about validation failure
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Persisted state failed validation'), expect.anything());
+
+      consoleSpy.mockRestore();
+    });
+
+    test('loadStateFromStorage handles generic errors during parsing/loading', () => {
+       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+       // Mock getItem to throw
+       localStorage.getItem.mockImplementationOnce(() => {
+         throw new Error('Access denied');
+       });
+
+       const loaded = loadStateFromStorage();
+
+       expect(loaded.protokollData.positionen).toEqual([]);
+       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to load state'), expect.any(Error));
+
+       consoleSpy.mockRestore();
+    });
   });
 
   describe('Contract Manager Functions', () => {
@@ -839,6 +922,75 @@ describe('State Management (state.js)', () => {
       expect(state1.protokollData.metadata.orderNumber).toBeNull();
       expect(state2.protokollData.metadata.orderNumber).toBe('NEW');
       expect(state1).not.toBe(state2);
+    });
+  });
+
+  describe('Branch Coverage Improvements', () => {
+    test('setState with meta updates merges meta', () => {
+      setState({ meta: { version: '2.0.0' } });
+      const state = getState();
+      expect(state.meta.version).toBe('2.0.0');
+    });
+
+    test('loadStateFromStorage handles state with null meta', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      // Valid state but meta is null (allowed by validation technically)
+      const stateWithNullMeta = {
+        protokollData: { metadata: {}, positionen: [] },
+        abrechnungData: { header: {}, positionen: {} },
+        ui: { import: {}, generate: {}, export: {} },
+        meta: null
+      };
+      localStorage.getItem.mockReturnValue(JSON.stringify(stateWithNullMeta));
+
+      const loaded = loadStateFromStorage();
+      expect(loaded.meta).toBeDefined(); // Should have merged with initial meta
+      consoleSpy.mockRestore();
+    });
+
+    test('updateProtokollData works without positionen', () => {
+      updateProtokollData({ metadata: { orderNumber: 'ONLY_META' } });
+      const state = getState();
+      expect(state.protokollData.metadata.orderNumber).toBe('ONLY_META');
+    });
+
+    test('addContractFile handles missing contracts section', () => {
+      // Remove contracts section
+      setState({ contracts: undefined });
+
+      addContractFile({ fileName: 'test.xlsx', size: 100, sheets: [], recordsImported: 0, recordsWithErrors: 0 });
+
+      const state = getState();
+      expect(state.contracts.importedFiles).toHaveLength(1);
+    });
+
+    test('setContractUIState handles missing contracts/ui section', () => {
+      setState({ contracts: undefined });
+
+      setContractUIState({ activeTab: 'preview' });
+
+      const state = getState();
+      expect(state.contracts.ui.activeTab).toBe('preview');
+    });
+
+    test('loadState handles missing/null data structures', () => {
+      // Case where abrechnungData.positionen is null/undefined
+      const stateNoAbrechnungPos = {
+        protokollData: { positionen: [] },
+        abrechnungData: { positionen: null },
+        ui: {}, meta: {}
+      };
+      localStorage.getItem.mockReturnValue(JSON.stringify(stateNoAbrechnungPos));
+
+      // Should return false (no data)
+      expect(loadState()).toBe(false);
+
+      // Case where protokollData is missing/null
+       localStorage.getItem.mockReturnValue(JSON.stringify({
+        protokollData: null,
+        abrechnungData: { positionen: null }
+      }));
+      expect(loadState()).toBe(false);
     });
   });
 });
