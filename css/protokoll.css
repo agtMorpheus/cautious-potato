@@ -817,3 +817,25 @@
 .position-row.highlight .table-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+
+[data-theme="dark"] .step-number,
+[data-color-scheme="dark"] .step-number {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .position-row.highlight .table-input,
+[data-theme="dark"] .position-row.highlight .table-select,
+[data-color-scheme="dark"] .position-row.highlight .table-input,
+[data-color-scheme="dark"] .position-row.highlight .table-select {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .position-row.highlight .table-input::placeholder,
+[data-color-scheme="dark"] .position-row.highlight .table-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
