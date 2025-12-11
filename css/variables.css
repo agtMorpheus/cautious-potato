@@ -297,6 +297,13 @@
     --color-orange-400: #e68161;
     --color-orange-500: #a84b2f;
 
+    /* RGB Values for Transparency */
+    --color-primary-rgb: 33, 128, 141;
+    --color-success-rgb: 33, 128, 141;
+    --color-warning-rgb: 168, 75, 47;
+    --color-error-rgb: 192, 21, 47;
+    --color-info-rgb: 98, 108, 113;
+
     /* Semantic Color Tokens (Light Mode - Default) */
     --color-background: #fcfcf9;       /* Page background */
     --color-surface: #fffffe;          /* Card/panel background */

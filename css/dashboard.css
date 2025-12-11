@@ -10,9 +10,7 @@
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: auto auto 1fr;
     gap: var(--space-24);
-    /* was space-lg */
     padding: var(--space-24);
-    /* was space-lg */
     max-width: var(--layout-max-width);
     margin: 0 auto;
     min-height: calc(100vh - 80px);
@@ -23,12 +21,9 @@
 /* Maps to Standard Card with extras */
 .dashboard-header-card {
     grid-column: 1 / -1;
-    background: var(--bg-glass);
-    /* Retaining glass effect as per theme, but could switch to --color-surface */
-    /* If strict standardization: background: var(--color-surface); */
+    background: var(--color-surface); /* Updated to standard surface color */
     border-radius: var(--radius-std-lg);
     padding: var(--space-32) var(--space-40);
-    /* was space-xl space-xxl */
     border: 1px solid var(--color-border-std);
     box-shadow: var(--shadow-std-lg);
     display: flex;
@@ -37,8 +32,7 @@
     min-height: 140px;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* backdrop-filter removed for strict standardization compliance */
 }
 
 .header-content {
@@ -49,11 +43,9 @@
 
 .header-content h3 {
     font-size: var(--font-size-h1);
-    /* was 4xl */
     font-weight: var(--font-weight-std-normal);
-    font-family: var(--font-family-std-mono);
+    font-family: var(--font-family-std-base); /* Updated to base font */
     margin-bottom: var(--space-8);
-    /* was space-sm */
     color: var(--color-text);
     letter-spacing: -0.04em;
 }
@@ -76,9 +68,8 @@
     background: repeating-linear-gradient(45deg,
             transparent,
             transparent 10px,
-            rgba(33, 128, 141, 0.05) 10px,
-            /* Using teal color manually or via var */
-            rgba(33, 128, 141, 0.05) 11px);
+            rgba(var(--color-primary-rgb), 0.05) 10px,
+            rgba(var(--color-primary-rgb), 0.05) 11px);
     pointer-events: none;
     mask-image: linear-gradient(to right, transparent, var(--color-text));
     -webkit-mask-image: linear-gradient(to right, transparent, var(--color-text));
@@ -90,20 +81,17 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--space-24);
-    /* was space-lg */
 }
 
 .metric-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border-std);
-    border-radius: var(--radius-std-md);
+    border-radius: var(--radius-std-lg); /* Updated to standard large radius (12px) */
     padding: var(--space-24);
-    /* was space-lg */
     display: flex;
     align-items: center;
     gap: var(--space-24);
     transition: all var(--duration-normal) var(--ease-standard);
-    /* Standard duration? */
     cursor: default;
     position: relative;
     overflow: hidden;
@@ -146,29 +134,25 @@
     stroke-width: 1.5;
 }
 
-/* Icon Colors - Mapped to Standard Colors */
+/* Icon Colors - Mapped to Standard Colors using RGB vars */
 .metric-icon-wrapper.import {
     color: var(--color-primary);
-    background: rgba(33, 128, 141, 0.1);
-    /* Teal light */
+    background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .metric-icon-wrapper.process {
-    color: var(--folder-purple);
-    /* Kept non-standard but consistent with logic? Or map to standard? Guide doesn't specify purple. */
-    background: var(--folder-purple-light);
+    color: var(--color-primary); /* Updated to standard primary color */
+    background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .metric-icon-wrapper.export {
     color: var(--color-success);
-    /* Teal/Green */
-    background: rgba(33, 128, 141, 0.1);
+    background: rgba(var(--color-success-rgb), 0.1);
 }
 
 .metric-icon-wrapper.templates {
     color: var(--color-warning);
-    /* Orange */
-    background: rgba(168, 75, 47, 0.1);
+    background: rgba(var(--color-warning-rgb), 0.1);
 }
 
 .metric-info {
@@ -178,19 +162,16 @@
 
 .metric-label {
     font-size: var(--font-size-tiny);
-    /* was xs */
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-std-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: var(--space-4);
-    /* was space-xs */
     font-family: var(--font-family-std-base);
 }
 
 .metric-value {
     font-size: 2rem;
-    /* Map to nearest standard or keep 2xl */
     font-weight: var(--font-weight-std-medium);
     font-family: var(--font-family-std-mono);
     color: var(--color-text);
@@ -203,11 +184,10 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-16);
-    /* was space-md */
 }
 
 .section-title {
-    font-family: var(--font-family-std-mono);
+    font-family: var(--font-family-std-base); /* Updated to base font */
     font-size: var(--font-size-std-base);
     font-weight: var(--font-weight-std-medium);
     color: var(--color-text-secondary);
@@ -234,11 +214,9 @@
 
 .action-card {
     background: var(--color-surface);
-    /* was bg-card */
     border: 1px solid var(--color-border-std);
     border-radius: var(--radius-std-lg);
     padding: var(--space-32);
-    /* was space-xl */
     text-align: left;
     transition: all var(--duration-normal) var(--ease-standard);
     display: flex;
@@ -253,9 +231,7 @@
 .action-card:hover:not(:disabled) {
     transform: translateY(-4px);
     box-shadow: var(--shadow-std-lg);
-    /* was xl */
     border-color: var(--color-primary);
-    /* background: var(--bg-surface); surface is already bg */
 }
 
 .action-card:disabled {
@@ -279,8 +255,7 @@
 .action-card:hover:not(:disabled) .action-icon {
     background: var(--color-primary);
     color: white;
-    /* Text inverse usually white in standardization for primary btns */
-    box-shadow: 0 4px 12px rgba(33, 128, 141, 0.4);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
 }
 
 .action-icon svg {
@@ -291,7 +266,6 @@
 
 .action-text {
     font-size: 1.125rem;
-    /* ~lg */
     font-weight: var(--font-weight-std-semibold);
     color: var(--color-text);
     margin-top: auto;
@@ -300,7 +274,6 @@
 
 .action-subtext {
     font-size: var(--font-size-std-base);
-    /* or small */
     color: var(--color-text-secondary);
     line-height: 1.4;
 }
@@ -333,7 +306,7 @@
     gap: var(--space-16);
     align-items: flex-start;
     transition: background var(--duration-fast);
-    font-family: var(--font-family-std-mono);
+    font-family: var(--font-family-std-base); /* Updated to base font */
     font-size: var(--font-size-small);
 }
 
@@ -343,7 +316,6 @@
 
 .activity-item:hover {
     background: var(--color-secondary);
-    /* or bg-hover */
 }
 
 .activity-icon {
@@ -365,22 +337,22 @@
 /* Status dots style */
 .activity-icon.info {
     color: var(--color-info);
-    background: rgba(98, 108, 113, 0.1);
+    background: rgba(var(--color-info-rgb), 0.1);
 }
 
 .activity-icon.success {
     color: var(--color-success);
-    background: rgba(33, 128, 141, 0.1);
+    background: rgba(var(--color-success-rgb), 0.1);
 }
 
 .activity-icon.warning {
     color: var(--color-warning);
-    background: rgba(168, 75, 47, 0.1);
+    background: rgba(var(--color-warning-rgb), 0.1);
 }
 
 .activity-icon.error {
     color: var(--color-error);
-    background: rgba(192, 21, 47, 0.1);
+    background: rgba(var(--color-error-rgb), 0.1);
 }
 
 .activity-content {
@@ -398,6 +370,7 @@
     color: var(--color-text-secondary);
     opacity: 0.7;
     font-size: var(--font-size-tiny);
+    font-family: var(--font-family-std-mono); /* Keep time mono */
 }
 
 /* ==================== Responsive ==================== */
