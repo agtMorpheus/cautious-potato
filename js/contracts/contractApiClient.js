@@ -36,6 +36,16 @@ export class ContractApiClient {
     }
 
     /**
+     * Set the base URL for API requests
+     * @param {string} url - New base URL
+     */
+    setBaseUrl(url) {
+        // Remove trailing slash if present
+        this.baseUrl = url.replace(/\/$/, '');
+        console.log(`API Base URL updated to: ${this.baseUrl}`);
+    }
+
+    /**
      * Make authenticated API request
      * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
      * @param {string} endpoint - API endpoint path
@@ -59,7 +69,29 @@ export class ContractApiClient {
 
         try {
             const response = await fetch(url, options);
-            const json = await response.json();
+
+            let json;
+            try {
+                json = await response.json();
+            } catch (parseError) {
+                // JSON parsing failed
+                if (!response.ok) {
+                    // If the response was an error (e.g. 404/500) and not JSON,
+                    // it's likely a server error page (HTML).
+                    // Use statusText if available, otherwise default to status
+                    const statusText = response.statusText || 'Error';
+                    throw new ApiError(`HTTP ${response.status} ${statusText}`, response.status, {
+                        error: 'server_error',
+                        details: 'Non-JSON response received'
+                    });
+                }
+
+                // If response was OK (200) but not JSON, that's unexpected for this API
+                throw new ApiError(`Invalid server response: ${parseError.message}`, response.status, {
+                    error: 'invalid_json',
+                    details: 'Response could not be parsed as JSON'
+                });
+            }
 
             if (!response.ok) {
                 if (response.status === 401) {

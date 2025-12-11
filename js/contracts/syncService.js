@@ -416,6 +416,12 @@ export function initSyncService() {
     // Listen for config changes
     window.addEventListener('syncConfigChanged', (event) => {
         const config = event.detail?.config;
+
+        // Update API Base URL
+        if (config?.apiBaseUrl) {
+            apiClient.setBaseUrl(config.apiBaseUrl);
+        }
+
         if (config?.autoSync && config?.storageMode === 'sync_with_server') {
             startAutoSync();
         } else {
@@ -428,6 +434,12 @@ export function initSyncService() {
         updateSyncStatus(SyncStatus.OFFLINE);
     }
     
+    // Initialize API URL from config
+    const config = loadSyncConfig();
+    if (config.apiBaseUrl) {
+        apiClient.setBaseUrl(config.apiBaseUrl);
+    }
+
     // Start auto-sync if enabled
     if (isAutoSyncEnabled()) {
         startAutoSync();

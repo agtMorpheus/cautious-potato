@@ -1093,6 +1093,19 @@
                                 </div>
                             </div>
 
+                            <!-- API Configuration (only visible when sync is enabled) -->
+                            <div id="api-config-section" class="settings-group" style="display: none;">
+                                <h4 class="settings-label">Server Konfiguration</h4>
+                                <div class="form-group">
+                                    <label for="api-base-url" class="form-label">API Base URL</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="text" id="api-base-url" class="form-input" placeholder="z.B. http://localhost:8000/api" style="flex-grow: 1;">
+                                        <button type="button" class="btn btn-secondary btn-sm" id="save-api-config-btn">Speichern</button>
+                                    </div>
+                                    <p class="settings-desc" style="margin-top: 5px;">URL des Backend-Servers (Standard: /api)</p>
+                                </div>
+                            </div>
+
                             <!-- Sync Status (only visible when sync is enabled) -->
                             <div id="sync-status-section" class="settings-group" style="display: none;">
                                 <h4 class="settings-label">Synchronisationsstatus</h4>

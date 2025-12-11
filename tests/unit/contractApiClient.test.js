@@ -56,6 +56,18 @@ describe('Contract API Client (contractApiClient.js)', () => {
         });
     });
     
+    describe('setBaseUrl()', () => {
+        test('updates base URL', () => {
+            apiClient.setBaseUrl('/new-api');
+            expect(apiClient.baseUrl).toBe('/new-api');
+        });
+
+        test('removes trailing slash', () => {
+            apiClient.setBaseUrl('/api/');
+            expect(apiClient.baseUrl).toBe('/api');
+        });
+    });
+
     describe('request()', () => {
         test('makes GET request correctly', async () => {
             const mockResponse = { data: { contracts: [] } };
@@ -110,6 +122,23 @@ describe('Contract API Client (contractApiClient.js)', () => {
             
             await expect(apiClient.request('POST', '/contracts', {}))
                 .rejects.toThrow(ApiError);
+        });
+
+        test('throws descriptive ApiError when server returns HTML (e.g. 404/500)', async () => {
+            // Simulate HTML response for 404
+            global.fetch.mockResolvedValue({
+                ok: false,
+                status: 404,
+                statusText: 'Not Found',
+                headers: {
+                    get: (name) => name.toLowerCase() === 'content-type' ? 'text/html' : null
+                },
+                json: () => Promise.reject(new SyntaxError('Unexpected token < in JSON at position 0'))
+            });
+
+            // Expect it to throw ApiError with status info, NOT the SyntaxError
+            await expect(apiClient.request('GET', '/contracts'))
+                .rejects.toThrow('HTTP 404 Not Found');
         });
     });
     
