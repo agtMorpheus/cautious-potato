@@ -1,0 +1,280 @@
+/**
+ * Abrechnung (Workflow) View Styles
+ * Command Center Aesthetic
+ */
+
+#view-workflow {
+    /* Ensure clear spacing within the view container */
+    padding-top: var(--space-md);
+}
+
+/* Custom Grid Layout for the 3 Steps */
+#view-workflow .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-xl);
+    margin: 0;
+}
+
+/* Reset Bootstrap grid styles if present */
+#view-workflow .col-md-4 {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    flex: none;
+}
+
+/* ==================== Card Styling ==================== */
+#view-workflow .card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    height: 100%;
+    min-height: 400px;
+    /* Ensure consistent height */
+    display: flex;
+    flex-direction: column;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+#view-workflow .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-light);
+    background: linear-gradient(135deg, var(--bg-glass) 0%, rgba(var(--primary-rgb), 0.05) 100%);
+}
+
+#view-workflow .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--border-glass);
+    padding: var(--space-lg);
+    position: relative;
+}
+
+/* Step Number/Title */
+#view-workflow .card-title {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xl);
+    color: var(--text-main);
+    margin: 0 0 var(--space-xs);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+#view-workflow .card-description {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    line-height: 1.5;
+}
+
+#view-workflow .card-body {
+    padding: var(--space-lg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ==================== Action Buttons ==================== */
+#view-workflow .form-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0;
+}
+
+#view-workflow .btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family-mono);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--font-size-sm);
+    height: 54px;
+}
+
+/* Icons */
+#view-workflow .btn svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2px;
+}
+
+/* Specific Button Colors */
+#import-button {
+    background: var(--primary-main);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    border: 1px solid transparent;
+}
+
+#import-button:hover:not(:disabled) {
+    background: var(--primary-hover);
+    box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+#generate-button {
+    background: var(--folder-purple);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(var(--folder-purple-rgb), 0.3);
+    border: 1px solid transparent;
+}
+
+#generate-button:hover:not(:disabled) {
+    filter: brightness(1.1);
+    box-shadow: 0 6px 16px rgba(var(--folder-purple-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+#export-button {
+    background: var(--folder-green);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(var(--folder-green-rgb), 0.3);
+    border: 1px solid transparent;
+}
+
+#export-button:hover:not(:disabled) {
+    filter: brightness(1.1);
+    box-shadow: 0 6px 16px rgba(var(--folder-green-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+/* Disabled State */
+#view-workflow .btn:disabled {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border-base);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ==================== Status Display ==================== */
+.status-display {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: 60px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--c-neutral-400);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.status-indicator.status-idle {
+    background-color: var(--c-neutral-500);
+}
+
+.status-indicator.status-loading {
+    background-color: var(--c-info);
+    box-shadow: 0 0 0 4px var(--info-light);
+    animation: status-pulse 1.5s infinite;
+}
+
+.status-indicator.status-success {
+    background-color: var(--c-success);
+    box-shadow: 0 0 0 4px var(--success-light);
+}
+
+.status-indicator.status-error {
+    background-color: var(--c-danger);
+    box-shadow: 0 0 0 4px var(--danger-light);
+}
+
+.status-message {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-main);
+    font-family: var(--font-family-mono);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* ==================== Summary Panel ==================== */
+.summary-panel {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border-glass);
+    margin-top: auto;
+    /* Push to bottom */
+}
+
+.summary-panel[hidden] {
+    display: none;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-row dt {
+    color: var(--text-muted);
+}
+
+.summary-row dd {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+/* Animations */
+@keyframes status-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    #view-workflow .row {
+        grid-template-columns: 1fr;
+    }
+
+    #view-workflow .card {
+        min-height: auto;
+    }
+}

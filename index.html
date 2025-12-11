@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.sheetjs.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://cdn.sheetjs.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
     <title>Abrechnung aus Protokoll</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +16,7 @@
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/contracts.css" />
     <link rel="stylesheet" href="css/cell-mapper.css" />
+    <link rel="stylesheet" href="css/abrechnung.css" />
     <link rel="stylesheet" href="css/protokoll.css" />
     <link rel="stylesheet" href="css/hr-module.css" />
     <link rel="stylesheet" href="css/messgeraet.css" />
@@ -37,7 +39,8 @@
                     </svg>
                     <span class="logo-text">Abrechnung</span>
                 </div>
-                <button id="sidebar-toggle-btn" class="sidebar-toggle" aria-label="Sidebar umschalten" title="Sidebar umschalten">
+                <button id="sidebar-toggle-btn" class="sidebar-toggle" aria-label="Sidebar umschalten"
+                    title="Sidebar umschalten">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -58,7 +61,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#workflow" class="nav-link" role="menuitem" data-view="workflow" title="Abrechnung" aria-label="Abrechnung">
+                        <a href="#workflow" class="nav-link" role="menuitem" data-view="workflow" title="Abrechnung"
+                            aria-label="Abrechnung">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -68,7 +72,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#protokoll" class="nav-link" role="menuitem" data-view="protokoll" title="Protokoll" aria-label="Protokoll">
+                        <a href="#protokoll" class="nav-link" role="menuitem" data-view="protokoll" title="Protokoll"
+                            aria-label="Protokoll">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -78,7 +83,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#messgeraet" class="nav-link" role="menuitem" data-view="messgeraet" title="Messgeräte" aria-label="Messgeräte">
+                        <a href="#messgeraet" class="nav-link" role="menuitem" data-view="messgeraet" title="Messgeräte"
+                            aria-label="Messgeräte">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -88,7 +94,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#contracts" class="nav-link" role="menuitem" data-view="contracts" title="Contracts" aria-label="Contracts">
+                        <a href="#contracts" class="nav-link" role="menuitem" data-view="contracts" title="Contracts"
+                            aria-label="Contracts">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -108,7 +115,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#assets" class="nav-link" role="menuitem" data-view="assets" title="Assets" aria-label="Assets">
+                        <a href="#assets" class="nav-link" role="menuitem" data-view="assets" title="Assets"
+                            aria-label="Assets">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -118,7 +126,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#templates" class="nav-link" role="menuitem" data-view="templates" title="Templates" aria-label="Templates">
+                        <a href="#templates" class="nav-link" role="menuitem" data-view="templates" title="Templates"
+                            aria-label="Templates">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -128,7 +137,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#settings" class="nav-link" role="menuitem" data-view="settings" title="Settings" aria-label="Settings">
+                        <a href="#settings" class="nav-link" role="menuitem" data-view="settings" title="Settings"
+                            aria-label="Settings">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,7 +150,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#logs" class="nav-link" role="menuitem" data-view="logs" title="Logs" aria-label="Logs">
+                        <a href="#logs" class="nav-link" role="menuitem" data-view="logs" title="Logs"
+                            aria-label="Logs">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -150,7 +161,8 @@
                         </a>
                     </li>
                     <li class="nav-item" role="none">
-                        <a href="#help" class="nav-link" role="menuitem" data-view="help" title="Help" aria-label="Help">
+                        <a href="#help" class="nav-link" role="menuitem" data-view="help" title="Help"
+                            aria-label="Help">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -162,8 +174,8 @@
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <button id="theme-toggle-btn" class="btn btn-secondary btn-sm" title="Toggle Dark Mode" aria-label="Toggle Dark Mode"
-                    style="width: 100%;">
+                <button id="theme-toggle-btn" class="btn btn-secondary btn-sm" title="Toggle Dark Mode"
+                    aria-label="Toggle Dark Mode" style="width: 100%;">
                     <!-- Icon will be injected by JS -->
                     <span>Theme</span>
                 </button>
@@ -198,9 +210,9 @@
 
                 <div class="cmd-header-end">
                     <!-- Welcome Message Container (Daily Message) -->
-                    <div id="welcome-message-container" class="welcome-message-container" 
-                         aria-label="Tägliche Willkommensnachricht" 
-                         title="Tägliche Willkommensnachricht - Elektro Bereich">
+                    <div id="welcome-message-container" class="welcome-message-container"
+                        aria-label="Tägliche Willkommensnachricht"
+                        title="Tägliche Willkommensnachricht - Elektro Bereich">
                         <!-- Content will be injected by JS -->
                     </div>
 
@@ -1099,10 +1111,13 @@
                                 <div class="form-group">
                                     <label for="api-base-url" class="form-label">API Base URL</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="text" id="api-base-url" class="form-input" placeholder="z.B. http://localhost:8000/api" style="flex-grow: 1;">
-                                        <button type="button" class="btn btn-secondary btn-sm" id="save-api-config-btn">Speichern</button>
+                                        <input type="text" id="api-base-url" class="form-input"
+                                            placeholder="z.B. http://localhost:8000/api" style="flex-grow: 1;">
+                                        <button type="button" class="btn btn-secondary btn-sm"
+                                            id="save-api-config-btn">Speichern</button>
                                     </div>
-                                    <p class="settings-desc" style="margin-top: 5px;">URL des Backend-Servers (Standard: /api)</p>
+                                    <p class="settings-desc" style="margin-top: 5px;">URL des Backend-Servers (Standard:
+                                        /api)</p>
                                 </div>
                             </div>
 

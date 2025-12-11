@@ -74,6 +74,13 @@ global.XLSX = {
   }
 };
 
+// Mock window.scrollTo (missing in JSDOM)
+window.scrollTo = jest.fn();
+
+// Mock window.confirm and window.prompt
+window.confirm = jest.fn();
+window.prompt = jest.fn();
+
 // Reset mocks before each test
 beforeEach(() => {
   localStorageMock.getItem.mockClear();
@@ -81,4 +88,9 @@ beforeEach(() => {
   localStorageMock.removeItem.mockClear();
   localStorageMock.clear.mockClear();
   localStorageMock.clear(); // Actually clear the store
+  
+  // Reset window mocks
+  window.scrollTo.mockClear();
+  window.confirm.mockClear();
+  window.prompt.mockClear();
 });

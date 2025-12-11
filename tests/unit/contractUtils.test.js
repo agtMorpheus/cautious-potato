@@ -15,7 +15,8 @@ import {
   readContractWorkbook,
   extractContractsFromSheetAsync,
   importContractFile,
-  DEFAULT_COLUMN_MAPPING
+  DEFAULT_COLUMN_MAPPING,
+  VALID_STATUS_VALUES
 } from '../../js/contracts/contractUtils.js';
 
 // Mock XLSX global
@@ -223,128 +224,6 @@ describe('Contract Utils (contractUtils.js)', () => {
             }
         };
         
-        test('has optional fields marked correctly', () => {
-            expect(DEFAULT_COLUMN_MAPPING.location.required).toBe(false);
-            expect(DEFAULT_COLUMN_MAPPING.taskId.required).toBe(false);
-        });
-    });
-    
-    describe('VALID_STATUS_VALUES', () => {
-        test('contains expected status values', () => {
-            expect(VALID_STATUS_VALUES).toContain('In Bearbeitung');
-            expect(VALID_STATUS_VALUES).toContain('Abgerechnet');
-            expect(VALID_STATUS_VALUES).toContain('Erstellt');
-        });
-
-        test('contains all expected German status values', () => {
-            expect(VALID_STATUS_VALUES).toContain('Geplant');
-            expect(VALID_STATUS_VALUES).toContain('Freigegeben');
-            expect(VALID_STATUS_VALUES).toContain('Archiviert');
-        });
-    });
-
-    describe('normalizeStatus() additional cases', () => {
-        test('normalizes "complete" variations', () => {
-            expect(normalizeStatus('complete')).toBe('Abgerechnet');
-            expect(normalizeStatus('completed')).toBe('Abgerechnet');
-        });
-
-        test('normalizes "in arbeit" to "In Bearbeitung"', () => {
-            expect(normalizeStatus('in arbeit')).toBe('In Bearbeitung');
-        });
-
-        test('normalizes "open" to "Erstellt"', () => {
-            expect(normalizeStatus('open')).toBe('Erstellt');
-        });
-
-        test('preserves valid status values', () => {
-            expect(normalizeStatus('Geplant')).toBe('Geplant');
-            expect(normalizeStatus('Freigegeben')).toBe('Freigegeben');
-        });
-    });
-
-    describe('validateContractRecord() additional cases', () => {
-        test('validates contract with valid date format', () => {
-            const contract = {
-                contractId: '1406',
-                contractTitle: 'Test',
-                status: 'INBEARB',
-                plannedStart: '2025-06-15'
-            };
-            const result = validateContractRecord(contract);
-            expect(result.valid).toBe(true);
-        });
-
-        test('warns about invalid date format', () => {
-            const contract = {
-                contractId: '1406',
-                contractTitle: 'Test',
-                status: 'INBEARB',
-                plannedStart: '15-06-2025'
-            };
-            const result = validateContractRecord(contract);
-            expect(result.warnings.some(w => w.includes('ungültiges Format'))).toBe(true);
-        });
-
-        test('returns error for non-object contract', () => {
-            const result = validateContractRecord('string');
-            expect(result.valid).toBe(false);
-        });
-    });
-
-    describe('getContractSummary() additional cases', () => {
-        test('calculates summary with unknown locations', () => {
-            const contracts = [
-                { contractId: '1406', status: 'In Bearbeitung', location: null },
-                { contractId: '1407', status: 'Abgerechnet', location: 'Berlin' }
-            ];
-            const summary = getContractSummary(contracts);
-            expect(summary.byLocation['Unbekannt']).toBe(1);
-            expect(summary.byLocation['Berlin']).toBe(1);
-        });
-
-        test('calculates correct date range with multiple dates', () => {
-            const contracts = [
-                { contractId: '1406', status: 'In Bearbeitung', plannedStart: '2025-01-15' },
-                { contractId: '1407', status: 'Abgerechnet', plannedStart: '2025-12-31' }
-            ];
-            const summary = getContractSummary(contracts);
-            expect(summary.dateRange.earliest).toBe('2025-01-15');
-            expect(summary.dateRange.latest).toBe('2025-12-31');
-        });
-    });
-
-    describe('columnLetterToIndex() additional cases', () => {
-        test('handles mixed case consistently', () => {
-            expect(columnLetterToIndex('Ab')).toBe(columnLetterToIndex('AB'));
-        });
-
-        test('returns -1 for undefined and objects', () => {
-            expect(columnLetterToIndex(undefined)).toBe(-1);
-            expect(columnLetterToIndex({})).toBe(-1);
-        });
-    });
-
-    describe('indexToColumnLetter() additional cases', () => {
-        test('converts triple letter indices correctly', () => {
-            expect(indexToColumnLetter(702)).toBe('AAA');
-        });
-
-        test('handles boundary values', () => {
-            expect(indexToColumnLetter(0)).toBe('A');
-            expect(indexToColumnLetter(25)).toBe('Z');
-            expect(indexToColumnLetter(26)).toBe('AA');
-        });
-    });
-
-    describe('discoverContractSheets() edge cases', () => {
-        test('handles workbook with empty sheet array', () => {
-            expect(() => discoverContractSheets({ SheetNames: [] })).toThrow();
-        });
-
-        test('handles null workbook', () => {
-            expect(() => discoverContractSheets(null)).toThrow();
-        });
         // Mock sheet_to_json result
         XLSX.utils.sheet_to_json.mockReturnValue([
             ['ID', 'Title', 'Status'], // Header
@@ -363,6 +242,128 @@ describe('Contract Utils (contractUtils.js)', () => {
         expect(result.contracts[0].contractId).toBe('1001');
         expect(result.summary.successCount).toBe(1);
     });
+
+    test('has optional fields marked correctly', () => {
+        expect(DEFAULT_COLUMN_MAPPING.location.required).toBe(false);
+        expect(DEFAULT_COLUMN_MAPPING.taskId.required).toBe(false);
+    });
   });
 
+  describe('VALID_STATUS_VALUES', () => {
+    test('contains expected status values', () => {
+        expect(VALID_STATUS_VALUES).toContain('In Bearbeitung');
+        expect(VALID_STATUS_VALUES).toContain('Abgerechnet');
+        expect(VALID_STATUS_VALUES).toContain('Erstellt');
+    });
+
+    test('contains all expected German status values', () => {
+        expect(VALID_STATUS_VALUES).toContain('Geplant');
+        expect(VALID_STATUS_VALUES).toContain('Freigegeben');
+        expect(VALID_STATUS_VALUES).toContain('Archiviert');
+    });
+  });
+
+  describe('normalizeStatus() additional cases', () => {
+    test('normalizes "complete" variations', () => {
+        expect(normalizeStatus('complete')).toBe('Abgerechnet');
+        expect(normalizeStatus('completed')).toBe('Abgerechnet');
+    });
+
+    test('normalizes "in arbeit" to "In Bearbeitung"', () => {
+        expect(normalizeStatus('in arbeit')).toBe('In Bearbeitung');
+    });
+
+    test('normalizes "open" to "Erstellt"', () => {
+        expect(normalizeStatus('open')).toBe('Erstellt');
+    });
+
+    test('preserves valid status values', () => {
+        expect(normalizeStatus('Geplant')).toBe('Geplant');
+        expect(normalizeStatus('Freigegeben')).toBe('Freigegeben');
+    });
+  });
+
+  describe('validateContractRecord() additional cases', () => {
+    test('validates contract with valid date format', () => {
+        const contract = {
+            contractId: '1406',
+            contractTitle: 'Test',
+            status: 'INBEARB',
+            plannedStart: '2025-06-15'
+        };
+        const result = validateContractRecord(contract);
+        expect(result.valid).toBe(true);
+    });
+
+    test('warns about invalid date format', () => {
+        const contract = {
+            contractId: '1406',
+            contractTitle: 'Test',
+            status: 'INBEARB',
+            plannedStart: '15-06-2025'
+        };
+        const result = validateContractRecord(contract);
+        expect(result.warnings.some(w => w.includes('ungültiges Format'))).toBe(true);
+    });
+
+    test('returns error for non-object contract', () => {
+        const result = validateContractRecord('string');
+        expect(result.valid).toBe(false);
+    });
+  });
+
+  describe('getContractSummary() additional cases', () => {
+    test('calculates summary with unknown locations', () => {
+        const contracts = [
+            { contractId: '1406', status: 'In Bearbeitung', location: null },
+            { contractId: '1407', status: 'Abgerechnet', location: 'Berlin' }
+        ];
+        const summary = getContractSummary(contracts);
+        expect(summary.byLocation['Unbekannt']).toBe(1);
+        expect(summary.byLocation['Berlin']).toBe(1);
+    });
+
+    test('calculates correct date range with multiple dates', () => {
+        const contracts = [
+            { contractId: '1406', status: 'In Bearbeitung', plannedStart: '2025-01-15' },
+            { contractId: '1407', status: 'Abgerechnet', plannedStart: '2025-12-31' }
+        ];
+        const summary = getContractSummary(contracts);
+        expect(summary.dateRange.earliest).toBe('2025-01-15');
+        expect(summary.dateRange.latest).toBe('2025-12-31');
+    });
+  });
+
+  describe('columnLetterToIndex() additional cases', () => {
+    test('handles mixed case consistently', () => {
+        expect(columnLetterToIndex('Ab')).toBe(columnLetterToIndex('AB'));
+    });
+
+    test('returns -1 for undefined and objects', () => {
+        expect(columnLetterToIndex(undefined)).toBe(-1);
+        expect(columnLetterToIndex({})).toBe(-1);
+    });
+  });
+
+  describe('indexToColumnLetter() additional cases', () => {
+    test('converts triple letter indices correctly', () => {
+        expect(indexToColumnLetter(702)).toBe('AAA');
+    });
+
+    test('handles boundary values', () => {
+        expect(indexToColumnLetter(0)).toBe('A');
+        expect(indexToColumnLetter(25)).toBe('Z');
+        expect(indexToColumnLetter(26)).toBe('AA');
+    });
+  });
+
+  describe('discoverContractSheets() edge cases', () => {
+    test('handles workbook with empty sheet array', () => {
+        expect(() => discoverContractSheets({ SheetNames: [] })).toThrow();
+    });
+
+    test('handles null workbook', () => {
+        expect(() => discoverContractSheets(null)).toThrow();
+    });
+  });
 });

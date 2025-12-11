@@ -36,6 +36,50 @@ jest.mock('../../js/contracts/contractRepository.js');
 jest.mock('../../js/handlers.js');
 jest.mock('../../js/contracts/contractRenderer.js');
 
+// Helper functions for tests
+let mockStateData = {};
+
+function setupTestContracts(contracts) {
+    mockStateData = {
+        contracts: {
+            records: contracts,
+            importState: { status: 'idle' },
+            filters: {},
+            ui: { sortKey: null, sortDir: 'asc' },
+            lastImportResult: null
+        }
+    };
+    stateModule.getState.mockReturnValue(mockStateData);
+}
+
+function getState() {
+    return mockStateData;
+}
+
+function setState(newState, options = {}) {
+    // Merge the new state into mockStateData
+    if (newState.contracts) {
+        mockStateData.contracts = { ...mockStateData.contracts, ...newState.contracts };
+    }
+    stateModule.setState(newState, options);
+}
+
+function normalizeStatus(status) {
+    if (!status) return '';
+    const statusMap = {
+        'offen': 'Erstellt',
+        'inbearb': 'In Bearbeitung', 
+        'fertig': 'Abgerechnet'
+    };
+    return statusMap[status.toLowerCase()] || status;
+}
+
+// Make helper functions available globally for tests
+global.setupTestContracts = setupTestContracts;
+global.getState = getState;
+global.setState = setState;
+global.normalizeStatus = normalizeStatus;
+
 describe('Contract Handlers', () => {
     let mockState;
 

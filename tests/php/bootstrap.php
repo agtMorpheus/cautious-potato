@@ -5,6 +5,9 @@
  * Sets up the test environment for PHP unit tests.
  */
 
+// Load Composer autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
+
 // Set error reporting for tests
 error_reporting(E_ALL);
 
