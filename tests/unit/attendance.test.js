@@ -479,8 +479,9 @@ describe('Attendance Submodule (attendance.js)', () => {
       
       if (result.length > 1) {
         for (let i = 0; i < result.length - 1; i++) {
-          expect(new Date(result[i].date))
-            .toBeGreaterThanOrEqual(new Date(result[i + 1].date));
+          const date1 = new Date(result[i].date).getTime();
+          const date2 = new Date(result[i + 1].date).getTime();
+          expect(date1).toBeGreaterThanOrEqual(date2);
         }
       }
     });

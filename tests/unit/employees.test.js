@@ -327,12 +327,16 @@ describe('Employees Submodule (employees.js)', () => {
     });
 
     test('returns errors when validation fails', () => {
-      validateEmployee.mockReturnValueOnce({ valid: true, errors: [] })
-        .mockReturnValueOnce({ valid: false, errors: ['Invalid email'] });
+      // validateEmployee is called once in editEmployee - return invalid
+      validateEmployee.mockReturnValue({ valid: false, errors: ['Invalid email'] });
       
       const result = editEmployee('emp-1', { email: 'invalid' });
       
       expect(result.success).toBe(false);
+      expect(result.errors).toContain('Invalid email');
+      
+      // Reset to default for other tests
+      validateEmployee.mockReturnValue({ valid: true, errors: [] });
     });
   });
 
@@ -353,22 +357,17 @@ describe('Employees Submodule (employees.js)', () => {
   });
 
   describe('archiveEmployee()', () => {
-    test('sets status to inactive', () => {
-      archiveEmployee('emp-1');
-      
-      expect(updateEmployee).toHaveBeenCalledWith('emp-1', expect.objectContaining({
-        employmentStatus: 'inactive'
-      }));
-    });
-
-    test('sets end date to today', () => {
+    test('sets status to inactive and end date', () => {
       const today = new Date().toISOString().split('T')[0];
       
-      archiveEmployee('emp-1');
+      // archiveEmployee calls editEmployee which calls updateEmployee
+      const result = archiveEmployee('emp-1');
       
-      expect(updateEmployee).toHaveBeenCalledWith('emp-1', expect.objectContaining({
+      expect(result.success).toBe(true);
+      expect(updateEmployee).toHaveBeenCalledWith('emp-1', {
+        employmentStatus: 'inactive',
         endDate: today
-      }));
+      });
     });
   });
 

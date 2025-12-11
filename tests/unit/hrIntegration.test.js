@@ -570,8 +570,9 @@ describe('HR Integration Module (hrIntegration.js)', () => {
       
       // Should be sorted by date ascending
       if (result.schedules.length > 1) {
-        expect(new Date(result.schedules[0].weekStartDate))
-          .toBeLessThanOrEqual(new Date(result.schedules[1].weekStartDate));
+        const date1 = new Date(result.schedules[0].weekStartDate).getTime();
+        const date2 = new Date(result.schedules[1].weekStartDate).getTime();
+        expect(date1).toBeLessThanOrEqual(date2);
       }
     });
   });

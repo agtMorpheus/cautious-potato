@@ -565,8 +565,9 @@ describe('Schedules Submodule (schedules.js)', () => {
       const result = getScheduleHistory('emp-1', 12);
       
       if (result.length > 1) {
-        expect(new Date(result[0].weekStartDate))
-          .toBeGreaterThanOrEqual(new Date(result[1].weekStartDate));
+        const date1 = new Date(result[0].weekStartDate).getTime();
+        const date2 = new Date(result[1].weekStartDate).getTime();
+        expect(date1).toBeGreaterThanOrEqual(date2);
       }
     });
 
