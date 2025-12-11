@@ -1,354 +1,638 @@
-# Troubleshooting Guide
+# Troubleshooting Guide - Abrechnung Application
 
-## Common Issues
+## Quick Diagnostic Checklist
 
-### Issue: "Import failed: Invalid file type"
+Before diving into specific issues, run through this quick checklist:
 
-**Symptom**: Cannot import .xlsx file, error says "Ungültiges Dateiformat"
-
-**Causes**:
-- File is not a valid Excel file (.xls, .csv, etc.)
-- File MIME type is not recognized by browser
-- File is corrupted
-
-**Solutions**:
-1. Verify file extension is `.xlsx` (not `.xls` or `.csv`)
-2. Re-save file in Excel as `.xlsx` format (Excel 2007+)
-3. Copy content to a fresh Excel workbook and save as `.xlsx`
-4. Try from a different browser (Chrome, Firefox, Edge)
+- [ ] Browser console shows no red errors (F12 → Console)
+- [ ] All files are loading correctly (F12 → Network tab)
+- [ ] JavaScript is enabled in browser
+- [ ] File is valid .xlsx format (not .xls or .csv)
+- [ ] XAMPP Apache server is running
+- [ ] Application is accessed via `http://localhost/abrechnung-app`
 
 ---
 
-### Issue: "Metadata fields are missing"
+## Common Issues & Solutions
 
-**Symptom**: Import fails with error about missing metadata (Auftrags-Nr., Protokoll-Nr., etc.)
+### 🚫 Import Issues
 
-**Causes**:
+#### Issue: "Import failed: Invalid file type"
+
+**Symptom:** Cannot import .xlsx file, error says "only .xlsx files are supported"
+
+**Root Causes:**
+- File is not a valid Excel file (.xls, .csv, .txt, etc.)
+- File MIME type is not recognized by browser
+- File is corrupted or incomplete
+- Browser security settings blocking file access
+
+**Solutions:**
+1. **Verify file format:**
+   - Check file extension is exactly `.xlsx` (not `.xls` or `.csv`)
+   - Right-click file → Properties to confirm file type
+   
+2. **Re-save in correct format:**
+   - Open file in Excel
+   - File → Save As → Excel Workbook (.xlsx)
+   - Ensure "Excel Workbook" is selected, not "Excel 97-2003"
+   
+3. **Try different browser:**
+   - Test in Chrome, Firefox, or Edge
+   - Disable browser extensions temporarily
+   
+4. **Check file integrity:**
+   - Try opening file in Excel first
+   - If Excel can't open it, file is corrupted
+
+**Prevention:** Always use the official protokoll.xlsx template
+
+---
+
+#### Issue: "Metadata fields are missing"
+
+**Symptom:** Import fails with error about missing Auftrags-Nr., Protokoll-Nr., etc.
+
+**Root Causes:**
 - Using wrong protokoll template version
-- Template cells were deleted or moved
+- Required cells were deleted or moved
 - Data not entered in correct cells
+- Template structure was modified
 
-**Solutions**:
-1. Use official `protokoll.xlsx` template, not a modified version
-2. Verify data is in the correct cells:
+**Solutions:**
+1. **Verify template usage:**
+   - Use only the official `protokoll.xlsx` template
+   - Don't modify template structure
+   - Only fill in data, don't add/remove rows/columns
+   
+2. **Check required cells:**
    - Protokoll-Nr. → Cell U3
-   - Auftrags-Nr. → Cell N5
+   - Auftrags-Nr. → Cell N5  
    - Anlage → Cell A10
    - Einsatzort → Cell T10
    - Firma → Cell T7
-   - Auftraggeber → Cell A5
-3. Ensure cells are not empty
-4. If cells were moved, contact template maintainer for updated version
+   
+3. **Verify data entry:**
+   - Cells must contain text/numbers, not formulas
+   - No empty required fields
+   - No special characters that might cause parsing issues
+
+**Debug Steps:**
+```
+1. Open protokoll.xlsx in Excel
+2. Click on cell U3 - should show Protokoll-Nr.
+3. Click on cell N5 - should show Auftrags-Nr.
+4. If cells are empty or contain different data, re-enter correctly
+```
 
 ---
 
-### Issue: No positions are extracted
+#### Issue: "No positions extracted" or "0 positions found"
 
-**Symptom**: Import succeeds, but shows 0 positions extracted
+**Symptom:** Import succeeds but shows 0 positions extracted
 
-**Causes**:
-- Position data is in wrong columns/rows
-- Rows outside the 30-325 range
-- Position numbers or quantities are empty
-- Quantity column is not X, B, or C
+**Root Causes:**
+- Position data is in wrong columns
+- Data is outside the expected row range (30-325)
+- Position numbers are empty or invalid format
+- Quantities are not numeric
 
-**Solutions**:
-1. Verify position data starts at row 30
-2. Verify position numbers (Pos.Nr.) are in Column A
-3. Check that quantities (Menge) are in Column X, B, or C
-4. Ensure position numbers follow format: DD.DD.DDDD (e.g., 01.01.0010)
-5. Ensure quantities are numeric values, not text
-6. If data is in different columns, contact support for template customization
+**Solutions:**
+1. **Verify position data location:**
+   - Position numbers must be in Column A (rows 30-325)
+   - Quantities must be in Column B (rows 30-325)
+   - Data outside this range is ignored
+   
+2. **Check position number format:**
+   - Must follow pattern: `XX.XX.XXXX` (e.g., `01.01.0010`)
+   - All digits, no letters or special characters
+   - Leading zeros are required
+   
+3. **Verify quantities:**
+   - Must be numbers, not text
+   - Can be integers or decimals
+   - Cannot be empty or contain formulas
+
+**Debug Steps:**
+```
+1. Open protokoll.xlsx in Excel
+2. Go to row 30, column A - should contain first position number
+3. Go to row 30, column B - should contain first quantity
+4. Scroll down to verify more positions exist
+5. Check that position numbers follow XX.XX.XXXX format
+```
 
 ---
 
-### Issue: "Failed to load template" during generation
+### 🔧 Generation Issues
 
-**Symptom**: Generate fails with error about template loading
+#### Issue: "Failed to load template" during generation
 
-**Causes**:
-- `templates/abrechnung.xlsx` is missing from server
+**Symptom:** Generate button fails with template loading error
+
+**Root Causes:**
+- `templates/abrechnung.xlsx` file is missing
 - File permissions prevent reading template
-- Server returned 404 error
-- Network error
+- XAMPP server not serving static files correctly
+- Network connectivity issues
 
-**Solutions**:
-1. Verify `templates/abrechnung.xlsx` exists on server
-2. Check file permissions (should be readable by web server)
-3. Check server is running (XAMPP Apache, Python HTTP server, etc.)
-4. Try accessing template directly: `http://localhost:8000/templates/abrechnung.xlsx`
-5. Check browser console (F12) for detailed error message
-6. If using XAMPP, check logs: `xampp/apache/logs/error.log`
+**Solutions:**
+1. **Verify template file exists:**
+   ```
+   Check: xampp/htdocs/abrechnung-app/templates/abrechnung.xlsx
+   File should be present and readable
+   ```
+   
+2. **Check file permissions:**
+   - On Windows: Right-click → Properties → Security
+   - Ensure "Everyone" or "Users" has Read permissions
+   - On macOS/Linux: `chmod 644 templates/abrechnung.xlsx`
+   
+3. **Restart XAMPP:**
+   - Stop Apache in XAMPP Control Panel
+   - Wait 5 seconds
+   - Start Apache again
+   - Test access: `http://localhost/abrechnung-app/templates/abrechnung.xlsx`
+   
+4. **Check XAMPP logs:**
+   ```
+   Location: xampp/apache/logs/error.log
+   Look for: 404 errors, permission denied, file not found
+   ```
+
+**Verification:**
+- Open browser: `http://localhost/abrechnung-app/templates/abrechnung.xlsx`
+- Should download the template file
+- If 404 error, file is missing or path is wrong
 
 ---
 
-### Issue: Export button doesn't work or nothing downloads
+#### Issue: "Generation failed: Invalid data"
 
-**Symptom**: Click export, nothing happens, no file downloads
+**Symptom:** Generate fails even though import was successful
 
-**Causes**:
+**Root Causes:**
+- Imported data was corrupted during processing
+- State management issues
+- Memory constraints with large datasets
+
+**Solutions:**
+1. **Check browser console:**
+   - Press F12 → Console tab
+   - Look for red error messages
+   - Note exact error text for debugging
+   
+2. **Verify imported data:**
+   - Check that positions were actually imported
+   - Verify metadata is complete
+   - Look for data corruption indicators
+   
+3. **Try smaller dataset:**
+   - Test with protokoll containing fewer positions
+   - If works with small data, may be memory issue
+   
+4. **Clear browser cache:**
+   - Ctrl+Shift+Delete → Clear cache
+   - Reload page and try again
+
+---
+
+### 📤 Export Issues
+
+#### Issue: Export button doesn't work or nothing downloads
+
+**Symptom:** Click export, nothing happens, no file downloads
+
+**Root Causes:**
 - Browser security policy prevents downloads
-- SheetJS library not loaded
-- No workbook in memory (generation failed)
-- Browser popup blocker
+- SheetJS library not loaded properly
+- No workbook generated in memory
+- Browser popup blocker interfering
 
-**Solutions**:
-1. Check browser console (F12) for errors
-2. Verify SheetJS loaded: type `XLSX` in console, should return object
-3. Try different browser (Chrome, Firefox, Edge)
-4. Clear browser cache and reload page (Ctrl+Shift+R)
-5. Check browser popup/download settings (allow downloads)
-6. Disable popup blocker for this site
-7. Ensure you clicked "Generate" before "Export"
+**Solutions:**
+1. **Check browser console:**
+   - Press F12 → Console tab
+   - Look for JavaScript errors
+   - Verify SheetJS loaded: type `XLSX` in console, should return object
+   
+2. **Browser settings:**
+   - Check popup blocker settings
+   - Allow downloads from localhost
+   - Try different browser (Chrome, Firefox, Edge)
+   
+3. **Clear browser data:**
+   - Clear cache and cookies
+   - Disable browser extensions
+   - Try incognito/private browsing mode
+   
+4. **Verify generation completed:**
+   - Ensure "Generate" step completed successfully
+   - Check that generation status shows "success"
+   - Try generating again before export
 
----
-
-### Issue: Browser console errors
-
-**Symptom**: Page loads but console (F12) shows red errors
-
-**Common Errors**:
-
-**"Cannot find module / Unexpected token"**
-- **Problem**: JavaScript syntax error or missing import
-- **Solution**: Refresh page, clear cache. If persists, contact developer
-
-**"localStorage is not defined"**
-- **Problem**: Browser localStorage disabled or in private mode
-- **Solution**: Disable private browsing, enable localStorage in browser settings
-
-**"XLSX is not defined"**
-- **Problem**: SheetJS library didn't load from CDN
-- **Solution**: Check internet connection, refresh page, check network tab in DevTools
-
-**"Failed to fetch"**
-- **Problem**: Server not running or template file not accessible
-- **Solution**: Verify server is running, check file paths
+**Debug Steps:**
+```
+1. Open browser console (F12)
+2. Type: window._currentWorkbook
+3. Should return an object, not undefined
+4. If undefined, generation didn't complete properly
+```
 
 ---
 
-### Issue: Data persists after reset
+### 🔄 Reset & State Issues
 
-**Symptom**: After clicking "Anwendung zurücksetzen", data reappears after page reload
+#### Issue: Data persists after reset
 
-**Causes**:
+**Symptom:** After clicking "Anwendung zurücksetzen", data reappears after page reload
+
+**Root Causes:**
 - localStorage not cleared properly
 - Browser cache interference
-- localStorage disabled
+- Multiple browser tabs with same app
+- localStorage disabled in browser
 
-**Solutions**:
-1. Manually clear localStorage:
-   - Open DevTools (F12)
-   - Go to Application → Local Storage
-   - Find `abrechnungAppState_v1` and delete it
-2. Clear browser cache (Ctrl+Shift+Delete)
-3. Try incognito/private browsing to rule out cache issues
-4. Hard reload: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+**Solutions:**
+1. **Manual localStorage clear:**
+   ```
+   1. Open DevTools (F12)
+   2. Go to Application → Local Storage
+   3. Find 'abrechnungAppState_v1' and delete it
+   4. Reload page
+   ```
+   
+2. **Clear browser cache:**
+   - Ctrl+Shift+Delete (Windows) or Cmd+Shift+Delete (Mac)
+   - Select "All time" and check all boxes
+   - Clear data and reload page
+   
+3. **Check other browser tabs:**
+   - Close all other tabs with the application
+   - Only keep one tab open
+   - Try reset again
+   
+4. **Try incognito mode:**
+   - Open application in private/incognito window
+   - Test if reset works there
+   - If yes, main browser has cache issues
 
 ---
 
-### Issue: Performance - application is slow
+### ⚡ Performance Issues
 
-**Symptom**: Import/generation takes > 5 seconds
+#### Issue: Application is slow or unresponsive
 
-**Causes**:
+**Symptom:** Import/generation takes > 5 seconds, browser becomes unresponsive
+
+**Root Causes:**
 - Very large protokoll file (> 1000 positions)
-- Slow computer or browser
+- Insufficient computer memory
 - Browser extensions interfering
-- Lots of other tabs open
-- Large amounts of data in localStorage
+- Too many browser tabs open
 
-**Solutions**:
-1. Check file size - are there really 1000+ positions?
-2. Close other browser tabs and disable extensions
-3. Try in a different browser
-4. Try on a different computer
-5. Check computer performance (Task Manager/Activity Monitor)
-6. Clear localStorage if very large
+**Solutions:**
+1. **Check file size:**
+   - How many positions does protokoll contain?
+   - Files with > 5000 positions may be slow
+   - Consider splitting large files
+   
+2. **Optimize browser:**
+   - Close other browser tabs
+   - Disable browser extensions
+   - Close other applications to free memory
+   
+3. **Try different browser:**
+   - Chrome generally performs best
+   - Firefox and Edge are good alternatives
+   - Avoid Internet Explorer
+   
+4. **Check computer performance:**
+   - Open Task Manager (Windows) or Activity Monitor (Mac)
+   - Check CPU and memory usage
+   - Close unnecessary applications
 
-**Advanced Profiling**:
-- Open DevTools Performance tab (F12)
-- Click Record button
-- Perform the slow operation
-- Stop recording
-- Look for long red bars (long tasks > 50ms)
-- Take screenshot and contact developer with recording
-
----
-
-### Issue: Duplicate position numbers
-
-**Symptom**: Warning message about duplicate position numbers
-
-**Causes**:
-- Same position number appears multiple times in protokoll
-- This is expected behavior if same position appears in multiple rows
-
-**Solutions**:
-1. **This is not an error** - the application will automatically sum the quantities
-2. Review the protokoll to verify duplicates are intentional
-3. Check the generated summary to verify totals are correct
-4. If duplicates are unintentional, correct the protokoll and re-import
+**Performance Profiling:**
+```
+1. Open DevTools (F12) → Performance tab
+2. Click Record
+3. Perform slow operation (import/generate)
+4. Stop recording
+5. Look for long red bars (slow operations)
+6. Share screenshot with developer if needed
+```
 
 ---
 
-### Issue: Incorrect quantities in export
+### 🌐 Browser & Network Issues
 
-**Symptom**: Generated abrechnung has wrong quantities
+#### Issue: "SheetJS is not defined" or library errors
 
-**Causes**:
-- Position numbers don't match between protokoll and template
-- Quantities in wrong column
-- Formula errors in template
+**Symptom:** Console shows "XLSX is not defined" or similar library errors
 
-**Solutions**:
-1. Verify position numbers in protokoll match template exactly
-2. Check that quantities are being read from correct column (X, B, or C)
-3. Open generated abrechnung.xlsx and check formulas in Column F
-4. Compare protokoll and abrechnung side by side
-5. Check for data type issues (text vs numbers)
+**Root Causes:**
+- SheetJS library failed to load
+- Network connectivity issues
+- XAMPP not serving JavaScript files
+- Browser cache corruption
 
----
-
-### Issue: Missing positions in export
-
-**Symptom**: Some positions from protokoll don't appear in export
-
-**Causes**:
-- Position numbers in protokoll don't exist in template
-- Template only has predefined positions
-
-**Solutions**:
-1. Check which positions are missing
-2. Verify template contains those position numbers
-3. Template must be updated to include new positions
-4. Contact template maintainer to add missing positions
-
----
-
-## XAMPP Issues
-
-### "Cannot start Apache"
-
-**Causes**:
-- Port 80 already in use (Skype, IIS, another web server)
-- Another Apache instance running
-- Permission issues
-
-**Solutions**:
-1. Check if port 80 is in use (Windows):
+**Solutions:**
+1. **Verify library loading:**
+   - Open DevTools → Network tab
+   - Reload page
+   - Look for `xlsx.min.js` - should show 200 status
+   - If 404, file is missing or path wrong
+   
+2. **Check file exists:**
    ```
-   netstat -ano | find ":80"
+   Verify: xampp/htdocs/abrechnung-app/js/libs/xlsx.min.js
+   File should be present and not empty
    ```
-2. Stop conflicting service or change Apache port:
-   - Edit `apache/conf/httpd.conf`
-   - Change `Listen 80` to `Listen 8080`
-   - Access as `http://localhost:8080/abrechnung-app`
-3. Run XAMPP as Administrator (Windows)
-4. Check XAMPP error logs in `xampp/apache/logs/error.log`
+   
+3. **Test direct access:**
+   - Open: `http://localhost/abrechnung-app/js/libs/xlsx.min.js`
+   - Should show JavaScript code, not 404 error
+   
+4. **Clear cache and reload:**
+   - Hard refresh: Ctrl+F5 (Windows) or Cmd+Shift+R (Mac)
+   - Clear browser cache completely
+   - Restart browser
 
 ---
 
-### "File not found (404)"
+#### Issue: "Cannot connect to localhost"
 
-**Causes**:
-- Application not in correct directory
-- Incorrect URL
-- File path issues
+**Symptom:** Browser shows "This site can't be reached" or connection refused
 
-**Solutions**:
-1. Verify app is in `htdocs` folder: `xampp/htdocs/abrechnung-app/`
-2. Check file names match exactly (case-sensitive on Linux)
-3. Verify `index.html` is in root of project
-4. Try accessing: `http://localhost/abrechnung-app/index.html`
-5. Restart Apache in XAMPP Control Panel
+**Root Causes:**
+- XAMPP Apache server not running
+- Wrong URL or port
+- Firewall blocking connections
+- Another application using port 80
+
+**Solutions:**
+1. **Check XAMPP status:**
+   - Open XAMPP Control Panel
+   - Apache should show "Running" in green
+   - If not, click "Start" next to Apache
+   
+2. **Verify URL:**
+   - Use: `http://localhost/abrechnung-app/`
+   - NOT: `file:///` or `https://`
+   - Check spelling and path
+   
+3. **Check port conflicts:**
+   ```
+   Windows: netstat -ano | find ":80"
+   Mac/Linux: lsof -i :80
+   
+   If port 80 is used by another app:
+   - Change Apache port in httpd.conf
+   - Or stop the conflicting application
+   ```
+   
+4. **Firewall settings:**
+   - Temporarily disable firewall/antivirus
+   - Add XAMPP to firewall exceptions
+   - Allow Apache through Windows Defender
 
 ---
 
-### "Permission denied"
+## XAMPP-Specific Issues
 
-**Causes**:
-- File permissions incorrect
-- Antivirus blocking access
-- User permissions
+### Apache Won't Start
 
-**Solutions**:
-1. Check file permissions (should be readable by web server)
-2. On Windows, disable antivirus scanner temporarily
-3. Run XAMPP as Administrator
-4. On Linux/Mac, set permissions:
-   ```bash
-   chmod -R 755 /path/to/xampp/htdocs/abrechnung-app
+**Error Messages:**
+- "Port 80 in use by another application"
+- "Apache shutdown unexpectedly"
+- "Permission denied"
+
+**Solutions:**
+
+1. **Port Conflict (Most Common):**
    ```
+   1. Open XAMPP Control Panel
+   2. Click "Config" next to Apache
+   3. Select "Apache (httpd.conf)"
+   4. Find line: Listen 80
+   5. Change to: Listen 8080
+   6. Save file and restart Apache
+   7. Access app: http://localhost:8080/abrechnung-app
+   ```
+
+2. **Permission Issues:**
+   - Run XAMPP Control Panel as Administrator (Windows)
+   - On Mac: `sudo /Applications/XAMPP/xamppfiles/xampp start`
+   - Check antivirus isn't blocking XAMPP
+
+3. **Skype Conflict (Windows):**
+   - Skype often uses port 80
+   - Close Skype or change its port settings
+   - Restart Apache
+
+### File Not Found (404 Errors)
+
+**Symptoms:**
+- "404 Not Found" when accessing application
+- Template files not loading
+- JavaScript files not loading
+
+**Solutions:**
+
+1. **Verify file location:**
+   ```
+   Correct path: xampp/htdocs/abrechnung-app/
+   Files should be directly in this folder:
+   - index.html
+   - js/ folder
+   - css/ folder
+   - templates/ folder
+   ```
+
+2. **Check file names:**
+   - Case sensitive on Linux/Mac
+   - No spaces in file names
+   - Use forward slashes in URLs
+
+3. **Restart Apache:**
+   - Stop Apache in XAMPP
+   - Wait 5 seconds
+   - Start Apache again
 
 ---
 
 ## Browser-Specific Issues
 
-### Chrome
+### Chrome Issues
 
-- **Issue**: Downloads blocked
-- **Solution**: Check Settings → Privacy → Downloads → Allow downloads
+**File Upload Problems:**
+- Chrome may block file uploads from localhost
+- Solution: Use `--allow-file-access-from-files` flag
+- Or use different browser for testing
 
-### Firefox
+**Download Blocking:**
+- Chrome may block automatic downloads
+- Check download settings in Chrome
+- Allow downloads from localhost
 
-- **Issue**: CORS errors with file:// protocol
-- **Solution**: Must use a web server (XAMPP, Python http.server)
+### Firefox Issues
 
-### Safari
+**CORS Errors:**
+- Firefox strict CORS policy
+- Ensure all files served from same origin
+- Use XAMPP, don't open files directly
 
-- **Issue**: localStorage disabled in private mode
-- **Solution**: Exit private browsing mode
+### Safari Issues
 
-### Edge
-
-- **Issue**: Old cached version
-- **Solution**: Hard reload with Ctrl+Shift+R or clear cache
+**File API Limitations:**
+- Safari has stricter file API
+- May not support all Excel features
+- Recommend Chrome or Firefox for best experience
 
 ---
 
-## Reporting Issues
+## Advanced Debugging
 
-When reporting a problem, please include:
+### Browser Developer Tools
 
-1. **Operating System**: Windows 10, macOS 14, Ubuntu 22.04, etc.
-2. **Browser**: Chrome 120, Firefox 121, Safari 17, Edge 120, etc.
-3. **Error Message**: Exact text from alert or console
-4. **Steps to Reproduce**: What were you doing when it happened?
-5. **Screenshot**: Of the error or unexpected behavior
-6. **Console Errors**: 
-   - Press F12
-   - Go to Console tab
-   - Copy all red errors
-7. **Sample File**: If possible, attach the protokoll.xlsx file (sanitize sensitive data)
-8. **Expected vs Actual**: What you expected to happen vs what actually happened
+**Console Tab (F12):**
+```javascript
+// Check if libraries loaded
+typeof XLSX !== 'undefined'  // Should return true
+
+// Check application state
+getState()  // Should return state object
+
+// Check for errors
+console.clear()  // Clear console, then try operation
+```
+
+**Network Tab:**
+- Shows all file loading requests
+- Red entries indicate failed loads
+- Check status codes (200 = success, 404 = not found)
+
+**Application Tab:**
+- Local Storage → Check saved state
+- Can manually clear stored data
+
+### Performance Debugging
+
+**Memory Usage:**
+```javascript
+// Check memory usage (Chrome only)
+console.log(performance.memory);
+
+// Monitor during operations
+setInterval(() => {
+  console.log('Memory:', Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + 'MB');
+}, 1000);
+```
+
+**Timing Operations:**
+```javascript
+// Time import operation
+console.time('import');
+// ... perform import ...
+console.timeEnd('import');
+```
 
 ---
 
 ## Getting Help
 
-1. Check this troubleshooting guide first
-2. Check browser console (F12 → Console tab) for errors
-3. Try in a different browser
-4. Try with a fresh, clean protokoll.xlsx file
-5. Check DevTools Network tab to see if files are loading
-6. Check ARCHITECTURE.md and API.md for technical details
-7. Contact developer with detailed information from "Reporting Issues" above
+### Information to Collect
+
+When reporting issues, please provide:
+
+1. **System Information:**
+   - Operating System (Windows 10, macOS Big Sur, etc.)
+   - Browser and version (Chrome 120, Firefox 121, etc.)
+   - XAMPP version
+
+2. **Error Details:**
+   - Exact error message from alert or console
+   - Screenshot of error
+   - Steps that led to the error
+
+3. **Console Output:**
+   - Press F12 → Console tab
+   - Copy all red error messages
+   - Include any warnings (yellow messages)
+
+4. **Network Information:**
+   - F12 → Network tab
+   - Look for failed requests (red entries)
+   - Note status codes and error messages
+
+5. **File Information:**
+   - File size of protokoll.xlsx
+   - Number of positions in file
+   - Any modifications made to template
+
+### Sample Files
+
+If possible, provide a sanitized sample file:
+- Remove sensitive company data
+- Keep structure and position format
+- Replace real data with test data
+
+### Contact Information
+
+**Priority Levels:**
+- **Critical:** Application completely broken, cannot import any files
+- **High:** Major feature not working, blocking normal workflow
+- **Medium:** Minor issues, workarounds available
+- **Low:** Enhancement requests, cosmetic issues
 
 ---
 
 ## Prevention Tips
 
-1. **Always use official templates** - Don't modify template structure
-2. **Test with small files first** - Before processing large protokolls
-3. **Keep browser updated** - Use latest version of Chrome, Firefox, or Edge
-4. **Regular backups** - Export important data before making changes
-5. **Clear cache periodically** - Prevents stale data issues
-6. **Use stable network** - Especially when loading templates
-7. **Monitor console** - Check F12 console regularly for warnings
+### Best Practices
+
+1. **File Management:**
+   - Always use official templates
+   - Don't modify template structure
+   - Keep backup copies of important files
+   - Use descriptive filenames
+
+2. **Browser Maintenance:**
+   - Keep browser updated
+   - Clear cache regularly
+   - Disable unnecessary extensions
+   - Use supported browsers (Chrome, Firefox, Edge)
+
+3. **XAMPP Maintenance:**
+   - Keep XAMPP updated
+   - Regular restart of Apache
+   - Monitor log files for issues
+   - Backup application files
+
+4. **Data Validation:**
+   - Verify data before import
+   - Check position number formats
+   - Ensure quantities are numeric
+   - Review metadata completeness
+
+### Regular Maintenance
+
+**Weekly:**
+- Clear browser cache
+- Restart XAMPP Apache
+- Check for application updates
+
+**Monthly:**
+- Update browser to latest version
+- Review XAMPP logs for errors
+- Backup application and templates
+
+**As Needed:**
+- Update XAMPP when new version available
+- Replace templates when updated versions provided
+- Clear localStorage if experiencing state issues
 
 ---
 
-**Troubleshooting Guide Version:** 1.0  
-**Last Updated:** December 2025  
-**Status:** Complete
+**Last Updated:** December 11, 2025  
+**Version:** 2.0 - Phase 6 Comprehensive Troubleshooting  
+**Coverage:** All common issues with step-by-step solutions

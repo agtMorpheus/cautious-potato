@@ -384,12 +384,12 @@
                         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                         <!-- Import Card -->
                         <div class="card h-100">
-                            <div class="card-header">
-                                <h3 class="card-title">1. Import</h3>
-                                <p class="card-description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der
+                            <div class="card__header">
+                                <h3 class="card__title">1. Import</h3>
+                                <p class="card__description">Laden Sie ein gültiges <code>protokoll.xlsx</code> aus der
                                     Vorlage.</p>
                             </div>
-                            <div class="card-body">
+                            <div class="card__body">
                                 <div class="form-group">
                                     <label class="form-label">Protokoll-Datei (.xlsx)</label>
                                     <div class="file-upload-area" id="file-drop-zone">
@@ -408,7 +408,7 @@
                                 </div>
 
                                 <div class="form-actions">
-                                    <button id="import-button" type="button" class="btn btn-primary" disabled>
+                                    <button id="import-button" type="button" class="btn btn--primary" disabled>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -430,14 +430,14 @@
 
                         <!-- Process Card -->
                         <div class="card h-100">
-                            <div class="card-header">
-                                <h3 class="card-title">2. Prozess</h3>
-                                <p class="card-description">Positionen werden aggregiert und in die Abrechnungsvorlage
+                            <div class="card__header">
+                                <h3 class="card__title">2. Prozess</h3>
+                                <p class="card__description">Positionen werden aggregiert und in die Abrechnungsvorlage
                                     übernommen.</p>
                             </div>
-                            <div class="card-body">
+                            <div class="card__body">
                                 <div class="form-actions">
-                                    <button id="generate-button" type="button" class="btn btn-primary" disabled>
+                                    <button id="generate-button" type="button" class="btn btn--primary" disabled>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -457,14 +457,15 @@
 
                         <!-- Export Card -->
                         <div class="card h-100">
-                            <div class="card-header">
-                                <h3 class="card-title">3. Export</h3>
-                                <p class="card-description">Laden Sie die fertige <code>abrechnung.xlsx</code> herunter.
+                            <div class="card__header">
+                                <h3 class="card__title">3. Export</h3>
+                                <p class="card__description">Laden Sie die fertige <code>abrechnung.xlsx</code>
+                                    herunter.
                                 </p>
                             </div>
-                            <div class="card-body">
+                            <div class="card__body">
                                 <div class="form-actions">
-                                    <button id="export-button" type="button" class="btn btn-primary" disabled>
+                                    <button id="export-button" type="button" class="btn btn--primary" disabled>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

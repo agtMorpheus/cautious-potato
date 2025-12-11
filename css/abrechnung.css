@@ -1,11 +1,11 @@
 /**
  * Abrechnung (Workflow) View Styles
- * Command Center Aesthetic
+ * UI Standardization Compliant
  */
 
 #view-workflow {
-    /* Ensure clear spacing within the view container matching Dashboard */
-    padding: var(--space-lg);
+    /* Ensure clear spacing within the view container */
+    padding: var(--space-24);
     max-width: var(--layout-max-width);
     margin: 0 auto;
 }
@@ -14,75 +14,64 @@
 #view-workflow .row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--space-xl);
+    gap: var(--space-32);
     margin: 0;
 }
 
-/* Reset Bootstrap grid styles if present */
-#view-workflow .col-md-4 {
-    width: 100%;
-    max-width: 100%;
-    padding: 0;
-    flex: none;
-}
-
-/* ==================== Card Styling ==================== */
+/* ==================== Card Styling (Standardized) ==================== */
 #view-workflow .card {
-    background: var(--bg-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-lg);
     height: 100%;
     min-height: 400px;
-    /* Ensure consistent height */
     display: flex;
     flex-direction: column;
-    transition: all var(--transition-normal);
+    transition: box-shadow var(--duration-normal) var(--ease-standard),
+        transform var(--duration-normal) var(--ease-standard);
     position: relative;
     overflow: hidden;
 }
 
 #view-workflow .card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
-    border-color: var(--primary-light);
-    background: linear-gradient(135deg, var(--bg-glass) 0%, rgba(var(--primary-rgb), 0.05) 100%);
+    box-shadow: var(--shadow-std-xl);
+    border-color: var(--color-primary);
 }
 
-#view-workflow .card-header {
+#view-workflow .card__header {
     background: transparent;
-    border-bottom: 1px solid var(--border-glass);
-    padding: var(--space-lg);
+    border-bottom: 1px solid var(--color-border-std);
+    padding: var(--space-24);
     position: relative;
 }
 
 /* Step Number/Title */
-#view-workflow .card-title {
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xl);
-    color: var(--text-main);
-    margin: 0 0 var(--space-xs);
-    font-weight: var(--font-weight-medium);
+#view-workflow .card__title {
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-h3);
+    color: var(--color-text);
+    margin: 0 0 var(--space-4);
+    font-weight: var(--font-weight-std-medium);
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-8);
 }
 
-#view-workflow .card-description {
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
+#view-workflow .card__description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
     margin: 0;
-    line-height: 1.5;
+    line-height: var(--line-height-body);
 }
 
-#view-workflow .card-body {
-    padding: var(--space-lg);
+#view-workflow .card__body {
+    padding: var(--space-24);
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--space-24);
 }
 
 /* ==================== Action Buttons ==================== */
@@ -94,45 +83,37 @@
 
 #view-workflow .btn {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    padding: var(--space-md) var(--space-lg);
-    border-radius: var(--radius-md);
-    font-family: var(--font-family-mono);
-    font-weight: var(--font-weight-semibold);
-    transition: all var(--transition-normal);
+    height: 54px;
+    font-family: var(--font-family-std-mono);
+    font-weight: var(--font-weight-std-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    font-size: var(--font-size-sm);
-    height: 54px;
+    font-size: var(--font-size-small);
 }
 
-/* Icons */
+/* Icons within buttons */
 #view-workflow .btn svg {
     width: 24px;
     height: 24px;
-    stroke-width: var(--border-width-medium);
+    stroke-width: 2px;
 }
 
-/* Specific Button Colors */
+/* Specific Button Colors (Overrides using variables) */
 #import-button {
-    background: var(--primary-main);
-    color: var(--bg-card);
+    background: var(--color-primary);
+    color: var(--color-white);
     box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
-    border: 1px solid transparent;
 }
 
 #import-button:hover:not(:disabled) {
-    background: var(--primary-hover);
+    background: var(--color-primary-hover);
     box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
     transform: translateY(-2px);
 }
 
 #generate-button {
     background: var(--folder-purple);
-    color: var(--bg-card);
+    color: var(--color-white);
     box-shadow: 0 4px 12px rgba(var(--folder-purple-rgb), 0.3);
     border: 1px solid transparent;
 }
@@ -144,8 +125,8 @@
 }
 
 #export-button {
-    background: var(--c-success);
-    color: var(--bg-card);
+    background: var(--color-success);
+    color: var(--color-white);
     box-shadow: 0 4px 12px rgba(var(--success-rgb), 0.3);
     border: 1px solid transparent;
 }
@@ -156,76 +137,78 @@
     transform: translateY(-2px);
 }
 
-/* Disabled State */
+/* Disabled State Override */
 #view-workflow .btn:disabled {
-    background: var(--bg-hover);
-    color: var(--text-muted);
-    border: 1px solid var(--border-base);
+    background: var(--color-gray-200);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-std);
     box-shadow: none;
     cursor: not-allowed;
     opacity: 0.6;
+    transform: none;
 }
 
 /* ==================== Status Display ==================== */
 .status-display {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    padding: var(--space-16);
     display: flex;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-16);
     min-height: 60px;
 }
 
 .status-indicator {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background-color: var(--c-neutral-400);
+    background-color: var(--color-text-secondary);
+    /* Default idle */
     position: relative;
     flex-shrink: 0;
 }
 
 .status-indicator.status-idle {
-    background-color: var(--c-neutral-500);
+    background-color: var(--color-text-secondary);
 }
 
 .status-indicator.status-loading {
-    background-color: var(--c-info);
+    background-color: var(--color-info);
     box-shadow: 0 0 0 4px var(--info-light);
     animation: status-pulse 1.5s infinite;
 }
 
 .status-indicator.status-success {
-    background-color: var(--c-success);
+    background-color: var(--color-success);
     box-shadow: 0 0 0 4px var(--success-light);
 }
 
 .status-indicator.status-error {
-    background-color: var(--c-danger);
+    background-color: var(--color-error);
     box-shadow: 0 0 0 4px var(--danger-light);
 }
 
 .status-message {
     margin: 0;
-    font-size: var(--font-size-sm);
-    color: var(--text-main);
-    font-family: var(--font-family-mono);
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+    font-family: var(--font-family-std-mono);
     line-height: 1.4;
     word-break: break-word;
 }
 
 /* ==================== Summary Panel ==================== */
 .summary-panel {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-sm);
-    border: 1px solid var(--border-glass);
+    background: var(--color-gray-200);
+    /* Use a subtle solid bg instead of glass overlay */
+    border-radius: var(--radius-std-md);
+    padding: var(--space-16);
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-tiny);
+    border: 1px solid var(--color-border-std);
     margin-top: auto;
-    /* Push to bottom */
 }
 
 .summary-panel[hidden] {
@@ -235,8 +218,8 @@
 .summary-row {
     display: flex;
     justify-content: space-between;
-    padding: var(--space-xs) 0;
-    border-bottom: 1px solid var(--border-glass);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-border-std);
 }
 
 .summary-row:last-child {
@@ -244,11 +227,11 @@
 }
 
 .summary-row dt {
-    color: var(--text-muted);
+    color: var(--color-text-secondary);
 }
 
 .summary-row dd {
-    color: var(--text-main);
+    color: var(--color-text);
     font-weight: 600;
 }
 
@@ -271,7 +254,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: var(--layout-modal-width)) {
+@media (max-width: 900px) {
     #view-workflow .row {
         grid-template-columns: 1fr;
     }

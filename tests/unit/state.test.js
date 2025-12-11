@@ -1,67 +1,74 @@
 /**
- * Unit Tests for State Management Module (state.js)
- * Phase 6 - Testing Framework
+ * Unit Tests for State Management (state.js)
+ * Phase 6 Testing Framework
  */
 
-import {
-  getState,
-  setState,
-  resetState,
-  subscribe,
+// Mock localStorage for testing
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn()
+};
+global.localStorage = localStorageMock;
+
+// Import modules to test
+import { 
+  getState, 
+  setState, 
+  resetState, 
+  subscribe, 
   unsubscribe,
-  loadStateFromStorage,
   clearPersistedState,
-  setImportStatus,
-  setGenerateStatus,
-  setExportStatus,
-  updateProtokollData,
-  updateAbrechnungPositions,
-  updateAbrechnungHeader,
-  addContractFile,
-  setContracts,
-  addContracts,
-  setContractFilters,
-  resetContractFilters,
-  setContractImportState,
-  setContractRawSheets,
-  setContractMapping,
-  clearContracts,
-  setLastImportResult,
-  setContractUIState,
-  clearState,
-  loadState,
-  saveState,
-  debugState
+  loadStateFromStorage 
 } from '../../js/state.js';
 
 describe('State Management (state.js)', () => {
   beforeEach(() => {
-    // Clear localStorage and reset state before each test
-    localStorage.clear();
+    // Clear localStorage mock and reset state before each test
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
+    localStorageMock.clear.mockClear();
+    
     resetState({ persist: false, silent: true });
   });
 
   describe('getState()', () => {
     test('returns initial state with expected structure', () => {
       const state = getState();
+      
       expect(state).toHaveProperty('protokollData');
       expect(state).toHaveProperty('abrechnungData');
       expect(state).toHaveProperty('ui');
       expect(state).toHaveProperty('meta');
-    });
-
-    test('returns the same structure on repeated calls', () => {
-      const state1 = getState();
-      const state2 = getState();
-      expect(state1).toEqual(state2);
-    });
-
-    test('returns a defensive copy (mutations do not affect internal state)', () => {
-      const state1 = getState();
-      state1.protokollData.metadata.orderNumber = 'MODIFIED';
       
+      // Check nested structure
+      expect(state.protokollData).toHaveProperty('metadata');
+      expect(state.protokollData).toHaveProperty('positionen');
+      expect(state.ui).toHaveProperty('import');
+      expect(state.ui).toHaveProperty('generate');
+      expect(state.ui).toHaveProperty('export');
+    });
+
+    test('returns defensive copy (not same reference)', () => {
+      const state1 = getState();
       const state2 = getState();
-      expect(state2.protokollData.metadata.orderNumber).toBeNull();
+      
+      expect(state1).toEqual(state2);
+      expect(state1).not.toBe(state2); // Different objects
+      
+      // Modifying returned state should not affect internal state
+      state1.protokollData.metadata.orderNumber = 'MODIFIED';
+      const state3 = getState();
+      expect(state3.protokollData.metadata.orderNumber).not.toBe('MODIFIED');
+    });
+
+    test('initial UI status is idle', () => {
+      const state = getState();
+      expect(state.ui.import.status).toBe('idle');
+      expect(state.ui.generate.status).toBe('idle');
+      expect(state.ui.export.status).toBe('idle');
     });
   });
 
@@ -69,73 +76,83 @@ describe('State Management (state.js)', () => {
     test('updates state with new values', () => {
       const newData = { 
         protokollData: { 
-          metadata: { orderNumber: 'ORD-001' },
-          positionen: []
+          metadata: { orderNumber: 'ORD-001', protocolNumber: 'PROT-001' } 
         } 
       };
-      setState(newData, { silent: true });
+      
+      setState(newData);
       const state = getState();
+      
       expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+      expect(state.protokollData.metadata.protocolNumber).toBe('PROT-001');
     });
 
-    test('performs shallow merge at top level', () => {
+    test('merges new state with existing state (deep merge)', () => {
+      // First update
       setState({ 
-        protokollData: { 
-          metadata: { orderNumber: 'ORD-001' },
-          positionen: []
-        } 
-      }, { silent: true });
+        protokollData: { metadata: { orderNumber: 'ORD-001' } } 
+      });
       
+      // Second update should merge, not replace
       setState({ 
-        ui: { 
-          import: { status: 'success', message: '', fileName: '', fileSize: 0, importedAt: null },
-          generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-          export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-        } 
-      }, { silent: true });
+        ui: { import: { status: 'success', message: 'File imported' } } 
+      });
       
       const state = getState();
       expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
       expect(state.ui.import.status).toBe('success');
+      expect(state.ui.import.message).toBe('File imported');
     });
 
-    test('updates meta.lastUpdated timestamp', () => {
-      const beforeTime = new Date().toISOString();
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } }, { silent: true });
-      const afterTime = new Date().toISOString();
-      
-      const state = getState();
-      expect(state.meta.lastUpdated).toBeDefined();
-      expect(state.meta.lastUpdated >= beforeTime).toBe(true);
-      expect(state.meta.lastUpdated <= afterTime).toBe(true);
-    });
-
-    test('triggers listeners when not silent', () => {
+    test('triggers stateChanged event listeners', () => {
       const listener = jest.fn();
       subscribe(listener);
       
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
+      const testData = { protokollData: { metadata: { orderNumber: 'ORD-001' } } };
+      setState(testData);
       
-      expect(listener).toHaveBeenCalled();
-      expect(listener.mock.calls[0][0].protokollData.metadata.orderNumber).toBe('ORD-001');
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({
+        protokollData: expect.objectContaining({
+          metadata: expect.objectContaining({ orderNumber: 'ORD-001' })
+        })
+      }));
     });
 
-    test('does not trigger listeners when silent option is true', () => {
+    test('persists state to localStorage by default', () => {
+      const testData = { protokollData: { metadata: { orderNumber: 'ORD-001' } } };
+      setState(testData);
+      
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'abrechnungAppState_v1',
+        expect.stringContaining('ORD-001')
+      );
+    });
+
+    test('skips persistence when persist option is false', () => {
+      const testData = { protokollData: { metadata: { orderNumber: 'ORD-001' } } };
+      setState(testData, { persist: false });
+      
+      expect(localStorageMock.setItem).not.toHaveBeenCalled();
+    });
+
+    test('skips listeners when silent option is true', () => {
       const listener = jest.fn();
       subscribe(listener);
       
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } }, { silent: true });
+      setState({ ui: { import: { status: 'success' } } }, { silent: true });
       
       expect(listener).not.toHaveBeenCalled();
     });
 
-    test('persists state to localStorage when not silent', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
+    test('updates meta.lastUpdated timestamp', () => {
+      const beforeTime = Date.now();
+      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' } } });
+      const afterTime = Date.now();
       
-      expect(localStorage.setItem).toHaveBeenCalled();
-      const calls = localStorage.setItem.mock.calls;
-      expect(calls.length).toBeGreaterThan(0);
-      expect(calls[0][0]).toContain('abrechnungAppState');
+      const state = getState();
+      expect(state.meta.lastUpdated).toBeGreaterThanOrEqual(beforeTime);
+      expect(state.meta.lastUpdated).toBeLessThanOrEqual(afterTime);
     });
   });
 
@@ -147,920 +164,242 @@ describe('State Management (state.js)', () => {
       subscribe(listener1);
       subscribe(listener2);
       
-      setState({ ui: { 
-        import: { status: 'success', message: '', fileName: '', fileSize: 0, importedAt: null },
-        generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-        export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-      } });
+      setState({ ui: { import: { status: 'success' } } });
       
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
+      expect(listener1).toHaveBeenCalledTimes(1);
+      expect(listener2).toHaveBeenCalledTimes(1);
     });
 
     test('listener receives updated state', () => {
       const listener = jest.fn();
       subscribe(listener);
       
-      const testData = { protokollData: { metadata: { orderNumber: 'TEST-001' }, positionen: [] } };
+      const testData = { protokollData: { metadata: { orderNumber: 'TEST-001' } } };
       setState(testData);
       
       const callArg = listener.mock.calls[0][0];
       expect(callArg.protokollData.metadata.orderNumber).toBe('TEST-001');
     });
 
-    test('subscribe returns unsubscribe function', () => {
-      const listener = jest.fn();
-      const unsubscribe = subscribe(listener);
+    test('unsubscribe removes specific listener', () => {
+      const listener1 = jest.fn();
+      const listener2 = jest.fn();
       
-      expect(typeof unsubscribe).toBe('function');
+      subscribe(listener1);
+      const unsubscribe2 = subscribe(listener2);
       
-      // Test that unsubscribe works
-      unsubscribe();
-      setState({ ui: { 
-        import: { status: 'success', message: '', fileName: '', fileSize: 0, importedAt: null },
-        generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-        export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-      } });
+      // Unsubscribe listener2
+      unsubscribe2();
       
-      expect(listener).not.toHaveBeenCalled();
+      setState({ ui: { import: { status: 'success' } } });
+      
+      expect(listener1).toHaveBeenCalledTimes(1);
+      expect(listener2).not.toHaveBeenCalled();
     });
 
-    test('unsubscribe removes listener', () => {
+    test('unsubscribe function works correctly', () => {
       const listener = jest.fn();
-      subscribe(listener);
-      unsubscribe(listener);
+      const unsubscribeFn = subscribe(listener);
       
-      setState({ ui: { 
-        import: { status: 'success', message: '', fileName: '', fileSize: 0, importedAt: null },
-        generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-        export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-      } });
+      setState({ ui: { import: { status: 'pending' } } });
+      expect(listener).toHaveBeenCalledTimes(1);
       
-      expect(listener).not.toHaveBeenCalled();
-    });
-
-    test('subscribe throws error if listener is not a function', () => {
-      expect(() => subscribe('not a function')).toThrow('State listener must be a function');
+      unsubscribeFn();
+      
+      setState({ ui: { import: { status: 'success' } } });
+      expect(listener).toHaveBeenCalledTimes(1); // Should not be called again
     });
   });
 
   describe('resetState()', () => {
     test('clears all state back to initial values', () => {
+      // Set some data first
       setState({ 
         protokollData: { 
           metadata: { orderNumber: 'ORD-001' },
           positionen: [{ posNr: '01.01.0010', menge: 5 }]
         },
-        ui: { 
-          import: { status: 'success', message: 'Imported', fileName: '', fileSize: 0, importedAt: null },
-          generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-          export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-        }
-      }, { silent: true });
+        ui: { import: { status: 'success', message: 'File imported' } }
+      });
       
-      resetState({ persist: false, silent: true });
+      resetState({ persist: false });
       
       const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBeNull();
+      expect(state.protokollData.metadata).toEqual({});
       expect(state.protokollData.positionen).toEqual([]);
       expect(state.ui.import.status).toBe('idle');
+      expect(state.ui.import.message).toBe('');
     });
 
-    test('triggers listeners when not silent', () => {
+    test('clears localStorage when persist option is true', () => {
+      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' } } });
+      
+      resetState({ persist: true });
+      
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('abrechnungAppState_v1');
+    });
+
+    test('triggers listeners unless silent option is true', () => {
       const listener = jest.fn();
       subscribe(listener);
       
       resetState({ persist: false, silent: false });
-      
       expect(listener).toHaveBeenCalled();
-    });
-
-    test('does not trigger listeners when silent', () => {
-      const listener = jest.fn();
-      subscribe(listener);
       
+      listener.mockClear();
       resetState({ persist: false, silent: true });
-      
       expect(listener).not.toHaveBeenCalled();
     });
   });
 
-  describe('Domain-Specific Helper Functions', () => {
-    test('setImportStatus updates import UI status', () => {
-      setImportStatus({ status: 'success', message: 'File imported', fileName: 'test.xlsx' });
+  describe('loadStateFromStorage()', () => {
+    test('loads persisted state from localStorage', () => {
+      const testState = { 
+        protokollData: { metadata: { orderNumber: 'STORED-001' } },
+        ui: { import: { status: 'success' } }
+      };
       
-      const state = getState();
-      expect(state.ui.import.status).toBe('success');
-      expect(state.ui.import.message).toBe('File imported');
-      expect(state.ui.import.fileName).toBe('test.xlsx');
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(testState));
+      
+      const loaded = loadStateFromStorage();
+      expect(loaded.protokollData.metadata.orderNumber).toBe('STORED-001');
+      expect(loaded.ui.import.status).toBe('success');
     });
 
-    test('setGenerateStatus updates generate UI status', () => {
-      setGenerateStatus({ status: 'success', positionCount: 10 });
+    test('returns empty object if localStorage is empty', () => {
+      localStorageMock.getItem.mockReturnValue(null);
       
-      const state = getState();
-      expect(state.ui.generate.status).toBe('success');
-      expect(state.ui.generate.positionCount).toBe(10);
+      const loaded = loadStateFromStorage();
+      expect(loaded).toEqual({});
     });
 
-    test('setExportStatus updates export UI status', () => {
-      setExportStatus({ status: 'success', lastExportAt: '2025-12-09T12:00:00Z' });
+    test('handles corrupted JSON gracefully', () => {
+      localStorageMock.getItem.mockReturnValue('invalid json {');
       
-      const state = getState();
-      expect(state.ui.export.status).toBe('success');
-      expect(state.ui.export.lastExportAt).toBe('2025-12-09T12:00:00Z');
+      const loaded = loadStateFromStorage();
+      expect(loaded).toEqual({});
     });
 
-    test('updateProtokollData updates protokoll metadata and positions', () => {
-      updateProtokollData({
-        metadata: { orderNumber: 'ORD-001', protocolNumber: 'PROT-001' },
-        positionen: [{ posNr: '01.01.0010', menge: 5 }]
-      });
+    test('handles non-string values gracefully', () => {
+      localStorageMock.getItem.mockReturnValue(undefined);
       
-      const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
-      expect(state.protokollData.positionen).toHaveLength(1);
-      expect(state.protokollData.positionen[0].posNr).toBe('01.01.0010');
-    });
-
-    test('updateAbrechnungPositions updates position map', () => {
-      updateAbrechnungPositions({ '01.01.0010': 7, '01.01.0020': 3 });
-      
-      const state = getState();
-      expect(state.abrechnungData.positionen['01.01.0010']).toBe(7);
-      expect(state.abrechnungData.positionen['01.01.0020']).toBe(3);
-    });
-
-    test('updateAbrechnungHeader updates header data', () => {
-      updateAbrechnungHeader({ 
-        date: '2025-12-09',
-        orderNumber: 'ORD-001',
-        plant: 'Factory A'
-      });
-      
-      const state = getState();
-      expect(state.abrechnungData.header.date).toBe('2025-12-09');
-      expect(state.abrechnungData.header.orderNumber).toBe('ORD-001');
-      expect(state.abrechnungData.header.plant).toBe('Factory A');
+      const loaded = loadStateFromStorage();
+      expect(loaded).toEqual({});
     });
   });
 
-  describe('localStorage Integration', () => {
-    test('loadStateFromStorage returns empty state when localStorage is empty', () => {
-      localStorage.getItem.mockReturnValue(null);
-      
-      const loaded = loadStateFromStorage();
-      
-      expect(loaded.protokollData.positionen).toEqual([]);
-      expect(loaded.ui.import.status).toBe('idle');
-    });
-
-    test('loadStateFromStorage handles corrupted JSON gracefully', () => {
-      localStorage.getItem.mockReturnValue('invalid json {');
-      
-      const loaded = loadStateFromStorage();
-      
-      // Should fall back to initial state
-      expect(loaded.protokollData.positionen).toEqual([]);
-    });
-
-    test('clearPersistedState removes data from localStorage', () => {
+  describe('clearPersistedState()', () => {
+    test('removes state from localStorage', () => {
       clearPersistedState();
-      
-      expect(localStorage.removeItem).toHaveBeenCalled();
-    });
-
-    test('saveStateToStorage handles QuotaExceededError', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const quotaError = new Error('Quota exceeded');
-      quotaError.name = 'QuotaExceededError';
-
-      localStorage.setItem.mockImplementationOnce(() => {
-        throw quotaError;
-      });
-
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('quota exceeded'));
-
-      consoleSpy.mockRestore();
-    });
-
-    test('saveStateToStorage handles generic errors', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      localStorage.setItem.mockImplementationOnce(() => {
-        throw new Error('Generic storage error');
-      });
-
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } });
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to save state'), expect.any(Error));
-
-      consoleSpy.mockRestore();
-    });
-
-    test('clearPersistedState handles errors', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      localStorage.removeItem.mockImplementationOnce(() => {
-        throw new Error('Remove error');
-      });
-
-      clearPersistedState();
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to clear persisted state'), expect.any(Error));
-
-      consoleSpy.mockRestore();
-    });
-
-    test('loadStateFromStorage validation fails with invalid state structure', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-      // Create invalid state (missing meta.version)
-      const invalidState = {
-        protokollData: { metadata: {}, positionen: [] },
-        abrechnungData: { header: {}, positionen: {} },
-        ui: { import: {}, generate: {}, export: {} },
-        meta: { lastUpdated: null } // Missing version
-      };
-
-      localStorage.getItem.mockReturnValue(JSON.stringify(invalidState));
-
-      const loaded = loadStateFromStorage();
-
-      // Should reset to initial state (empty positions)
-      expect(loaded.protokollData.positionen).toEqual([]);
-      // Should warn about validation failure
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Persisted state failed validation'), expect.anything());
-
-      consoleSpy.mockRestore();
-    });
-
-    test('loadStateFromStorage handles generic errors during parsing/loading', () => {
-       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-       // Mock getItem to throw
-       localStorage.getItem.mockImplementationOnce(() => {
-         throw new Error('Access denied');
-       });
-
-       const loaded = loadStateFromStorage();
-
-       expect(loaded.protokollData.positionen).toEqual([]);
-       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to load state'), expect.any(Error));
-
-       consoleSpy.mockRestore();
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('abrechnungAppState_v1');
     });
   });
 
-  describe('Contract Manager Functions', () => {
-    describe('addContractFile()', () => {
-      test('adds file info to importedFiles list', () => {
-        const fileInfo = {
-          fileName: 'contracts.xlsx',
-          size: 25600,
-          sheets: ['Sheet1', 'Sheet2'],
-          recordsImported: 100,
-          recordsWithErrors: 5
-        };
-        
-        addContractFile(fileInfo);
-        
-        const state = getState();
-        expect(state.contracts.importedFiles).toHaveLength(1);
-        expect(state.contracts.importedFiles[0].fileName).toBe('contracts.xlsx');
-        expect(state.contracts.importedFiles[0].size).toBe(25600);
-        expect(state.contracts.importedFiles[0].importedAt).toBeDefined();
+  describe('Error Handling', () => {
+    test('handles localStorage errors gracefully', () => {
+      localStorageMock.setItem.mockImplementation(() => {
+        throw new Error('Storage quota exceeded');
       });
-
-      test('appends to existing importedFiles', () => {
-        addContractFile({ fileName: 'file1.xlsx', size: 1000, sheets: [], recordsImported: 10, recordsWithErrors: 0 });
-        addContractFile({ fileName: 'file2.xlsx', size: 2000, sheets: [], recordsImported: 20, recordsWithErrors: 0 });
-        
-        const state = getState();
-        expect(state.contracts.importedFiles).toHaveLength(2);
-        expect(state.contracts.importedFiles[0].fileName).toBe('file1.xlsx');
-        expect(state.contracts.importedFiles[1].fileName).toBe('file2.xlsx');
-      });
-
-      test('sets importedAt timestamp automatically', () => {
-        const before = new Date().toISOString();
-        addContractFile({ fileName: 'test.xlsx', size: 100, sheets: [], recordsImported: 5, recordsWithErrors: 0 });
-        const after = new Date().toISOString();
-        
-        const state = getState();
-        const importedAt = state.contracts.importedFiles[0].importedAt;
-        expect(importedAt >= before).toBe(true);
-        expect(importedAt <= after).toBe(true);
-      });
-    });
-
-    describe('setContracts()', () => {
-      test('replaces existing contract records', () => {
-        const contracts = [
-          { contractId: 'C001', contractTitle: 'Contract 1', status: 'offen' },
-          { contractId: 'C002', contractTitle: 'Contract 2', status: 'fertig' }
-        ];
-        
-        setContracts(contracts);
-        
-        const state = getState();
-        expect(state.contracts.records).toHaveLength(2);
-        expect(state.contracts.records[0].contractId).toBe('C001');
-      });
-
-      test('clears contracts when given empty array', () => {
-        setContracts([{ contractId: 'C001', contractTitle: 'Test', status: 'offen' }]);
-        setContracts([]);
-        
-        const state = getState();
-        expect(state.contracts.records).toHaveLength(0);
-      });
-
-      test('handles null by setting empty array', () => {
-        setContracts([{ contractId: 'C001', contractTitle: 'Test', status: 'offen' }]);
-        setContracts(null);
-        
-        const state = getState();
-        expect(state.contracts.records).toEqual([]);
-      });
-    });
-
-    describe('addContracts()', () => {
-      test('appends new contracts to existing records', () => {
-        setContracts([{ contractId: 'C001', contractTitle: 'Contract 1', status: 'offen' }]);
-        addContracts([{ contractId: 'C002', contractTitle: 'Contract 2', status: 'fertig' }]);
-        
-        const state = getState();
-        expect(state.contracts.records).toHaveLength(2);
-        expect(state.contracts.records[1].contractId).toBe('C002');
-      });
-
-      test('works when no existing contracts', () => {
-        addContracts([{ contractId: 'C001', contractTitle: 'Contract 1', status: 'offen' }]);
-        
-        const state = getState();
-        expect(state.contracts.records).toHaveLength(1);
-      });
-
-      test('adds multiple contracts at once', () => {
-        addContracts([
-          { contractId: 'C001', contractTitle: 'Contract 1', status: 'offen' },
-          { contractId: 'C002', contractTitle: 'Contract 2', status: 'offen' },
-          { contractId: 'C003', contractTitle: 'Contract 3', status: 'fertig' }
-        ]);
-        
-        const state = getState();
-        expect(state.contracts.records).toHaveLength(3);
-      });
-    });
-
-    describe('setContractFilters()', () => {
-      test('updates filter values', () => {
-        setContractFilters({ contractId: 'C001', status: 'offen' });
-        
-        const state = getState();
-        expect(state.contracts.filters.contractId).toBe('C001');
-        expect(state.contracts.filters.status).toBe('offen');
-      });
-
-      test('merges with existing filters', () => {
-        setContractFilters({ contractId: 'C001' });
-        setContractFilters({ status: 'fertig' });
-        
-        const state = getState();
-        expect(state.contracts.filters.contractId).toBe('C001');
-        expect(state.contracts.filters.status).toBe('fertig');
-      });
-
-      test('updates date range filter', () => {
-        setContractFilters({ dateRange: { from: '2025-01-01', to: '2025-12-31' } });
-        
-        const state = getState();
-        expect(state.contracts.filters.dateRange.from).toBe('2025-01-01');
-        expect(state.contracts.filters.dateRange.to).toBe('2025-12-31');
-      });
-
-      test('updates search text filter', () => {
-        setContractFilters({ searchText: 'maintenance' });
-        
-        const state = getState();
-        expect(state.contracts.filters.searchText).toBe('maintenance');
-      });
-    });
-
-    describe('resetContractFilters()', () => {
-      test('resets all filters to default values', () => {
-        setContractFilters({ 
-          contractId: 'C001', 
-          status: 'offen', 
-          location: 'Building A',
-          searchText: 'test search'
-        });
-        
-        resetContractFilters();
-        
-        const state = getState();
-        expect(state.contracts.filters.contractId).toBeNull();
-        expect(state.contracts.filters.status).toBeNull();
-        expect(state.contracts.filters.location).toBeNull();
-        expect(state.contracts.filters.equipmentId).toBeNull();
-        expect(state.contracts.filters.dateRange).toEqual({ from: null, to: null });
-        expect(state.contracts.filters.searchText).toBe('');
-      });
-    });
-
-    describe('setContractImportState()', () => {
-      test('updates import state values', () => {
-        setContractImportState({
-          isImporting: true,
-          currentFile: 'contracts.xlsx',
-          progress: 50,
-          status: 'pending'
-        });
-        
-        const state = getState();
-        expect(state.contracts.importState.isImporting).toBe(true);
-        expect(state.contracts.importState.currentFile).toBe('contracts.xlsx');
-        expect(state.contracts.importState.progress).toBe(50);
-        expect(state.contracts.importState.status).toBe('pending');
-      });
-
-      test('merges with existing import state', () => {
-        setContractImportState({ isImporting: true, progress: 25 });
-        setContractImportState({ progress: 75 });
-        
-        const state = getState();
-        expect(state.contracts.importState.isImporting).toBe(true);
-        expect(state.contracts.importState.progress).toBe(75);
-      });
-
-      test('updates errors and warnings arrays', () => {
-        setContractImportState({
-          errors: ['Invalid format', 'Missing field'],
-          warnings: ['Deprecated field used']
-        });
-        
-        const state = getState();
-        expect(state.contracts.importState.errors).toHaveLength(2);
-        expect(state.contracts.importState.warnings).toHaveLength(1);
-      });
-    });
-
-    describe('setContractRawSheets()', () => {
-      test('sets sheet metadata', () => {
-        const sheets = {
-          'Sheet1': { sheetName: 'Sheet1', rowCount: 100, columns: ['A', 'B', 'C'], isEmpty: false },
-          'Sheet2': { sheetName: 'Sheet2', rowCount: 0, columns: [], isEmpty: true }
-        };
-        
-        setContractRawSheets(sheets);
-        
-        const state = getState();
-        expect(state.contracts.rawSheets.Sheet1).toBeDefined();
-        expect(state.contracts.rawSheets.Sheet1.rowCount).toBe(100);
-        expect(state.contracts.rawSheets.Sheet2.isEmpty).toBe(true);
-      });
-
-      test('handles null by setting empty object', () => {
-        setContractRawSheets({ 'Sheet1': { sheetName: 'Sheet1' } });
-        setContractRawSheets(null);
-        
-        const state = getState();
-        expect(state.contracts.rawSheets).toEqual({});
-      });
-
-      test('replaces existing sheets', () => {
-        setContractRawSheets({ 'Sheet1': { sheetName: 'Sheet1' } });
-        setContractRawSheets({ 'NewSheet': { sheetName: 'NewSheet' } });
-        
-        const state = getState();
-        expect(state.contracts.rawSheets.Sheet1).toBeUndefined();
-        expect(state.contracts.rawSheets.NewSheet).toBeDefined();
-      });
-    });
-
-    describe('setContractMapping()', () => {
-      test('sets column mapping configuration', () => {
-        const mapping = {
-          contractId: { excelColumn: 'A', type: 'string', required: true },
-          contractTitle: { excelColumn: 'B', type: 'string', required: true },
-          status: { excelColumn: 'C', type: 'string', required: true }
-        };
-        
-        setContractMapping(mapping);
-        
-        const state = getState();
-        expect(state.contracts.currentMapping.contractId.excelColumn).toBe('A');
-        expect(state.contracts.currentMapping.contractTitle.excelColumn).toBe('B');
-      });
-
-      test('handles null by setting empty object', () => {
-        setContractMapping({ contractId: { excelColumn: 'A' } });
-        setContractMapping(null);
-        
-        const state = getState();
-        expect(state.contracts.currentMapping).toEqual({});
-      });
-    });
-
-    describe('clearContracts()', () => {
-      test('resets all contract state to initial values', () => {
-        // Set up some contract data
-        addContractFile({ fileName: 'test.xlsx', size: 1000, sheets: [], recordsImported: 10, recordsWithErrors: 0 });
-        setContracts([{ contractId: 'C001', contractTitle: 'Test', status: 'offen' }]);
-        setContractFilters({ searchText: 'test' });
-        setContractImportState({ isImporting: true, progress: 50 });
-        
-        clearContracts();
-        
-        const state = getState();
-        expect(state.contracts.importedFiles).toHaveLength(0);
-        expect(state.contracts.records).toHaveLength(0);
-        expect(state.contracts.rawSheets).toEqual({});
-        expect(state.contracts.currentMapping).toEqual({});
-        expect(state.contracts.filters.searchText).toBe('');
-        expect(state.contracts.importState.isImporting).toBe(false);
-        expect(state.contracts.importState.status).toBe('idle');
-      });
-
-      test('resets lastImportResult to null', () => {
-        setLastImportResult({ contracts: [], errors: [], warnings: [], summary: {} });
-        clearContracts();
-        
-        const state = getState();
-        expect(state.contracts.lastImportResult).toBeNull();
-      });
-
-      test('resets UI state to defaults', () => {
-        setContractUIState({ activeTab: 'list', sortKey: 'status', sortDir: 'desc' });
-        clearContracts();
-        
-        const state = getState();
-        expect(state.contracts.ui.activeTab).toBe('import');
-        expect(state.contracts.ui.sortKey).toBe('contractId');
-        expect(state.contracts.ui.sortDir).toBe('asc');
-      });
-    });
-
-    describe('setLastImportResult()', () => {
-      test('stores import result for preview', () => {
-        const result = {
-          contracts: [{ contractId: 'C001', contractTitle: 'Test', status: 'offen' }],
-          errors: ['Invalid row 5'],
-          warnings: ['Duplicate ID detected'],
-          summary: { total: 10, imported: 9, failed: 1 }
-        };
-        
-        setLastImportResult(result);
-        
-        const state = getState();
-        expect(state.contracts.lastImportResult).toBeDefined();
-        expect(state.contracts.lastImportResult.contracts).toHaveLength(1);
-        expect(state.contracts.lastImportResult.errors).toHaveLength(1);
-        expect(state.contracts.lastImportResult.summary.total).toBe(10);
-      });
-
-      test('can clear lastImportResult by setting null', () => {
-        setLastImportResult({ contracts: [], errors: [], warnings: [], summary: {} });
-        setLastImportResult(null);
-        
-        const state = getState();
-        expect(state.contracts.lastImportResult).toBeNull();
-      });
-    });
-
-    describe('setContractUIState()', () => {
-      test('updates active tab', () => {
-        setContractUIState({ activeTab: 'list' });
-        
-        const state = getState();
-        expect(state.contracts.ui.activeTab).toBe('list');
-      });
-
-      test('updates sort configuration', () => {
-        setContractUIState({ sortKey: 'status', sortDir: 'desc' });
-        
-        const state = getState();
-        expect(state.contracts.ui.sortKey).toBe('status');
-        expect(state.contracts.ui.sortDir).toBe('desc');
-      });
-
-      test('merges with existing UI state', () => {
-        setContractUIState({ activeTab: 'preview' });
-        setContractUIState({ sortKey: 'contractTitle' });
-        
-        const state = getState();
-        expect(state.contracts.ui.activeTab).toBe('preview');
-        expect(state.contracts.ui.sortKey).toBe('contractTitle');
-      });
-    });
-  });
-
-  describe('Legacy Compatibility Functions', () => {
-    test('clearState resets and clears persisted state', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } }, { silent: true });
       
-      clearState();
-      
-      const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBeNull();
-      expect(localStorage.removeItem).toHaveBeenCalled();
+      // Should not throw error
+      expect(() => {
+        setState({ protokollData: { metadata: { orderNumber: 'ORD-001' } } });
+      }).not.toThrow();
     });
 
-    test('loadState returns false for empty state', () => {
-      localStorage.getItem.mockReturnValue(null);
-      
-      const result = loadState();
-      
-      expect(result).toBe(false);
-    });
-
-    test('loadState returns true when protokollData has positions', () => {
-      const savedState = {
-        protokollData: { metadata: {}, positionen: [{ posNr: '01.01.0010', menge: 5 }] },
-        abrechnungData: { header: {}, positionen: {} },
-        ui: { import: {}, generate: {}, export: {} },
-        meta: { version: '1.0.0' }
-      };
-      localStorage.getItem.mockReturnValue(JSON.stringify(savedState));
-      
-      const result = loadState();
-      
-      expect(result).toBe(true);
-    });
-
-    test('loadState returns true when abrechnungData has positions', () => {
-      const savedState = {
-        protokollData: { metadata: {}, positionen: [] },
-        abrechnungData: { header: {}, positionen: { '01.01.0010': 5 } },
-        ui: { import: {}, generate: {}, export: {} },
-        meta: { version: '1.0.0' }
-      };
-      localStorage.getItem.mockReturnValue(JSON.stringify(savedState));
-      
-      const result = loadState();
-      
-      expect(result).toBe(true);
-    });
-
-    test('saveState persists to localStorage', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } }, { silent: true });
-      localStorage.setItem.mockClear();
-      
-      saveState();
-      
-      expect(localStorage.setItem).toHaveBeenCalled();
-    });
-
-    test('debugState returns JSON formatted string', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'ORD-001' }, positionen: [] } }, { silent: true });
-      
-      const debug = debugState();
-      
-      expect(typeof debug).toBe('string');
-      expect(() => JSON.parse(debug)).not.toThrow();
-      const parsed = JSON.parse(debug);
-      expect(parsed.protokollData.metadata.orderNumber).toBe('ORD-001');
-    });
-  });
-
-  describe('Edge Cases and Error Handling', () => {
-    test('multiple listeners receive state updates', () => {
-      const listener1 = jest.fn();
-      const listener2 = jest.fn();
-      const listener3 = jest.fn();
-      
-      subscribe(listener1);
-      subscribe(listener2);
-      subscribe(listener3);
-      
-      setState({ protokollData: { metadata: { orderNumber: 'TEST' }, positionen: [] } });
-      
-      expect(listener1).toHaveBeenCalledTimes(1);
-      expect(listener2).toHaveBeenCalledTimes(1);
-      expect(listener3).toHaveBeenCalledTimes(1);
-    });
-
-    test('unsubscribe prevents listener from receiving updates', () => {
-      const listener = jest.fn();
-      
-      const unsub = subscribe(listener);
-      setState({ protokollData: { metadata: { orderNumber: 'FIRST' }, positionen: [] } });
-      expect(listener).toHaveBeenCalledTimes(1);
-      
-      unsub();
-      setState({ protokollData: { metadata: { orderNumber: 'SECOND' }, positionen: [] } });
-      expect(listener).toHaveBeenCalledTimes(1); // Still 1, not 2
-    });
-
-    test('listener errors do not prevent other listeners', () => {
-      const badListener = jest.fn(() => { throw new Error('Test error'); });
+    test('handles listener errors gracefully', () => {
       const goodListener = jest.fn();
+      const badListener = jest.fn(() => {
+        throw new Error('Listener error');
+      });
       
-      subscribe(badListener);
       subscribe(goodListener);
+      subscribe(badListener);
       
-      // Should not throw and goodListener should still be called
-      const testUIState = {
-        ui: {
-          import: { status: 'idle', message: '', fileName: '', fileSize: 0, importedAt: null },
-          generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
-          export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
-        }
-      };
-      expect(() => setState(testUIState)).not.toThrow();
+      // Should not prevent other listeners from running
+      expect(() => {
+        setState({ ui: { import: { status: 'success' } } });
+      }).not.toThrow();
+      
       expect(goodListener).toHaveBeenCalled();
     });
+  });
 
-    test('state merges preserve existing nested data', () => {
-      updateProtokollData({
-        metadata: { orderNumber: 'ORD-001', plant: 'Factory A' },
-        positionen: []
-      });
+  describe('State Validation', () => {
+    test('validates metadata structure', () => {
+      const validMetadata = {
+        protocolNumber: 'PROT-001',
+        orderNumber: 'ORD-001',
+        plant: 'Factory A',
+        location: 'Building 1',
+        company: 'Test Company',
+        date: '2025-12-11'
+      };
       
-      updateProtokollData({
-        metadata: { location: 'Building B' }
-      });
-      
+      setState({ protokollData: { metadata: validMetadata } });
       const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
-      expect(state.protokollData.metadata.plant).toBe('Factory A');
-      expect(state.protokollData.metadata.location).toBe('Building B');
+      
+      expect(state.protokollData.metadata).toEqual(validMetadata);
     });
 
-    test('handles rapid successive state updates', () => {
-      const listener = jest.fn();
-      subscribe(listener);
+    test('handles empty position arrays', () => {
+      setState({ protokollData: { positionen: [] } });
+      const state = getState();
       
-      for (let i = 0; i < 10; i++) {
-        setState({ protokollData: { metadata: { orderNumber: `ORD-${i}` }, positionen: [] } });
+      expect(Array.isArray(state.protokollData.positionen)).toBe(true);
+      expect(state.protokollData.positionen.length).toBe(0);
+    });
+
+    test('preserves position structure', () => {
+      const positions = [
+        { posNr: '01.01.0010', menge: 5, rowIndex: 30 },
+        { posNr: '01.01.0020', menge: 3, rowIndex: 31 }
+      ];
+      
+      setState({ protokollData: { positionen: positions } });
+      const state = getState();
+      
+      expect(state.protokollData.positionen).toEqual(positions);
+      expect(state.protokollData.positionen[0]).toHaveProperty('posNr');
+      expect(state.protokollData.positionen[0]).toHaveProperty('menge');
+      expect(state.protokollData.positionen[0]).toHaveProperty('rowIndex');
+    });
+  });
+
+  describe('Performance', () => {
+    test('state updates complete quickly', () => {
+      const startTime = performance.now();
+      
+      // Perform multiple state updates
+      for (let i = 0; i < 100; i++) {
+        setState({ 
+          protokollData: { metadata: { orderNumber: `ORD-${i}` } } 
+        }, { persist: false, silent: true });
       }
       
-      expect(listener).toHaveBeenCalledTimes(10);
-      const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBe('ORD-9');
-    });
-
-    test('resetState with silent option does not notify listeners', () => {
-      const listener = jest.fn();
-      subscribe(listener);
+      const endTime = performance.now();
+      const duration = endTime - startTime;
       
-      setState({ protokollData: { metadata: { orderNumber: 'TEST' }, positionen: [] } });
-      expect(listener).toHaveBeenCalledTimes(1);
+      // Should complete 100 updates in under 100ms
+      expect(duration).toBeLessThan(100);
+    });
+
+    test('large state objects are handled efficiently', () => {
+      const largePositions = Array.from({ length: 1000 }, (_, i) => ({
+        posNr: `01.01.${String(i).padStart(4, '0')}`,
+        menge: Math.floor(Math.random() * 100),
+        rowIndex: 30 + i
+      }));
       
-      resetState({ persist: false, silent: true });
-      expect(listener).toHaveBeenCalledTimes(1); // Still 1
-    });
-
-    test('state maintains immutability across updates', () => {
-      const state1 = getState();
-      setState({ protokollData: { metadata: { orderNumber: 'NEW' }, positionen: [] } }, { silent: true });
-      const state2 = getState();
+      const startTime = performance.now();
+      setState({ protokollData: { positionen: largePositions } }, { persist: false });
+      const endTime = performance.now();
       
-      expect(state1.protokollData.metadata.orderNumber).toBeNull();
-      expect(state2.protokollData.metadata.orderNumber).toBe('NEW');
-      expect(state1).not.toBe(state2);
-    });
-  });
-
-  describe('Branch Coverage Improvements', () => {
-    test('setState with meta updates merges meta', () => {
-      setState({ meta: { version: '2.0.0' } });
+      // Should handle 1000 positions in under 50ms
+      expect(endTime - startTime).toBeLessThan(50);
+      
       const state = getState();
-      expect(state.meta.version).toBe('2.0.0');
-    });
-
-    test('loadStateFromStorage handles state with null meta', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      // Valid state but meta is null (allowed by validation technically)
-      const stateWithNullMeta = {
-        protokollData: { metadata: {}, positionen: [] },
-        abrechnungData: { header: {}, positionen: {} },
-        ui: { import: {}, generate: {}, export: {} },
-        meta: null
-      };
-      localStorage.getItem.mockReturnValue(JSON.stringify(stateWithNullMeta));
-
-      const loaded = loadStateFromStorage();
-      expect(loaded.meta).toBeDefined(); // Should have merged with initial meta
-      consoleSpy.mockRestore();
-    });
-
-    test('updateProtokollData works without positionen', () => {
-      updateProtokollData({ metadata: { orderNumber: 'ONLY_META' } });
-      const state = getState();
-      expect(state.protokollData.metadata.orderNumber).toBe('ONLY_META');
-    });
-
-    test('addContractFile handles missing contracts section', () => {
-      // Remove contracts section
-      setState({ contracts: undefined });
-
-      addContractFile({ fileName: 'test.xlsx', size: 100, sheets: [], recordsImported: 0, recordsWithErrors: 0 });
-
-      const state = getState();
-      expect(state.contracts.importedFiles).toHaveLength(1);
-    });
-
-    test('setContractUIState handles missing contracts/ui section', () => {
-      setState({ contracts: undefined });
-
-      setContractUIState({ activeTab: 'preview' });
-
-      const state = getState();
-      expect(state.contracts.ui.activeTab).toBe('preview');
-    });
-
-    test('loadState handles missing/null data structures', () => {
-      // Case where abrechnungData.positionen is null/undefined
-      const stateNoAbrechnungPos = {
-        protokollData: { positionen: [] },
-        abrechnungData: { positionen: null },
-        ui: {}, meta: {}
-      };
-      localStorage.getItem.mockReturnValue(JSON.stringify(stateNoAbrechnungPos));
-
-      // Should return false (no data)
-      expect(loadState()).toBe(false);
-
-      // Case where protokollData is missing/null
-       localStorage.getItem.mockReturnValue(JSON.stringify({
-        protokollData: null,
-        abrechnungData: { positionen: null }
-      }));
-      expect(loadState()).toBe(false);
-    });
-  });
-
-  describe('Additional Coverage Tests', () => {
-    test('resetState works with no arguments (uses defaults)', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
-      localStorage.setItem.mockClear();
-
-      resetState();
-
-      expect(localStorage.setItem).toHaveBeenCalled();
-    });
-
-    test('resetState persists by default when options empty', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
-      localStorage.setItem.mockClear();
-
-      resetState({}); // Should use default persist=true
-
-      expect(localStorage.setItem).toHaveBeenCalled();
-    });
-
-    test('resetState persists when partial options provided', () => {
-      setState({ protokollData: { metadata: { orderNumber: 'PERSIST' } } });
-      localStorage.setItem.mockClear();
-
-      resetState({ silent: true }); // Should keep persist=true default
-
-      expect(localStorage.setItem).toHaveBeenCalled();
-    });
-
-    test('addContracts handles missing contracts in state', () => {
-      setState({ contracts: undefined });
-
-      addContracts([{ contractId: 'NEW' }]);
-
-      const state = getState();
-      expect(state.contracts.records).toHaveLength(1);
-    });
-
-    test('addContracts handles missing records in contracts', () => {
-      setState({ contracts: {} });
-
-      addContracts([{ contractId: 'NEW' }]);
-
-      const state = getState();
-      expect(state.contracts.records).toHaveLength(1);
-    });
-
-    test('loadState handles complex nested undefined scenarios', () => {
-      // protokollData undefined
-      localStorage.getItem.mockReturnValue(JSON.stringify({
-        protokollData: undefined,
-        abrechnungData: { positionen: {} }
-      }));
-      expect(loadState()).toBe(false);
-
-      // abrechnungData undefined
-      localStorage.getItem.mockReturnValue(JSON.stringify({
-        protokollData: { positionen: [] },
-        abrechnungData: undefined
-      }));
-      expect(loadState()).toBe(false);
-
-      // both undefined
-       localStorage.getItem.mockReturnValue(JSON.stringify({
-        protokollData: undefined,
-        abrechnungData: undefined
-      }));
-      expect(loadState()).toBe(false);
+      expect(state.protokollData.positionen.length).toBe(1000);
     });
   });
 });

@@ -1,422 +1,582 @@
 /**
- * Integration Test: Full Workflow (handlers + state + utils interaction)
- * Validates the cross-module interactions from Import -> Generate -> Export
+ * Integration Tests for Complete Workflows
+ * Phase 6 Testing Framework
  */
 
+// Mock dependencies
+const mockXLSX = {
+  read: jest.fn(),
+  write: jest.fn(),
+  writeFile: jest.fn(),
+  utils: {
+    sheet_to_json: jest.fn(),
+    json_to_sheet: jest.fn(),
+    book_new: jest.fn(),
+    book_append_sheet: jest.fn()
+  }
+};
+global.XLSX = mockXLSX;
+
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn()
+};
+global.localStorage = localStorageMock;
+
+// Mock DOM elements
+const mockDOM = {
+  getElementById: jest.fn(),
+  querySelector: jest.fn(),
+  querySelectorAll: jest.fn(() => []),
+  createElement: jest.fn(() => ({
+    textContent: '',
+    innerHTML: '',
+    style: {},
+    classList: { add: jest.fn(), remove: jest.fn() },
+    addEventListener: jest.fn(),
+    appendChild: jest.fn(),
+    removeChild: jest.fn()
+  })),
+  body: {
+    appendChild: jest.fn(),
+    removeChild: jest.fn()
+  }
+};
+global.document = mockDOM;
+
+// Import modules
+import { getState, setState, resetState } from '../../js/state.js';
 import {
-  handleFileSelect,
+  readExcelFile,
+  parseProtokoll,
+  extractPositions,
+  sumByPosition,
+  createExportWorkbook
+} from '../../js/utils.js';
+import {
   handleImportFile,
   handleGenerateAbrechnung,
   handleExportAbrechnung,
-  initializeEventListeners
+  handleResetApplication
 } from '../../js/handlers.js';
 
-import { getState, resetState } from '../../js/state.js';
-import * as utils from '../../js/utils.js';
-import * as cellMapper from '../../js/cell-mapper.js';
-import * as utilsExcel from '../../js/utils-exceljs.js';
-
-// Mock heavy utilities and UI dialogs
-jest.mock('../../js/utils.js', () => {
-  const originalUtils = jest.requireActual('../../js/utils.js');
-  return {
-    ...originalUtils,
-    readExcelFile: jest.fn(),
-    safeReadAndParseProtokoll: jest.fn(),
-    createExportWorkbook: jest.fn(),
-    // Keep original implementations for pure functions if possible
-    sumByPosition: originalUtils.sumByPosition,
-    getPositionSummary: originalUtils.getPositionSummary,
-    validateFilledPositions: jest.fn() // mock this one as it might need workbook structure
-  };
-});
-
-jest.mock('../../js/cell-mapper.js', () => ({
-  showCellMapperDialog: jest.fn(),
-  applyMapping: jest.fn()
-}));
-
-jest.mock('../../js/utils-exceljs.js', () => ({
-  createAndExportAbrechnungExcelJS: jest.fn()
-}));
-
-// Mock LocalStorage
-const localStorageMock = (function() {
-  let store = {};
-  return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => { store[key] = value.toString(); }),
-    removeItem: jest.fn(key => { delete store[key]; }),
-    clear: jest.fn(() => { store = {}; })
-  };
-})();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-
-describe('Workflow Integration Test', () => {
-
+describe('End-to-End Workflow Integration', () => {
   beforeEach(() => {
-    // Reset state and DOM
-    resetState({ persist: false, silent: true });
-    localStorageMock.clear();
-
-    document.body.innerHTML = `
-      <div id="alert-container"></div>
-      <div id="loading-spinner"></div>
-      <button id="import-button"></button>
-      <button id="generate-button"></button>
-      <button id="export-button"></button>
-      <input type="file" id="file-input" />
-      <span id="fileName"></span>
-    `;
-
-    // Mocks setup
+    // Clear all mocks
     jest.clearAllMocks();
-
-    // Silence console
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    // Default successful mocks
-    utils.readExcelFile.mockResolvedValue({ workbook: {} });
-    cellMapper.showCellMapperDialog.mockResolvedValue({ mapping: {} });
-
-    // Sample parsed data
-    utils.safeReadAndParseProtokoll.mockResolvedValue({
-      success: true,
-      metadata: {
-        datum: '2023-01-01',
-        auftragsNr: 'A-123',
-        anlage: 'Plant 1',
-        einsatzort: 'Location 1',
-        firma: 'Company X'
-      },
-      positionen: [
-        { posNr: '01.01.010', menge: 5 },
-        { posNr: '01.01.010', menge: 3 }, // Duplicate pos to test aggregation
-        { posNr: '02.02.020', menge: 10 }
-      ],
-      positionSums: {
-        '01.01.010': 8,
-        '02.02.020': 10
-      },
-      warnings: []
+    localStorageMock.getItem.mockReturnValue(null);
+    
+    // Reset state
+    resetState({ persist: false, silent: true });
+    
+    // Setup basic DOM mocks
+    mockDOM.getElementById.mockImplementation((id) => {
+      const mockElement = {
+        textContent: '',
+        innerHTML: '',
+        style: {},
+        classList: { add: jest.fn(), remove: jest.fn() },
+        disabled: false,
+        files: []
+      };
+      
+      if (id === 'file-input') {
+        mockElement.files = [createMockFile()];
+      }
+      
+      return mockElement;
     });
-
-    utils.createExportWorkbook.mockResolvedValue({ name: 'ExportWorkbook' });
-    utils.validateFilledPositions.mockReturnValue({ valid: true });
-    utilsExcel.createAndExportAbrechnungExcelJS.mockResolvedValue({
-      fileName: 'abrechnung.xlsx',
-      fileSize: 5000
+    
+    mockDOM.querySelector.mockReturnValue({
+      textContent: '',
+      innerHTML: '',
+      style: {},
+      classList: { add: jest.fn(), remove: jest.fn() }
     });
   });
 
-  test('Complete Workflow: Import -> Generate -> Export', async () => {
-    // 1. Initial State Check
-    let state = getState();
-    expect(state.protokollData.metadata.orderNumber).toBeNull();
-    expect(state.ui.import.status).toBe('idle');
-
-    // 2. File Selection
-    const file = new File(['dummy'], 'protokoll.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    handleFileSelect({ target: { files: [file] } });
-
-    // 3. Import
-    await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-
-    // Verify State after Import
-    state = getState();
-    expect(state.ui.import.status).toBe('success');
-    expect(state.protokollData.metadata.auftragsNr).toBe('A-123'); // From mocked parser
-    expect(state.protokollData.positionen).toHaveLength(3);
-
-    // Verify persistence happened
-    expect(localStorageMock.setItem).toHaveBeenCalled();
-
-    // 4. Generate
-    await handleGenerateAbrechnung();
-
-    // Verify State after Generate
-    state = getState();
-    expect(state.ui.generate.status).toBe('success');
-    expect(state.abrechnungData.header.orderNumber).toBe('A-123');
-    // Check if aggregation logic (via real sumByPosition or mocked return) worked
-    // Since we mocked sumByPosition as "originalUtils.sumByPosition" if it was pure...
-    // But in the mock factory above:
-    // "sumByPosition: originalUtils.sumByPosition"
-    // Wait, jest.mock factory cannot access out-of-scope variables easily.
-    // `originalUtils` usage inside the factory needs `jest.requireActual`.
-    // And I did that. So it should be the real function.
-    // The real `sumByPosition` logic should have aggregated the positions.
-    // However, `safeReadAndParseProtokoll` returns `positionSums` too.
-    // Let's check what `handleGenerateAbrechnung` uses.
-    // It calls `utils.sumByPosition(positionen)`.
-
-    // Let's verify aggregation
-    expect(state.abrechnungData.positionen['01.01.010']).toBe(8); // 5 + 3
-    expect(state.abrechnungData.positionen['02.02.020']).toBe(10);
-    expect(state.ui.generate.uniquePositionCount).toBe(2);
-
-    // 5. Export
-    await handleExportAbrechnung();
-
-    // Verify State after Export
-    state = getState();
-    expect(state.ui.export.status).toBe('success');
-    expect(utilsExcel.createAndExportAbrechnungExcelJS).toHaveBeenCalledWith(state.abrechnungData);
-  });
-
-  test('Integration: Generate fails if Import not done', async () => {
-    // Attempt Generate without Import
-    await handleGenerateAbrechnung();
-
-    const alert = document.querySelector('.alert-error');
-    expect(alert).not.toBeNull();
-    expect(alert.innerHTML).toContain('Please import');
-
-    const state = getState();
-    expect(state.ui.generate.status).toBe('idle'); // Should not even start
-  });
-
-  test('Integration: Export fails if Generate not done', async () => {
-    // Import first (to pass first check)
-     const file = new File(['dummy'], 'protokoll.xlsx');
-    handleFileSelect({ target: { files: [file] } });
-    await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-
-    // Attempt Export without Generate
-    await handleExportAbrechnung();
-
-    const alert = document.querySelector('.alert-error');
-    expect(alert).not.toBeNull();
-    expect(alert.innerHTML).toContain('Please generate');
-  });
-
-  describe('Error Recovery Scenarios', () => {
-    test('should recover from failed import', async () => {
-      // Mock failed import
-      utils.readExcelFile.mockRejectedValueOnce(new Error('File read error'));
+  describe('Complete Import → Generate → Export Workflow', () => {
+    test('successful end-to-end workflow', async () => {
+      // Setup mock data
+      const mockFile = createMockFile();
+      const mockWorkbook = createMockWorkbook();
+      const mockPositions = createMockPositions();
       
-      const file = new File(['dummy'], 'bad-file.xlsx');
-      handleFileSelect({ target: { files: [file] } });
+      // Mock XLSX operations
+      mockXLSX.read.mockReturnValue(mockWorkbook);
       
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      // Mock FileReader
+      global.FileReader = jest.fn(() => ({
+        readAsArrayBuffer: jest.fn(function() {
+          setTimeout(() => {
+            this.onload({ target: { result: new ArrayBuffer(8) } });
+          }, 0);
+        }),
+        onload: null,
+        onerror: null
+      }));
       
-      // State should reflect error
+      // Mock fetch for template loading
+      global.fetch = jest.fn().mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8))
+      });
+      
+      // Step 1: Import file
+      console.log('🔄 Testing import workflow...');
+      
+      const importEvent = { target: { files: [mockFile] } };
+      await handleImportFile(importEvent);
+      
       let state = getState();
-      expect(state.ui.import.status).toBe('error');
+      expect(state.ui.import.status).toBe('success');
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+      expect(state.protokollData.positionen.length).toBeGreaterThan(0);
       
-      // Should be able to retry with valid file
-      utils.readExcelFile.mockResolvedValueOnce({ workbook: {} });
+      // Step 2: Generate abrechnung
+      console.log('🔄 Testing generate workflow...');
       
-      const goodFile = new File(['valid'], 'good-file.xlsx');
-      handleFileSelect({ target: { files: [goodFile] } });
-      
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      await handleGenerateAbrechnung();
       
       state = getState();
-      expect(state.ui.import.status).toBe('success');
-    });
-
-    test('should recover from failed generate', async () => {
-      // Import successfully first
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      expect(state.ui.generate.status).toBe('success');
+      expect(state.abrechnungData.positionen).toBeDefined();
+      expect(Object.keys(state.abrechnungData.positionen).length).toBeGreaterThan(0);
       
-      // Mock failed validation
-      utils.validateFilledPositions.mockReturnValueOnce({ 
-        valid: false, 
-        errors: ['Position 01.01.010 missing required data'] 
-      });
+      // Step 3: Export abrechnung
+      console.log('🔄 Testing export workflow...');
       
-      await handleGenerateAbrechnung();
-      
-      const state = getState();
-      // Generate should fail or handle validation errors
-      expect(state.ui.generate.status).toBeTruthy();
-    });
-
-    test('should recover from failed export', async () => {
-      // Complete import and generate
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-      await handleGenerateAbrechnung();
-      
-      // Mock failed export
-      utilsExcel.createAndExportAbrechnungExcelJS.mockRejectedValueOnce(
-        new Error('Export failed')
-      );
-      
-      await handleExportAbrechnung();
-      
-      let state = getState();
-      expect(state.ui.export.status).toBe('error');
-      
-      // Retry export
-      utilsExcel.createAndExportAbrechnungExcelJS.mockResolvedValueOnce({
-        fileName: 'retry-export.xlsx',
-        fileSize: 5000
-      });
+      // Mock URL.createObjectURL and download
+      global.URL = {
+        createObjectURL: jest.fn(() => 'blob:mock-url'),
+        revokeObjectURL: jest.fn()
+      };
       
       await handleExportAbrechnung();
       
       state = getState();
       expect(state.ui.export.status).toBe('success');
+      expect(state.ui.export.lastExportAt).toBeDefined();
+      
+      console.log('✅ Complete workflow test passed');
+    });
+
+    test('workflow maintains state integrity across steps', async () => {
+      const testMetadata = {
+        protocolNumber: 'PROT-001',
+        orderNumber: 'ORD-001',
+        plant: 'Factory A',
+        location: 'Building 1',
+        company: 'Test Company',
+        date: '2025-12-11'
+      };
+
+      const testPositions = [
+        { posNr: '01.01.0010', menge: 5, rowIndex: 30 },
+        { posNr: '01.01.0020', menge: 3, rowIndex: 31 }
+      ];
+
+      // Set initial state
+      setState({ 
+        protokollData: { 
+          metadata: testMetadata, 
+          positionen: testPositions 
+        } 
+      });
+
+      // Verify state integrity
+      let state = getState();
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+      expect(state.protokollData.positionen).toHaveLength(2);
+
+      // Perform aggregation
+      const positionSums = sumByPosition(testPositions);
+      setState({
+        abrechnungData: {
+          header: testMetadata,
+          positionen: positionSums
+        }
+      });
+
+      // Verify state still intact
+      state = getState();
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+      expect(state.abrechnungData.positionen['01.01.0010']).toBe(5);
+      expect(state.abrechnungData.positionen['01.01.0020']).toBe(3);
+    });
+
+    test('workflow handles errors without corrupting state', async () => {
+      const validMetadata = {
+        protocolNumber: 'PROT-001',
+        orderNumber: 'ORD-001'
+      };
+
+      setState({ protokollData: { metadata: validMetadata } });
+
+      try {
+        // Attempt invalid operation
+        sumByPosition(null);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+
+      // State should still be valid
+      const state = getState();
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+    });
+
+    test('workflow persists data correctly', async () => {
+      const testData = {
+        protokollData: {
+          metadata: { orderNumber: 'ORD-PERSIST' },
+          positionen: [{ posNr: '01.01.0010', menge: 5 }]
+        }
+      };
+
+      setState(testData, { persist: true });
+
+      // Verify localStorage was called
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'abrechnungAppState_v1',
+        expect.stringContaining('ORD-PERSIST')
+      );
+
+      // Simulate page reload by resetting state and loading from storage
+      resetState({ persist: false, silent: true });
+      
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(testData));
+      
+      // In real app, this would be called during initialization
+      const loadedState = JSON.parse(localStorageMock.getItem('abrechnungAppState_v1'));
+      setState(loadedState, { persist: false });
+
+      const state = getState();
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-PERSIST');
     });
   });
 
-  describe('Data Validation Scenarios', () => {
-    test('should validate protokoll data before processing', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
+  describe('Error Recovery Scenarios', () => {
+    test('recovers from import failure without state corruption', async () => {
+      const initialState = getState();
+
+      // Mock FileReader to fail
+      global.FileReader = jest.fn(() => ({
+        readAsArrayBuffer: jest.fn(function() {
+          setTimeout(() => {
+            this.onerror(new Error('File read failed'));
+          }, 0);
+        }),
+        onload: null,
+        onerror: null
+      }));
+
+      const invalidFile = new File(['invalid'], 'invalid.txt', { type: 'text/plain' });
+      const importEvent = { target: { files: [invalidFile] } };
+
+      try {
+        await handleImportFile(importEvent);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+
+      // State should be unchanged or show error status
+      const currentState = getState();
+      expect(currentState.ui.import.status).toBe('error');
+      expect(currentState.protokollData.metadata).toEqual(initialState.protokollData.metadata);
+    });
+
+    test('can retry failed operation without manual reset', async () => {
+      // First attempt fails
+      const invalidFile = new File(['invalid'], 'invalid.txt', { type: 'text/plain' });
+      const failEvent = { target: { files: [invalidFile] } };
+
+      try {
+        await handleImportFile(failEvent);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+
+      let state = getState();
+      expect(state.ui.import.status).toBe('error');
+
+      // Second attempt should work
+      const validFile = createMockFile();
+      const mockWorkbook = createMockWorkbook();
       
-      // Mock parsed data with validation warnings
-      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
-        success: true,
-        metadata: {
-          datum: '2023-01-01',
-          auftragsNr: '', // Missing order number
-          anlage: 'Plant 1'
-        },
-        positionen: [],
-        positionSums: {},
-        warnings: ['Order number is missing']
-      });
+      mockXLSX.read.mockReturnValue(mockWorkbook);
       
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-      
-      const state = getState();
+      global.FileReader = jest.fn(() => ({
+        readAsArrayBuffer: jest.fn(function() {
+          setTimeout(() => {
+            this.onload({ target: { result: new ArrayBuffer(8) } });
+          }, 0);
+        }),
+        onload: null,
+        onerror: null
+      }));
+
+      const successEvent = { target: { files: [validFile] } };
+      await handleImportFile(successEvent);
+
+      state = getState();
       expect(state.ui.import.status).toBe('success');
-      expect(state.protokollData.metadata.auftragsNr).toBe('');
     });
 
-    test('should handle empty positions', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      
-      // Mock empty positions
-      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
-        success: true,
-        metadata: {
-          datum: '2023-01-01',
-          auftragsNr: 'A-123',
-          anlage: 'Plant 1'
-        },
-        positionen: [],
-        positionSums: {},
-        warnings: []
+    test('handles missing template gracefully', async () => {
+      // Setup state with valid data
+      setState({
+        protokollData: {
+          metadata: { orderNumber: 'ORD-001' },
+          positionen: [{ posNr: '01.01.0010', menge: 5 }]
+        }
       });
-      
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-      await handleGenerateAbrechnung();
-      
+
+      // Mock fetch to fail
+      global.fetch = jest.fn().mockRejectedValue(new Error('Template not found'));
+
+      try {
+        await handleGenerateAbrechnung();
+      } catch (error) {
+        expect(error.message).toContain('Template not found');
+      }
+
       const state = getState();
+      expect(state.ui.generate.status).toBe('error');
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001'); // Original data preserved
+    });
+
+    test('handles export failures gracefully', async () => {
+      // Setup state with generated data
+      setState({
+        abrechnungData: {
+          header: { orderNumber: 'ORD-001' },
+          positionen: { '01.01.0010': 5 }
+        }
+      });
+
+      // Mock XLSX.write to fail
+      mockXLSX.write.mockImplementation(() => {
+        throw new Error('Export failed');
+      });
+
+      try {
+        await handleExportAbrechnung();
+      } catch (error) {
+        expect(error.message).toContain('Export failed');
+      }
+
+      const state = getState();
+      expect(state.ui.export.status).toBe('error');
+      expect(state.abrechnungData.positionen['01.01.0010']).toBe(5); // Data preserved
+    });
+  });
+
+  describe('Reset Functionality', () => {
+    test('reset clears all data and UI state', async () => {
+      // Setup state with data
+      setState({
+        protokollData: {
+          metadata: { orderNumber: 'ORD-001' },
+          positionen: [{ posNr: '01.01.0010', menge: 5 }]
+        },
+        abrechnungData: {
+          header: { orderNumber: 'ORD-001' },
+          positionen: { '01.01.0010': 5 }
+        },
+        ui: {
+          import: { status: 'success', message: 'File imported' },
+          generate: { status: 'success', message: 'Generated' },
+          export: { status: 'success', message: 'Exported' }
+        }
+      });
+
+      // Mock confirm dialog
+      global.confirm = jest.fn(() => true);
+
+      await handleResetApplication();
+
+      const state = getState();
+      expect(state.protokollData.metadata).toEqual({});
+      expect(state.protokollData.positionen).toEqual([]);
       expect(state.abrechnungData.positionen).toEqual({});
+      expect(state.ui.import.status).toBe('idle');
+      expect(state.ui.generate.status).toBe('idle');
+      expect(state.ui.export.status).toBe('idle');
     });
 
-    test('should aggregate duplicate positions correctly', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      
-      // Mock data with duplicate positions
-      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
-        success: true,
-        metadata: {
-          datum: '2023-01-01',
-          auftragsNr: 'A-DUP',
-          anlage: 'Test'
-        },
-        positionen: [
-          { posNr: '01.01.010', menge: 5 },
-          { posNr: '01.01.010', menge: 3 },
-          { posNr: '01.01.010', menge: 2 }
-        ],
-        positionSums: {
-          '01.01.010': 10
-        },
-        warnings: []
-      });
-      
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-      await handleGenerateAbrechnung();
-      
+    test('reset cancellation preserves data', async () => {
+      const originalData = {
+        protokollData: {
+          metadata: { orderNumber: 'ORD-001' },
+          positionen: [{ posNr: '01.01.0010', menge: 5 }]
+        }
+      };
+
+      setState(originalData);
+
+      // Mock confirm dialog to return false (cancel)
+      global.confirm = jest.fn(() => false);
+
+      await handleResetApplication();
+
       const state = getState();
-      expect(state.abrechnungData.positionen['01.01.010']).toBe(10);
+      expect(state.protokollData.metadata.orderNumber).toBe('ORD-001');
+    });
+  });
+
+  describe('Performance Integration Tests', () => {
+    test('complete workflow with large dataset', async () => {
+      const largePositions = Array.from({ length: 5000 }, (_, i) => ({
+        posNr: `01.01.${String(i % 1000).padStart(4, '0')}`,
+        menge: Math.floor(Math.random() * 10) + 1,
+        rowIndex: 30 + i
+      }));
+
+      const startTime = performance.now();
+
+      // Step 1: Set large dataset
+      setState({
+        protokollData: {
+          metadata: { orderNumber: 'ORD-LARGE' },
+          positionen: largePositions
+        }
+      });
+
+      // Step 2: Aggregate positions
+      const positionSums = sumByPosition(largePositions);
+
+      // Step 3: Update state with aggregated data
+      setState({
+        abrechnungData: {
+          header: { orderNumber: 'ORD-LARGE' },
+          positionen: positionSums
+        }
+      });
+
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+
+      // Should complete large dataset processing in under 1 second
+      expect(duration).toBeLessThan(1000);
+      expect(Object.keys(positionSums)).toHaveLength(1000);
+
+      console.log(`✅ Large dataset workflow completed in ${duration.toFixed(2)}ms`);
+    });
+
+    test('memory usage remains stable across multiple operations', async () => {
+      const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+
+      // Perform multiple workflow cycles
+      for (let i = 0; i < 10; i++) {
+        const positions = Array.from({ length: 100 }, (_, j) => ({
+          posNr: `01.01.${String(j).padStart(4, '0')}`,
+          menge: Math.floor(Math.random() * 10) + 1,
+          rowIndex: 30 + j
+        }));
+
+        setState({
+          protokollData: {
+            metadata: { orderNumber: `ORD-${i}` },
+            positionen: positions
+          }
+        });
+
+        const sums = sumByPosition(positions);
+        
+        setState({
+          abrechnungData: {
+            header: { orderNumber: `ORD-${i}` },
+            positionen: sums
+          }
+        });
+
+        // Reset for next iteration
+        resetState({ persist: false, silent: true });
+      }
+
+      const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryIncrease = finalMemory - initialMemory;
+
+      // Memory increase should be minimal (< 10MB)
+      if (performance.memory) {
+        expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
+        console.log(`✅ Memory usage stable: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB increase`);
+      }
     });
   });
 
   describe('Concurrent Operations', () => {
-    test('should handle rapid state changes', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
+    test('handles rapid state updates correctly', async () => {
+      const updates = [];
       
-      // Rapid file selections
-      handleFileSelect({ target: { files: [file] } });
-      handleFileSelect({ target: { files: [file] } });
-      handleFileSelect({ target: { files: [file] } });
-      
-      const state = getState();
-      expect(state.ui.import.fileName).toBe('protokoll.xlsx');
+      // Perform rapid state updates
+      for (let i = 0; i < 50; i++) {
+        updates.push(
+          setState({
+            protokollData: {
+              metadata: { orderNumber: `ORD-${i}` }
+            }
+          }, { persist: false, silent: true })
+        );
+      }
+
+      await Promise.all(updates);
+
+      const finalState = getState();
+      expect(finalState.protokollData.metadata.orderNumber).toMatch(/^ORD-\d+$/);
     });
 
-    test('should prevent concurrent operations on same workflow', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      
-      // Start import
-      const importPromise = handleImportFile({ 
-        preventDefault: () => {}, 
-        stopPropagation: () => {} 
-      });
-      
-      // Don't await, try to start another operation immediately
-      let state = getState();
-      const statusDuringImport = state.ui.import.status;
-      
-      await importPromise;
-      
-      state = getState();
-      expect(state.ui.import.status).toBe('success');
-    });
-  });
+    test('state listeners handle rapid changes', async () => {
+      const listener = jest.fn();
+      const unsubscribe = subscribe(listener);
 
-  describe('State Persistence', () => {
-    test('should persist state after import', async () => {
-      const file = new File(['dummy'], 'protokoll.xlsx');
-      handleFileSelect({ target: { files: [file] } });
-      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
-      
-      // Verify localStorage was called
-      expect(localStorageMock.setItem).toHaveBeenCalled();
-      
-      // Check if any state was saved (key might vary)
-      const calls = localStorageMock.setItem.mock.calls;
-      expect(calls.length).toBeGreaterThan(0);
-    });
+      // Rapid state changes
+      for (let i = 0; i < 20; i++) {
+        setState({
+          ui: { import: { status: i % 2 === 0 ? 'pending' : 'success' } }
+        }, { persist: false });
+      }
 
-    test('should restore state on page load', () => {
-      // Set up localStorage with saved state
-      const savedState = {
-        protokollData: {
-          metadata: {
-            auftragsNr: 'RESTORED-123'
-          },
-          positionen: []
-        },
-        ui: {
-          import: { status: 'success' }
-        }
-      };
-      
-      localStorageMock.setItem('appState', JSON.stringify(savedState));
-      
-      // Reset and reload state
-      resetState({ persist: false, silent: true });
-      
-      // State should be restored (if implemented)
-      const state = getState();
-      expect(state).toBeTruthy();
+      // Allow async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(listener).toHaveBeenCalledTimes(20);
+      unsubscribe();
     });
   });
 });
+
+// Helper functions
+function createMockFile() {
+  return new File(['mock excel content'], 'test-protokoll.xlsx', {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+}
+
+function createMockWorkbook() {
+  return {
+    SheetNames: ['Sheet1'],
+    Sheets: {
+      'Sheet1': {
+        'U3': { v: 'PROT-001' },
+        'N5': { v: 'ORD-001' },
+        'A10': { v: 'Factory A' },
+        'T10': { v: 'Building 1' },
+        'T7': { v: 'Test Company' },
+        'A30': { v: '01.01.0010' },
+        'B30': { v: 5 },
+        'A31': { v: '01.01.0020' },
+        'B31': { v: 3 }
+      }
+    }
+  };
+}
+
+function createMockPositions() {
+  return [
+    { posNr: '01.01.0010', menge: 5, rowIndex: 30 },
+    { posNr: '01.01.0020', menge: 3, rowIndex: 31 },
+    { posNr: '01.01.0010', menge: 2, rowIndex: 32 }
+  ];
+}

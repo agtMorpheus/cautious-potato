@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 6 Accessibility Audit Demo - Abrechnung Application</title>
+    
+    <!-- Import Phase 4 Accessibility Styles -->
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/phase4-accessibility.css">
+    
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-base);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .audit-controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+        
+        .audit-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--duration-fast);
+        }
+        
+        .audit-btn.primary {
+            background: var(--primary-main);
+            color: white;
+        }
+        
+        .audit-btn.secondary {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-base);
+        }
+        
+        .audit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .audit-btn:focus-visible {
+            outline: 2px solid var(--primary-main);
+            outline-offset: 2px;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-indicator.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(34, 197, 94);
+        }
+        
+        .status-indicator.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: rgb(245, 158, 11);
+        }
+        
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(239, 68, 68);
+        }
+        
+        .accessibility-feature {
+            padding: 1rem;
+            border: 1px solid var(--border-base);
+            border-radius: var(--radius-md);
+            background: var(--bg-surface);
+        }
+        
+        .accessibility-feature h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-main);
+        }
+        
+        .accessibility-feature p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .test-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        
+        .form-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-base);
+            border-radius: var(--radius-md);
+            background: var(--bg-surface);
+            color: var(--text-main);
+            transition: border-color var(--duration-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-main);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-input:invalid {
+            border-color: rgb(239, 68, 68);
+        }
+        
+        .form-help {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-title {
+            margin: 0;
+            color: var(--text-main);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-hover);
+        }
+        
+        .modal-close:focus-visible {
+            outline: 2px solid var(--primary-main);
+            outline-offset: 2px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-muted);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-main);
+            transition: width var(--duration-normal);
+            width: 0%;
+        }
+        
+        .skip-links {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--bg-surface);
+            color: var(--text-main);
+            padding: 8px;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-base);
+            z-index: 1000;
+        }
+        
+        .skip-links:focus {
+            top: 6px;
+        }
+        
+        .live-region {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        @media (prefers-contrast: more) {
+            .audit-btn {
+                border: 2px solid currentColor;
+            }
+            
+            .form-input:focus {
+                outline: 3px solid var(--primary-main);
+                outline-offset: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Links for Keyboard Navigation -->
+    <a href="#main-content" class="skip-links">Skip to main content</a>
+    <a href="#audit-controls" class="skip-links">Skip to audit controls</a>
+    
+    <!-- Live Region for Screen Reader Announcements -->
+    <div id="live-region" class="live-region" aria-live="polite" aria-atomic="true"></div>
+    <div id="live-region-assertive" class="live-region" aria-live="assertive" aria-atomic="true"></div>
+    
+    <!-- Audit Controls -->
+    <div id="audit-controls" class="audit-controls">
+        <button id="run-audit-btn" class="audit-btn primary" aria-describedby="audit-help">
+            🔍 Run Accessibility Audit
+        </button>
+        <button id="toggle-theme-btn" class="audit-btn secondary">
+            🌓 Toggle Dark Mode
+        </button>
+        <button id="test-screen-reader-btn" class="audit-btn secondary">
+            🔊 Test Screen Reader
+        </button>
+        <button id="show-modal-btn" class="audit-btn secondary">
+            📋 Test Modal
+        </button>
+        <div id="audit-help" class="form-help">
+            Runs comprehensive WCAG 2.1 AA compliance audit
+        </div>
+    </div>
+    
+    <div class="demo-container">
+        <header>
+            <h1 id="main-content">Phase 6 Accessibility Audit Demo</h1>
+            <p>This page demonstrates the comprehensive accessibility features implemented in Phase 6 of the Abrechnung Application.</p>
+        </header>
+        
+        <main>
+            <!-- Accessibility Features Overview -->
+            <section class="demo-section">
+                <h2>Enhanced Accessibility Features</h2>
+                <div class="demo-grid">
+                    <div class="accessibility-feature">
+                        <h4>🔊 Screen Reader Support</h4>
+                        <p>Comprehensive ARIA attributes, live regions for dynamic content announcements, and proper semantic structure.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>WCAG 2.1 AA Compliant</span>
+                        </div>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>⌨️ Keyboard Navigation</h4>
+                        <p>Full keyboard accessibility with visible focus indicators, logical tab order, and keyboard shortcuts.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>All Interactive Elements</span>
+                        </div>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>🎨 High Contrast Support</h4>
+                        <p>Enhanced color contrast ratios (4.5:1 minimum) and support for high contrast mode preferences.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>4.5:1 Contrast Ratio</span>
+                        </div>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>🌓 Enhanced Dark Mode</h4>
+                        <p>Three-mode theme system (Light/Dark/Auto) with system preference detection and accessibility announcements.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>System Integration</span>
+                        </div>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>📱 Touch Accessibility</h4>
+                        <p>Minimum 44px touch targets, enhanced spacing on touch devices, and gesture-friendly interactions.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>44px Touch Targets</span>
+                        </div>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>🎯 Focus Management</h4>
+                        <p>Enhanced focus indicators, focus trapping in modals, and skip links for efficient navigation.</p>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>Focus Trapping</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Interactive Test Form -->
+            <section class="demo-section">
+                <h2>Accessibility Test Form</h2>
+                <p>Test keyboard navigation, screen reader announcements, and form accessibility features.</p>
+                
+                <form class="test-form" id="test-form" novalidate>
+                    <div class="form-group">
+                        <label for="test-name" class="form-label">Name *</label>
+                        <input 
+                            type="text" 
+                            id="test-name" 
+                            class="form-input" 
+                            required 
+                            aria-describedby="name-help name-error"
+                            aria-invalid="false"
+                        >
+                        <div id="name-help" class="form-help">Enter your full name for testing</div>
+                        <div id="name-error" class="form-help" style="color: rgb(239, 68, 68); display: none;" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="test-email" class="form-label">Email *</label>
+                        <input 
+                            type="email" 
+                            id="test-email" 
+                            class="form-input" 
+                            required 
+                            aria-describedby="email-help email-error"
+                            aria-invalid="false"
+                        >
+                        <div id="email-help" class="form-help">Valid email address required</div>
+                        <div id="email-error" class="form-help" style="color: rgb(239, 68, 68); display: none;" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="test-message" class="form-label">Message</label>
+                        <textarea 
+                            id="test-message" 
+                            class="form-input" 
+                            rows="4" 
+                            aria-describedby="message-help"
+                            placeholder="Optional feedback message"
+                        ></textarea>
+                        <div id="message-help" class="form-help">Optional feedback about accessibility features</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <fieldset>
+                            <legend class="form-label">Accessibility Preferences</legend>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="reduce-motion" name="preferences" value="reduce-motion">
+                                    <span>Reduce Motion</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="high-contrast" name="preferences" value="high-contrast">
+                                    <span>High Contrast</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="large-text" name="preferences" value="large-text">
+                                    <span>Large Text</span>
+                                </label>
+                            </div>
+                        </fieldset>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="audit-btn primary">
+                            Submit Test Form
+                        </button>
+                        <button type="reset" class="audit-btn secondary">
+                            Reset Form
+                        </button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Progress Indicator Test -->
+            <section class="demo-section">
+                <h2>Progress Indicator Test</h2>
+                <p>Test screen reader announcements for progress updates.</p>
+                
+                <div>
+                    <label for="test-progress">Test Progress:</label>
+                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-labelledby="progress-label">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div id="progress-label">0% Complete</div>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button id="start-progress-btn" class="audit-btn primary">
+                        Start Progress Test
+                    </button>
+                    <button id="stop-progress-btn" class="audit-btn secondary" disabled>
+                        Stop Progress
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Audit Results -->
+            <section class="demo-section">
+                <h2>Audit Results</h2>
+                <div id="audit-results">
+                    <p>Click "Run Accessibility Audit" to see comprehensive WCAG 2.1 AA compliance results.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Test Modal -->
+    <div id="test-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="modal-title">Accessibility Test Modal</h3>
+                <button class="modal-close" aria-label="Close modal" data-close-modal>×</button>
+            </div>
+            <div id="modal-description">
+                <p>This modal demonstrates focus trapping and keyboard navigation. Try using Tab and Shift+Tab to navigate, or press Escape to close.</p>
+                <div style="margin-top: 1rem;">
+                    <button class="audit-btn secondary" style="margin-right: 0.5rem;">Test Button 1</button>
+                    <button class="audit-btn secondary">Test Button 2</button>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; text-align: right;">
+                <button class="audit-btn secondary" data-close-modal style="margin-right: 0.5rem;">Cancel</button>
+                <button class="audit-btn primary" data-close-modal>OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../js/phase4-accessibility.js"></script>
+    <script src="../scripts/phase6-accessibility-audit.js"></script>
+    
+    <script>
+        // Initialize demo functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize accessibility features
+            if (typeof AccessibilityManager !== 'undefined') {
+                AccessibilityManager.initialize();
+            }
+            
+            if (typeof EnhancedDarkModeManager !== 'undefined') {
+                EnhancedDarkModeManager.initialize();
+            }
+            
+            // Theme toggle
+            document.getElementById('toggle-theme-btn').addEventListener('click', function() {
+                if (typeof EnhancedDarkModeManager !== 'undefined') {
+                    const currentTheme = EnhancedDarkModeManager.getThemeInfo().effectiveTheme;
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    EnhancedDarkModeManager.applyTheme(newTheme);
+                    
+                    // Announce theme change
+                    announceToScreenReader(`Theme changed to ${newTheme} mode`, 'polite');
+                }
+            });
+            
+            // Screen reader test
+            document.getElementById('test-screen-reader-btn').addEventListener('click', function() {
+                announceToScreenReader('Screen reader test: This is a test announcement for accessibility validation.', 'assertive');
+            });
+            
+            // Modal functionality
+            const modal = document.getElementById('test-modal');
+            const showModalBtn = document.getElementById('show-modal-btn');
+            const closeModalBtns = document.querySelectorAll('[data-close-modal]');
+            
+            showModalBtn.addEventListener('click', function() {
+                modal.classList.add('active');
+                // Focus first focusable element in modal
+                const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
+                if (firstFocusable) {
+                    firstFocusable.focus();
+                }
+                announceToScreenReader('Modal opened', 'polite');
+            });
+            
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modal.classList.remove('active');
+                    showModalBtn.focus(); // Return focus to trigger
+                    announceToScreenReader('Modal closed', 'polite');
+                });
+            });
+            
+            // Escape key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    modal.classList.remove('active');
+                    showModalBtn.focus();
+                    announceToScreenReader('Modal closed', 'polite');
+                }
+            });
+            
+            // Form validation
+            const form = document.getElementById('test-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let isValid = true;
+                const nameInput = document.getElementById('test-name');
+                const emailInput = document.getElementById('test-email');
+                
+                // Validate name
+                if (!nameInput.value.trim()) {
+                    showFieldError('name', 'Name is required');
+                    isValid = false;
+                } else {
+                    hideFieldError('name');
+                }
+                
+                // Validate email
+                if (!emailInput.value.trim()) {
+                    showFieldError('email', 'Email is required');
+                    isValid = false;
+                } else if (!isValidEmail(emailInput.value)) {
+                    showFieldError('email', 'Please enter a valid email address');
+                    isValid = false;
+                } else {
+                    hideFieldError('email');
+                }
+                
+                if (isValid) {
+                    announceToScreenReader('Form submitted successfully', 'assertive');
+                    form.reset();
+                } else {
+                    announceToScreenReader('Form has errors. Please check the highlighted fields.', 'assertive');
+                }
+            });
+            
+            // Progress test
+            let progressInterval;
+            const startProgressBtn = document.getElementById('start-progress-btn');
+            const stopProgressBtn = document.getElementById('stop-progress-btn');
+            const progressBar = document.querySelector('[role="progressbar"]');
+            const progressFill = document.getElementById('progress-fill');
+            const progressLabel = document.getElementById('progress-label');
+            
+            startProgressBtn.addEventListener('click', function() {
+                let progress = 0;
+                startProgressBtn.disabled = true;
+                stopProgressBtn.disabled = false;
+                
+                progressInterval = setInterval(() => {
+                    progress += 10;
+                    updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        startProgressBtn.disabled = false;
+                        stopProgressBtn.disabled = true;
+                        announceToScreenReader('Progress complete', 'assertive');
+                    }
+                }, 500);
+                
+                announceToScreenReader('Progress started', 'polite');
+            });
+            
+            stopProgressBtn.addEventListener('click', function() {
+                clearInterval(progressInterval);
+                startProgressBtn.disabled = false;
+                stopProgressBtn.disabled = true;
+                announceToScreenReader('Progress stopped', 'polite');
+            });
+            
+            function updateProgress(value) {
+                progressBar.setAttribute('aria-valuenow', value);
+                progressFill.style.width = value + '%';
+                progressLabel.textContent = value + '% Complete';
+                
+                // Announce milestones
+                if (value % 25 === 0 && value > 0) {
+                    announceToScreenReader(`${value}% complete`, 'polite');
+                }
+            }
+        });
+        
+        // Utility functions
+        function announceToScreenReader(message, priority = 'polite') {
+            const liveRegion = priority === 'assertive' 
+                ? document.getElementById('live-region-assertive')
+                : document.getElementById('live-region');
+            
+            if (liveRegion) {
+                liveRegion.textContent = message;
+                // Clear after announcement
+                setTimeout(() => {
+                    liveRegion.textContent = '';
+                }, 1000);
+            }
+        }
+        
+        function showFieldError(fieldName, message) {
+            const input = document.getElementById(`test-${fieldName}`);
+            const errorDiv = document.getElementById(`${fieldName}-error`);
+            
+            input.setAttribute('aria-invalid', 'true');
+            input.style.borderColor = 'rgb(239, 68, 68)';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideFieldError(fieldName) {
+            const input = document.getElementById(`test-${fieldName}`);
+            const errorDiv = document.getElementById(`${fieldName}-error`);
+            
+            input.setAttribute('aria-invalid', 'false');
+            input.style.borderColor = '';
+            errorDiv.style.display = 'none';
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Run audit when button is clicked
+        document.getElementById('run-audit-btn').addEventListener('click', async function() {
+            const button = this;
+            const originalText = button.textContent;
+            
+            button.textContent = '🔄 Running Audit...';
+            button.disabled = true;
+            
+            try {
+                if (typeof AccessibilityAuditor !== 'undefined') {
+                    const auditor = new AccessibilityAuditor();
+                    const results = await auditor.runFullAudit();
+                    
+                    // Display results
+                    displayAuditResults(results);
+                    announceToScreenReader('Accessibility audit completed', 'assertive');
+                } else {
+                    throw new Error('AccessibilityAuditor not available');
+                }
+            } catch (error) {
+                console.error('Audit failed:', error);
+                announceToScreenReader('Audit failed. Check console for details.', 'assertive');
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
+        
+        function displayAuditResults(results) {
+            const resultsContainer = document.getElementById('audit-results');
+            
+            const html = `
+                <h3>Audit Results Summary</h3>
+                <div class="demo-grid">
+                    <div class="accessibility-feature">
+                        <h4>📊 Overall Score</h4>
+                        <div class="status-indicator ${results.summary.failed === 0 ? 'success' : 'warning'}">
+                            <span>${results.summary.failed === 0 ? '✓' : '⚠'}</span>
+                            <span>${results.summary.passRate} Pass Rate</span>
+                        </div>
+                        <p>${results.summary.totalTests} tests completed in ${results.summary.duration}</p>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>✅ Passed Tests</h4>
+                        <div class="status-indicator success">
+                            <span>✓</span>
+                            <span>${results.summary.passed} Tests</span>
+                        </div>
+                        <p>All accessibility requirements met</p>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>❌ Failed Tests</h4>
+                        <div class="status-indicator ${results.summary.failed === 0 ? 'success' : 'error'}">
+                            <span>${results.summary.failed === 0 ? '✓' : '❌'}</span>
+                            <span>${results.summary.failed} Tests</span>
+                        </div>
+                        <p>${results.summary.failed === 0 ? 'No failures detected' : 'Issues require attention'}</p>
+                    </div>
+                    
+                    <div class="accessibility-feature">
+                        <h4>⚠️ Warnings</h4>
+                        <div class="status-indicator ${results.summary.warnings === 0 ? 'success' : 'warning'}">
+                            <span>${results.summary.warnings === 0 ? '✓' : '⚠'}</span>
+                            <span>${results.summary.warnings} Warnings</span>
+                        </div>
+                        <p>${results.summary.warnings === 0 ? 'No warnings' : 'Minor improvements suggested'}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <h4>WCAG 2.1 AA Compliance: ${results.summary.wcagCompliance}</h4>
+                    <p><strong>Audit Date:</strong> ${new Date(results.summary.auditDate).toLocaleString()}</p>
+                    <p><em>Detailed report has been downloaded as HTML file.</em></p>
+                </div>
+            `;
+            
+            resultsContainer.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

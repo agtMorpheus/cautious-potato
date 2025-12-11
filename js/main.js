@@ -75,6 +75,9 @@ import assetDb from './modules/assets/asset-db.js';
 // Dashboard Module imports (Welcome Messages)
 import { initDashboardModule } from './modules/dashboard/index.js';
 
+// Performance Monitor (Phase 5)
+import performanceMonitor from './performance-monitor.js';
+
 /**
  * View titles and subtitles for navigation
  */
@@ -1261,6 +1264,7 @@ function updateSyncTimeDisplay() {
  * Initialize the application (Phase 5.1.4)
  */
 async function initializeApp() {
+    performanceMonitor.startMeasure('initialization');
     console.log('Abrechnung Application – Initializing (Phase 5 with Modern UI)');
 
     // 1. Load persisted state (if any)
@@ -1416,6 +1420,19 @@ async function initializeApp() {
     addLogEntry('Application initialized', 'info');
 
     console.log('Abrechnung Application – Initialization complete');
+    
+    // 9. End performance measurement and log results
+    const initPerf = performanceMonitor.endMeasure('initialization');
+    if (initPerf) {
+        addLogEntry(`Application initialized in ${initPerf.duration}ms`, 'info');
+        
+        // Perform health check
+        const healthCheck = performanceMonitor.healthCheck();
+        if (!healthCheck.healthy) {
+            console.warn('Performance issues detected:', healthCheck.issues);
+            healthCheck.issues.forEach(issue => addLogEntry(issue, 'warning'));
+        }
+    }
 }
 
 /**
