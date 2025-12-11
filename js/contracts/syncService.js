@@ -45,6 +45,15 @@ let autoSyncIntervalId = null;
 const statusListeners = new Set();
 
 /**
+ * Configuration constants for sync performance
+ */
+const SYNC_CONFIG = {
+    LARGE_DATASET_THRESHOLD: 500,  // Contracts count threshold for chunk size adjustment
+    DEFAULT_CHUNK_SIZE_LARGE: 50,  // Chunk size for large datasets
+    DEFAULT_CHUNK_SIZE_SMALL: 100  // Chunk size for smaller datasets
+};
+
+/**
  * Get current sync status
  * @returns {Object} Status object with status and error
  */
@@ -122,7 +131,9 @@ export async function syncToServer(options = { force: false, chunkSize: 100 }) {
         }
         
         // Determine optimal chunk size based on dataset size
-        const defaultChunkSize = contracts.length > 500 ? 50 : 100;
+        const defaultChunkSize = contracts.length > SYNC_CONFIG.LARGE_DATASET_THRESHOLD 
+            ? SYNC_CONFIG.DEFAULT_CHUNK_SIZE_LARGE 
+            : SYNC_CONFIG.DEFAULT_CHUNK_SIZE_SMALL;
         const chunkSize = options.chunkSize || defaultChunkSize;
         
         let uploadedCount = 0;
