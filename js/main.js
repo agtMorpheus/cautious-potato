@@ -75,6 +75,9 @@ import assetDb from './modules/assets/asset-db.js';
 // Dashboard Module imports (Welcome Messages)
 import { initDashboardModule } from './modules/dashboard/index.js';
 
+// Logs Module imports
+import { initLogsModule, addLog } from './modules/logs/index.js';
+
 // Performance Monitor (Phase 5)
 import performanceMonitor from './performance-monitor.js';
 
@@ -321,29 +324,10 @@ function addActivityLogEntry(message, type = 'info') {
 
 /**
  * Add log entry to logs view
+ * @deprecated Use addLog from logs module instead
  */
 function addLogEntry(message, level = 'info') {
-    const logEntries = document.getElementById('log-entries');
-    if (!logEntries) return;
-
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    entry.innerHTML = `
-        <span class="log-time">${timeStr}</span>
-        <span class="log-level ${level}">${level.toUpperCase()}</span>
-        <span class="log-message">${message}</span>
-    `;
-
-    // Insert at the beginning
-    logEntries.insertBefore(entry, logEntries.firstChild);
-
-    // Keep only last 50 entries
-    while (logEntries.children.length > 50) {
-        logEntries.removeChild(logEntries.lastChild);
-    }
+    addLog(message, level);
 }
 
 /**
@@ -1349,6 +1333,9 @@ async function initializeApp() {
 
     // 5h. Initialize Dashboard Module (Welcome Messages)
     initDashboardModule();
+
+    // 5i. Initialize Logs Module
+    initLogsModule();
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {

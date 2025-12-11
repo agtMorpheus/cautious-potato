@@ -1,82 +1,43 @@
 /**
- * Logs View CSS (Command Center Theme)
+ * Logs View CSS
  * 
- * Styles for the Application Logs view
- * Implements a Terminal/Console aesthetic
+ * Styles for the Application Logs view.
+ * Follows UI Standardization Guide.
  */
 
-#view-logs .card {
-    background-color: var(--c-neutral-900);
-    /* Force dark terminal bg */
-    border: 1px solid var(--border-glass);
+/* Container for the table */
+.log-table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    min-height: 400px;
 }
 
-.log-list {
+.full-height-card {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-family: 'JetBrains Mono', 'Menlo', 'Consolas', monospace;
-    font-size: 0.85rem;
-    max-height: 600px;
-    overflow-y: auto;
-    padding: var(--space-md);
-    background: var(--c-neutral-950);
-    /* Even darker inner terminal */
-    border-radius: 6px;
-    border: 1px solid var(--border-base);
+    min-height: 600px;
 }
 
-.log-entry {
+.full-height-card .card-body {
+    flex: 1;
+    overflow: hidden;
     display: flex;
-    gap: var(--space-md);
-    padding: var(--radius-sm) var(--radius-md);
-    border-radius: 2px;
-    transition: background 0.15s;
-    align-items: baseline;
+    flex-direction: column;
 }
 
-.log-entry:hover {
-    background: rgba(255, 255, 255, 0.05);
+/* Ensure mono font for timestamps and messages */
+.font-mono {
+    font-family: var(--font-family-mono);
 }
 
-.log-time {
-    color: var(--c-neutral-500);
-    font-size: var(--font-size-xs);
-    min-width: 80px;
-    user-select: none;
+.whitespace-nowrap {
+    white-space: nowrap;
 }
 
-.log-level {
-    font-weight: 700;
-    font-size: var(--font-size-xs);
-    padding: 1px 6px;
-    border-radius: 2px;
-    min-width: 60px;
-    text-align: center;
-}
-
-.log-level.info {
-    color: var(--c-primary-500);
-    background: var(--primary-light);
-}
-
-.log-level.warn {
-    color: var(--c-warning);
-    background: var(--warning-light);
-}
-
-.log-level.error {
-    color: var(--c-danger);
-    background: var(--danger-light);
-}
-
-.log-level.success {
-    color: var(--c-success);
-    background: var(--success-light);
-}
-
-.log-message {
-    color: var(--c-neutral-300);
-    var(--bg-card)-space: pre-wrap;
+.break-all {
     word-break: break-all;
 }
