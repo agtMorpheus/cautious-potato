@@ -169,6 +169,7 @@ export class VirtualList {
         
         // Render rows
         const fragment = document.createDocumentFragment();
+        const hasClickHandler = this.options.onRowClick;
         
         for (let i = range.start; i < range.end; i++) {
             const item = this.items[i];
@@ -178,9 +179,9 @@ export class VirtualList {
             row.style.height = `${this.options.rowHeight}px`;
             row.dataset.index = i;
             
-            // Set cursor style if click handler exists (event delegation used in bindEvents)
-            if (this.options.onRowClick) {
-                row.style.cursor = 'pointer';
+            // Add clickable class if click handler exists (event delegation used in bindEvents)
+            if (hasClickHandler) {
+                row.classList.add('virtual-list-clickable');
             }
             
             fragment.appendChild(row);
