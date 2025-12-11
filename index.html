@@ -1222,20 +1222,68 @@
 
                 <!-- Logs View -->
                 <section id="view-logs" class="view-container" aria-labelledby="logs-heading">
-                    <h2 id="logs-heading" class="sr-only">Protokoll</h2>
+                    <h2 id="logs-heading" class="sr-only">Logs</h2>
 
-                    <div class="card">
+                    <div class="card full-height-card">
                         <div class="card-header">
                             <h3 class="card-title">Anwendungsprotokoll</h3>
-                            <p class="card-description">Letzte Aktivitäten und Systemereignisse</p>
+                            <div class="card-header-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <p class="card-description" style="margin-bottom: 0;">Letzte Aktivitäten und Systemereignisse</p>
+                                <div class="card-actions" style="display: flex; gap: var(--space-sm);">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="log-export-btn" title="Logs exportieren">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 4px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        Exportieren
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="log-clear-btn" title="Logs löschen" style="color: var(--c-danger); border-color: var(--c-danger);">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 4px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Löschen
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div id="log-entries" class="log-list">
-                                <div class="log-entry">
-                                    <span class="log-time">--:--:--</span>
-                                    <span class="log-level info">INFO</span>
-                                    <span class="log-message">Anwendung gestartet</span>
+                            <!-- Filter Section -->
+                            <div class="filter-section" style="margin-bottom: var(--space-md);">
+                                <div class="filter-row" style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+                                    <div class="filter-group filter-group--search" style="flex: 1; min-width: 200px;">
+                                        <label for="log-search-input" class="form-label">Suche</label>
+                                        <input type="text" id="log-search-input" placeholder="Nachricht suchen..." class="form-input">
+                                    </div>
+                                    <div class="filter-group" style="width: 150px;">
+                                        <label for="log-level-filter" class="form-label">Level</label>
+                                        <select id="log-level-filter" class="form-select">
+                                            <option value="">Alle</option>
+                                            <option value="info">Info</option>
+                                            <option value="success">Success</option>
+                                            <option value="warn">Warning</option>
+                                            <option value="error">Error</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group filter-group--actions" style="display: flex; align-items: flex-end;">
+                                        <button type="button" id="log-clear-filters" class="btn btn-secondary btn-sm">
+                                            Filter zurücksetzen
+                                        </button>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div class="log-table-container">
+                                <table class="table">
+                                    <thead class="table__head">
+                                        <tr>
+                                            <th class="table__th" style="width: 150px;">Zeit</th>
+                                            <th class="table__th" style="width: 100px;">Level</th>
+                                            <th class="table__th">Nachricht</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="log-table-body">
+                                        <!-- Logs injected here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
