@@ -376,13 +376,29 @@ export function getPositionSummary(positionMap) {
         };
     }
     
-    const quantities = Object.values(positionMap).filter(q => typeof q === 'number');
+    // Use single iteration for better performance with large datasets
+    let totalQuantity = 0;
+    let minQuantity = Infinity;
+    let maxQuantity = -Infinity;
+    let count = 0;
+    
+    for (const key in positionMap) {
+        if (Object.prototype.hasOwnProperty.call(positionMap, key)) {
+            const q = positionMap[key];
+            if (typeof q === 'number') {
+                totalQuantity += q;
+                if (q < minQuantity) minQuantity = q;
+                if (q > maxQuantity) maxQuantity = q;
+                count++;
+            }
+        }
+    }
     
     return {
-        totalQuantity: quantities.reduce((sum, q) => sum + q, 0),
+        totalQuantity,
         uniquePositions: Object.keys(positionMap).length,
-        minQuantity: quantities.length > 0 ? Math.min(...quantities) : 0,
-        maxQuantity: quantities.length > 0 ? Math.max(...quantities) : 0
+        minQuantity: count > 0 ? minQuantity : 0,
+        maxQuantity: count > 0 ? maxQuantity : 0
     };
 }
 

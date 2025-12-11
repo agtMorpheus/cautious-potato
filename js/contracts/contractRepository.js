@@ -59,83 +59,86 @@ export function getFilteredContracts(customFilters = null) {
     const contracts = state.contracts?.records || [];
     const filters = customFilters || state.contracts?.filters || {};
     
-    let filtered = [...contracts];
-    
-    // Filter by contract ID
-    if (filters.contractId) {
-        filtered = filtered.filter(c => 
-            c.contractId && c.contractId.includes(filters.contractId)
-        );
+    // Early return if no filters
+    const hasFilters = filters.contractId || filters.status || filters.location || 
+                       filters.equipmentId || filters.dateRange || 
+                       (filters.searchText && filters.searchText.trim() !== '');
+    if (!hasFilters) {
+        return [...contracts];
     }
     
-    // Filter by status
-    if (filters.status) {
-        const normalizedFilterStatus = normalizeStatus(filters.status);
-        filtered = filtered.filter(c => 
-            normalizeStatus(c.status) === normalizedFilterStatus
-        );
-    }
+    // Pre-compute filter values once for performance
+    const normalizedFilterStatus = filters.status ? normalizeStatus(filters.status) : null;
+    const locationLower = filters.location ? filters.location.toLowerCase() : null;
+    const equipmentLower = filters.equipmentId ? filters.equipmentId.toLowerCase() : null;
+    const searchLower = (filters.searchText && filters.searchText.trim() !== '') 
+        ? filters.searchText.toLowerCase().trim() 
+        : null;
     
-    // Filter by location
-    if (filters.location) {
-        const locationLower = filters.location.toLowerCase();
-        filtered = filtered.filter(c => 
-            c.location && c.location.toLowerCase().includes(locationLower)
-        );
-    }
+    // Pre-parse date objects once
+    const fromDate = filters.dateRange?.from ? new Date(filters.dateRange.from) : null;
+    const toDate = filters.dateRange?.to ? new Date(filters.dateRange.to) : null;
     
-    // Filter by equipment ID
-    if (filters.equipmentId) {
-        const equipmentLower = filters.equipmentId.toLowerCase();
-        filtered = filtered.filter(c => 
-            c.equipmentId && c.equipmentId.toLowerCase().includes(equipmentLower)
-        );
-    }
+    // Single-pass filtering for better performance
+    const filtered = [];
     
-    // Filter by date range
-    if (filters.dateRange) {
-        const { from, to } = filters.dateRange;
+    for (let i = 0; i < contracts.length; i++) {
+        const c = contracts[i];
         
-        if (from) {
-            const fromDate = new Date(from);
-            filtered = filtered.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate >= fromDate;
-            });
+        // Filter by contract ID
+        if (filters.contractId && (!c.contractId || !c.contractId.includes(filters.contractId))) {
+            continue;
         }
         
-        if (to) {
-            const toDate = new Date(to);
-            filtered = filtered.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate <= toDate;
-            });
+        // Filter by status
+        if (normalizedFilterStatus && normalizeStatus(c.status) !== normalizedFilterStatus) {
+            continue;
         }
-    }
-    
-    // Filter by search text (searches across multiple fields)
-    if (filters.searchText && filters.searchText.trim() !== '') {
-        const searchLower = filters.searchText.toLowerCase().trim();
-        filtered = filtered.filter(c => {
-            const searchableFields = [
-                c.contractId,
-                c.contractTitle,
-                c.taskId,
-                c.location,
-                c.roomArea,
-                c.equipmentId,
-                c.equipmentDescription,
-                c.serialNumber,
-                c.workorderCode,
-                c.description
-            ];
+        
+        // Filter by location
+        if (locationLower && (!c.location || !c.location.toLowerCase().includes(locationLower))) {
+            continue;
+        }
+        
+        // Filter by equipment ID
+        if (equipmentLower && (!c.equipmentId || !c.equipmentId.toLowerCase().includes(equipmentLower))) {
+            continue;
+        }
+        
+        // Filter by date range
+        if (fromDate || toDate) {
+            if (!c.plannedStart) {
+                continue;
+            }
+            const contractDate = new Date(c.plannedStart);
+            if (fromDate && contractDate < fromDate) {
+                continue;
+            }
+            if (toDate && contractDate > toDate) {
+                continue;
+            }
+        }
+        
+        // Filter by search text (searches across multiple fields)
+        if (searchLower) {
+            const searchMatch = 
+                (c.contractId && c.contractId.toLowerCase().includes(searchLower)) ||
+                (c.contractTitle && c.contractTitle.toLowerCase().includes(searchLower)) ||
+                (c.taskId && c.taskId.toLowerCase().includes(searchLower)) ||
+                (c.location && c.location.toLowerCase().includes(searchLower)) ||
+                (c.roomArea && c.roomArea.toLowerCase().includes(searchLower)) ||
+                (c.equipmentId && c.equipmentId.toLowerCase().includes(searchLower)) ||
+                (c.equipmentDescription && c.equipmentDescription.toLowerCase().includes(searchLower)) ||
+                (c.serialNumber && c.serialNumber.toLowerCase().includes(searchLower)) ||
+                (c.workorderCode && c.workorderCode.toLowerCase().includes(searchLower)) ||
+                (c.description && c.description.toLowerCase().includes(searchLower));
             
-            return searchableFields.some(field => 
-                field && String(field).toLowerCase().includes(searchLower)
-            );
-        });
+            if (!searchMatch) {
+                continue;
+            }
+        }
+        
+        filtered.push(c);
     }
     
     return filtered;
@@ -191,30 +194,49 @@ export function sortContracts(contracts, field, direction = 'asc') {
     
     const sorted = [...contracts];
     const multiplier = direction === 'desc' ? -1 : 1;
+    const isDateField = field === 'plannedStart' || field === 'createdAt' || field === 'updatedAt';
     
-    sorted.sort((a, b) => {
-        let valueA = a[field];
-        let valueB = b[field];
+    // For date fields, pre-compute timestamps for better performance
+    if (isDateField) {
+        // Create an array of timestamps for O(1) lookup during sorting
+        // Using array indices instead of object keys to avoid memory issues
+        const timestamps = new Array(sorted.length);
+        for (let i = 0; i < sorted.length; i++) {
+            const dateValue = sorted[i][field];
+            timestamps[i] = dateValue ? new Date(dateValue).getTime() || 0 : 0;
+        }
         
-        // Handle null/undefined values
-        if (valueA === null || valueA === undefined) valueA = '';
-        if (valueB === null || valueB === undefined) valueB = '';
+        // Create indices array and sort by timestamps
+        const indices = new Array(sorted.length);
+        for (let i = 0; i < sorted.length; i++) {
+            indices[i] = i;
+        }
+        indices.sort((a, b) => (timestamps[a] - timestamps[b]) * multiplier);
         
-        // Handle date fields
-        if (field === 'plannedStart' || field === 'createdAt' || field === 'updatedAt') {
-            valueA = new Date(valueA).getTime() || 0;
-            valueB = new Date(valueB).getTime() || 0;
+        // Build result from sorted indices
+        const result = new Array(sorted.length);
+        for (let i = 0; i < indices.length; i++) {
+            result[i] = sorted[indices[i]];
+        }
+        return result;
+    } else {
+        sorted.sort((a, b) => {
+            let valueA = a[field];
+            let valueB = b[field];
+            
+            // Handle null/undefined values
+            if (valueA === null || valueA === undefined) valueA = '';
+            if (valueB === null || valueB === undefined) valueB = '';
+            
+            // Handle string comparison
+            if (typeof valueA === 'string' && typeof valueB === 'string') {
+                return valueA.localeCompare(valueB) * multiplier;
+            }
+            
+            // Handle number comparison
             return (valueA - valueB) * multiplier;
-        }
-        
-        // Handle string comparison
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-            return valueA.localeCompare(valueB) * multiplier;
-        }
-        
-        // Handle number comparison
-        return (valueA - valueB) * multiplier;
-    });
+        });
+    }
     
     return sorted;
 }
