@@ -43,14 +43,41 @@ For comprehensive documentation, see:
 
 ## 📦 Installation & Setup
 
+### Cloud Deployment (Empfohlen für Produktion)
+
+**Deploy to Render.com in 10 minutes!**
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+Render.com bietet eine einfache, kostenlose Möglichkeit, die Anwendung in der Cloud zu hosten:
+- ✅ Automatisches Deployment
+- ✅ Kostenloser SSL-Zertifikat
+- ✅ MySQL Database inklusive
+- ✅ Auto-Scaling
+- ✅ Free Tier verfügbar
+
+**Schnellstart:**
+```bash
+# 1. Fork/Clone dieses Repository
+# 2. Verbinde es mit Render.com
+# 3. Deploy mit einem Klick!
+```
+
+📖 **Detaillierte Anleitung:** [Render.com Quick Start Guide](docs/RENDER_QUICKSTART.md)  
+📚 **Vollständige Dokumentation:** [Render Deployment Guide](docs/RENDER_DEPLOYMENT.md)
+
+---
+
+### Lokale Installation
+
 Da die Anwendung client-seitig läuft, wird lediglich ein lokaler Webserver benötigt, um ES6 Module und CORS-Richtlinien korrekt zu behandeln.
 
-### Voraussetzungen
+#### Voraussetzungen
 - Ein lokaler Webserver (siehe Optionen unten)
 - Ein moderner Webbrowser (Chrome, Firefox, Edge, Safari)
 - Excel-Templates (`protokoll.xlsx` und `abrechnung.xlsx`)
 
-### Option 1: XAMPP (empfohlen für Windows)
+#### Option 1: XAMPP (empfohlen für Windows)
 
 1. **XAMPP installieren**:
    - Download: [https://www.apachefriends.org/de/index.html](https://www.apachefriends.org/de/index.html)
@@ -74,7 +101,7 @@ Da die Anwendung client-seitig läuft, wird lediglich ein lokaler Webserver ben�
 5. **Anwendung öffnen**:
    - Navigiere im Browser zu: `http://localhost/abrechnung-app/`
 
-### Option 2: Python (plattformübergreifend)
+#### Option 2: Python (plattformübergreifend)
 
 ```bash
 # Repository klonen
@@ -91,7 +118,7 @@ python -m http.server 8000
 # Im Browser öffnen: http://localhost:8000
 ```
 
-### Option 3: Node.js http-server
+#### Option 3: Node.js http-server
 
 ```bash
 # Repository klonen
@@ -109,7 +136,7 @@ http-server -p 8000
 # Im Browser öffnen: http://localhost:8000
 ```
 
-### Option 4: Desktop-Anwendung (Electron)
+#### Option 4: Desktop-Anwendung (Electron)
 
 ```bash
 # Repository klonen

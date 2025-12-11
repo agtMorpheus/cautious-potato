@@ -584,6 +584,13 @@ describe('Protokoll Renderer', () => {
 
       // Checking for the escaped version in innerHTML
       // Removed check due to DOM serialization inconsistencies in test environment
+      // Check that no script tags are actually created in the DOM
+      // (checking innerHTML string might match escaped attribute values which are safe)
+      expect(tbody.querySelectorAll('script').length).toBe(0);
+
+      // Also verify that the value attribute contains the script string (it should be there, just not executed)
+      const input = tbody.querySelector('input[data-field="position.stromkreisNr"]');
+      expect(input.value).toBe('<script>alert("xss")</script>');
     });
 
     test('escapes HTML in review display', () => {

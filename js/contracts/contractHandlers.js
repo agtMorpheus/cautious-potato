@@ -30,7 +30,7 @@ import {
     VALID_STATUS_VALUES
 } from './contractUtils.js';
 import { addContracts, updateContract } from './contractRepository.js';
-import { showErrorAlert, showSuccessAlert, escapeHtml } from '../handlers.js';
+import { showErrorAlert, showSuccessAlert, escapeHtml, setupDragAndDrop, setupClickAndKeyboard } from '../handlers.js';
 import { highlightPreviewRow } from './contractRenderer.js';
 
 // Store selected contract file reference (not persisted in state)
@@ -506,6 +506,10 @@ export function initializeContractEventListeners() {
         fileInput.addEventListener('change', handleContractFileSelect);
         console.log('✓ Contract file input listener bound');
     }
+
+    // Enhance Contract File Drop Zone
+    setupDragAndDrop('contract-file-drop-zone', 'contract-file-input');
+    setupClickAndKeyboard('contract-file-drop-zone', 'contract-file-input');
 
     // Sheet selector handler
     const sheetSelector = document.getElementById('contract-sheet-select');
