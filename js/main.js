@@ -1006,6 +1006,9 @@ function initializeSyncSettings() {
     // Get UI elements
     const storageModeLocal = document.getElementById('storage-mode-local');
     const storageModeSync = document.getElementById('storage-mode-sync');
+    const apiConfigSection = document.getElementById('api-config-section');
+    const apiBaseUrlInput = document.getElementById('api-base-url');
+    const saveApiConfigBtn = document.getElementById('save-api-config-btn');
     const syncStatusSection = document.getElementById('sync-status-section');
     const syncStatusIndicator = document.getElementById('sync-status-indicator');
     const syncStatusText = document.getElementById('sync-status-text');
@@ -1023,10 +1026,17 @@ function initializeSyncSettings() {
         if (config.storageMode === StorageMode.SYNC_WITH_SERVER) {
             storageModeSync.checked = true;
             if (syncStatusSection) syncStatusSection.style.display = 'block';
+            if (apiConfigSection) apiConfigSection.style.display = 'block';
         } else {
             storageModeLocal.checked = true;
             if (syncStatusSection) syncStatusSection.style.display = 'none';
+            if (apiConfigSection) apiConfigSection.style.display = 'none';
         }
+    }
+
+    // Set initial API URL
+    if (apiBaseUrlInput && config.apiBaseUrl) {
+        apiBaseUrlInput.value = config.apiBaseUrl;
     }
 
     // Set initial auto-sync state
@@ -1043,6 +1053,7 @@ function initializeSyncSettings() {
             if (storageModeLocal.checked) {
                 saveSyncConfig({ storageMode: StorageMode.LOCAL_ONLY });
                 if (syncStatusSection) syncStatusSection.style.display = 'none';
+                if (apiConfigSection) apiConfigSection.style.display = 'none';
                 addActivityLogEntry('Speichermodus: Nur lokal', 'info');
                 addLogEntry('Storage mode changed to local only', 'info');
             }
@@ -1054,8 +1065,28 @@ function initializeSyncSettings() {
             if (storageModeSync.checked) {
                 saveSyncConfig({ storageMode: StorageMode.SYNC_WITH_SERVER });
                 if (syncStatusSection) syncStatusSection.style.display = 'block';
+                if (apiConfigSection) apiConfigSection.style.display = 'block';
                 addActivityLogEntry('Speichermodus: Mit Server synchronisieren', 'info');
                 addLogEntry('Storage mode changed to sync with server', 'info');
+            }
+        });
+    }
+
+    // API Config Save Handler
+    if (saveApiConfigBtn && apiBaseUrlInput) {
+        saveApiConfigBtn.addEventListener('click', () => {
+            const newUrl = apiBaseUrlInput.value.trim();
+            if (newUrl) {
+                saveSyncConfig({ apiBaseUrl: newUrl });
+                addActivityLogEntry(`API URL aktualisiert: ${newUrl}`, 'success');
+                addLogEntry(`API URL updated to: ${newUrl}`, 'success');
+
+                // Show visual feedback
+                const originalText = saveApiConfigBtn.textContent;
+                saveApiConfigBtn.textContent = 'Gespeichert!';
+                setTimeout(() => {
+                    saveApiConfigBtn.textContent = originalText;
+                }, 2000);
             }
         });
     }
