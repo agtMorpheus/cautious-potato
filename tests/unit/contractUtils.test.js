@@ -365,5 +365,36 @@ describe('Contract Utils (contractUtils.js)', () => {
     test('handles null workbook', () => {
         expect(() => discoverContractSheets(null)).toThrow();
     });
+
+    test('handles sheet with no range', () => {
+        const mockWorkbook = {
+            SheetNames: ['EmptySheet'],
+            Sheets: {
+                'EmptySheet': {}
+            }
+        };
+
+        const result = discoverContractSheets(mockWorkbook);
+        expect(result['EmptySheet']).toBeDefined();
+        expect(result['EmptySheet'].isEmpty).toBe(true);
+        expect(result['EmptySheet'].rowCount).toBe(0);
+        expect(result['EmptySheet'].columns).toEqual([]);
+    });
+
+    test('handles sheet with invalid range format', () => {
+        const mockWorkbook = {
+            SheetNames: ['BadRange'],
+            Sheets: {
+                'BadRange': {
+                    '!ref': 'invalid-range'
+                }
+            }
+        };
+
+        const result = discoverContractSheets(mockWorkbook);
+        expect(result['BadRange']).toBeDefined();
+        expect(result['BadRange'].isEmpty).toBe(true);
+        expect(result['BadRange'].rowCount).toBe(0);
+    });
   });
 });

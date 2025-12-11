@@ -755,4 +755,92 @@ describe('HR State Management (hrState.js)', () => {
       expect(history.attendance.length).toBe(1);
     });
   });
+
+  describe('Error Handling', () => {
+    test('notifyHrListeners catches listener errors', () => {
+      const errorListener = jest.fn(() => { throw new Error('Test error'); });
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      subscribeHr(errorListener);
+      
+      // Should not throw, error should be logged
+      expect(() => setHrState({ ui: { activeTab: 'test' } })).not.toThrow();
+      
+      // Cleanup
+      unsubscribeHr(errorListener);
+      consoleSpy.mockRestore();
+    });
+
+    test('loadHrStateFromStorage handles corrupted JSON', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Store invalid JSON
+      window.localStorage.setItem('hr_module_state', 'invalid json {{{');
+      
+      const state = loadHrStateFromStorage();
+      
+      // Should fallback to initial state
+      expect(state).toBeDefined();
+      expect(state.employees).toBeDefined();
+      
+      consoleSpy.mockRestore();
+    });
+
+    test('saveHrStateToStorage handles quota exceeded', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      
+      // Mock localStorage.setItem to throw QuotaExceededError
+      const originalSetItem = window.localStorage.setItem;
+      const quotaError = new Error('Quota exceeded');
+      quotaError.name = 'QuotaExceededError';
+      window.localStorage.setItem = jest.fn(() => { throw quotaError; });
+      
+      // Should not throw
+      expect(() => setHrState({ ui: { activeTab: 'test' } })).not.toThrow();
+      
+      // Restore
+      window.localStorage.setItem = originalSetItem;
+      consoleSpy.mockRestore();
+      warnSpy.mockRestore();
+    });
+
+    test('clearHrPersistedState handles errors gracefully', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Mock localStorage.removeItem to throw
+      const originalRemoveItem = window.localStorage.removeItem;
+      window.localStorage.removeItem = jest.fn(() => { throw new Error('Test error'); });
+      
+      // Should not throw
+      expect(() => clearHrPersistedState()).not.toThrow();
+      
+      // Restore
+      window.localStorage.removeItem = originalRemoveItem;
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('resetHrState options', () => {
+    test('resetHrState with persist: true saves to storage', () => {
+      addEmployee({ id: 'EMP001', firstName: 'John', lastName: 'Doe', email: 'john@test.com' });
+      
+      resetHrState({ persist: true, silent: false });
+      
+      const state = getHrState();
+      expect(state.employees).toEqual([]);
+    });
+
+    test('resetHrState with silent: true does not notify listeners', () => {
+      const listener = jest.fn();
+      subscribeHr(listener);
+      listener.mockClear();
+      
+      resetHrState({ persist: false, silent: true });
+      
+      expect(listener).not.toHaveBeenCalled();
+      
+      unsubscribeHr(listener);
+    });
+  });
 });
