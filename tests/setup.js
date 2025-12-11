@@ -46,6 +46,31 @@ global.XLSX = {
     json_to_sheet: jest.fn(),
     book_new: jest.fn(),
     book_append_sheet: jest.fn(),
+    // Cell address encoding/decoding for metadata search
+    decode_range: jest.fn((range) => {
+      // Parse range like 'A1:Z50' to row/col indices
+      const match = range.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+      if (!match) return { s: { r: 0, c: 0 }, e: { r: 49, c: 25 } };
+      const colToNum = (col) => col.split('').reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0) - 1;
+      return {
+        s: { r: parseInt(match[2]) - 1, c: colToNum(match[1]) },
+        e: { r: parseInt(match[4]) - 1, c: colToNum(match[3]) }
+      };
+    }),
+    encode_cell: jest.fn(({ r, c }) => {
+      // Convert row/col indices to cell address like 'A1'
+      const numToCol = (n) => {
+        let result = '';
+        n++;
+        while (n > 0) {
+          n--;
+          result = String.fromCharCode(65 + (n % 26)) + result;
+          n = Math.floor(n / 26);
+        }
+        return result;
+      };
+      return numToCol(c) + (r + 1);
+    }),
   }
 };
 
