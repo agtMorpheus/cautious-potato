@@ -124,6 +124,9 @@ export function getFilteredContracts(customFilters = null) {
     // Single-pass filtering for better performance
     const filtered = [];
     
+    // Pre-compute lowercase versions and normalized statuses to avoid repeated calls
+    const contractDataCache = new Map();
+    
     for (let i = 0; i < contracts.length; i++) {
         const c = contracts[i];
         
@@ -133,8 +136,16 @@ export function getFilteredContracts(customFilters = null) {
         }
         
         // Filter by status
-        if (normalizedFilterStatus && normalizeStatus(c.status) !== normalizedFilterStatus) {
-            continue;
+        if (normalizedFilterStatus) {
+            // Get cached normalized status or compute and cache it
+            let normalizedStatus = contractDataCache.get(c);
+            if (!normalizedStatus) {
+                normalizedStatus = { status: normalizeStatus(c.status) };
+                contractDataCache.set(c, normalizedStatus);
+            }
+            if (normalizedStatus.status !== normalizedFilterStatus) {
+                continue;
+            }
         }
         
         // Filter by location

@@ -682,3 +682,8 @@ select:focus {
     border: 1px solid var(--border-light);
     color: var(--text-muted);
 }
+
+/* ==================== Virtual List ==================== */
+.virtual-list-clickable {
+    cursor: pointer;
+}

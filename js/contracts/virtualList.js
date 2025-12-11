@@ -67,6 +67,21 @@ export class VirtualList {
         this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
         window.addEventListener('resize', this.resizeHandler);
         
+        // Use event delegation for row clicks (performance optimization)
+        if (this.options.onRowClick) {
+            this.clickHandler = (e) => {
+                const row = e.target.closest('[data-index]');
+                if (row) {
+                    const index = parseInt(row.dataset.index, 10);
+                    const item = this.items[index];
+                    if (item) {
+                        this.options.onRowClick(item, index, e);
+                    }
+                }
+            };
+            this.viewport.addEventListener('click', this.clickHandler);
+        }
+        
         // Use ResizeObserver if available
         if (typeof ResizeObserver !== 'undefined') {
             this.resizeObserver = new ResizeObserver(entries => {
@@ -154,20 +169,19 @@ export class VirtualList {
         
         // Render rows
         const fragment = document.createDocumentFragment();
+        const hasClickHandler = this.options.onRowClick;
         
         for (let i = range.start; i < range.end; i++) {
             const item = this.items[i];
             const row = this.options.renderRow(item, i, this.options);
             
-            // Set row height and add click handler
+            // Set row height and data attributes
             row.style.height = `${this.options.rowHeight}px`;
             row.dataset.index = i;
             
-            if (this.options.onRowClick) {
-                row.addEventListener('click', (e) => {
-                    this.options.onRowClick(item, i, e);
-                });
-                row.style.cursor = 'pointer';
+            // Add clickable class if click handler exists (event delegation used in bindEvents)
+            if (hasClickHandler) {
+                row.classList.add('virtual-list-clickable');
             }
             
             fragment.appendChild(row);
@@ -275,6 +289,11 @@ export class VirtualList {
     destroy() {
         this.container.removeEventListener('scroll', this.scrollHandler);
         window.removeEventListener('resize', this.resizeHandler);
+        
+        // Remove click handler if it was added
+        if (this.clickHandler) {
+            this.viewport.removeEventListener('click', this.clickHandler);
+        }
         
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
