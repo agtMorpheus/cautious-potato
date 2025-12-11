@@ -238,8 +238,8 @@
     }
     
     .badge {
-        border: 1px solid #000;
+        border: 1px solid currentColor;
         background: transparent !important;
-        color: #000 !important;
+        color: currentColor !important;
     }
 }

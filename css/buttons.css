@@ -477,16 +477,16 @@
 
 [data-color-scheme="dark"] .btn--secondary,
 [data-theme="dark"] .btn--secondary {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
+    border-color: var(--border-base);
 }
 
 [data-color-scheme="dark"] .btn--outline,
 [data-theme="dark"] .btn--outline {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-highlight);
 }
 
 [data-color-scheme="dark"] .btn--ghost:hover:not(:disabled),
 [data-theme="dark"] .btn--ghost:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
 }
