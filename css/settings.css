@@ -5,36 +5,36 @@
  */
 
 .settings-group {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
-    margin-bottom: var(--space-lg);
+    background: var(--color-background);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    padding: var(--space-24);
+    margin-bottom: var(--space-24);
 }
 
 .settings-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: var(--space-sm);
-    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-8);
+    font-family: var(--font-family-std-mono);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-relaxed);
 }
 
 .settings-desc {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-24);
     max-width: var(--layout-form-width);
-    line-height: 1.5;
+    line-height: var(--line-height-body);
 }
 
 /* Storage Mode Options */
 .storage-mode-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-md);
+    gap: var(--space-16);
 }
 
 .storage-mode-option {
@@ -49,42 +49,42 @@
 
 .storage-mode-content {
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-16);
     padding: 1.25rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-md);
-    transition: all 0.2s;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    transition: all var(--duration-fast);
     height: 100%;
 }
 
 /* Selected State */
 .storage-mode-option input:checked+.storage-mode-content {
-    border-color: var(--primary-main);
+    border-color: var(--color-primary);
     background: rgba(var(--primary-rgb), 0.05);
-    box-shadow: 0 0 0 1px var(--primary-main);
+    box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .storage-mode-icon {
-    color: var(--text-muted);
-    transition: color 0.2s;
+    color: var(--color-text-secondary);
+    transition: color var(--duration-fast);
 }
 
 .storage-mode-option input:checked+.storage-mode-content .storage-mode-icon {
-    color: var(--primary-main);
+    color: var(--color-primary);
 }
 
 .storage-mode-text strong {
     display: block;
-    color: var(--text-main);
-    font-weight: 600;
-    margin-bottom: var(--space-xs);
+    color: var(--color-text);
+    font-weight: var(--font-weight-std-semibold);
+    margin-bottom: var(--space-4);
 }
 
 .storage-mode-text span {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.4;
+    font-size: var(--font-size-tiny);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-body);
     display: block;
 }
 
@@ -92,27 +92,27 @@
 .sync-status-display {
     display: flex;
     align-items: center;
-    gap: var(--space-lg);
-    padding: var(--space-md);
-    background: var(--bg-surface);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-md);
-    border: 1px solid var(--border-base);
+    gap: var(--space-24);
+    padding: var(--space-16);
+    background: var(--color-surface);
+    border-radius: var(--radius-std-md);
+    margin-bottom: var(--space-16);
+    border: 1px solid var(--color-border-std);
 }
 
 .sync-status-indicator {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    font-weight: 600;
-    color: var(--c-success);
+    gap: var(--space-8);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-success);
 }
 
 .sync-last-time {
-    color: var(--text-muted);
+    color: var(--color-text-secondary);
     font-size: 0.85rem;
     margin-left: auto;
-    font-family: var(--font-family-mono);
+    font-family: var(--font-family-std-mono);
 }
 
 .checkbox-label {
@@ -121,11 +121,11 @@
     gap: 0.75rem;
     cursor: pointer;
     user-select: none;
-    margin-top: var(--space-md);
+    margin-top: var(--space-16);
 }
 
 .backup-actions {
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-16);
     flex-wrap: wrap;
 }
