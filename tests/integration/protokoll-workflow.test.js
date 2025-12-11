@@ -114,7 +114,7 @@ describe('Protokoll E2E Workflow', () => {
       
       positions = protokollState.getPositions();
       expect(positions).toHaveLength(2);
-      expect(protokollState.getPosition('1.2')).toBeUndefined();
+      expect(protokollState.getPosition('1.2')).toBeNull();
     });
   });
 
