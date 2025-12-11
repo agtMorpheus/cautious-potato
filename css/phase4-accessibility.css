@@ -26,7 +26,7 @@
     top: -40px;
     left: 6px;
     background: var(--color-primary);
-    color: white;
+    color: var(--text-inverse);
     padding: var(--space-8) var(--space-16);
     border-radius: var(--radius-std-base);
     text-decoration: none;
@@ -309,12 +309,12 @@ textarea:focus-visible,
 
 [data-theme="dark"] .form-error[role="alert"],
 [data-color-scheme="dark"] .form-error[role="alert"] {
-    color: #ff6b6b;
+    color: var(--color-error);
 }
 
 [data-theme="dark"] .form-success,
 [data-color-scheme="dark"] .form-success {
-    color: #51cf66;
+    color: var(--color-success);
 }
 
 /* ==================== MOTION PREFERENCES ==================== */

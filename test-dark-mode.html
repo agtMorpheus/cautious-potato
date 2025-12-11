@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Test - All Components</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- All CSS Files -->
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/buttons.css" />
+    <link rel="stylesheet" href="css/forms.css" />
+    <link rel="stylesheet" href="css/alerts.css" />
+    <link rel="stylesheet" href="css/cards.css" />
+    <link rel="stylesheet" href="css/tables.css" />
+    <link rel="stylesheet" href="css/status.css" />
+    <link rel="stylesheet" href="css/modals.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/phase2-components.css" />
+    <link rel="stylesheet" href="css/phase3-advanced.css" />
+    <link rel="stylesheet" href="css/phase4-accessibility.css" />
+    
+    <style>
+        body {
+            padding: var(--space-24);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .theme-controls {
+            position: fixed;
+            top: var(--space-16);
+            right: var(--space-16);
+            z-index: 1000;
+            display: flex;
+            gap: var(--space-8);
+            background: var(--bg-card);
+            padding: var(--space-12);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-base);
+        }
+        .section {
+            margin-bottom: var(--space-40);
+            padding: var(--space-24);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-base);
+        }
+        h1, h2, h3 {
+            margin-bottom: var(--space-16);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-controls">
+        <button class="btn btn--sm btn--secondary" onclick="setTheme('light')">☀️ Light</button>
+        <button class="btn btn--sm btn--secondary" onclick="setTheme('dark')">🌙 Dark</button>
+        <button class="btn btn--sm btn--secondary" onclick="setTheme('auto')">🔄 Auto</button>
+    </div>
+
+    <h1>Dark Mode Consistency Test</h1>
+    
+    <div class="section">
+        <h2>Alerts</h2>
+        <div class="alert alert--success" role="status">
+            <span class="alert__icon">✓</span>
+            <div>
+                <strong class="alert__title">Success</strong>
+                <p class="alert__message">This is a success alert.</p>
+            </div>
+        </div>
+        
+        <div class="alert alert--error" role="alert">
+            <span class="alert__icon">✕</span>
+            <div>
+                <strong class="alert__title">Error</strong>
+                <p class="alert__message">This is an error alert.</p>
+            </div>
+        </div>
+        
+        <div class="alert alert--warning">
+            <span class="alert__icon">⚠</span>
+            <div>
+                <strong class="alert__title">Warning</strong>
+                <p class="alert__message">This is a warning alert.</p>
+            </div>
+        </div>
+        
+        <div class="alert alert--info">
+            <span class="alert__icon">ℹ</span>
+            <div>
+                <strong class="alert__title">Info</strong>
+                <p class="alert__message">This is an info alert.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Badges</h2>
+        <div style="display: flex; gap: var(--space-8); flex-wrap: wrap;">
+            <span class="badge badge--success">Success</span>
+            <span class="badge badge--error">Error</span>
+            <span class="badge badge--warning">Warning</span>
+            <span class="badge badge--info">Info</span>
+            <span class="badge badge--neutral">Neutral</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Buttons</h2>
+        <div style="display: flex; gap: var(--space-8); flex-wrap: wrap;">
+            <button class="btn btn--primary">Primary</button>
+            <button class="btn btn--secondary">Secondary</button>
+            <button class="btn btn--outline">Outline</button>
+            <button class="btn btn--ghost">Ghost</button>
+            <button class="btn btn--danger">Danger</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Cards & Panels</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-16);">
+            <div class="panel panel--success">
+                <h3>Success Panel</h3>
+                <p>This panel indicates success.</p>
+            </div>
+            <div class="panel panel--error">
+                <h3>Error Panel</h3>
+                <p>This panel indicates an error.</p>
+            </div>
+            <div class="panel panel--warning">
+                <h3>Warning Panel</h3>
+                <p>This panel indicates a warning.</p>
+            </div>
+            <div class="panel panel--info">
+                <h3>Info Panel</h3>
+                <p>This panel provides information.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Forms</h2>
+        <form style="max-width: 500px;">
+            <div class="form-group">
+                <label for="test-input" class="form-label">Text Input</label>
+                <input type="text" id="test-input" class="form-control" placeholder="Enter text here">
+            </div>
+            
+            <div class="form-group">
+                <label for="test-select" class="form-label">Select</label>
+                <select id="test-select" class="form-control">
+                    <option>Option 1</option>
+                    <option>Option 2</option>
+                    <option>Option 3</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-textarea" class="form-label">Textarea</label>
+                <textarea id="test-textarea" class="form-control" rows="3" placeholder="Enter description"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn--primary">Submit</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Loading States</h2>
+        <div style="display: flex; gap: var(--space-24); align-items: center;">
+            <div class="loading-spinner"></div>
+            <div class="status-indicator status--pending"></div>
+            <div class="status-indicator status--success"></div>
+            <div class="status-indicator status--error"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Table</h2>
+        <table class="table">
+            <thead class="table__head">
+                <tr>
+                    <th class="table__th">Name</th>
+                    <th class="table__th">Status</th>
+                    <th class="table__th">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table__tr">
+                    <td class="table__td">Item 1</td>
+                    <td class="table__td"><span class="badge badge--success">Active</span></td>
+                    <td class="table__td">100</td>
+                </tr>
+                <tr class="table__tr">
+                    <td class="table__td">Item 2</td>
+                    <td class="table__td"><span class="badge badge--warning">Pending</span></td>
+                    <td class="table__td">200</td>
+                </tr>
+                <tr class="table__tr">
+                    <td class="table__td">Item 3</td>
+                    <td class="table__td"><span class="badge badge--error">Inactive</span></td>
+                    <td class="table__td">300</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            const html = document.documentElement;
+            
+            if (theme === 'auto') {
+                html.removeAttribute('data-theme');
+                html.removeAttribute('data-color-scheme');
+                localStorage.removeItem('theme');
+            } else {
+                html.setAttribute('data-theme', theme);
+                html.setAttribute('data-color-scheme', theme);
+                localStorage.setItem('theme', theme);
+            }
+        }
+
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        }
+    </script>
+</body>
+</html>

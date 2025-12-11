@@ -358,7 +358,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--bg-glass);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -512,12 +512,12 @@
 [data-color-scheme="dark"] .table__pagination-btn,
 [data-theme="dark"] .table__pagination-btn {
     background: var(--color-surface);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-highlight);
 }
 
 [data-color-scheme="dark"] .table__pagination-btn:hover:not(:disabled),
 [data-theme="dark"] .table__pagination-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
     border-color: var(--color-primary);
 }
 

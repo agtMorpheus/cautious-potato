@@ -386,22 +386,22 @@ input[type="file"].form-control::-webkit-file-upload-button:hover {
 [data-color-scheme="dark"] .input-group-text,
 [data-theme="dark"] .input-group-text {
     background: var(--color-charcoal-700);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-base);
 }
 
 [data-color-scheme="dark"] .fieldset,
 [data-theme="dark"] .fieldset {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-base);
 }
 
 [data-color-scheme="dark"] input[type="file"].form-control::-webkit-file-upload-button,
 [data-theme="dark"] input[type="file"].form-control::-webkit-file-upload-button {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--bg-hover);
+    border-color: var(--border-highlight);
     color: var(--color-text);
 }
 
 [data-color-scheme="dark"] input[type="file"].form-control::-webkit-file-upload-button:hover,
 [data-theme="dark"] input[type="file"].form-control::-webkit-file-upload-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--bg-active);
 }
