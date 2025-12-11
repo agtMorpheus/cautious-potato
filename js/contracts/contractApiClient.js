@@ -533,7 +533,7 @@ export class ContractApiClient {
             } catch (err) {
                 console.error('Logout failed:', err);
             }
-            window.location.href = '/login.html';
+            window.location.href = '/logout.html';
         });
     }
     

@@ -278,3 +278,10 @@
         background: var(--bg-sidebar);
     }
 }
+
+/* Logout specific styles */
+.logout-message {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+}
