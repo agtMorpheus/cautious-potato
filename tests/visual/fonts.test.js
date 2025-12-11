@@ -12,7 +12,6 @@ import {
   cleanupTestElements,
   getCSSVariable 
 } from './visual-setup.js';
-import { DESIGN_TOKENS } from '../../js/design-tokens.js';
 
 describe('Font Loading and Typography', () => {
   beforeAll(() => {

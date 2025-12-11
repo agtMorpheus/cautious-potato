@@ -10,8 +10,7 @@ import {
   loadCSSVariables, 
   loadAdditionalCSS,
   createTestElement, 
-  cleanupTestElements,
-  getCSSVariable 
+  cleanupTestElements
 } from './visual-setup.js';
 
 describe('Component Visual Consistency', () => {

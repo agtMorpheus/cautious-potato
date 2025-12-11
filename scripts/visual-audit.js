@@ -59,20 +59,29 @@ function findHardcodedColors(cssContent, filePath) {
   
   // Match hex colors that are NOT inside var() or inside :root
   const lines = cssContent.split('\n');
-  let inRoot = false;
-  let inDarkMode = false;
+  let rootBraceCount = 0;
+  let darkBraceCount = 0;
   
   lines.forEach((line, index) => {
-    // Track if we're inside :root or [data-theme="dark"]
-    if (line.includes(':root')) inRoot = true;
-    if (line.includes('[data-theme="dark"]')) inDarkMode = true;
-    if ((inRoot || inDarkMode) && line.includes('}')) {
-      inRoot = false;
-      inDarkMode = false;
+    // Track entering :root or [data-theme="dark"] blocks
+    if (line.includes(':root')) {
+      rootBraceCount += (line.match(/{/g) || []).length;
+    }
+    if (line.includes('[data-theme="dark"]')) {
+      darkBraceCount += (line.match(/{/g) || []).length;
+    }
+    // Count braces for ongoing blocks
+    if (rootBraceCount > 0) {
+      rootBraceCount += (line.match(/{/g) || []).length - (line.includes(':root') ? (line.match(/{/g) || []).length : 0);
+      rootBraceCount -= (line.match(/}/g) || []).length;
+    }
+    if (darkBraceCount > 0) {
+      darkBraceCount += (line.match(/{/g) || []).length - (line.includes('[data-theme="dark"]') ? (line.match(/{/g) || []).length : 0);
+      darkBraceCount -= (line.match(/}/g) || []).length;
     }
     
     // Skip lines inside variable definitions
-    if (inRoot || inDarkMode) return;
+    if (rootBraceCount > 0 || darkBraceCount > 0) return;
     
     // Skip comments
     if (line.trim().startsWith('/*') || line.trim().startsWith('*') || line.trim().startsWith('//')) return;
@@ -161,11 +170,13 @@ function findHardcodedSpacing(cssContent, filePath) {
  */
 function findMissingVarReferences(cssContent, definedVariables, filePath) {
   const issues = [];
-  const varRefRegex = /var\(--([a-z0-9-]+)\)/gi;
   const lines = cssContent.split('\n');
-  let match;
   
   lines.forEach((line, index) => {
+    // Create a new regex for each line to avoid state issues with 'g' flag
+    const varRefRegex = /var\(--([a-z0-9-]+)\)/gi;
+    let match;
+    
     while ((match = varRefRegex.exec(line)) !== null) {
       const varName = `--${match[1]}`;
       if (!definedVariables.has(varName)) {

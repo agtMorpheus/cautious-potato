@@ -121,14 +121,26 @@ export function isCSSVariableDefined(variableName) {
 export function parseColor(color) {
   if (!color) return null;
   
-  // Handle hex colors
-  const hexMatch = color.match(/^#([0-9a-f]{6})$/i);
-  if (hexMatch) {
-    const hex = hexMatch[1];
+  // Handle 6-character hex colors
+  const hexMatch6 = color.match(/^#([0-9a-f]{6})$/i);
+  if (hexMatch6) {
+    const hex = hexMatch6[1];
     return {
       r: parseInt(hex.slice(0, 2), 16),
       g: parseInt(hex.slice(2, 4), 16),
       b: parseInt(hex.slice(4, 6), 16),
+      a: 1
+    };
+  }
+  
+  // Handle 3-character shorthand hex colors (e.g., #fff -> #ffffff)
+  const hexMatch3 = color.match(/^#([0-9a-f]{3})$/i);
+  if (hexMatch3) {
+    const hex = hexMatch3[1];
+    return {
+      r: parseInt(hex[0] + hex[0], 16),
+      g: parseInt(hex[1] + hex[1], 16),
+      b: parseInt(hex[2] + hex[2], 16),
       a: 1
     };
   }
