@@ -196,7 +196,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
   background: var(--bg-hover);
-  padding: 0.var(--space-xl) 0.4rem;
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 4px;
   color: var(--text-premium, var(--c-neutral-300));
   border: 1px solid var(--border-light);
