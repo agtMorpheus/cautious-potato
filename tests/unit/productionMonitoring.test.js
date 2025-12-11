@@ -288,3 +288,74 @@ describe('productionMonitor singleton', () => {
     expect(productionMonitor).toBeInstanceOf(ProductionMonitoring);
   });
 });
+
+describe('setupHealthCheck()', () => {
+  let originalSetInterval;
+  let originalAddEventListener;
+  let intervalCallback;
+  
+  beforeEach(() => {
+    // Mock setInterval
+    originalSetInterval = global.setInterval;
+    global.setInterval = jest.fn((callback) => {
+      intervalCallback = callback;
+      return 123; // Return fake timer ID
+    });
+    
+    // Mock window.addEventListener
+    originalAddEventListener = window.addEventListener;
+    window.addEventListener = jest.fn();
+    
+    // Clear localStorage
+    localStorage.clear();
+  });
+  
+  afterEach(() => {
+    global.setInterval = originalSetInterval;
+    window.addEventListener = originalAddEventListener;
+    localStorage.clear();
+  });
+  
+  // Import setupHealthCheck dynamically to avoid issues with mocking
+  test('stores health data in localStorage', async () => {
+    const { setupHealthCheck } = await import('../../js/modules/measurement-validator/monitoring/productionMonitoring.js');
+    
+    const updateHealth = setupHealthCheck();
+    
+    // Call the returned function
+    const result = updateHealth();
+    
+    // Check localStorage
+    const stored = JSON.parse(localStorage.getItem('validator_health'));
+    expect(stored).toBeTruthy();
+    expect(stored.app).toBe('abrechnung-validator');
+    expect(stored.version).toBe('1.0.0');
+    expect(stored.timestamp).toBeDefined();
+  });
+  
+  test('sets up interval for health updates', async () => {
+    const { setupHealthCheck } = await import('../../js/modules/measurement-validator/monitoring/productionMonitoring.js');
+    
+    setupHealthCheck();
+    
+    // setInterval should be called with 30 second interval
+    expect(global.setInterval).toHaveBeenCalledWith(expect.any(Function), 30000);
+  });
+  
+  test('sets up beforeunload event listener', async () => {
+    const { setupHealthCheck } = await import('../../js/modules/measurement-validator/monitoring/productionMonitoring.js');
+    
+    setupHealthCheck();
+    
+    // window.addEventListener should be called with beforeunload
+    expect(window.addEventListener).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+  });
+  
+  test('returns updateHealth function', async () => {
+    const { setupHealthCheck } = await import('../../js/modules/measurement-validator/monitoring/productionMonitoring.js');
+    
+    const updateHealth = setupHealthCheck();
+    
+    expect(typeof updateHealth).toBe('function');
+  });
+});
