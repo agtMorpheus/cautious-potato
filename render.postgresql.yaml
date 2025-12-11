@@ -1,0 +1,96 @@
+# Alternative Render.com Blueprint - Using PostgreSQL
+# 
+# This configuration uses PostgreSQL instead of MySQL since Render.com
+# provides native PostgreSQL support (easier and cheaper).
+#
+# To use this configuration:
+# 1. Rename this file to render.yaml (backup the MySQL version first)
+# 2. Update your PHP code to use PostgreSQL instead of MySQL
+# 3. Convert database schemas from MySQL to PostgreSQL
+#
+# Note: This requires code changes to support PostgreSQL
+#
+# IMPORTANT: Free tier services spin down after 15 minutes of inactivity.
+# Both database and web service spinning down simultaneously makes the app
+# completely unavailable. For production, use at least starter plan.
+
+databases:
+  # ==========================================================================
+  # PostgreSQL Database - Contract Manager (Native Render Support)
+  # ==========================================================================
+  - name: contract-manager-db
+    databaseName: contract_manager
+    user: contract_user
+    plan: free  # WARNING: Free tier spins down. Use 'starter' for production
+    region: oregon  # or frankfurt, ohio, singapore
+
+services:
+  # ==========================================================================
+  # Web Service - Frontend + Backend API
+  # ==========================================================================
+  - type: web
+    name: abrechnung-app
+    runtime: docker
+    plan: free  # WARNING: Free tier spins down. Use 'starter' for production
+    region: oregon  # Use same region as database
+    dockerfilePath: ./docker/Dockerfile.php
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true  # Auto-deploy on git push
+    envVars:
+      # Database Configuration
+      - key: DB_HOST
+        fromDatabase:
+          name: contract-manager-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: contract-manager-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: contract-manager-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: contract-manager-db
+          property: password
+      - key: DB_PORT
+        fromDatabase:
+          name: contract-manager-db
+          property: port
+      
+      # Application Configuration
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      
+      # Session Configuration
+      - key: SESSION_TIMEOUT
+        value: 7200
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: SESSION_SAMESITE
+        value: Strict
+      - key: SESSION_COOKIE_LIFETIME
+        value: 0
+      
+      # CORS Configuration
+      # IMPORTANT: Update this with your actual domain after deployment
+      - key: CORS_ORIGIN
+        sync: false  # Set manually in Render dashboard
+      
+      # Security Configuration
+      - key: CSRF_TOKEN_ENABLED
+        value: true
+      
+      # Logging Configuration
+      - key: LOG_LEVEL
+        value: warning
+      - key: LOG_FILE
+        value: /tmp/app.log
+      
+      # Rate Limiting
+      - key: RATE_LIMIT
+        value: 100

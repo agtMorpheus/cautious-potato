@@ -1,0 +1,64 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development files
+.vscode/
+.idea/
+*.log
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+pnpm-lock.yaml
+
+# Tests
+tests/
+test-*.html
+phpunit.xml
+jest.config.js
+
+# Electron build files
+electron/
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Environment files (will be set by Render)
+config/*.env
+!config/*.env.example
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Large data files
+data/
+
+# Backup files
+*.bak
+*.backup
+
+# Note: db/ directory is needed for MySQL Docker image initialization
+# but excluded from PHP Docker image via specific Dockerfile logic
