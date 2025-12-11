@@ -44,24 +44,24 @@ import {
 export function renderWeeklyScheduleGrid(container, weekStartDate, employees) {
   const gridData = getScheduleGridData(weekStartDate, employees);
   const weekStart = new Date(weekStartDate);
-  
+
   const html = `
     <div class="hr-schedule-grid-container">
       <div class="hr-schedule-header">
         <div class="hr-week-navigation">
-          <button type="button" class="hr-btn-icon" data-action="prev-week">
+          <button type="button" class="btn btn--icon btn--ghost" data-action="prev-week">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <span class="hr-week-label">${gridData.weekLabel} (${formatDateDE(weekStartDate)})</span>
-          <button type="button" class="hr-btn-icon" data-action="next-week">
+          <button type="button" class="btn btn--icon btn--ghost" data-action="next-week">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="go-to-current">
+        <button type="button" class="btn btn--secondary" data-action="go-to-current">
           Aktuelle Woche
         </button>
       </div>
@@ -72,13 +72,13 @@ export function renderWeeklyScheduleGrid(container, weekStartDate, employees) {
             <tr>
               <th class="hr-schedule-employee-col">Mitarbeiter</th>
               ${WEEKDAYS_DE.map((day, i) => {
-                const date = new Date(weekStart);
-                date.setDate(date.getDate() + i);
-                return `<th class="hr-schedule-day-col ${i >= 5 ? 'hr-schedule-weekend' : ''}">
+    const date = new Date(weekStart);
+    date.setDate(date.getDate() + i);
+    return `<th class="hr-schedule-day-col ${i >= 5 ? 'hr-schedule-weekend' : ''}">
                   <span class="hr-schedule-day-name">${day.substring(0, 2)}</span>
                   <span class="hr-schedule-day-date">${date.getDate()}</span>
                 </th>`;
-              }).join('')}
+  }).join('')}
               <th class="hr-schedule-total-col">Summe</th>
               <th class="hr-schedule-status-col">Status</th>
             </tr>
@@ -90,7 +90,7 @@ export function renderWeeklyScheduleGrid(container, weekStartDate, employees) {
       </div>
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -102,7 +102,7 @@ export function renderWeeklyScheduleGrid(container, weekStartDate, employees) {
  */
 function renderScheduleRow(row, weekStartDate) {
   const { employee, schedule, hasSchedule } = row;
-  
+
   if (!hasSchedule) {
     return `
       <tr data-employee-id="${employee.id}">
@@ -114,7 +114,7 @@ function renderScheduleRow(row, weekStartDate) {
         `).join('')}
         <td class="hr-schedule-total-cell">-</td>
         <td class="hr-schedule-status-cell">
-          <button type="button" class="hr-btn hr-btn-sm hr-btn-outline" 
+          <button type="button" class="btn btn--sm btn--outline" 
                   data-action="create-schedule" data-employee="${employee.id}" data-week="${weekStartDate}">
             Erstellen
           </button>
@@ -122,9 +122,9 @@ function renderScheduleRow(row, weekStartDate) {
       </tr>
     `;
   }
-  
+
   const totals = calculateWeeklyTotals(schedule);
-  
+
   return `
     <tr data-employee-id="${employee.id}" data-schedule-id="${schedule.id}">
       <td class="hr-schedule-employee-cell">
@@ -133,8 +133,8 @@ function renderScheduleRow(row, weekStartDate) {
       ${schedule.dailySchedule.map((day, i) => `
         <td class="hr-schedule-day-cell ${i >= 5 ? 'hr-schedule-weekend' : ''} ${day.plannedHours > 0 ? 'hr-schedule-filled' : ''}">
           <span class="hr-schedule-hours">${day.plannedHours > 0 ? day.plannedHours + 'h' : '-'}</span>
-          ${day.actualHours > 0 && day.actualHours !== day.plannedHours ? 
-            `<span class="hr-schedule-actual">(${day.actualHours}h)</span>` : ''}
+          ${day.actualHours > 0 && day.actualHours !== day.plannedHours ?
+      `<span class="hr-schedule-actual">(${day.actualHours}h)</span>` : ''}
         </td>
       `).join('')}
       <td class="hr-schedule-total-cell">
@@ -164,7 +164,7 @@ export function renderScheduleForm(container, schedule, employee) {
   const isEdit = !!schedule;
   const weekStart = schedule ? new Date(schedule.weekStartDate) : getWeekStart(new Date());
   const weekLabel = schedule?.weekLabel || `KW ${getWeekNumber(weekStart)}/${weekStart.getFullYear()}`;
-  
+
   const dailySchedule = schedule?.dailySchedule || WEEKDAYS_DE.map((day, i) => ({
     day,
     plannedHours: i < 5 ? 8 : 0,
@@ -173,7 +173,7 @@ export function renderScheduleForm(container, schedule, employee) {
     actualPoints: 0,
     notes: ''
   }));
-  
+
   const html = `
     <form id="hr-schedule-form" class="hr-form hr-schedule-form">
       <div class="hr-schedule-form-header">
@@ -221,21 +221,21 @@ export function renderScheduleForm(container, schedule, employee) {
       </div>
       
       <div class="hr-form-actions">
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="cancel">
+        <button type="button" class="btn btn--secondary" data-action="cancel">
           Abbrechen
         </button>
-        <button type="submit" class="hr-btn hr-btn-primary">
+        <button type="submit" class="btn btn--primary">
           Speichern
         </button>
         ${isEdit && schedule.status === 'draft' ? `
-          <button type="button" class="hr-btn hr-btn-success" data-action="submit">
+          <button type="button" class="btn btn--success" data-action="submit">
             Zur Genehmigung einreichen
           </button>
         ` : ''}
       </div>
     </form>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -250,13 +250,13 @@ export function renderScheduleForm(container, schedule, employee) {
  */
 export function renderPendingApprovals(container, employeeMap = new Map()) {
   const pending = getPendingSchedules().map(formatScheduleForDisplay);
-  
+
   // Helper to get employee name from map
   const getEmployeeName = (empId) => {
     const emp = employeeMap.get(empId);
     return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
   };
-  
+
   const html = `
     <div class="hr-pending-approvals">
       <h3>Ausstehende Genehmigungen (${pending.length})</h3>
@@ -274,13 +274,13 @@ export function renderPendingApprovals(container, employeeMap = new Map()) {
                 <span class="hr-approval-submitted">Eingereicht: ${formatDateDE(schedule.submittedAt)}</span>
               </div>
               <div class="hr-approval-actions">
-                <button type="button" class="hr-btn hr-btn-sm hr-btn-outline" data-action="view" data-id="${schedule.id}">
+                <button type="button" class="btn btn--sm btn--outline" data-action="view" data-id="${schedule.id}">
                   Details
                 </button>
-                <button type="button" class="hr-btn hr-btn-sm hr-btn-success" data-action="approve" data-id="${schedule.id}">
+                <button type="button" class="btn btn--sm btn--success" data-action="approve" data-id="${schedule.id}">
                   Genehmigen
                 </button>
-                <button type="button" class="hr-btn hr-btn-sm hr-btn-danger" data-action="reject" data-id="${schedule.id}">
+                <button type="button" class="btn btn--sm btn--danger" data-action="reject" data-id="${schedule.id}">
                   Ablehnen
                 </button>
               </div>
@@ -294,7 +294,7 @@ export function renderPendingApprovals(container, employeeMap = new Map()) {
       `}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -310,7 +310,7 @@ export function renderPendingApprovals(container, employeeMap = new Map()) {
  */
 export function renderScheduleHistory(container, employeeId, weeks = 12) {
   const history = getScheduleHistory(employeeId, weeks);
-  
+
   const html = `
     <div class="hr-schedule-history">
       <h3>Wochenplan-Historie</h3>
@@ -341,7 +341,7 @@ export function renderScheduleHistory(container, employeeId, weeks = 12) {
                     </span>
                   </td>
                   <td>
-                    <button type="button" class="hr-btn-icon" data-action="view" data-id="${schedule.id}" title="Anzeigen">
+                    <button type="button" class="btn btn--icon btn--ghost" data-action="view" data-id="${schedule.id}" title="Anzeigen">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -360,7 +360,7 @@ export function renderScheduleHistory(container, employeeId, weeks = 12) {
       `}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -394,12 +394,12 @@ export function bindScheduleEvents(container, handlers) {
   container.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
     if (!button) return;
-    
+
     const action = button.dataset.action;
     const id = button.dataset.id;
     const employeeId = button.dataset.employee;
     const week = button.dataset.week;
-    
+
     switch (action) {
       case 'prev-week':
         handlers.onPrevWeek?.();
@@ -427,7 +427,7 @@ export function bindScheduleEvents(container, handlers) {
         break;
     }
   });
-  
+
   // Hours input change for points calculation
   container.addEventListener('input', (e) => {
     if (e.target.classList.contains('hr-input-hours')) {

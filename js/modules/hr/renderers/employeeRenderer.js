@@ -34,7 +34,7 @@ import {
  */
 export function renderEmployeeList(container, options = {}) {
   const employees = getEmployeeListForDisplay(options);
-  
+
   if (employees.length === 0) {
     container.innerHTML = `
       <div class="hr-empty-state">
@@ -47,7 +47,7 @@ export function renderEmployeeList(container, options = {}) {
     `;
     return;
   }
-  
+
   const tableHTML = `
     <div class="hr-table-container">
       <table class="hr-data-table">
@@ -68,7 +68,7 @@ export function renderEmployeeList(container, options = {}) {
       </table>
     </div>
   `;
-  
+
   container.innerHTML = tableHTML;
 }
 
@@ -100,18 +100,18 @@ function renderEmployeeRow(employee) {
       <td>${employee.hoursPerWeek}h</td>
       <td>
         <div class="hr-action-buttons">
-          <button type="button" class="hr-btn-icon" data-action="view" data-id="${employee.id}" title="Anzeigen">
+          <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="view" data-id="${employee.id}" title="Anzeigen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button type="button" class="hr-btn-icon" data-action="edit" data-id="${employee.id}" title="Bearbeiten">
+          <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="edit" data-id="${employee.id}" title="Bearbeiten">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
-          <button type="button" class="hr-btn-icon hr-btn-danger" data-action="delete" data-id="${employee.id}" title="Löschen">
+          <button type="button" class="btn btn--icon btn--sm btn--danger btn--ghost" data-action="delete" data-id="${employee.id}" title="Löschen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -135,7 +135,7 @@ export function renderEmployeeForm(container, employee = null) {
   const isEdit = !!employee;
   const departments = getUniqueDepartments();
   const positions = getUniquePositions();
-  
+
   const formHTML = `
     <form id="hr-employee-form" class="hr-form">
       <div class="hr-form-section">
@@ -232,16 +232,16 @@ export function renderEmployeeForm(container, employee = null) {
       </div>
       
       <div class="hr-form-actions">
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="cancel">
+        <button type="button" class="btn btn--secondary" data-action="cancel">
           Abbrechen
         </button>
-        <button type="submit" class="hr-btn hr-btn-primary">
+        <button type="submit" class="btn btn--primary">
           ${isEdit ? 'Speichern' : 'Hinzufügen'}
         </button>
       </div>
     </form>
   `;
-  
+
   container.innerHTML = formHTML;
 }
 
@@ -256,7 +256,7 @@ export function renderEmployeeForm(container, employee = null) {
  */
 export function renderEmployeeDetail(container, employeeId) {
   const employee = getEmployeeById(employeeId);
-  
+
   if (!employee) {
     container.innerHTML = `
       <div class="hr-error-state">
@@ -265,9 +265,9 @@ export function renderEmployeeDetail(container, employeeId) {
     `;
     return;
   }
-  
+
   const formatted = formatEmployeeForDisplay(employee);
-  
+
   const detailHTML = `
     <div class="hr-employee-detail">
       <div class="hr-detail-header">
@@ -312,7 +312,7 @@ export function renderEmployeeDetail(container, employeeId) {
       </div>
     </div>
   `;
-  
+
   container.innerHTML = detailHTML;
 }
 
@@ -326,7 +326,7 @@ export function renderEmployeeDetail(container, employeeId) {
  */
 export function renderEmployeeStats(container) {
   const stats = getEmployeeStatistics();
-  
+
   const statsHTML = `
     <div class="hr-stats-grid">
       <div class="hr-stat-card">
@@ -370,7 +370,7 @@ export function renderEmployeeStats(container) {
       </div>
     </div>
   `;
-  
+
   container.innerHTML = statsHTML;
 }
 
@@ -415,10 +415,10 @@ export function bindEmployeeListEvents(container, handlers) {
   container.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
     if (!button) return;
-    
+
     const action = button.dataset.action;
     const id = button.dataset.id;
-    
+
     switch (action) {
       case 'view':
         handlers.onView?.(id);

@@ -39,18 +39,18 @@ import {
 export function renderDailyAttendanceLog(container, date = new Date().toISOString().split('T')[0], employeeMap = new Map()) {
   const records = getAttendanceByDate(date).map(formatAttendanceForDisplay);
   const summary = getDailyAttendanceSummary(date);
-  
+
   const html = `
     <div class="hr-attendance-daily">
       <div class="hr-attendance-header">
         <div class="hr-date-navigation">
-          <button type="button" class="hr-btn-icon" data-action="prev-day">
+          <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="prev-day">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <input type="date" id="attendance-date" value="${date}" class="hr-date-input" />
-          <button type="button" class="hr-btn-icon" data-action="next-day">
+          <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="next-day">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
@@ -104,7 +104,7 @@ export function renderDailyAttendanceLog(container, date = new Date().toISOStrin
       `}
       
       <div class="hr-attendance-actions">
-        <button type="button" class="hr-btn hr-btn-primary" data-action="add-attendance">
+        <button type="button" class="btn btn--primary" data-action="add-attendance">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -113,7 +113,7 @@ export function renderDailyAttendanceLog(container, date = new Date().toISOStrin
       </div>
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -125,10 +125,10 @@ export function renderDailyAttendanceLog(container, date = new Date().toISOStrin
  */
 function renderAttendanceRow(record, employeeMap = new Map()) {
   const employee = employeeMap.get(record.employeeId);
-  const displayName = employee 
-    ? `${escapeHtml(employee.lastName)}, ${escapeHtml(employee.firstName)}` 
+  const displayName = employee
+    ? `${escapeHtml(employee.lastName)}, ${escapeHtml(employee.firstName)}`
     : escapeHtml(record.employeeId);
-  
+
   return `
     <tr data-attendance-id="${record.id}">
       <td>${displayName}</td>
@@ -143,7 +143,7 @@ function renderAttendanceRow(record, employeeMap = new Map()) {
       </td>
       <td>
         <div class="hr-action-buttons">
-          <button type="button" class="hr-btn-icon" data-action="edit" data-id="${record.id}" title="Bearbeiten">
+          <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="edit" data-id="${record.id}" title="Bearbeiten">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
@@ -166,7 +166,7 @@ function renderAttendanceRow(record, employeeMap = new Map()) {
  */
 export function renderAttendanceForm(container, record = null, employees = []) {
   const isEdit = !!record;
-  
+
   const html = `
     <form id="hr-attendance-form" class="hr-form">
       <div class="hr-form-row">
@@ -235,16 +235,16 @@ export function renderAttendanceForm(container, record = null, employees = []) {
       </div>
       
       <div class="hr-form-actions">
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="cancel">
+        <button type="button" class="btn btn--secondary" data-action="cancel">
           Abbrechen
         </button>
-        <button type="submit" class="hr-btn hr-btn-primary">
+        <button type="submit" class="btn btn--primary">
           ${isEdit ? 'Speichern' : 'Hinzufügen'}
         </button>
       </div>
     </form>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -263,30 +263,30 @@ export function renderAttendanceCalendar(container, year, month, employeeId = nu
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
   const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
-  
+
   const daysInMonth = lastDay.getDate();
   const monthName = firstDay.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  
+
   // Build calendar grid
   let calendarCells = '';
-  
+
   // Empty cells for days before the 1st
   for (let i = 0; i < startDayOfWeek; i++) {
     calendarCells += '<div class="hr-calendar-cell hr-calendar-empty"></div>';
   }
-  
+
   // Day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const records = getAttendanceByDate(dateStr);
-    const relevantRecords = employeeId 
+    const relevantRecords = employeeId
       ? records.filter(r => r.employeeId === employeeId)
       : records;
-    
+
     const hasRecords = relevantRecords.length > 0;
     const status = relevantRecords[0]?.status;
     const statusClass = status ? getStatusClass(status) : '';
-    
+
     calendarCells += `
       <div class="hr-calendar-cell ${hasRecords ? 'hr-calendar-has-record' : ''} ${statusClass}"
            data-date="${dateStr}">
@@ -295,17 +295,17 @@ export function renderAttendanceCalendar(container, year, month, employeeId = nu
       </div>
     `;
   }
-  
+
   const html = `
     <div class="hr-attendance-calendar">
       <div class="hr-calendar-header">
-        <button type="button" class="hr-btn-icon" data-action="prev-month">
+        <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="prev-month">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <h3>${monthName}</h3>
-        <button type="button" class="hr-btn-icon" data-action="next-month">
+        <button type="button" class="btn btn--icon btn--sm btn--ghost" data-action="next-month">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -335,7 +335,7 @@ export function renderAttendanceCalendar(container, year, month, employeeId = nu
       </div>
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -353,18 +353,18 @@ export function renderAttendanceCalendar(container, year, month, employeeId = nu
 export function renderAttendanceReport(container, year, month, employeeMap = new Map()) {
   const report = getMonthlyAttendanceReport(year, month);
   const monthName = new Date(year, month - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  
+
   // Helper to get employee name from map
   const getEmployeeName = (empId) => {
     const emp = employeeMap.get(empId);
     return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
   };
-  
+
   const html = `
     <div class="hr-attendance-report">
       <div class="hr-report-header">
         <h3>Anwesenheitsbericht: ${monthName}</h3>
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="export-report">
+        <button type="button" class="btn btn--secondary" data-action="export-report">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
@@ -421,7 +421,7 @@ export function renderAttendanceReport(container, year, month, employeeMap = new
       `}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -455,10 +455,10 @@ export function bindAttendanceEvents(container, handlers) {
   container.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
     if (!button) return;
-    
+
     const action = button.dataset.action;
     const id = button.dataset.id;
-    
+
     switch (action) {
       case 'prev-day':
         handlers.onPrevDay?.();
@@ -483,7 +483,7 @@ export function bindAttendanceEvents(container, handlers) {
         break;
     }
   });
-  
+
   // Date input change
   const dateInput = container.querySelector('#attendance-date');
   if (dateInput) {

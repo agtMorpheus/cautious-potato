@@ -474,38 +474,61 @@ export function addPosition(position) {
     return null;
   }
   
-  // Ensure position has all required fields
+  // Ensure position has all required fields based on protokoll measurements specification
   const newPosition = {
     posNr: position.posNr || generateCircuitId(),
     stromkreisNr: position.stromkreisNr || generatePositionNumber(),
+    nr: position.nr || '',
     zielbezeichnung: position.zielbezeichnung || '',
-    // Phase type: 'mono' (1-phase), 'bi' (2-phase), 'tri' (3-phase)
-    phaseType: position.phaseType || 'mono',
     // Parent circuit reference for circuit tree hierarchy
     parentCircuitId: position.parentCircuitId || null,
-    leitung: {
-      typ: position.leitung?.typ || '',
-      anzahl: position.leitung?.anzahl || '',
-      querschnitt: position.leitung?.querschnitt || ''
+    
+    // Kabel/Leitung information
+    kabel: {
+      typ: position.kabel?.typ || '',
+      leiterAnzahl: position.kabel?.leiterAnzahl || '',
+      querschnitt: position.kabel?.querschnitt || ''
     },
+    
+    // Spannung/Frequenz
     spannung: {
       un: position.spannung?.un || '',
       fn: position.spannung?.fn || ''
     },
+    
+    // Überstrom-Schutzeinrichtung
     überstromschutz: {
       art: position.überstromschutz?.art || '',
-      inNennstrom: position.überstromschutz?.inNennstrom || '',
-      zs: position.überstromschutz?.zs || '',
-      zn: position.überstromschutz?.zn || '',
-      ik: position.überstromschutz?.ik || ''
+      inNennstrom: position.überstromschutz?.inNennstrom || ''
     },
+    
+    // Messwerte (Impedanzen, Isolationswiderstand, etc.)
     messwerte: {
-      riso: position.messwerte?.riso || '',
-      schutzleiterWiderstand: position.messwerte?.schutzleiterWiderstand || '',
-      rcd: position.messwerte?.rcd || '',
-      differenzstrom: position.messwerte?.differenzstrom || '',
-      auslösezeit: position.messwerte?.auslösezeit || ''
+      // Impedanzen
+      zsLPE: position.messwerte?.zsLPE || '',  // ZS(Ω) L-PE
+      znLN: position.messwerte?.znLN || '',    // ZN(Ω) L-N
+      ikLPE: position.messwerte?.ikLPE || '',  // Ik (kA) L-PE
+      
+      // Isolationswiderstand
+      risoOhne: position.messwerte?.risoOhne || '',  // Riso (MΩ) ohne Verbraucher
+      risoMit: position.messwerte?.risoMit || '',    // Riso (MΩ) mit Verbraucher
+      
+      // Schutzleiterwiderstand
+      rpe: position.messwerte?.rpe || ''  // RPE (max. 1Ω)
     },
+    
+    // Fehlerstrom-Schutzeinrichtung (RCD)
+    rcd: {
+      gewiss: position.rcd?.gewiss || '',
+      inNennstrom: position.rcd?.inNennstrom || '',
+      iDeltaN: position.rcd?.iDeltaN || '',        // I∆n (mA)
+      iMess: position.rcd?.iMess || '',            // Imess (mA)
+      ausloesezeit: position.rcd?.ausloesezeit || '', // Auslösezeit tA (ms)
+      uMess: position.rcd?.uMess || '',            // UL≤50V Umess (V)
+      diffStrom: position.rcd?.diffStrom || ''     // Diff. Strom (mA)
+    },
+    
+    // Prüfergebnis
     prüfergebnis: {
       status: position.prüfergebnis?.status || 'nicht-geprüft',
       mängel: position.prüfergebnis?.mängel || [],
