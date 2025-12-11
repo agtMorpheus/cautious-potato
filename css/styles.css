@@ -192,23 +192,14 @@ ul {
     padding: 0;
 }
 
-.app-container.sidebar-collapsed .sidebar-toggle {
-    display: none;
-    /* Hide toggle in collapsed mode if clicking header expands? Or move it? Usually keep generic */
-}
-
-/* Fix for sidebar toggle visibility in collapsed mode: Keep it but maybe adjust pos */
+/* Sidebar toggle in collapsed mode: Center in header */
 .app-container.sidebar-collapsed .sidebar-toggle {
     display: flex;
-    position: absolute;
-    top: 14px;
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 24px;
-    height: 24px;
+    /* Remove absolute positioning to allow natural flex centering from parent .sidebar-header */
     margin: 0;
-    z-index: 10;
+    /* Ensure size remains accessible */
+    width: 32px;
+    height: 32px;
 }
 
 .app-container.sidebar-collapsed .sidebar-logo {
