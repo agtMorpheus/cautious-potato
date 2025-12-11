@@ -164,8 +164,10 @@ describe('Validation Module (validation.js)', () => {
       expect(result.errors).toContain('Abrechnung positions must be an object map');
     });
 
-    test('accepts array positionen (arrays are objects in JS)', () => {
-      // Note: The validation uses typeof === 'object', which includes arrays
+    test('accepts array positionen (typeof returns "object" for arrays)', () => {
+      // Note: In JavaScript, typeof [] === 'object', so the current validation 
+      // using typeof === 'object' will accept arrays. A stricter implementation
+      // could use !Array.isArray() to reject arrays if needed.
       const result = validateAbrechnungData({ header: {}, positionen: [] });
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);

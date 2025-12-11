@@ -331,11 +331,11 @@ describe('Protokoll Export Utilities (utils-protokoll-export.js)', () => {
 
     test('fills across multiple pages', () => {
       const workbook = createMockWorkbook();
-      // Create more than one page worth of measurements
-      const measurements = [];
-      for (let i = 0; i < 15; i++) {
-        measurements.push({ stromkreis: `SK${i}`, riso: 500 + i });
-      }
+      // Create more than one page worth of measurements using Array.from
+      const measurements = Array.from({ length: 15 }, (_, i) => ({
+        stromkreis: `SK${i}`,
+        riso: 500 + i
+      }));
       
       fillProtokollMeasurements(workbook, measurements);
       
