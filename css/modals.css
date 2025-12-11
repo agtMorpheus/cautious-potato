@@ -576,6 +576,7 @@ body.modal-open {
     transition: opacity var(--duration-normal) var(--ease-standard);
 }
 
+/*
 .sidebar {
     display: none;
     position: fixed;
@@ -589,3 +590,4 @@ body.modal-open {
     transform: translateX(100%);
     transition: transform var(--duration-normal) var(--ease-standard);
 }
+*/

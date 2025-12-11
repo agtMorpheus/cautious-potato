@@ -106,6 +106,7 @@ module.exports = {
     'XLSX': {},
     'localStorage': {},
     'sessionStorage': {}
+    // performance mock moved to setup.js
   },
   
   // Test results processor
