@@ -20,6 +20,42 @@ import { normalizeStatus, getContractSummary } from './contractUtils.js';
 import { syncToServer } from './syncService.js';
 import { isSyncEnabled, loadSyncConfig } from './syncConfig.js';
 
+// Simple cache for filter results to improve performance on repeated queries
+let filterCache = new Map();
+const CACHE_MAX_SIZE = 50;
+const CACHE_KEY_SEPARATOR = '|||';
+
+/**
+ * Generate cache key from filters
+ * @param {Object} filters - Filter object
+ * @param {number} contractsLength - Number of contracts (to invalidate on data change)
+ * @returns {string} Cache key
+ */
+function getFilterCacheKey(filters, contractsLength) {
+    if (!filters) return `${contractsLength}${CACHE_KEY_SEPARATOR}none`;
+    
+    // Create stable key from filter values
+    const parts = [
+        contractsLength,
+        filters.contractId || '',
+        filters.status || '',
+        filters.location || '',
+        filters.equipmentId || '',
+        filters.searchText || '',
+        filters.dateRange?.from || '',
+        filters.dateRange?.to || ''
+    ];
+    
+    return parts.join(CACHE_KEY_SEPARATOR);
+}
+
+/**
+ * Clear filter cache (called when contracts are modified)
+ */
+export function clearFilterCache() {
+    filterCache.clear();
+}
+
 /**
  * Get all contract records from state
  * @returns {Array} Array of contract records
@@ -65,6 +101,12 @@ export function getFilteredContracts(customFilters = null) {
                        (filters.searchText && filters.searchText.trim() !== '');
     if (!hasFilters) {
         return [...contracts];
+    }
+    
+    // Check cache
+    const cacheKey = getFilterCacheKey(filters, contracts.length);
+    if (filterCache.has(cacheKey)) {
+        return [...filterCache.get(cacheKey)]; // Return copy to prevent mutations
     }
     
     // Pre-compute filter values once for performance
@@ -140,6 +182,14 @@ export function getFilteredContracts(customFilters = null) {
         
         filtered.push(c);
     }
+    
+    // Cache result (with LRU eviction)
+    if (filterCache.size >= CACHE_MAX_SIZE) {
+        // Remove oldest entry
+        const firstKey = filterCache.keys().next().value;
+        filterCache.delete(firstKey);
+    }
+    filterCache.set(cacheKey, filtered);
     
     return filtered;
 }
@@ -265,6 +315,9 @@ export function addContract(contract) {
         }
     });
     
+    // Clear filter cache since data changed
+    clearFilterCache();
+    
     // Trigger background sync if enabled
     triggerBackgroundSync();
     
@@ -321,6 +374,9 @@ export function addContracts(contracts, importMetadata = null) {
     
     setState(updatedState);
     
+    // Clear filter cache since data changed
+    clearFilterCache();
+    
     // Trigger background sync if enabled
     triggerBackgroundSync();
     
@@ -364,6 +420,9 @@ export function updateContract(id, updates) {
         }
     });
     
+    // Clear filter cache since data changed
+    clearFilterCache();
+    
     // Trigger background sync if enabled
     triggerBackgroundSync();
     
@@ -393,6 +452,9 @@ export function deleteContract(id) {
             records: newRecords
         }
     });
+    
+    // Clear filter cache since data changed
+    clearFilterCache();
     
     // Trigger background sync if enabled
     triggerBackgroundSync();
