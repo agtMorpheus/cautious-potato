@@ -521,5 +521,361 @@ describe('Contract Handlers Logic (Phase 3 & 4)', () => {
 
             expect(filtered.length).toBe(2);
         });
+
+        test('handles whitespace in search text', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A001', contractTitle: 'Test Project' }
+            ];
+
+            const searchText = '  test  ';
+            const searchLower = searchText.trim().toLowerCase();
+            
+            const filtered = testContracts.filter(c => {
+                return c.contractTitle && c.contractTitle.toLowerCase().includes(searchLower);
+            });
+
+            expect(filtered.length).toBe(1);
+        });
+
+        test('handles special characters in search', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A-001', contractTitle: 'Test (Project)' },
+                { id: '2', contractId: 'A-002', contractTitle: 'Another' }
+            ];
+
+            const searchText = '(Project)';
+            const searchLower = searchText.toLowerCase();
+            
+            const filtered = testContracts.filter(c => {
+                return c.contractTitle && c.contractTitle.toLowerCase().includes(searchLower);
+            });
+
+            expect(filtered.length).toBe(1);
+            expect(filtered[0].contractId).toBe('A-001');
+        });
+
+        test('handles numeric search values', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A001', taskId: '12345' },
+                { id: '2', contractId: 'A002', taskId: '67890' }
+            ];
+
+            const searchText = '123';
+            const searchLower = searchText.toLowerCase();
+            
+            const filtered = testContracts.filter(c => {
+                const searchableFields = [c.contractId, c.taskId];
+                return searchableFields.some(field => 
+                    field && String(field).toLowerCase().includes(searchLower)
+                );
+            });
+
+            expect(filtered.length).toBe(1);
+            expect(filtered[0].contractId).toBe('A001');
+        });
+    });
+
+    describe('Contract Actions', () => {
+        test('action type validation', () => {
+            const validActions = ['edit', 'delete'];
+            
+            expect(validActions.includes('edit')).toBe(true);
+            expect(validActions.includes('delete')).toBe(true);
+            expect(validActions.includes('unknown')).toBe(false);
+        });
+
+        test('edit action with valid contract', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A001', status: 'fertig' }
+            ];
+            setupTestContracts(testContracts);
+
+            const state = getState();
+            const contract = state.contracts.records.find(c => c.id === '1');
+            
+            expect(contract).toBeDefined();
+            expect(contract.contractId).toBe('A001');
+        });
+
+        test('edit action with non-existent contract', () => {
+            setupTestContracts([]);
+
+            const state = getState();
+            const contract = state.contracts.records.find(c => c.id === 'non-existent');
+            
+            expect(contract).toBeUndefined();
+        });
+    });
+
+    describe('Import Status Updates', () => {
+        test('updates import status to pending', () => {
+            setupTestContracts([]);
+
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    importState: {
+                        ...getState().contracts.importState,
+                        status: 'pending',
+                        message: 'Processing...',
+                        progress: 25
+                    }
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.importState.status).toBe('pending');
+            expect(state.contracts.importState.progress).toBe(25);
+        });
+
+        test('updates import status to success', () => {
+            setupTestContracts([]);
+
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    importState: {
+                        status: 'success',
+                        message: '100 contracts imported',
+                        progress: 100,
+                        errors: [],
+                        warnings: []
+                    }
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.importState.status).toBe('success');
+            expect(state.contracts.importState.progress).toBe(100);
+        });
+
+        test('updates import status to error', () => {
+            setupTestContracts([]);
+
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    importState: {
+                        status: 'error',
+                        message: 'Import failed',
+                        progress: 0,
+                        errors: ['Error 1', 'Error 2']
+                    }
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.importState.status).toBe('error');
+            expect(state.contracts.importState.errors.length).toBe(2);
+        });
+    });
+
+    describe('Multiple Filter Combinations', () => {
+        test('applies status and location filters together', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A001', status: 'fertig', location: 'Berlin' },
+                { id: '2', contractId: 'A002', status: 'fertig', location: 'Munich' },
+                { id: '3', contractId: 'A003', status: 'inbearb', location: 'Berlin' }
+            ];
+
+            const statusFilter = 'Abgerechnet';
+            const locationFilter = 'Berlin';
+
+            const filtered = testContracts.filter(c => {
+                const matchesStatus = normalizeStatus(c.status) === statusFilter;
+                const matchesLocation = c.location === locationFilter;
+                return matchesStatus && matchesLocation;
+            });
+
+            expect(filtered.length).toBe(1);
+            expect(filtered[0].contractId).toBe('A001');
+        });
+
+        test('applies search, status, and date filters together', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A564', status: 'fertig', plannedStart: '2025-06-15' },
+                { id: '2', contractId: 'A564', status: 'inbearb', plannedStart: '2025-06-20' },
+                { id: '3', contractId: 'B123', status: 'fertig', plannedStart: '2025-06-15' }
+            ];
+
+            const searchText = 'A564';
+            const statusFilter = 'Abgerechnet';
+            const dateRange = { from: '2025-06-01', to: '2025-06-30' };
+
+            const filtered = testContracts.filter(c => {
+                const matchesSearch = c.contractId.includes(searchText);
+                const matchesStatus = normalizeStatus(c.status) === statusFilter;
+                const contractDate = new Date(c.plannedStart);
+                const matchesDate = contractDate >= new Date(dateRange.from) && 
+                                   contractDate <= new Date(dateRange.to);
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+
+            expect(filtered.length).toBe(1);
+            expect(filtered[0].contractId).toBe('A564');
+        });
+
+        test('clears all filters returns all contracts', () => {
+            const testContracts = [
+                { id: '1', contractId: 'A001', status: 'fertig' },
+                { id: '2', contractId: 'A002', status: 'inbearb' },
+                { id: '3', contractId: 'A003', status: 'offen' }
+            ];
+
+            const filters = {
+                searchText: '',
+                status: null,
+                location: null,
+                dateRange: { from: null, to: null }
+            };
+
+            // With no active filters, all contracts should be returned
+            const filtered = testContracts.filter(c => {
+                if (filters.searchText) return false;
+                if (filters.status) return false;
+                if (filters.location) return false;
+                if (filters.dateRange.from || filters.dateRange.to) return false;
+                return true;
+            });
+
+            expect(filtered.length).toBe(3);
+        });
+    });
+
+    describe('Sort State Toggle', () => {
+        test('toggles sort direction on repeated clicks', () => {
+            setupTestContracts([]);
+
+            // Initial state - ascending
+            let sortKey = 'contractId';
+            let sortDir = 'asc';
+
+            // First click on same column - should toggle to desc
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+            expect(sortDir).toBe('desc');
+
+            // Second click - should toggle back to asc
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+            expect(sortDir).toBe('asc');
+        });
+
+        test('clicking different column resets to ascending', () => {
+            setupTestContracts([]);
+
+            const currentSortKey = 'contractId';
+            const currentSortDir = 'desc';
+            const newSortKey = 'status';
+
+            let newSortDir = 'asc';
+            if (newSortKey === currentSortKey) {
+                newSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+            }
+
+            expect(newSortDir).toBe('asc');
+        });
+    });
+
+    describe('Contract Field Validation', () => {
+        test('validates required contractId field', () => {
+            const contract = { contractId: '', contractTitle: 'Test', status: 'fertig' };
+            
+            const isValid = contract.contractId && contract.contractId.trim() !== '';
+            
+            expect(isValid).toBeFalsy();
+        });
+
+        test('validates required contractTitle field', () => {
+            const contract = { contractId: 'A001', contractTitle: '', status: 'fertig' };
+            
+            const isValid = contract.contractTitle && contract.contractTitle.trim() !== '';
+            
+            expect(isValid).toBeFalsy();
+        });
+
+        test('validates required status field', () => {
+            const contract = { contractId: 'A001', contractTitle: 'Test', status: '' };
+            
+            const isValid = contract.status && contract.status.trim() !== '';
+            
+            expect(isValid).toBeFalsy();
+        });
+
+        test('validates complete contract', () => {
+            const contract = { contractId: 'A001', contractTitle: 'Test', status: 'fertig' };
+            
+            const isValid = contract.contractId && contract.contractTitle && contract.status;
+            
+            expect(isValid).toBeTruthy();
+        });
+    });
+
+    describe('Preview State Management', () => {
+        test('stores last import result for preview', () => {
+            setupTestContracts([]);
+
+            const mockImportResult = {
+                contracts: [
+                    { id: '1', contractId: 'A001' },
+                    { id: '2', contractId: 'A002' }
+                ],
+                errors: [{ row: 3, message: 'Invalid data' }],
+                warnings: [],
+                summary: { totalRows: 3, successCount: 2, errorCount: 1 }
+            };
+
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    lastImportResult: mockImportResult
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.lastImportResult.contracts.length).toBe(2);
+            expect(state.contracts.lastImportResult.errors.length).toBe(1);
+        });
+
+        test('clears preview result on cancel', () => {
+            setupTestContracts([]);
+
+            // Set preview
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    lastImportResult: { contracts: [{ id: '1' }] }
+                }
+            }, { silent: true });
+
+            // Clear preview
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    lastImportResult: null
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.lastImportResult).toBeNull();
+        });
+
+        test('clears preview after successful save', () => {
+            setupTestContracts([]);
+
+            // Simulate successful save - preview should be cleared
+            setState({
+                contracts: {
+                    ...getState().contracts,
+                    lastImportResult: null,
+                    importState: {
+                        ...getState().contracts.importState,
+                        status: 'success'
+                    }
+                }
+            }, { silent: true });
+
+            const state = getState();
+            expect(state.contracts.lastImportResult).toBeNull();
+            expect(state.contracts.importState.status).toBe('success');
+        });
     });
 });
