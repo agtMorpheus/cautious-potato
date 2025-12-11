@@ -27,8 +27,8 @@
 }
 
 .messgeraet-stat-card {
-  background-color: var(--bg-surface, #0f172a);
-  border: 1px solid var(--border-base, #1e293b);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-base);
   border-radius: var(--radius-lg, 8px);
   padding: 1.5rem;
   display: flex;
@@ -79,7 +79,7 @@
 
 .messgeraet-stat-card .stat-icon.devices {
   color: var(--primary-main);
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--primary-rgb), 0.1);
 }
 
 .messgeraet-stat-card .stat-icon.valid {
@@ -89,7 +89,7 @@
 
 .messgeraet-stat-card .stat-icon.expired {
   color: var(--c-warning);
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(var(--warning-rgb), 0.1);
 }
 
 .stat-info {
@@ -100,7 +100,7 @@
 .messgeraet-stat-card .stat-value {
   font-size: 2rem;
   font-weight: 500;
-  color: var(--text-main, #f8fafc);
+  color: var(--text-main);
   line-height: 1;
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: -0.05em;
@@ -108,7 +108,7 @@
 
 .messgeraet-stat-card .stat-label {
   font-size: 0.8rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -133,7 +133,7 @@
   font-size: 1.5rem;
   font-weight: 400;
   font-family: 'JetBrains Mono', monospace;
-  color: var(--text-main, #f8fafc);
+  color: var(--text-main);
   margin: 0;
   display: flex;
   align-items: center;
@@ -272,9 +272,9 @@
 }
 
 .calibration-status.status-expired {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(var(--danger-rgb), 0.1);
   color: var(--c-danger);
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(var(--danger-rgb), 0.2);
 }
 
 /* ============================================

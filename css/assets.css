@@ -72,7 +72,7 @@
 }
 
 .asset-stat-card .stat-icon.assets {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--primary-rgb), 0.1);
   color: var(--c-brand-400);
 }
 
@@ -82,12 +82,12 @@
 }
 
 .asset-stat-card .stat-icon.plants {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: rgba(var(--folder-purple-rgb), 0.1);
+  color: var(--folder-purple);
 }
 
 .asset-stat-card .stat-icon.hierarchy {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(var(--warning-rgb), 0.1);
   color: var(--c-warning);
 }
 
@@ -198,7 +198,7 @@
   background: rgba(0, 0, 0, 0.2);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
-  color: var(--text-premium, #cbd5e1);
+  color: var(--text-premium, var(--c-neutral-300));
   border: 1px solid var(--border-light);
 }
 
@@ -222,17 +222,17 @@
 }
 
 .asset-status.status-active {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(var(--success-rgb), 0.15);
   color: var(--c-success);
 }
 
 .asset-status.status-inactive {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(var(--warning-rgb), 0.15);
   color: var(--c-warning);
 }
 
 .asset-status.status-decommissioned {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(var(--danger-rgb), 0.15);
   color: var(--c-danger);
 }
 

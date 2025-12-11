@@ -362,7 +362,7 @@ ul {
     height: 8px;
     border-radius: 50%;
     background-color: var(--c-success);
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 0 2px rgba(var(--success-rgb), 0.2);
 }
 
 .status-label {
@@ -486,7 +486,7 @@ ul {
 
 .btn-primary {
     background-color: var(--primary-main);
-    color: white;
+    color: var(--text-inverse);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -582,17 +582,17 @@ select:focus {
 }
 
 .stat-icon.process {
-    background-color: rgba(16, 185, 129, 0.1);
+    background-color: rgba(var(--success-rgb), 0.1);
     color: var(--c-success);
 }
 
 .stat-icon.export {
-    background-color: rgba(6, 182, 212, 0.1);
+    background-color: rgba(var(--info-rgb), 0.1);
     color: var(--c-info);
 }
 
 .stat-icon.templates {
-    background-color: rgba(245, 158, 11, 0.1);
+    background-color: rgba(var(--warning-rgb), 0.1);
     color: var(--c-warning);
 }
 

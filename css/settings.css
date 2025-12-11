@@ -61,7 +61,7 @@
 /* Selected State */
 .storage-mode-option input:checked+.storage-mode-content {
     border-color: var(--primary-main);
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(var(--primary-rgb), 0.05);
     box-shadow: 0 0 0 1px var(--primary-main);
 }
 

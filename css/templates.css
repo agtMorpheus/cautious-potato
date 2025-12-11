@@ -33,7 +33,7 @@
 
 .template-item:hover .template-icon {
     color: var(--primary-main);
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
 }
 
 .template-icon {

@@ -76,13 +76,13 @@
     /* Folder/Module Colors */
     --folder-purple: #8b5cf6;
     --folder-purple-rgb: 139, 92, 246;
-    --folder-purple-light: rgba(139, 92, 246, 0.1);
+    --folder-purple-light: rgba(var(--folder-purple-rgb), 0.1);
     --folder-green: #10b981;
     --folder-green-rgb: 16, 185, 129;
-    --folder-green-light: rgba(16, 185, 129, 0.1);
+    --folder-green-light: rgba(var(--success-rgb), 0.1);
     --folder-orange: #f59e0b;
     --folder-orange-rgb: 245, 158, 11;
-    --folder-orange-light: rgba(245, 158, 11, 0.1);
+    --folder-orange-light: rgba(var(--warning-rgb), 0.1);
 
     /* Semantic Colors (Light Mode Mappings) */
     --bg-app: var(--c-neutral-50);
@@ -115,10 +115,10 @@
     --c-info: #06b6d4;
     
     /* Status Light Variants */
-    --success-light: rgba(16, 185, 129, 0.1);
-    --warning-light: rgba(245, 158, 11, 0.1);
-    --danger-light: rgba(239, 68, 68, 0.1);
-    --info-light: rgba(6, 182, 212, 0.1);
+    --success-light: rgba(var(--success-rgb), 0.1);
+    --warning-light: rgba(var(--warning-rgb), 0.1);
+    --danger-light: rgba(var(--danger-rgb), 0.1);
+    --info-light: rgba(var(--info-rgb), 0.1);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -145,10 +145,10 @@
     --color-error: var(--c-danger);
 
     /* Re-map status bg colors if needed or define them */
-    --color-success-bg: rgba(16, 185, 129, 0.1);
-    --color-warning-bg: rgba(245, 158, 11, 0.1);
-    --color-info-bg: rgba(6, 182, 212, 0.1);
-    --color-error-bg: rgba(239, 68, 68, 0.1);
+    --color-success-bg: rgba(var(--success-rgb), 0.1);
+    --color-warning-bg: rgba(var(--warning-rgb), 0.1);
+    --color-info-bg: rgba(var(--info-rgb), 0.1);
+    --color-error-bg: rgba(var(--danger-rgb), 0.1);
 
     /* Legacy Font Sizes */
     --font-size-xs: 0.75rem;
@@ -200,7 +200,7 @@
     /* primary-400 - lighter for dark mode */
     --primary-hover: #93c5fd;
     /* primary-300 */
-    --primary-light: rgba(59, 130, 246, 0.2);
+    --primary-light: rgba(var(--primary-rgb), 0.2);
 
     /* Glassmorphism Tokens */
     --bg-glass: rgba(2, 6, 23, 0.8);

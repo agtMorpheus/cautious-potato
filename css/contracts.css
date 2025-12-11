@@ -160,23 +160,23 @@
 /* Badge variants using alpha backgrounds */
 .status-badge.status-success,
 .status-badge.status-fertig {
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(var(--success-rgb), 0.15);
     color: var(--contract-status-fertig);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(var(--success-rgb), 0.2);
 }
 
 .status-badge.status-pending,
 .status-badge.status-inbearb {
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(var(--warning-rgb), 0.15);
     color: var(--contract-status-inbearb);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(var(--warning-rgb), 0.2);
 }
 
 .status-badge.status-idle,
 .status-badge.status-offen {
-    background: rgba(6, 182, 212, 0.15);
+    background: rgba(var(--info-rgb), 0.15);
     color: var(--contract-status-offen);
-    border: 1px solid rgba(6, 182, 212, 0.2);
+    border: 1px solid rgba(var(--info-rgb), 0.2);
 }
 
 .status-badge.status-unknown {
@@ -186,9 +186,9 @@
 }
 
 .status-badge.status-error {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(var(--danger-rgb), 0.15);
     color: var(--c-danger);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(var(--danger-rgb), 0.2);
 }
 
 /* ==================== Stats Cards ==================== */
