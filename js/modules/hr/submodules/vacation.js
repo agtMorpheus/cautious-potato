@@ -10,6 +10,7 @@
 
 import {
   getHrState,
+  setHrState,
   createVacationRequest,
   approveVacationRequest,
   rejectVacationRequest
@@ -236,7 +237,7 @@ export function cancelVacation(vacationId) {
   }
   
   // Import setHrState to properly update vacation status
-  const { setHrState } = await import('../hrState.js');
+  // setHrState is imported at the top
   const state = getHrState();
   
   const updatedVacation = state.vacation.map(v => {
