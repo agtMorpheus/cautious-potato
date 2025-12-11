@@ -198,18 +198,27 @@ export function sortContracts(contracts, field, direction = 'asc') {
     
     // For date fields, pre-compute timestamps for better performance
     if (isDateField) {
-        // Create a Map of contract → timestamp for O(1) lookup during sorting
-        const dateCache = new Map();
+        // Create an array of timestamps for O(1) lookup during sorting
+        // Using array indices instead of object keys to avoid memory issues
+        const timestamps = new Array(sorted.length);
         for (let i = 0; i < sorted.length; i++) {
-            const contract = sorted[i];
-            const dateValue = contract[field];
-            const timestamp = dateValue ? new Date(dateValue).getTime() || 0 : 0;
-            dateCache.set(contract, timestamp);
+            const dateValue = sorted[i][field];
+            timestamps[i] = dateValue ? new Date(dateValue).getTime() || 0 : 0;
         }
         
-        sorted.sort((a, b) => {
-            return (dateCache.get(a) - dateCache.get(b)) * multiplier;
-        });
+        // Create indices array and sort by timestamps
+        const indices = new Array(sorted.length);
+        for (let i = 0; i < sorted.length; i++) {
+            indices[i] = i;
+        }
+        indices.sort((a, b) => (timestamps[a] - timestamps[b]) * multiplier);
+        
+        // Build result from sorted indices
+        const result = new Array(sorted.length);
+        for (let i = 0; i < indices.length; i++) {
+            result[i] = sorted[indices[i]];
+        }
+        return result;
     } else {
         sorted.sort((a, b) => {
             let valueA = a[field];
