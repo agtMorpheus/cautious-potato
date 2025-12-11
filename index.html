@@ -381,8 +381,7 @@
                 <section id="view-workflow" class="view-container" aria-labelledby="workflow-heading">
                     <h2 id="workflow-heading" class="sr-only">Abrechnung Workflow</h2>
 
-                    <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="row">
                         <!-- Import Card -->
                         <div class="card h-100">
                             <div class="card__header">
@@ -415,6 +414,13 @@
                                                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                         </svg>
                                         <span>Datei importieren</span>
+                                    </button>
+                                    <button id="workflow-reset-button" type="button" class="btn btn--secondary">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span>Zurücksetzen</span>
                                     </button>
                                 </div>
 
