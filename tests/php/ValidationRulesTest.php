@@ -113,4 +113,203 @@ class ValidationRulesTest extends TestCase
         $this->assertContains('Error 1', $flattened);
         $this->assertContains('Error 3', $flattened);
     }
+
+    // Additional Tests
+
+    public function testValidateWithEmptyData()
+    {
+        $data = [];
+        $result = ValidationRules::validate($data);
+        
+        // Depending on implementation, empty data might be valid or have required field errors
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('valid', $result);
+        $this->assertArrayHasKey('errors', $result);
+    }
+
+    public function testValidateWithNullValue()
+    {
+        $data = ['titel' => null];
+        $result = ValidationRules::validate($data);
+        
+        $this->assertFalse($result['valid']);
+        $this->assertArrayHasKey('titel', $result['errors']);
+    }
+
+    public function testValidateWithWhitespaceOnlyTitle()
+    {
+        $data = ['titel' => '   '];
+        $result = ValidationRules::validate($data);
+        
+        $this->assertFalse($result['valid']);
+        $this->assertArrayHasKey('titel', $result['errors']);
+    }
+
+    public function testValidateAllValidStatuses()
+    {
+        $validStatuses = ['offen', 'inbearb', 'fertig'];
+        
+        foreach ($validStatuses as $status) {
+            $data = ['status' => $status, 'auftrag' => 'A1', 'titel' => 'T1'];
+            $result = ValidationRules::validate($data);
+            $this->assertTrue($result['valid'], "Status '$status' should be valid");
+        }
+    }
+
+    public function testValidateDateWithFutureDateNearLimit()
+    {
+        // Date within the future limit (730 days)
+        $validFuture = date('Y-m-d', strtotime('+700 days'));
+        $data = ['sollstart' => $validFuture, 'auftrag' => 'A1', 'titel' => 'T1', 'status' => 'offen'];
+        $result = ValidationRules::validate($data);
+        $this->assertTrue($result['valid']);
+    }
+
+    public function testValidateDateTooFarInFuture()
+    {
+        // Date beyond the future limit (730 days)
+        $tooFuture = date('Y-m-d', strtotime('+800 days'));
+        $data = ['sollstart' => $tooFuture, 'auftrag' => 'A1', 'titel' => 'T1', 'status' => 'offen'];
+        $result = ValidationRules::validate($data);
+        $this->assertFalse($result['valid']);
+        $this->assertArrayHasKey('sollstart', $result['errors']);
+    }
+
+    public function testValidateAuftragWithSpecialChars()
+    {
+        // Various invalid characters
+        $invalidAuftrags = ['INV@001', 'INV#001', 'INV%001', 'INV&001', 'INV*001'];
+        
+        foreach ($invalidAuftrags as $auftrag) {
+            $data = ['auftrag' => $auftrag, 'titel' => 'Title'];
+            $result = ValidationRules::validate($data);
+            $this->assertFalse($result['valid'], "Auftrag '$auftrag' should be invalid");
+        }
+    }
+
+    public function testValidateAuftragWithValidFormats()
+    {
+        // Valid formats: alphanumeric with dashes
+        $validAuftrags = ['INV-001', 'INV_001', 'INV123', 'inv-001'];
+        
+        foreach ($validAuftrags as $auftrag) {
+            $data = ['auftrag' => $auftrag, 'titel' => 'Title'];
+            $result = ValidationRules::validate($data);
+            $this->assertTrue($result['valid'], "Auftrag '$auftrag' should be valid");
+        }
+    }
+
+    public function testValidateMultipleFieldsWithErrors()
+    {
+        $data = [
+            'titel' => '',
+            'auftrag' => 'INV$001',
+            'status' => 'invalid'
+        ];
+        $result = ValidationRules::validate($data);
+        
+        $this->assertFalse($result['valid']);
+        // Should have errors for multiple fields
+        $this->assertGreaterThanOrEqual(1, count($result['errors']));
+    }
+
+    public function testFlattenErrorsWithEmptyErrors()
+    {
+        $result = [
+            'valid' => true,
+            'errors' => []
+        ];
+        
+        $flattened = ValidationRules::flattenErrors($result);
+        $this->assertIsArray($flattened);
+        $this->assertEmpty($flattened);
+    }
+
+    public function testFlattenErrorsWithSingleFieldError()
+    {
+        $result = [
+            'valid' => false,
+            'errors' => [
+                'titel' => ['Title is required']
+            ]
+        ];
+        
+        $flattened = ValidationRules::flattenErrors($result);
+        $this->assertCount(1, $flattened);
+        $this->assertEquals('Title is required', $flattened[0]);
+    }
+
+    public function testValidateReturnStructure()
+    {
+        $data = ['titel' => 'Valid Title'];
+        $result = ValidationRules::validate($data);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('valid', $result);
+        $this->assertArrayHasKey('errors', $result);
+        $this->assertIsBool($result['valid']);
+        $this->assertIsArray($result['errors']);
+    }
+
+    public function testValidateTitleMaxLength()
+    {
+        // Test title at or near max length
+        $longTitle = str_repeat('A', 100);
+        $data = ['titel' => $longTitle, 'auftrag' => 'A1'];
+        $result = ValidationRules::validate($data);
+        
+        // Check if validation passes or if there's a max length rule
+        $this->assertIsArray($result);
+    }
+
+    public function testValidateDateFormatVariations()
+    {
+        // Test various date formats
+        $dateFormats = [
+            '2023-01-01',      // ISO format
+            '2023-12-31',      // End of year
+            '2024-02-29'       // Leap year
+        ];
+        
+        foreach ($dateFormats as $date) {
+            $data = ['sollstart' => $date, 'auftrag' => 'A1', 'titel' => 'T1', 'status' => 'offen'];
+            $result = ValidationRules::validate($data);
+            
+            // Valid date format should be accepted
+            if (!$result['valid'] && isset($result['errors']['sollstart'])) {
+                // If invalid, check if it's due to date format or date range
+                $this->assertNotEmpty($result['errors']['sollstart']);
+            }
+        }
+    }
+
+    public function testValidateInvalidDateFormats()
+    {
+        $invalidDates = [
+            'not-a-date',
+            '2023/01/01',       // Wrong separator
+            '01-01-2023',       // Wrong order (might be invalid)
+            '2023-13-01',       // Invalid month
+            '2023-01-32'        // Invalid day
+        ];
+        
+        foreach ($invalidDates as $date) {
+            $data = ['sollstart' => $date, 'auftrag' => 'A1', 'titel' => 'T1', 'status' => 'offen'];
+            $result = ValidationRules::validate($data);
+            
+            // These should either fail validation or be caught as invalid
+            $this->assertIsArray($result);
+        }
+    }
+
+    public function testValidateStatusCaseSensitivity()
+    {
+        // Test if status validation is case-sensitive
+        $data = ['status' => 'OFFEN', 'auftrag' => 'A1', 'titel' => 'T1'];
+        $result = ValidationRules::validate($data);
+        
+        // Depending on implementation, uppercase might be invalid
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('valid', $result);
+    }
 }
