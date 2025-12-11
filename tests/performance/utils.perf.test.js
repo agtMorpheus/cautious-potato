@@ -84,8 +84,8 @@ function generateMockWorksheet(rowCount) {
   // Add position data
   for (let i = 0; i < rowCount; i++) {
     const row = i + 10; // Starting from row 10
-    worksheet[`B${row}`] = { v: `01.01.${String(i).padStart(4, '0')}` };
-    worksheet[`H${row}`] = { v: Math.floor(Math.random() * 100) + 1 };
+    worksheet[`A${row}`] = { v: `01.01.${String(i).padStart(4, '0')}` };
+    worksheet[`X${row}`] = { v: Math.floor(Math.random() * 100) + 1 };
   }
   
   return worksheet;
@@ -469,6 +469,95 @@ describe('Utils Performance Tests', () => {
       }
       
       expect(true).toBe(true);
+    });
+  });
+  
+  // ============================================
+  // parseProtokollMetadata Performance
+  // ============================================
+  describe('parseProtokollMetadata() Performance', () => {
+    test('parses metadata within threshold', () => {
+      const workbook = {
+        Sheets: {
+          'Vorlage': {
+            'N5': { v: 'ORDER-67890' },  // auftragsNr
+            'U3': { v: 'PROT-12345' },   // protokollNr
+            'A10': { v: 'Test Plant' },  // anlage
+            'T10': { v: 'Berlin' },      // einsatzort
+            'T7': { v: 'Test Company' }, // firma
+            'A5': { v: 'Test Client' }   // auftraggeber
+          }
+        }
+      };
+      
+      const { result, duration } = measureTime(() => {
+        return parseProtokollMetadata(workbook, { strictMode: false, enableLogging: false });
+      });
+      
+      console.log(`parseProtokollMetadata: ${duration.toFixed(2)}ms`);
+      expect(duration).toBeLessThan(PERFORMANCE_THRESHOLDS.metadata_parse);
+      expect(result.auftragsNr).toBe('ORDER-67890');
+    });
+    
+    test('handles multiple parse operations efficiently', () => {
+      const workbook = {
+        Sheets: {
+          'Vorlage': {
+            'N5': { v: 'ORDER-67890' },  // auftragsNr
+            'U3': { v: 'PROT-12345' },   // protokollNr
+            'A10': { v: 'Test Plant' }   // anlage (required field)
+          }
+        }
+      };
+      
+      const durations = [];
+      for (let i = 0; i < 100; i++) {
+        const { duration } = measureTime(() => {
+          parseProtokollMetadata(workbook, { strictMode: false, enableLogging: false });
+        });
+        durations.push(duration);
+      }
+      
+      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+      console.log(`parseProtokollMetadata (100 calls avg): ${avgDuration.toFixed(2)}ms`);
+      expect(avgDuration).toBeLessThan(PERFORMANCE_THRESHOLDS.metadata_parse);
+    });
+  });
+  
+  // ============================================
+  // extractPositions Performance
+  // ============================================
+  describe('extractPositions() Performance', () => {
+    test('extracts 500 positions within threshold', () => {
+      const workbook = {
+        Sheets: {
+          'Vorlage': generateMockWorksheet(500)
+        }
+      };
+      
+      const { result, duration } = measureTime(() => {
+        return extractPositions(workbook);
+      });
+      
+      console.log(`extractPositions (500): ${duration.toFixed(2)}ms`);
+      expect(duration).toBeLessThan(PERFORMANCE_THRESHOLDS.position_extraction_500);
+      expect(Array.isArray(result)).toBe(true);
+    });
+    
+    test('handles large worksheets efficiently', () => {
+      const workbook = {
+        Sheets: {
+          'Vorlage': generateMockWorksheet(1000)
+        }
+      };
+      
+      const { result, duration } = measureTime(() => {
+        return extractPositions(workbook);
+      });
+      
+      console.log(`extractPositions (1000): ${duration.toFixed(2)}ms`);
+      expect(duration).toBeLessThan(PERFORMANCE_THRESHOLDS.position_extraction_500 * 2);
+      expect(result.length).toBeGreaterThan(0);
     });
   });
   
