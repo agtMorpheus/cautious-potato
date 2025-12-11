@@ -297,6 +297,13 @@
     --color-orange-400: #e68161;
     --color-orange-500: #a84b2f;
 
+    /* RGB Values for Transparency */
+    --color-primary-rgb: 33, 128, 141;
+    --color-success-rgb: 33, 128, 141;
+    --color-warning-rgb: 168, 75, 47;
+    --color-error-rgb: 192, 21, 47;
+    --color-info-rgb: 98, 108, 113;
+
     /* Semantic Color Tokens (Light Mode - Default) */
     --color-background: #fcfcf9;       /* Page background */
     --color-surface: #fffffe;          /* Card/panel background */
@@ -334,6 +341,7 @@
     --radius-std-base: 6px;    /* Default (buttons, cards) */
     --radius-std-md: 8px;      /* Medium (panels) */
     --radius-std-lg: 12px;     /* Large (modals, large cards) */
+    --radius-std-xl: 16px;     /* Extra Large */
     --radius-std-full: 9999px; /* Pill buttons, avatars */
 
     /* 13. SHADOWS */

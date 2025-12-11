@@ -117,12 +117,14 @@ function updateImportSection(contractState) {
     if (errorContainer) {
         if (importState.errors && importState.errors.length > 0) {
             errorContainer.innerHTML = `
-                <div class="alert alert-error">
-                    <strong>${importState.errors.length} Fehler beim Import:</strong>
-                    <ul>
-                        ${importState.errors.slice(0, 5).map(e => `<li>${escapeHtml(e)}</li>`).join('')}
-                        ${importState.errors.length > 5 ? `<li>... und ${importState.errors.length - 5} weitere</li>` : ''}
-                    </ul>
+                <div class="alert alert--error">
+                    <div class="alert__content">
+                        <strong>${importState.errors.length} Fehler beim Import:</strong>
+                        <ul>
+                            ${importState.errors.slice(0, 5).map(e => `<li>${escapeHtml(e)}</li>`).join('')}
+                            ${importState.errors.length > 5 ? `<li>... und ${importState.errors.length - 5} weitere</li>` : ''}
+                        </ul>
+                    </div>
                 </div>
             `;
             errorContainer.style.display = 'block';
@@ -212,13 +214,13 @@ function updateMappingEditor(contractState) {
         const detectedHeader = mapping.detectedHeader || '';
 
         html += `
-            <div class="mapping-row ${field.required ? 'required' : ''}">
-                <label for="mapping-${field.key}" class="mapping-label">
+            <div class="mapping-row form-group ${field.required ? 'required' : ''}">
+                <label for="mapping-${field.key}" class="form-label mapping-label">
                     ${escapeHtml(field.label)}
                     ${field.required ? '<span class="required-mark">*</span>' : ''}
                 </label>
                 <select id="mapping-${field.key}" 
-                        class="mapping-select" 
+                        class="form-control mapping-select"
                         data-field="${field.key}"
                         onchange="window._handleMappingChange && window._handleMappingChange('${field.key}', this.value)">
                     <option value="">-- Nicht zugeordnet --</option>
@@ -400,13 +402,13 @@ export function renderContractPreview(contractState) {
     // Build save button
     const saveButtonHtml = `
         <div class="cm-preview-actions">
-            <button id="contract-save-button" class="btn btn-primary" ${contracts.length === 0 ? 'disabled' : ''}>
+            <button id="contract-save-button" class="btn btn--primary" ${contracts.length === 0 ? 'disabled' : ''}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 8px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
                 Verträge speichern (${contracts.length})
             </button>
-            <button id="contract-cancel-preview" class="btn btn-secondary">
+            <button id="contract-cancel-preview" class="btn btn--secondary">
                 Abbrechen
             </button>
         </div>
@@ -624,7 +626,7 @@ function renderContractTableWithActions(contracts, sortKey, sortDir, options = {
                 <td>${workerDropdown}</td>
                 <td>
                     <select 
-                        class="status-select ${statusClass}" 
+                        class="form-control status-select ${statusClass}"
                         data-contract-id="${escapeHtml(contract.id)}"
                         onchange="window._handleContractStatusChange && window._handleContractStatusChange('${escapeHtml(contract.id)}', this.value)">
                         ${VALID_STATUS_VALUES.map(status => `
@@ -635,10 +637,20 @@ function renderContractTableWithActions(contracts, sortKey, sortDir, options = {
                     </select>
                 </td>
                 <td>${escapeHtml(contract.plannedStart || '-')}</td>
-                <td class="contract-actions">
+                <td class="contract-actions" style="display: flex; gap: 4px;">
                     <button 
                         type="button" 
-                        class="btn btn-sm btn-primary create-protokoll-btn"
+                        class="btn btn--sm btn--secondary"
+                        onclick="window._handleContractActionClick && window._handleContractActionClick('view', '${escapeHtml(contract.id)}')"
+                        title="Details anzeigen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn--sm btn--primary create-protokoll-btn"
                         data-contract="${contractDataEncoded}"
                         onclick="window._handleCreateProtokollFromContract && window._handleCreateProtokollFromContract(this.dataset.contract)"
                         title="Neues Protokoll erstellen">
@@ -687,7 +699,7 @@ function renderWorkerDropdown(contractId, assignedWorkerId, workers, hrAvailable
     
     return `
         <select 
-            class="worker-select" 
+            class="form-control worker-select"
             data-contract-id="${escapeHtml(contractId)}"
             onchange="window._handleContractWorkerChange && window._handleContractWorkerChange('${escapeHtml(contractId)}', this.value)">
             <option value="">-- Nicht zugewiesen --</option>
@@ -699,6 +711,76 @@ function renderWorkerDropdown(contractId, assignedWorkerId, workers, hrAvailable
         </select>
     `;
 }
+
+/**
+ * Open contract detail modal
+ * @param {Object} contract - Contract object
+ */
+export function openContractModal(contract) {
+    const modal = document.getElementById('contract-detail-modal');
+    const body = document.getElementById('contract-modal-body');
+
+    if (!modal || !body) return;
+
+    // Build detail view
+    body.innerHTML = `
+        <div class="contract-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+                <label class="form-label">Auftrag</label>
+                <div>${escapeHtml(contract.contractId || '-')}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Titel</label>
+                <div>${escapeHtml(contract.contractTitle || '-')}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <div><span class="status-badge ${getStatusClass(contract.status)}">${escapeHtml(contract.status || '-')}</span></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Standort</label>
+                <div>${escapeHtml(contract.location || '-')}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Säule/Raum</label>
+                <div>${escapeHtml(contract.roomArea || '-')}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Anlage</label>
+                <div>${escapeHtml(contract.equipmentId || '-')}</div>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Beschreibung</label>
+                <div>${escapeHtml(contract.equipmentDescription || '-')}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sollstart</label>
+                <div>${escapeHtml(contract.plannedStart || '-')}</div>
+            </div>
+             <div class="form-group">
+                <label class="form-label">Mitarbeiter</label>
+                <div>${contract.assignedWorkerId ? escapeHtml(getWorkerNameById(contract.assignedWorkerId)) : '-'}</div>
+            </div>
+        </div>
+    `;
+
+    modal.classList.add('is-open');
+    document.body.classList.add('modal-open');
+}
+
+/**
+ * Close contract detail modal
+ */
+export function closeContractModal() {
+    const modal = document.getElementById('contract-detail-modal');
+    if (modal) {
+        modal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+    }
+}
+
+// Global exposure for onClick handlers
+window._closeContractModal = closeContractModal;
 
 /**
  * Get CSS class for row background based on status
@@ -930,27 +1012,27 @@ export function renderContractFilters() {
         <div class="filter-section">
             <div class="filter-row">
                 <div class="filter-group">
-                    <label for="contract-search-input">Suche</label>
+                    <label for="contract-search-input" class="form-label">Suche</label>
                     <input type="text" 
                            id="contract-search-input" 
                            placeholder="Suche in allen Feldern..."
-                           class="form-input">
+                           class="form-control">
                 </div>
                 <div class="filter-group">
-                    <label for="contract-status-filter">Status</label>
-                    <select id="contract-status-filter" class="form-select">
+                    <label for="contract-status-filter" class="form-label">Status</label>
+                    <select id="contract-status-filter" class="form-control">
                         <option value="">Alle Status</option>
                         ${statusValues.map(s => `<option value="${s}">${escapeHtml(s)}</option>`).join('')}
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="contract-location-filter">Standort</label>
-                    <select id="contract-location-filter" class="form-select">
+                    <label for="contract-location-filter" class="form-label">Standort</label>
+                    <select id="contract-location-filter" class="form-control">
                         <option value="">Alle Standorte</option>
                         ${locations.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('')}
                     </select>
                 </div>
-                <button type="button" id="contract-clear-filters" class="btn btn-secondary btn-sm">
+                <button type="button" id="contract-clear-filters" class="btn btn--secondary btn--sm">
                     Filter zurücksetzen
                 </button>
             </div>

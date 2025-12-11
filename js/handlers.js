@@ -776,6 +776,13 @@ export function initializeEventListeners(handlers = {}) {
     } else {
         console.warn('Reset button (#reset-button) not found in DOM');
     }
+
+    // Workflow Reset button handler
+    const workflowResetButton = document.querySelector('#workflow-reset-button');
+    if (workflowResetButton) {
+        workflowResetButton.addEventListener('click', onReset);
+        console.log('✓ Workflow Reset button listener bound');
+    }
     
     listenersInitialized = true;
     console.log('Event listeners initialized');
