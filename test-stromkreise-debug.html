@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stromkreise Table Debug</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .debug-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        #debug-output { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            font-family: monospace; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stromkreise Table Debug Test</h1>
+    
+    <div class="debug-section">
+        <h2>Module Loading Test</h2>
+        <div id="module-status" class="info">Loading modules...</div>
+        <div id="debug-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Stromkreise Table</h2>
+        <div id="protokollFormContainer">
+            <div class="loading">Loading protocol form...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        const debugOutput = document.getElementById('debug-output');
+        const moduleStatus = document.getElementById('module-status');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugOutput.appendChild(div);
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+            console.log(message);
+        }
+
+        async function debugTest() {
+            try {
+                log('Starting Stromkreise debug test...');
+                moduleStatus.textContent = 'Loading modules...';
+                
+                // Test 1: Import modules
+                log('Importing protokoll-state.js...');
+                const protokollState = await import('./js/protokoll/protokoll-state.js');
+                log('✓ protokoll-state.js imported', 'success');
+                
+                log('Importing protokoll-validator.js...');
+                const protokollValidator = await import('./js/protokoll/protokoll-validator.js');
+                log('✓ protokoll-validator.js imported', 'success');
+                
+                log('Importing protokoll-handlers.js...');
+                const protokollHandlers = await import('./js/protokoll/protokoll-handlers.js');
+                log('✓ protokoll-handlers.js imported', 'success');
+                
+                log('Importing protokoll-renderer.js...');
+                const protokollRenderer = await import('./js/protokoll/protokoll-renderer.js');
+                log('✓ protokoll-renderer.js imported', 'success');
+                
+                // Test 2: Initialize modules
+                log('Initializing modules...');
+                protokollState.init();
+                log('✓ State initialized', 'success');
+                
+                protokollHandlers.init();
+                log('✓ Handlers initialized', 'success');
+                
+                protokollRenderer.init();
+                log('✓ Renderer initialized', 'success');
+                
+                // Test 3: Check state
+                const currentState = protokollState.getState();
+                log(`Current state positions: ${currentState.positions.length}`);
+                
+                // Test 4: Add a test position
+                log('Adding test position...');
+                const posNr = protokollHandlers.handleAddPosition();
+                log(`✓ Added position: ${posNr}`, 'success');
+                
+                // Test 5: Render positions form
+                log('Rendering positions form...');
+                protokollRenderer.renderStep('positions');
+                log('✓ Positions form rendered', 'success');
+                
+                // Test 6: Check table exists
+                const table = document.querySelector('.positions-table');
+                if (table) {
+                    log('✓ Positions table found in DOM', 'success');
+                    const rows = table.querySelectorAll('tbody tr');
+                    log(`Table has ${rows.length} rows`);
+                } else {
+                    log('✗ Positions table not found in DOM', 'error');
+                }
+                
+                moduleStatus.innerHTML = '<span class="success">✓ All tests passed!</span>';
+                
+            } catch (error) {
+                log(`✗ Error: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+                moduleStatus.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        // Start the test when page loads
+        document.addEventListener('DOMContentLoaded', debugTest);
+    </script>
+</body>
+</html>

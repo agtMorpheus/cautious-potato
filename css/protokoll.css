@@ -80,7 +80,7 @@
   border: 1px solid var(--border-base);
   border-radius: var(--radius-md, 6px);
   font-size: 0.9rem;
-  font(--font-family-base), sans-serif;
+  font-family: var(--font-family-base), sans-serif;
   background-color: var(--bg-surface);
   color: var(--text-main);
   transition: all 0.2s ease;

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stromkreise Final Test</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        .test-results { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            font-family: monospace; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stromkreise Final Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results" class="test-results">Starting tests...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Stromkreise Table</h2>
+        <div id="protokollFormContainer">
+            <div class="loading">Loading protocol form...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Interactive Tests</h2>
+        <button onclick="testAddPosition()" class="btn btn-primary">Add Position</button>
+        <button onclick="testAddChildPosition()" class="btn btn-secondary">Add Child Position</button>
+        <button onclick="testDeletePosition()" class="btn btn-danger">Delete Last Position</button>
+        <button onclick="testEditPosition()" class="btn btn-info">Test Edit Position</button>
+    </div>
+
+    <script type="module">
+        const testResults = document.getElementById('test-results');
+        let protokollState, protokollHandlers, protokollRenderer;
+        let testPositions = [];
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            testResults.appendChild(div);
+            testResults.scrollTop = testResults.scrollHeight;
+            console.log(message);
+        }
+
+        async function runTests() {
+            try {
+                log('=== Starting Stromkreise Final Test ===');
+                
+                // Test 1: Module Loading
+                log('Test 1: Loading modules...');
+                protokollState = await import('./js/protokoll/protokoll-state.js');
+                protokollHandlers = await import('./js/protokoll/protokoll-handlers.js');
+                protokollRenderer = await import('./js/protokoll/protokoll-renderer.js');
+                log('✓ All modules loaded successfully', 'success');
+                
+                // Test 2: Module Initialization
+                log('Test 2: Initializing modules...');
+                protokollState.init();
+                protokollHandlers.init();
+                protokollRenderer.init();
+                log('✓ All modules initialized successfully', 'success');
+                
+                // Test 3: Render Positions Form
+                log('Test 3: Rendering positions form...');
+                protokollRenderer.renderStep('positions');
+                
+                const table = document.querySelector('.positions-table');
+                if (table) {
+                    log('✓ Positions table rendered successfully', 'success');
+                } else {
+                    log('✗ Positions table not found', 'error');
+                    return;
+                }
+                
+                // Test 4: Add Position
+                log('Test 4: Adding test position...');
+                const posNr1 = protokollHandlers.handleAddPosition();
+                if (posNr1) {
+                    testPositions.push(posNr1);
+                    log(`✓ Position added: ${posNr1}`, 'success');
+                    
+                    const row = document.querySelector(`tr[data-pos-nr="${posNr1}"]`);
+                    if (row) {
+                        log('✓ Position row found in DOM', 'success');
+                    } else {
+                        log('✗ Position row not found in DOM', 'error');
+                    }
+                } else {
+                    log('✗ Failed to add position', 'error');
+                }
+                
+                // Test 5: Add Child Position
+                if (posNr1) {
+                    log('Test 5: Adding child position...');
+                    const childPosNr = protokollHandlers.handleAddChildPosition(posNr1);
+                    if (childPosNr) {
+                        testPositions.push(childPosNr);
+                        log(`✓ Child position added: ${childPosNr}`, 'success');
+                        
+                        const childRow = document.querySelector(`tr[data-pos-nr="${childPosNr}"]`);
+                        if (childRow && childRow.classList.contains('child-circuit')) {
+                            log('✓ Child position has correct styling', 'success');
+                        } else {
+                            log('✗ Child position styling incorrect', 'error');
+                        }
+                    } else {
+                        log('✗ Failed to add child position', 'error');
+                    }
+                }
+                
+                // Test 6: Edit Position
+                if (posNr1) {
+                    log('Test 6: Testing position editing...');
+                    const input = document.querySelector(`tr[data-pos-nr="${posNr1}"] input[data-field="position.zielbezeichnung"]`);
+                    if (input) {
+                        input.value = 'Test Stromkreis Edited';
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        
+                        // Check if state was updated
+                        setTimeout(() => {
+                            const position = protokollState.getPosition(posNr1);
+                            if (position && position.zielbezeichnung === 'Test Stromkreis Edited') {
+                                log('✓ Position editing works correctly', 'success');
+                            } else {
+                                log('✗ Position editing failed to update state', 'error');
+                            }
+                        }, 100);
+                    } else {
+                        log('✗ Position input field not found', 'error');
+                    }
+                }
+                
+                // Test 7: Table Responsiveness
+                log('Test 7: Checking table responsiveness...');
+                const tableWrapper = document.querySelector('.positions-table-wrapper');
+                if (tableWrapper) {
+                    const hasHorizontalScroll = tableWrapper.scrollWidth > tableWrapper.clientWidth;
+                    if (hasHorizontalScroll) {
+                        log('✓ Table has horizontal scroll (expected for many columns)', 'success');
+                    } else {
+                        log('ℹ Table fits in viewport (may be expected on wide screens)', 'info');
+                    }
+                } else {
+                    log('✗ Table wrapper not found', 'error');
+                }
+                
+                // Test 8: Button Functionality
+                log('Test 8: Testing action buttons...');
+                const addButton = document.querySelector('[data-action="add-position"]');
+                if (addButton) {
+                    log('✓ Add position button found', 'success');
+                } else {
+                    log('✗ Add position button not found', 'error');
+                }
+                
+                const actionButtons = document.querySelectorAll('.btn-icon');
+                if (actionButtons.length > 0) {
+                    log(`✓ Found ${actionButtons.length} action buttons`, 'success');
+                } else {
+                    log('✗ No action buttons found', 'error');
+                }
+                
+                log('=== All Tests Completed ===', 'success');
+                
+            } catch (error) {
+                log(`✗ Test failed: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Interactive test functions
+        window.testAddPosition = function() {
+            if (protokollHandlers) {
+                const posNr = protokollHandlers.handleAddPosition();
+                if (posNr) {
+                    testPositions.push(posNr);
+                    log(`Interactive: Added position ${posNr}`, 'success');
+                } else {
+                    log('Interactive: Failed to add position', 'error');
+                }
+            }
+        };
+
+        window.testAddChildPosition = function() {
+            if (protokollHandlers && testPositions.length > 0) {
+                const parentPosNr = testPositions[testPositions.length - 1];
+                const childPosNr = protokollHandlers.handleAddChildPosition(parentPosNr);
+                if (childPosNr) {
+                    testPositions.push(childPosNr);
+                    log(`Interactive: Added child position ${childPosNr} to ${parentPosNr}`, 'success');
+                } else {
+                    log('Interactive: Failed to add child position', 'error');
+                }
+            } else {
+                log('Interactive: No parent positions available', 'error');
+            }
+        };
+
+        window.testDeletePosition = function() {
+            if (protokollHandlers && testPositions.length > 0) {
+                const posNr = testPositions.pop();
+                const success = protokollHandlers.handleDeletePosition(posNr, true); // Skip confirm
+                if (success) {
+                    log(`Interactive: Deleted position ${posNr}`, 'success');
+                } else {
+                    log(`Interactive: Failed to delete position ${posNr}`, 'error');
+                }
+            } else {
+                log('Interactive: No positions to delete', 'error');
+            }
+        };
+
+        window.testEditPosition = function() {
+            if (testPositions.length > 0) {
+                const posNr = testPositions[0];
+                const input = document.querySelector(`tr[data-pos-nr="${posNr}"] input[data-field="position.zielbezeichnung"]`);
+                if (input) {
+                    const newValue = `Edited at ${new Date().toLocaleTimeString()}`;
+                    input.value = newValue;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    log(`Interactive: Edited position ${posNr} to "${newValue}"`, 'success');
+                } else {
+                    log('Interactive: Could not find input field to edit', 'error');
+                }
+            } else {
+                log('Interactive: No positions to edit', 'error');
+            }
+        };
+
+        // Start tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>
