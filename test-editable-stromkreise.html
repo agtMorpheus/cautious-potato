@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Stromkreise Table Test</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/protokoll.css" />
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        #console-output { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            font-family: monospace; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Editable Stromkreise Table Test</h1>
+    
+    <div class="test-section">
+        <h2>Stromkreise Table</h2>
+        <p class="info">This test verifies that the Stromkreise table is editable and shows proper position numbers.</p>
+        
+        <!-- Protocol Form Container -->
+        <div id="protokollFormContainer">
+            <div class="loading">Loading protocol form...</div>
+        </div>
+        
+        <!-- Message Container -->
+        <div id="messageContainer" class="message-container" role="status" aria-live="polite"></div>
+        
+        <div id="test-status" class="info">Initializing...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Position Data Monitor</h2>
+        <p>Current positions in state:</p>
+        <pre id="positions-display" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">Loading...</pre>
+        <button onclick="refreshPositions()">Refresh Positions</button>
+        <button onclick="addTestPosition()">Add Test Position</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console-output"></div>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script type="module">
+        // Capture console output
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToConsole(type, args) {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${type.toUpperCase()}: ${Array.from(args).join(' ')}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('log', args);
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', args);
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('warn', args);
+        };
+
+        window.clearConsole = function() {
+            consoleOutput.innerHTML = '';
+        };
+
+        // Import protocol modules
+        let protokollState, protokollHandlers, protokollRenderer;
+
+        async function initializeTest() {
+            const statusDiv = document.getElementById('test-status');
+            
+            try {
+                console.log('Starting editable Stromkreise table test...');
+                statusDiv.textContent = 'Loading modules...';
+                
+                // Import modules
+                protokollState = await import('./js/protokoll/protokoll-state.js');
+                protokollHandlers = await import('./js/protokoll/protokoll-handlers.js');
+                protokollRenderer = await import('./js/protokoll/protokoll-renderer.js');
+                
+                console.log('✓ All modules imported successfully');
+                statusDiv.textContent = 'Initializing modules...';
+                
+                // Initialize modules
+                protokollState.init();
+                protokollHandlers.init();
+                protokollRenderer.init();
+                
+                console.log('✓ All modules initialized');
+                statusDiv.textContent = 'Rendering positions form...';
+                
+                // Render the positions form (Stromkreise table)
+                protokollRenderer.renderStep('positions');
+                
+                console.log('✓ Positions form rendered');
+                statusDiv.innerHTML = '<span class="success">✓ Editable Stromkreise table loaded successfully!</span>';
+                
+                // Set up monitoring
+                setupPositionMonitoring();
+                
+                // Add some test positions
+                setTimeout(addInitialTestPositions, 500);
+                
+            } catch (error) {
+                console.error('Test initialization failed:', error);
+                statusDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        function setupPositionMonitoring() {
+            // Monitor position changes
+            window.refreshPositions = function() {
+                if (protokollState) {
+                    const positions = protokollState.getPositions();
+                    document.getElementById('positions-display').textContent = JSON.stringify(positions, null, 2);
+                }
+            };
+            
+            window.addTestPosition = function() {
+                if (protokollHandlers) {
+                    const posNr = protokollHandlers.handleAddPosition();
+                    console.log('Added test position:', posNr);
+                    refreshPositions();
+                }
+            };
+            
+            // Initial positions display
+            refreshPositions();
+            
+            // Auto-refresh every 3 seconds
+            setInterval(refreshPositions, 3000);
+        }
+
+        function addInitialTestPositions() {
+            console.log('Adding initial test positions...');
+            
+            // Add a few test positions to demonstrate the table
+            if (protokollHandlers) {
+                const pos1 = protokollHandlers.handleAddPosition();
+                console.log('Added position 1:', pos1);
+                
+                const pos2 = protokollHandlers.handleAddPosition();
+                console.log('Added position 2:', pos2);
+                
+                // Add a child position
+                if (pos1) {
+                    const childPos = protokollHandlers.handleAddChildPosition(pos1);
+                    console.log('Added child position:', childPos);
+                }
+                
+                refreshPositions();
+            }
+        }
+
+        // Start the test when page loads
+        document.addEventListener('DOMContentLoaded', initializeTest);
+    </script>
+</body>
+</html>

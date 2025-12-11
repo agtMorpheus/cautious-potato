@@ -1,0 +1,70 @@
+/**
+ * Templates View CSS (Command Center Theme)
+ * 
+ * Styles for the Templates management view
+ */
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.template-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.template-item:hover {
+    border-color: var(--primary-main);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    background: var(--bg-card);
+}
+
+.template-item:hover .template-icon {
+    color: var(--primary-main);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.template-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.template-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.template-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.template-desc {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}

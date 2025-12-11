@@ -263,13 +263,65 @@ export function handleAddPosition(options = {}) {
  */
 export function handleDeletePosition(posNr, skipConfirm = false) {
   if (!skipConfirm) {
-    const confirmed = confirm(`Delete position ${posNr}?`);
+    const position = state.getPosition(posNr);
+    const positionLabel = position?.stromkreisNr || posNr;
+    const confirmed = confirm(`Position "${positionLabel}" löschen?`);
     if (!confirmed) {
       return false;
     }
   }
 
   return state.deletePosition(posNr);
+}
+
+/**
+ * Add child position to a parent circuit
+ * @param {string} parentPosNr - Parent position number
+ * @returns {string} Position number of new child position
+ */
+export function handleAddChildPosition(parentPosNr) {
+  const parentPosition = state.getPosition(parentPosNr);
+  if (!parentPosition) {
+    console.error(`Parent position not found: ${parentPosNr}`);
+    return null;
+  }
+
+  const newPosition = {
+    stromkreisNr: '', // Will be auto-generated
+    zielbezeichnung: '',
+    phaseType: 'mono',
+    parentCircuitId: parentPosNr,
+    leitung: {
+      typ: '',
+      anzahl: '',
+      querschnitt: ''
+    },
+    spannung: {
+      un: '',
+      fn: ''
+    },
+    überstromschutz: {
+      art: '',
+      inNennstrom: '',
+      zs: '',
+      zn: '',
+      ik: ''
+    },
+    messwerte: {
+      riso: '',
+      schutzleiterWiderstand: '',
+      rcd: '',
+      differenzstrom: '',
+      auslösezeit: ''
+    },
+    prüfergebnis: {
+      status: 'nicht-geprüft',
+      mängel: [],
+      bemerkung: ''
+    }
+  };
+
+  return state.addPosition(newPosition);
 }
 
 /**
@@ -485,6 +537,18 @@ function handleButtonClick(e) {
     case 'add-position':
       handleAddPosition();
       break;
+    case 'add-child-position':
+      const parentPosNr = button.getAttribute('data-pos-nr');
+      if (parentPosNr) {
+        handleAddChildPosition(parentPosNr);
+      }
+      break;
+    case 'delete-position':
+      const deletePosNr = button.getAttribute('data-pos-nr');
+      if (deletePosNr) {
+        handleDeletePosition(deletePosNr);
+      }
+      break;
     case 'previous-step':
       handlePreviousStep();
       break;
@@ -497,12 +561,6 @@ function handleButtonClick(e) {
     case 'reset':
       handleReset();
       break;
-    default:
-      // Check for delete-position-{posNr}
-      if (action.startsWith('delete-position-')) {
-        const posNr = action.replace('delete-position-', '');
-        handleDeletePosition(posNr);
-      }
   }
 }
 

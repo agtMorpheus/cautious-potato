@@ -1,0 +1,80 @@
+/* Help View - Command Center Aesthetic */
+
+#view-help {
+    padding: var(--space-lg);
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+.help-section {
+    margin-bottom: var(--space-xl);
+    border-left: 2px solid var(--border-glass);
+    padding-left: var(--space-md);
+    transition: border-color var(--duration-fast);
+}
+
+.help-section:hover {
+    border-left-color: var(--primary-main);
+}
+
+.help-section h4 {
+    font-family: var(--font-family-heading);
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.help-section p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 65ch;
+}
+
+.help-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.help-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    padding: var(--space-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+}
+
+.help-steps li strong {
+    color: var(--primary-light);
+    font-family: var(--font-family-heading);
+    min-width: 80px;
+}
+
+.help-steps li::before {
+    content: "→";
+    color: var(--primary-main);
+    font-family: var(--font-family-heading);
+}
+
+code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-family-heading);
+    font-size: 0.9em;
+    color: var(--c-warning);
+    border: 1px solid var(--border-glass);
+}

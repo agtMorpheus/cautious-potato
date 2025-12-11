@@ -436,12 +436,15 @@ ul {
 
 /* Cards - Minimalist */
 .card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-base);
+    background-color: var(--bg-glass, rgba(255, 255, 255, 0.7));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.2));
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     margin-bottom: var(--space-lg);
     overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .card:hover {

@@ -1,1473 +1,328 @@
 /**
- * HR Module Styles
+ * HR Module Styles (Command Center Theme)
  * 
- * Styling for HR Management Module components
- * Design tokens extend the main application styles
- * 
- * @version 1.0.0
+ * Styling for HR Management Module
+ * Implements Glassmorphism and Technical aesthetic
  */
-
-/* ==================== HR Module Design Tokens ==================== */
-:root {
-  /* Status Colors */
-  --hr-color-present: #22c55e;      /* Green */
-  --hr-color-absent: #ef4444;       /* Red */
-  --hr-color-vacation: #3b82f6;     /* Blue */
-  --hr-color-sick: #f59e0b;         /* Amber */
-  --hr-color-pending: #8b5cf6;      /* Purple */
-  --hr-color-approved: #10b981;     /* Emerald */
-  --hr-color-rejected: #dc2626;     /* Dark Red */
-  --hr-color-home: #6366f1;         /* Indigo */
-  --hr-color-draft: #64748b;        /* Slate */
-  
-  /* Component Sizing */
-  --hr-calendar-cell-height: 60px;
-  --hr-table-row-height: 48px;
-  --hr-avatar-size: 40px;
-  --hr-avatar-size-large: 80px;
-  
-  /* Spacing */
-  --hr-gap-small: 8px;
-  --hr-gap-medium: 16px;
-  --hr-gap-large: 24px;
-}
 
 /* ==================== HR Layout ==================== */
 .hr-dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--hr-gap-large);
-}
-
-.hr-content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--hr-gap-large);
-}
-
-/* ==================== HR Cards ==================== */
-.hr-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.hr-card-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-base);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hr-card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.hr-card-body {
-  padding: 1.5rem;
+  gap: 2rem;
+  font-family: 'Inter', sans-serif;
 }
 
 /* ==================== HR Statistics ==================== */
 .hr-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--hr-gap-medium);
-  margin-bottom: var(--hr-gap-large);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .hr-stat-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
+  background-color: var(--bg-surface, #0f172a);
+  border: 1px solid var(--border-base, #1e293b);
+  border-radius: var(--radius-lg, 8px);
+  padding: 1.5rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 0.5rem;
-  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  /* Dashboard row layout */
+  gap: 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
 .hr-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  border-color: var(--primary-main);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
 }
 
 .hr-stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+  background: var(--bg-hover);
 }
 
 .hr-stat-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke-width: 1.5;
 }
 
 .hr-stat-icon.employees {
-  background-color: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   color: var(--c-brand-500);
 }
 
 .hr-stat-icon.active {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: var(--hr-color-present);
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--c-success);
 }
 
 .hr-stat-icon.inactive {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--hr-color-absent);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--c-danger);
 }
 
 .hr-stat-icon.departments {
-  background-color: rgba(139, 92, 246, 0.1);
-  color: var(--hr-color-pending);
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.hr-stat-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .hr-stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 500;
   color: var(--text-main);
   line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.05em;
 }
 
 .hr-stat-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
-}
-
-/* Mini stats for summaries */
-.hr-mini-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.75rem;
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-md);
-}
-
-.hr-mini-stat-value {
-  font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
 }
 
-.hr-mini-stat-label {
-  font-size: 0.75rem;
+/* ==================== HR Tab Navigation ==================== */
+.hr-header__nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 0px;
+  overflow-x: auto;
+}
+
+.hr-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
   color: var(--text-muted);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.hr-nav-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.hr-nav-btn.active {
+  color: var(--primary-main);
+  border-bottom-color: var(--primary-main);
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.hr-nav-icon {
+  font-size: 1.1rem;
 }
 
 /* ==================== HR Tables ==================== */
 .hr-table-container {
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  overflow-x: auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
 }
 
 .hr-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .hr-data-table th {
   background-color: var(--bg-surface);
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.25rem;
   text-align: left;
   font-weight: 600;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-base);
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-base);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
   white-space: nowrap;
-}
-
-.hr-data-table th[data-sort] {
-  cursor: pointer;
-}
-
-.hr-data-table th[data-sort]:hover {
-  color: var(--text-main);
 }
 
 .hr-data-table td {
-  padding: 0.875rem 1rem;
-  border-bottom: 1px solid var(--border-base);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
   color: var(--text-main);
-}
-
-.hr-data-table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.hr-data-table tr:last-child td {
-  border-bottom: none;
-}
-
-/* ==================== HR Employee Name Cell ==================== */
-.hr-employee-name {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.hr-employee-avatar {
-  width: var(--hr-avatar-size);
-  height: var(--hr-avatar-size);
-  border-radius: 50%;
-  background-color: var(--c-brand-500);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
-  flex-shrink: 0;
-}
-
-.hr-employee-avatar-large {
-  width: var(--hr-avatar-size-large);
-  height: var(--hr-avatar-size-large);
-  border-radius: 50%;
-  background-color: var(--c-brand-500);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.hr-employee-email {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-/* ==================== HR Status Badges ==================== */
-.hr-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.hr-status-present, .hr-status-active, .hr-status-approved {
-  background-color: rgba(34, 197, 94, 0.15);
-  color: var(--hr-color-approved);
-}
-
-.hr-status-absent, .hr-status-rejected {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: var(--hr-color-absent);
-}
-
-.hr-status-vacation {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: var(--hr-color-vacation);
-}
-
-.hr-status-sick {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: var(--hr-color-sick);
-}
-
-.hr-status-pending, .hr-status-submitted {
-  background-color: rgba(139, 92, 246, 0.15);
-  color: var(--hr-color-pending);
-}
-
-.hr-status-home {
-  background-color: rgba(99, 102, 241, 0.15);
-  color: var(--hr-color-home);
-}
-
-.hr-status-draft, .hr-status-inactive, .hr-status-default {
-  background-color: rgba(100, 116, 139, 0.15);
-  color: var(--text-muted);
-}
-
-/* ==================== HR Action Buttons ==================== */
-.hr-action-buttons {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.hr-btn-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all var(--duration-fast);
-}
-
-.hr-btn-icon:hover {
-  background-color: var(--bg-surface);
-  color: var(--text-main);
-}
-
-.hr-btn-icon.hr-btn-danger:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--hr-color-absent);
-}
-
-/* HR Buttons */
-.hr-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  font-size: 0.875rem;
-  border: none;
-  cursor: pointer;
-  transition: all var(--duration-fast);
-}
-
-.hr-btn-primary {
-  background-color: var(--c-brand-500);
-  color: white;
-}
-
-.hr-btn-primary:hover {
-  background-color: var(--c-brand-600);
-}
-
-.hr-btn-secondary {
-  background-color: transparent;
-  border: 1px solid var(--border-highlight);
-  color: var(--text-main);
-}
-
-.hr-btn-secondary:hover {
-  background-color: var(--bg-surface);
-}
-
-.hr-btn-success {
-  background-color: var(--hr-color-approved);
-  color: white;
-}
-
-.hr-btn-success:hover {
-  background-color: #059669;
-}
-
-.hr-btn-danger {
-  background-color: var(--hr-color-absent);
-  color: white;
-}
-
-.hr-btn-danger:hover {
-  background-color: #dc2626;
-}
-
-.hr-btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-.hr-btn-outline {
-  background-color: transparent;
-  border: 1px solid var(--border-highlight);
-  color: var(--text-main);
-}
-
-/* ==================== HR Forms ==================== */
-.hr-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-form-section {
-  border-bottom: 1px solid var(--border-base);
-  padding-bottom: var(--hr-gap-medium);
-}
-
-.hr-form-section:last-of-type {
-  border-bottom: none;
-}
-
-.hr-form-section-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: var(--hr-gap-medium);
-}
-
-.hr-form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--hr-gap-medium);
-}
-
-.hr-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.hr-form-group label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.hr-form-group input,
-.hr-form-group select,
-.hr-form-group textarea {
-  padding: 0.625rem 0.875rem;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-md);
-  color: var(--text-main);
-  font-size: 0.875rem;
-  transition: border-color var(--duration-fast);
-}
-
-.hr-form-group input:focus,
-.hr-form-group select:focus,
-.hr-form-group textarea:focus {
-  outline: none;
-  border-color: var(--c-brand-500);
-  box-shadow: 0 0 0 2px var(--c-brand-glow);
-}
-
-.hr-form-group input:disabled,
-.hr-form-group select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.hr-form-actions {
-  display: flex;
-  gap: var(--hr-gap-small);
-  justify-content: flex-end;
-  padding-top: var(--hr-gap-medium);
-  border-top: 1px solid var(--border-base);
-}
-
-/* ==================== HR Empty State ==================== */
-.hr-empty-state {
-  padding: 3rem 2rem;
-  text-align: center;
-  color: var(--text-muted);
-}
-
-.hr-empty-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 1rem;
-  color: var(--text-dim);
-}
-
-.hr-empty-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 0.5rem;
-}
-
-.hr-empty-text {
-  font-size: 0.875rem;
-}
-
-/* ==================== HR Employee Detail ==================== */
-.hr-employee-detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-large);
-}
-
-.hr-detail-header {
-  display: flex;
-  align-items: center;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-employee-header-info h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 0.25rem;
-}
-
-.hr-employee-header-info p {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}
-
-.hr-detail-sections {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--hr-gap-medium);
-}
-
-.hr-detail-section {
-  background-color: var(--bg-surface);
-  padding: 1.25rem;
-  border-radius: var(--radius-md);
-}
-
-.hr-detail-section h4 {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 1rem;
-}
-
-.hr-detail-list {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1rem;
-}
-
-.hr-detail-list dt {
-  color: var(--text-muted);
-  font-size: 0.8125rem;
-}
-
-.hr-detail-list dd {
-  color: var(--text-main);
-  font-size: 0.875rem;
-}
-
-/* ==================== HR Attendance ==================== */
-.hr-attendance-daily {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-attendance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hr-date-navigation {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.hr-date-input {
-  padding: 0.5rem;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-md);
-  color: var(--text-main);
-}
-
-.hr-attendance-summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: var(--hr-gap-small);
-}
-
-.hr-attendance-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* ==================== HR Calendar ==================== */
-.hr-calendar-grid,
-.hr-vacation-calendar-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.hr-calendar-weekdays,
-.hr-vacation-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 0.5rem 0;
-}
-
-.hr-calendar-days,
-.hr-vacation-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-
-.hr-calendar-cell,
-.hr-vacation-cell {
-  min-height: var(--hr-calendar-cell-height);
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: background-color var(--duration-fast);
-}
-
-.hr-calendar-cell:hover,
-.hr-vacation-cell:hover {
-  background-color: var(--c-slate-700);
-}
-
-.hr-calendar-empty,
-.hr-vacation-empty {
-  background-color: transparent;
-  cursor: default;
-}
-
-.hr-calendar-empty:hover,
-.hr-vacation-empty:hover {
-  background-color: transparent;
-}
-
-.hr-calendar-day,
-.hr-vacation-day-num {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.hr-calendar-weekend,
-.hr-vacation-weekend {
-  opacity: 0.6;
-}
-
-.hr-calendar-has-record,
-.hr-vacation-has-data {
-  border-left: 3px solid var(--c-brand-500);
-}
-
-.hr-calendar-legend,
-.hr-vacation-calendar-footer {
-  display: flex;
-  gap: 1rem;
-  padding-top: var(--hr-gap-medium);
-  flex-wrap: wrap;
-}
-
-.hr-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.hr-legend-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-/* ==================== HR Schedule Grid ==================== */
-.hr-schedule-grid-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-schedule-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hr-week-navigation {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.hr-week-label {
-  font-weight: 600;
-  min-width: 200px;
-  text-align: center;
-}
-
-.hr-schedule-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.hr-schedule-table th,
-.hr-schedule-table td {
-  border: 1px solid var(--border-base);
-  padding: 0.5rem;
-  text-align: center;
-}
-
-.hr-schedule-employee-col {
-  width: 200px;
-  text-align: left !important;
-}
-
-.hr-schedule-employee-cell {
-  text-align: left !important;
-}
-
-.hr-schedule-day-col {
-  width: 80px;
-}
-
-.hr-schedule-day-name {
-  font-weight: 600;
-  display: block;
-}
-
-.hr-schedule-day-date {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.hr-schedule-weekend {
-  background-color: rgba(100, 116, 139, 0.1);
-}
-
-.hr-schedule-day-cell {
   vertical-align: middle;
 }
 
-.hr-schedule-filled {
-  background-color: rgba(59, 130, 246, 0.1);
+.hr-data-table tr:hover td {
+  background-color: var(--bg-hover);
 }
 
-.hr-schedule-hours {
-  font-weight: 500;
-}
-
-.hr-schedule-actual {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  display: block;
-}
-
-.hr-schedule-total-col {
-  width: 100px;
-}
-
-.hr-schedule-points {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  display: block;
-}
-
-/* Schedule Form */
-.hr-schedule-form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--hr-gap-medium);
-}
-
-.hr-schedule-days-editor {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-}
-
-.hr-schedule-day-editor {
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.hr-schedule-day-editor.hr-schedule-weekend {
-  opacity: 0.7;
-}
-
-.hr-schedule-day-header {
-  text-align: center;
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-base);
-}
-
-.hr-schedule-day-points {
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.hr-schedule-totals {
-  display: flex;
-  gap: var(--hr-gap-large);
-  padding: 1rem;
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-md);
-}
-
-.hr-schedule-total-item {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.hr-total-label {
-  color: var(--text-muted);
-}
-
-.hr-total-value {
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-/* ==================== HR Vacation ==================== */
-.hr-vacation-calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--hr-gap-medium);
-}
-
-.hr-vacation-indicators {
-  display: flex;
-  gap: 2px;
-  margin-top: 0.25rem;
-}
-
-.hr-vacation-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--hr-color-vacation);
-}
-
-.hr-vacation-more {
-  font-size: 0.625rem;
-  color: var(--text-muted);
-}
-
-/* Vacation Balance */
-.hr-vacation-balance {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-balance-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--hr-gap-small);
-}
-
-.hr-balance-card {
-  background-color: var(--bg-surface);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  text-align: center;
-}
-
-.hr-balance-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  display: block;
-}
-
-.hr-balance-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.hr-balance-used .hr-balance-value { color: var(--hr-color-sick); }
-.hr-balance-pending .hr-balance-value { color: var(--hr-color-pending); }
-.hr-balance-remaining .hr-balance-value { color: var(--hr-color-approved); }
-
-.hr-balance-bar {
-  height: 8px;
-  background-color: var(--bg-surface);
-  border-radius: 4px;
-  overflow: hidden;
-  display: flex;
-}
-
-.hr-balance-bar-used {
-  background-color: var(--hr-color-sick);
-}
-
-.hr-balance-bar-pending {
-  background-color: var(--hr-color-pending);
-}
-
-/* Vacation Approvals */
-.hr-vacation-approval-card {
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: var(--hr-gap-small);
-}
-
-.hr-approval-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hr-approval-employee {
-  font-weight: 600;
-}
-
-.hr-approval-dates {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.hr-vacation-duration {
-  font-weight: 500;
-  color: var(--text-main);
-}
-
-.hr-approval-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-/* Team Coverage */
-.hr-team-coverage {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-coverage-period {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.hr-coverage-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-
-.hr-coverage-day {
-  min-height: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  padding: 0.5rem;
-}
-
-.hr-coverage-good {
-  background-color: rgba(34, 197, 94, 0.2);
-}
-
-.hr-coverage-warning {
-  background-color: rgba(245, 158, 11, 0.2);
-}
-
-.hr-coverage-critical {
-  background-color: rgba(239, 68, 68, 0.2);
-}
-
-.hr-coverage-date {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.hr-coverage-count {
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-/* ==================== HR Pending Approvals ==================== */
-.hr-pending-approvals,
-.hr-vacation-approvals {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-medium);
-}
-
-.hr-approval-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--hr-gap-small);
-}
-
-.hr-approval-card {
-  background-color: var(--bg-surface);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.hr-approval-week {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.hr-approval-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-}
-
-.hr-approval-submitted {
-  color: var(--text-muted);
-}
-
-/* ==================== Responsive Adjustments ==================== */
-@media (max-width: 768px) {
-  .hr-schedule-days-editor {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .hr-balance-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .hr-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .hr-detail-sections {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .hr-schedule-days-editor {
-    grid-template-columns: 1fr;
-  }
-  
-  .hr-balance-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .hr-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* ==================== Phase 3: App Layout ==================== */
-.hr-app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--bg-base, #0f172a);
-}
-
-/* ==================== Phase 3: Header Navigation ==================== */
-.hr-header {
-  background: var(--bg-card, #1e293b);
-  border-bottom: 1px solid var(--border-base, #334155);
-  padding: 1rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.hr-header__container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.hr-header__title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-main, #f1f5f9);
-  flex-shrink: 0;
-}
-
-.hr-header__nav {
-  display: flex;
-  gap: 0.5rem;
-  flex: 1;
-  min-width: 300px;
-}
-
-.hr-nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: transparent;
-  border: 2px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  color: var(--text-muted, #94a3b8);
-  font-family: inherit;
-  font-size: 0.875rem;
-}
-
-.hr-nav-btn:hover {
-  background: var(--bg-surface, #334155);
-  color: var(--text-main, #f1f5f9);
-}
-
-.hr-nav-btn.active {
-  background: var(--c-brand-500, #21808d);
-  color: white;
-  border-color: var(--c-brand-600, #1a6670);
-}
-
-.hr-nav-icon {
-  font-size: 1.25rem;
-}
-
-.hr-nav-label {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .hr-nav-label {
-    display: inline;
-  }
-}
-
-.hr-header__actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-/* ==================== Phase 3: Main Content ==================== */
-.hr-main {
-  flex: 1;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-/* ==================== Phase 3: Tabs ==================== */
-.hr-tab {
-  display: none;
-  animation: fadeIn 0.3s ease-in;
-}
-
-.hr-tab--active {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hr-tab__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.hr-tab__header h2 {
-  margin: 0;
-  font-size: 1.75rem;
-  color: var(--text-main, #f1f5f9);
-}
-
-/* ==================== Phase 3: Filters ==================== */
+/* ==================== HR Filters ==================== */
 .hr-filters {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
-  align-items: center;
+  padding: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
 }
 
 .hr-filters__input,
 .hr-filters__select {
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.9rem;
   flex: 1;
   min-width: 200px;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-highlight, #475569);
-  border-radius: 6px;
-  background: var(--bg-surface, #334155);
-  color: var(--text-main, #f1f5f9);
-  font-size: 0.95rem;
-  font-family: inherit;
+  transition: border-color 0.2s;
+  font-family: 'Inter', sans-serif;
 }
 
 .hr-filters__input:focus,
 .hr-filters__select:focus {
   outline: none;
-  border-color: var(--c-brand-500, #21808d);
-  box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.2);
+  border-color: var(--primary-main);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 1px var(--primary-main);
 }
 
-.hr-date-range {
+/* ==================== Avatar ==================== */
+.hr-employee-name {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.hr-date-range label {
-  white-space: nowrap;
-  font-weight: 500;
-  color: var(--text-muted, #94a3b8);
-  font-size: 0.875rem;
-}
-
-.hr-week-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* ==================== Phase 3: Modals ==================== */
-.hr-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hr-modal.hidden {
-  display: none;
-}
-
-.hr-modal__overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.hr-modal__content {
-  position: relative;
-  background: var(--bg-card, #1e293b);
+.hr-employee-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.hr-modal__content--wide {
-  max-width: 900px;
-}
-
-.hr-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--border-base, #334155);
-}
-
-.hr-modal__header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: var(--text-main, #f1f5f9);
-}
-
-.hr-modal__close {
-  background: transparent;
-  border: none;
-  font-size: 1.75rem;
-  cursor: pointer;
-  color: var(--text-muted, #94a3b8);
-  padding: 0;
-  width: 40px;
-  height: 40px;
+  /* Tech square */
+  background: linear-gradient(135deg, var(--c-brand-500), var(--c-brand-700));
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ==================== Status Badges ==================== */
+.hr-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
   border-radius: 4px;
-  transition: all 0.2s ease;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.hr-modal__close:hover {
-  color: var(--text-main, #f1f5f9);
-  background: var(--bg-surface, #334155);
+.hr-status-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--c-success);
 }
 
-/* ==================== Phase 3: Alerts ==================== */
-.hr-alert {
-  padding: 1rem 1.5rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: slideDown 0.3s ease-in-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hr-alert.hidden {
-  display: none;
-}
-
-.hr-alert--success {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-  border-left: 4px solid var(--hr-color-approved);
-}
-
-.hr-alert--error {
+.hr-status-inactive {
   background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-left: 4px solid var(--hr-color-absent);
+  color: var(--c-danger);
 }
 
-.hr-alert__message {
-  flex: 1;
-}
-
-.hr-alert__close {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: inherit;
-  padding: 0;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.hr-alert__close:hover {
-  opacity: 1;
-}
-
-/* ==================== Phase 3: Loading & Empty States ==================== */
-.hr-loading {
-  display: flex;
-  flex-direction: column;
+/* ==================== Action Buttons ==================== */
+.hr-btn-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.hr-loading.hidden {
-  display: none;
+.hr-btn-icon:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+  border-color: var(--border-light);
 }
 
-.hr-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border-base, #334155);
-  border-top: 4px solid var(--c-brand-500, #21808d);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 1rem;
+.hr-btn-primary {
+  background: var(--primary-main);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.hr-btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
 }
 
-/* ==================== Phase 3: Responsive Layout ==================== */
-@media (max-width: 768px) {
-  .hr-main {
-    padding: 1rem;
-  }
-
-  .hr-header__container {
-    flex-direction: column;
-    padding: 1rem;
-  }
-
-  .hr-header__nav {
-    width: 100%;
-  }
-
-  .hr-nav-label {
-    display: none !important;
-  }
-
-  .hr-tab__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .hr-filters {
-    flex-direction: column;
-  }
-
-  .hr-filters__input,
-  .hr-filters__select {
-    width: 100%;
-  }
-
-  .hr-modal__content {
-    width: 95%;
-  }
-
-  .hr-week-selector {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+/* ==================== Empty State ==================== */
+.hr-empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
 }
 
-@media (max-width: 480px) {
-  .hr-header__title {
-    font-size: 1.25rem;
-  }
+.hr-empty-icon {
+  color: var(--text-muted);
+  opacity: 0.3;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+}
 
-  .hr-tab__header h2 {
-    font-size: 1.5rem;
-  }
+.hr-empty-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
 }

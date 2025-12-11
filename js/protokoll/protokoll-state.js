@@ -473,8 +473,8 @@ export function addPosition(position) {
   
   // Ensure position has all required fields
   const newPosition = {
-    posNr: position.posNr || generatePositionNumber(),
-    stromkreisNr: position.stromkreisNr || '',
+    posNr: position.posNr || generateCircuitId(),
+    stromkreisNr: position.stromkreisNr || generatePositionNumber(),
     zielbezeichnung: position.zielbezeichnung || '',
     // Phase type: 'mono' (1-phase), 'bi' (2-phase), 'tri' (3-phase)
     phaseType: position.phaseType || 'mono',
@@ -1157,11 +1157,42 @@ function setNestedValue(obj, path, value) {
 }
 
 /**
- * Generate unique position number
+ * Generate unique circuit ID (internal identifier)
+ * @returns {string} Circuit ID
+ */
+function generateCircuitId() {
+  return `circuit-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}
+
+/**
+ * Generate next position number in format XX.XX.XXXX
  * @returns {string} Position number
  */
 function generatePositionNumber() {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  const existingNumbers = state.positions
+    .map(p => p.stromkreisNr)
+    .filter(nr => nr && /^\d{2}\.\d{2}\.\d{4}$/.test(nr))
+    .map(nr => {
+      const parts = nr.split('.');
+      return parseInt(parts[0]) * 1000000 + parseInt(parts[1]) * 10000 + parseInt(parts[2]);
+    })
+    .sort((a, b) => a - b);
+
+  let nextNumber = 1010010; // Start with 01.01.0010
+  
+  for (const num of existingNumbers) {
+    if (num === nextNumber) {
+      nextNumber += 10; // Increment by 10 (e.g., 01.01.0010 -> 01.01.0020)
+    } else {
+      break;
+    }
+  }
+
+  const major = Math.floor(nextNumber / 1000000);
+  const minor = Math.floor((nextNumber % 1000000) / 10000);
+  const patch = nextNumber % 10000;
+
+  return `${major.toString().padStart(2, '0')}.${minor.toString().padStart(2, '0')}.${patch.toString().padStart(4, '0')}`;
 }
 
 // ============================================

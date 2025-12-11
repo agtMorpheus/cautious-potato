@@ -479,7 +479,6 @@ export function renderPositionsForm() {
             <thead>
               <tr>
                 <th scope="col">Pos.Nr.</th>
-                <th scope="col">Nr.</th>
                 <th scope="col">Zielbezeichnung</th>
                 <th scope="col">Phase</th>
                 <th scope="col">Leitung/Kabel</th>
@@ -944,20 +943,104 @@ function renderPositionRow(position, index) {
   
   return `
     <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
-      <td>${escapeHtml(position.posNr || (index + 1))}</td>
-      <td>${escapeHtml(position.stromkreisNr || '-')}</td>
-      <td>${escapeHtml(position.zielbezeichnung || '-')}</td>
-      <td><span class="phase-badge phase-${escapeHtml(position.phaseType || 'mono')}">${phaseLabel}</span></td>
-      <td>${escapeHtml(position.leitung?.typ || '-')}</td>
-      <td>${position.spannung?.un || '-'}</td>
-      <td>${position.spannung?.fn || '-'}</td>
-      <td>${escapeHtml(position.überstromschutz?.art || '-')}</td>
-      <td>${position.überstromschutz?.inNennstrom || '-'}</td>
-      <td>${position.messwerte?.riso || '-'}</td>
-      <td><span class="status-badge status-${status}">${escapeHtml(status)}</span></td>
+      <td class="editable-cell" data-field="stromkreisNr">
+        <input type="text" 
+               value="${escapeHtml(position.stromkreisNr || '')}" 
+               data-field="position.stromkreisNr"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="01.01.0010"
+               pattern="\\d{2}\\.\\d{2}\\.\\d{4}"
+               class="table-input pos-nr-input">
+      </td>
+      <td class="editable-cell" data-field="zielbezeichnung">
+        <input type="text" 
+               value="${escapeHtml(position.zielbezeichnung || '')}" 
+               data-field="position.zielbezeichnung"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="Bezeichnung eingeben"
+               class="table-input">
+      </td>
+      <td class="editable-cell" data-field="phaseType">
+        <select data-field="position.phaseType" 
+                data-pos-nr="${escapeHtml(position.posNr)}"
+                class="table-select">
+          <option value="mono" ${position.phaseType === 'mono' ? 'selected' : ''}>1-phasig</option>
+          <option value="bi" ${position.phaseType === 'bi' ? 'selected' : ''}>2-phasig</option>
+          <option value="tri" ${position.phaseType === 'tri' ? 'selected' : ''}>3-phasig</option>
+        </select>
+      </td>
+      <td class="editable-cell" data-field="leitung.typ">
+        <input type="text" 
+               value="${escapeHtml(position.leitung?.typ || '')}" 
+               data-field="position.leitung.typ"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="NYM-J 3x1,5"
+               class="table-input">
+      </td>
+      <td class="editable-cell" data-field="spannung.un">
+        <input type="number" 
+               value="${position.spannung?.un || ''}" 
+               data-field="position.spannung.un"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="230"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      <td class="editable-cell" data-field="spannung.fn">
+        <input type="number" 
+               value="${position.spannung?.fn || ''}" 
+               data-field="position.spannung.fn"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="50"
+               min="0"
+               max="100"
+               class="table-input number-input">
+      </td>
+      <td class="editable-cell" data-field="überstromschutz.art">
+        <select data-field="position.überstromschutz.art" 
+                data-pos-nr="${escapeHtml(position.posNr)}"
+                class="table-select">
+          <option value="">Auswählen</option>
+          <option value="B" ${position.überstromschutz?.art === 'B' ? 'selected' : ''}>B</option>
+          <option value="C" ${position.überstromschutz?.art === 'C' ? 'selected' : ''}>C</option>
+          <option value="D" ${position.überstromschutz?.art === 'D' ? 'selected' : ''}>D</option>
+          <option value="K" ${position.überstromschutz?.art === 'K' ? 'selected' : ''}>K</option>
+        </select>
+      </td>
+      <td class="editable-cell" data-field="überstromschutz.inNennstrom">
+        <input type="number" 
+               value="${position.überstromschutz?.inNennstrom || ''}" 
+               data-field="position.überstromschutz.inNennstrom"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="16"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      <td class="editable-cell" data-field="messwerte.riso">
+        <input type="number" 
+               value="${position.messwerte?.riso || ''}" 
+               data-field="position.messwerte.riso"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="500"
+               min="0"
+               step="0.1"
+               class="table-input number-input">
+      </td>
+      <td class="status-cell">
+        <select data-field="position.prüfergebnis.status" 
+                data-pos-nr="${escapeHtml(position.posNr)}"
+                class="table-select status-select">
+          <option value="nicht-geprüft" ${status === 'nicht-geprüft' ? 'selected' : ''}>Nicht geprüft</option>
+          <option value="i.O." ${status === 'i.O.' ? 'selected' : ''}>i.O.</option>
+          <option value="n.i.O." ${status === 'n.i.O.' ? 'selected' : ''}>n.i.O.</option>
+          <option value="nicht-zugänglich" ${status === 'nicht-zugänglich' ? 'selected' : ''}>Nicht zugänglich</option>
+        </select>
+      </td>
       <td class="position-actions">
         ${hasParent ? `<button type="button" class="btn-icon btn-tree" data-action="view-parent" data-pos-nr="${escapeHtml(position.posNr)}" title="Zum Vater-Stromkreis" aria-label="Vater-Stromkreis anzeigen">↑</button>` : ''}
-        <button type="button" class="btn-icon" data-action="edit-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Bearbeiten" aria-label="Position bearbeiten">✎</button>
+        <button type="button" class="btn-icon btn-success" data-action="add-child-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Unterkreis hinzufügen" aria-label="Unterkreis hinzufügen">+</button>
         <button type="button" class="btn-icon btn-danger" data-action="delete-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Löschen" aria-label="Position löschen">✕</button>
       </td>
     </tr>
@@ -1335,13 +1418,18 @@ function attachPositionListeners() {
   const tbody = document.getElementById('positionsTableBody');
   if (!tbody) return;
 
-  // Remove any existing delegated listener by using a named handler
-  // We store the handler reference on the element to allow removal
+  // Remove any existing delegated listeners
   if (tbody._positionClickHandler) {
     tbody.removeEventListener('click', tbody._positionClickHandler);
   }
+  if (tbody._positionInputHandler) {
+    tbody.removeEventListener('input', tbody._positionInputHandler);
+  }
+  if (tbody._positionChangeHandler) {
+    tbody.removeEventListener('change', tbody._positionChangeHandler);
+  }
 
-  // Create a delegated event handler
+  // Create click handler for buttons
   tbody._positionClickHandler = function(e) {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -1357,14 +1445,49 @@ function attachPositionListeners() {
       case 'delete-position':
         handlers.handleDeletePosition(posNr);
         break;
-      case 'edit-position':
-        // For now, log - edit functionality can be expanded
-        console.log('Edit position:', posNr);
+      case 'add-child-position':
+        handlers.handleAddChildPosition(posNr);
+        break;
+      case 'view-parent':
+        // Scroll to parent position or highlight it
+        const parentRow = document.querySelector(`tr[data-pos-nr="${posNr}"]`);
+        if (parentRow) {
+          parentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          parentRow.classList.add('highlight');
+          setTimeout(() => parentRow.classList.remove('highlight'), 2000);
+        }
         break;
     }
   };
 
+  // Create input handler for real-time updates
+  tbody._positionInputHandler = function(e) {
+    const input = e.target;
+    const fieldPath = input.getAttribute('data-field');
+    const posNr = input.getAttribute('data-pos-nr');
+
+    if (!fieldPath || !posNr) return;
+
+    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
+    handlers.handlePositionChange(posNr, fieldPath, value);
+  };
+
+  // Create change handler for final validation
+  tbody._positionChangeHandler = function(e) {
+    const input = e.target;
+    const fieldPath = input.getAttribute('data-field');
+    const posNr = input.getAttribute('data-pos-nr');
+
+    if (!fieldPath || !posNr) return;
+
+    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
+    handlers.handlePositionChange(posNr, fieldPath, value);
+  };
+
+  // Attach all listeners
   tbody.addEventListener('click', tbody._positionClickHandler);
+  tbody.addEventListener('input', tbody._positionInputHandler);
+  tbody.addEventListener('change', tbody._positionChangeHandler);
 }
 
 /**
