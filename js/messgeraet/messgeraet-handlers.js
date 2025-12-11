@@ -161,7 +161,7 @@ export function handleAddDevice(deviceData) {
     state.setEditingDevice(null);
   }
 
-  return device ? device.id : null;
+  return device?.id || null;
 }
 
 /**
