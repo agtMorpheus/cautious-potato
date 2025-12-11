@@ -7,6 +7,12 @@ import * as renderer from '../../js/protokoll/protokoll-renderer.js';
 import * as state from '../../js/protokoll/protokoll-state.js';
 import * as handlers from '../../js/protokoll/protokoll-handlers.js';
 
+jest.mock('../../js/messgeraet/messgeraet-state.js', () => ({
+  getDevicesForDropdown: jest.fn(() => [
+    { id: 'd1', label: 'Fluke 1654B', name: 'Fluke 1654B', fabrikat: 'Fluke', type: '1654B', calibrationDate: '2025-05-01', identNr: '12345', isExpired: false }
+  ])
+}));
+
 describe('Protokoll Renderer', () => {
   
   beforeEach(() => {
@@ -688,6 +694,49 @@ describe('Protokoll Renderer', () => {
       
       // Should advance to besichtigung step (next step after metadata)
       expect(state.getCurrentStep()).toBe('besichtigung');
+    });
+  });
+
+  // ===== DEVICE SELECTION =====
+  describe('Device Selection', () => {
+    beforeEach(() => {
+      renderer.init();
+      renderer.renderMessenForm();
+    });
+
+    test('renders device dropdown', () => {
+      const select = document.getElementById('messgeraet-select');
+      expect(select).toBeTruthy();
+      expect(select.options.length).toBeGreaterThan(1); // Default + mocked device
+    });
+
+    test('selecting device populates fields', () => {
+      const select = document.getElementById('messgeraet-select');
+      // Find the option with value 'd1' (from our mock)
+      // Since select options are rendered based on mock return, we need to find it.
+      // The options are rendered as `<option value="${d.id}" ...`
+
+      // We can iterate options to find the one with value 'd1'
+      let option;
+      for(let i=0; i<select.options.length; i++) {
+        if (select.options[i].value === 'd1') {
+          option = select.options[i];
+          break;
+        }
+      }
+
+      if (option) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change'));
+
+        const fabrikat = document.querySelector('[data-field="messgeräte.fabrikat"]');
+        expect(fabrikat.value).toBe('Fluke');
+
+        const typ = document.querySelector('[data-field="messgeräte.typ"]');
+        expect(typ.value).toBe('1654B');
+      } else {
+        throw new Error('Device option not found');
+      }
     });
   });
 });

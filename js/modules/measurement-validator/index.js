@@ -30,6 +30,7 @@ export {
 } from './validators/validationRules.js';
 
 // Engine
+import { ValidationEngine } from './engine/validationEngine.js';
 export { ValidationEngine, validationEngine } from './engine/validationEngine.js';
 
 // Result Formatter
