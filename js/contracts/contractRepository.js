@@ -194,30 +194,40 @@ export function sortContracts(contracts, field, direction = 'asc') {
     
     const sorted = [...contracts];
     const multiplier = direction === 'desc' ? -1 : 1;
+    const isDateField = field === 'plannedStart' || field === 'createdAt' || field === 'updatedAt';
     
-    sorted.sort((a, b) => {
-        let valueA = a[field];
-        let valueB = b[field];
+    // For date fields, pre-compute timestamps for better performance
+    if (isDateField) {
+        // Create a Map of contract → timestamp for O(1) lookup during sorting
+        const dateCache = new Map();
+        for (let i = 0; i < sorted.length; i++) {
+            const contract = sorted[i];
+            const dateValue = contract[field];
+            const timestamp = dateValue ? new Date(dateValue).getTime() || 0 : 0;
+            dateCache.set(contract, timestamp);
+        }
         
-        // Handle null/undefined values
-        if (valueA === null || valueA === undefined) valueA = '';
-        if (valueB === null || valueB === undefined) valueB = '';
-        
-        // Handle date fields
-        if (field === 'plannedStart' || field === 'createdAt' || field === 'updatedAt') {
-            valueA = new Date(valueA).getTime() || 0;
-            valueB = new Date(valueB).getTime() || 0;
+        sorted.sort((a, b) => {
+            return (dateCache.get(a) - dateCache.get(b)) * multiplier;
+        });
+    } else {
+        sorted.sort((a, b) => {
+            let valueA = a[field];
+            let valueB = b[field];
+            
+            // Handle null/undefined values
+            if (valueA === null || valueA === undefined) valueA = '';
+            if (valueB === null || valueB === undefined) valueB = '';
+            
+            // Handle string comparison
+            if (typeof valueA === 'string' && typeof valueB === 'string') {
+                return valueA.localeCompare(valueB) * multiplier;
+            }
+            
+            // Handle number comparison
             return (valueA - valueB) * multiplier;
-        }
-        
-        // Handle string comparison
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-            return valueA.localeCompare(valueB) * multiplier;
-        }
-        
-        // Handle number comparison
-        return (valueA - valueB) * multiplier;
-    });
+        });
+    }
     
     return sorted;
 }
