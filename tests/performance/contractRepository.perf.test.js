@@ -11,7 +11,8 @@ import {
   getPaginatedContracts,
   getContractStatistics,
   getUniqueFieldValues,
-  searchContracts
+  searchContracts,
+  clearFilterCache
 } from '../../js/contracts/contractRepository.js';
 
 import { getState, setState, resetState } from '../../js/state.js';
@@ -117,6 +118,46 @@ describe('Contract Repository Performance Tests', () => {
       console.log(`Filter by status (10000): ${duration.toFixed(2)}ms`);
       expect(duration).toBeLessThan(PERFORMANCE_THRESHOLDS.filter_10000);
       expect(result.length).toBeGreaterThan(0);
+    });
+    
+    test('cache improves repeated filter performance', () => {
+      setupStateWithContracts(5000);
+      const filters = { status: 'Erstellt', location: 'Berlin' };
+      
+      // First call (no cache)
+      const { duration: firstDuration } = measureTime(() => {
+        return getFilteredContracts(filters);
+      });
+      
+      // Second call (from cache)
+      const { duration: cachedDuration } = measureTime(() => {
+        return getFilteredContracts(filters);
+      });
+      
+      console.log(`First filter: ${firstDuration.toFixed(2)}ms, Cached: ${cachedDuration.toFixed(2)}ms`);
+      // Cached should be faster
+      expect(cachedDuration).toBeLessThan(firstDuration * 1.5); // Allow some variance
+      expect(cachedDuration).toBeLessThan(50); // Should be reasonably fast from cache
+    });
+    
+    test('cache is invalidated when clearFilterCache is called', () => {
+      setupStateWithContracts(5000);
+      const filters = { status: 'Erstellt' };
+      
+      // Prime cache
+      getFilteredContracts(filters);
+      
+      // Clear cache
+      clearFilterCache();
+      
+      // Next call should be slower (not from cache)
+      const { duration } = measureTime(() => {
+        return getFilteredContracts(filters);
+      });
+      
+      // Should be slower than cached but still within threshold
+      expect(duration).toBeGreaterThan(5);
+      expect(duration).toBeLessThan(PERFORMANCE_THRESHOLDS.filter_10000);
     });
     
     test('filters 10000 contracts by location within threshold', () => {

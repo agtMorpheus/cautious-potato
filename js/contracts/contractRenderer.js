@@ -542,10 +542,15 @@ function applyContractFiltersAndSort(contracts, filters) {
  * @param {Array} contracts - Array of contract objects
  * @param {string} sortKey - Current sort key
  * @param {string} sortDir - Current sort direction
+ * @param {Object} options - Rendering options
+ * @param {number} options.limit - Maximum rows to render (default: 500, use virtualList for larger sets)
+ * @param {number} options.offset - Offset for pagination (default: 0)
  * @returns {string} HTML string
  */
-function renderContractTableWithActions(contracts, sortKey, sortDir) {
-    const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
+function renderContractTableWithActions(contracts, sortKey, sortDir, options = {}) {
+    const limit = options.limit || 500; // Increased from 100 to 500
+    const offset = options.offset || 0;
+    const displayContracts = contracts.slice(offset, offset + limit);
 
     // Get available workers from HR module for dropdown
     const workers = getAvailableWorkers();
@@ -653,8 +658,11 @@ function renderContractTableWithActions(contracts, sortKey, sortDir) {
         </div>
     `;
 
-    if (contracts.length > 100) {
-        html += `<p class="table-footer">Zeige 100 von ${contracts.length} Verträgen</p>`;
+    // Add pagination info if needed
+    if (contracts.length > displayContracts.length) {
+        const start = offset + 1;
+        const end = Math.min(offset + displayContracts.length, contracts.length);
+        html += `<p class="table-footer">Zeige ${start}-${end} von ${contracts.length} Verträgen</p>`;
     }
 
     return html;
@@ -747,10 +755,15 @@ function updateContractList(contractState) {
 /**
  * Render a contract table
  * @param {Array} contracts - Array of contract objects
+ * @param {Object} options - Rendering options
+ * @param {number} options.limit - Maximum rows to render (default: 500)
+ * @param {number} options.offset - Offset for pagination (default: 0)
  * @returns {string} HTML string
  */
-function renderContractTable(contracts) {
-    const displayContracts = contracts.slice(0, 100); // Limit to 100 for performance
+function renderContractTable(contracts, options = {}) {
+    const limit = options.limit || 500; // Increased from 100 to 500
+    const offset = options.offset || 0;
+    const displayContracts = contracts.slice(offset, offset + limit);
 
     let html = `
         <div class="data-table-container">
@@ -793,8 +806,10 @@ function renderContractTable(contracts) {
         </div>
     `;
 
-    if (contracts.length > 100) {
-        html += `<p class="table-footer">Zeige 100 von ${contracts.length} Verträgen</p>`;
+    if (contracts.length > displayContracts.length) {
+        const start = offset + 1;
+        const end = Math.min(offset + displayContracts.length, contracts.length);
+        html += `<p class="table-footer">Zeige ${start}-${end} von ${contracts.length} Verträgen</p>`;
     }
 
     return html;
