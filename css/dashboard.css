@@ -409,3 +409,102 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 }
+
+/* ==================== Welcome Message (Navbar Marquee) ==================== */
+.welcome-message-container {
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    height: 36px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-sm);
+    overflow: hidden;
+    margin-right: var(--space-md);
+}
+
+.welcome-message-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    height: 100%;
+}
+
+.welcome-message-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    animation: welcome-pulse 2s ease-in-out infinite;
+}
+
+@keyframes welcome-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.welcome-message-content {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    min-width: 0;
+}
+
+.welcome-message-text {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    padding-right: var(--space-md);
+}
+
+/* Marquee animation for long messages */
+.welcome-message-text.welcome-message-marquee {
+    animation: marquee-scroll var(--marquee-duration, 20s) linear infinite;
+}
+
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Pause animation on hover */
+.welcome-message-container:hover .welcome-message-text.welcome-message-marquee {
+    animation-play-state: paused;
+}
+
+.welcome-message-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    cursor: help;
+}
+
+/* Responsive - hide on smaller screens */
+@media (max-width: 1200px) {
+    .welcome-message-container {
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 900px) {
+    .welcome-message-container {
+        display: none;
+    }
+}
