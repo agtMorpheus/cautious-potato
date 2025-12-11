@@ -1,9 +1,12 @@
 /**
  * Main Stylesheet - Minimalist Professional Theme
- * Uses variables.css for tokens.
+ * Uses standardized design system components.
  */
 
 @import 'variables.css';
+@import 'buttons.css';
+@import 'forms.css';
+@import 'alerts.css';
 
 /* ==================== Reset & Base ==================== */
 *,
@@ -467,47 +470,8 @@ ul {
     padding: var(--space-lg);
 }
 
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: var(--font-size-sm);
-    transition: all var(--duration-fast);
-}
-
-.btn-full {
-    width: 100%;
-    justify-content: center;
-}
-
-.btn-primary {
-    background-color: var(--primary-main);
-    color: var(--text-inverse);
-}
-
-.btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
-}
-
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn-secondary {
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    color: var(--text-main);
-}
-
-.btn-secondary:hover:not(:disabled) {
-    background-color: var(--bg-hover);
-    border-color: var(--border-highlight);
-}
+/* Import standardized button system */
+@import url('./buttons.css');
 
 /* Inputs */
 .form-group {

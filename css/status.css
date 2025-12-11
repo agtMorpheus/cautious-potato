@@ -1,0 +1,605 @@
+/**
+ * Status Indicators & Progress System
+ * 
+ * Implements status indicators, progress bars, and state displays
+ * from the UI Standardization Guide. Provides consistent feedback
+ * across all modules.
+ */
+
+/* ==================== STATUS INDICATORS ==================== */
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-medium);
+    line-height: var(--line-height-body);
+}
+
+.status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.status-dot--sm {
+    width: 8px;
+    height: 8px;
+}
+
+.status-dot--lg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ==================== STATUS VARIANTS ==================== */
+
+.status--idle {
+    color: var(--color-text-secondary);
+}
+
+.status--pending {
+    color: var(--color-warning);
+}
+
+.status--pending .status-dot {
+    animation: pulse 2s infinite;
+}
+
+.status--success {
+    color: var(--color-success);
+}
+
+.status--error {
+    color: var(--color-error);
+}
+
+.status--info {
+    color: var(--color-info);
+}
+
+.status--processing {
+    color: var(--color-primary);
+}
+
+.status--processing .status-dot {
+    animation: pulse 1.5s infinite;
+}
+
+/* ==================== STATUS BADGES ==================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--radius-std-full);
+    font-size: var(--font-size-tiny);
+    font-weight: var(--font-weight-std-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-relaxed);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge--success {
+    background: rgba(33, 128, 141, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(33, 128, 141, 0.2);
+}
+
+.badge--error {
+    background: rgba(192, 21, 47, 0.1);
+    color: var(--color-error);
+    border: 1px solid rgba(192, 21, 47, 0.2);
+}
+
+.badge--warning {
+    background: rgba(168, 75, 47, 0.1);
+    color: var(--color-warning);
+    border: 1px solid rgba(168, 75, 47, 0.2);
+}
+
+.badge--info {
+    background: rgba(98, 108, 113, 0.1);
+    color: var(--color-info);
+    border: 1px solid rgba(98, 108, 113, 0.2);
+}
+
+.badge--neutral {
+    background: var(--color-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-std);
+}
+
+.badge--primary {
+    background: rgba(33, 128, 141, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(33, 128, 141, 0.2);
+}
+
+/* Badge sizes */
+.badge--sm {
+    padding: var(--space-2) var(--space-6);
+    font-size: 10px;
+    gap: var(--space-2);
+}
+
+.badge--lg {
+    padding: var(--space-6) var(--space-12);
+    font-size: var(--font-size-small);
+    gap: var(--space-6);
+}
+
+/* ==================== PROGRESS INDICATORS ==================== */
+
+.progress {
+    width: 100%;
+    height: 8px;
+    background: var(--color-secondary);
+    border-radius: var(--radius-std-full);
+    overflow: hidden;
+    margin: var(--space-8) 0;
+    position: relative;
+}
+
+.progress__bar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-std-full);
+    transition: width var(--duration-normal) var(--ease-out);
+    min-width: 0;
+}
+
+.progress--success .progress__bar {
+    background: var(--color-success);
+}
+
+.progress--error .progress__bar {
+    background: var(--color-error);
+}
+
+.progress--warning .progress__bar {
+    background: var(--color-warning);
+}
+
+.progress--info .progress__bar {
+    background: var(--color-info);
+}
+
+/* Progress sizes */
+.progress--sm {
+    height: 4px;
+}
+
+.progress--lg {
+    height: 12px;
+}
+
+.progress--xl {
+    height: 16px;
+}
+
+/* Indeterminate Progress */
+.progress--indeterminate .progress__bar {
+    width: 30%;
+    animation: progress-indeterminate 2s infinite linear;
+}
+
+@keyframes progress-indeterminate {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+}
+
+/* Progress with label */
+.progress-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.progress__label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+}
+
+.progress__text {
+    font-weight: var(--font-weight-std-medium);
+}
+
+.progress__percentage {
+    font-family: var(--font-family-mono);
+    color: var(--color-text-secondary);
+}
+
+/* ==================== LOADING SPINNERS ==================== */
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-secondary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin var(--duration-slow) linear infinite;
+}
+
+.loading-spinner--sm {
+    width: 16px;
+    height: 16px;
+    border-width: 1.5px;
+}
+
+.loading-spinner--lg {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+}
+
+.loading-spinner--xl {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
+
+/* Spinner variants */
+.loading-spinner--success {
+    border-top-color: var(--color-success);
+}
+
+.loading-spinner--error {
+    border-top-color: var(--color-error);
+}
+
+.loading-spinner--warning {
+    border-top-color: var(--color-warning);
+}
+
+.loading-spinner--info {
+    border-top-color: var(--color-info);
+}
+
+/* ==================== STEP INDICATORS ==================== */
+
+.steps {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    margin: var(--space-16) 0;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    flex: 1;
+    position: relative;
+}
+
+.step__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-secondary);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-semibold);
+    flex-shrink: 0;
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.step__label {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-std-medium);
+}
+
+.step__connector {
+    flex: 1;
+    height: 2px;
+    background: var(--color-secondary);
+    margin: 0 var(--space-8);
+}
+
+.step:last-child .step__connector {
+    display: none;
+}
+
+/* Step states */
+.step--active .step__indicator {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+.step--active .step__label {
+    color: var(--color-text);
+}
+
+.step--completed .step__indicator {
+    background: var(--color-success);
+    color: var(--color-white);
+}
+
+.step--completed .step__label {
+    color: var(--color-text);
+}
+
+.step--completed .step__connector {
+    background: var(--color-success);
+}
+
+.step--error .step__indicator {
+    background: var(--color-error);
+    color: var(--color-white);
+}
+
+.step--error .step__label {
+    color: var(--color-error);
+}
+
+/* ==================== ACTIVITY INDICATORS ==================== */
+
+.activity-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-12);
+    background: var(--color-secondary);
+    border-radius: var(--radius-std-base);
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+}
+
+.activity-indicator__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.activity-indicator--processing .activity-indicator__icon {
+    animation: spin var(--duration-slow) linear infinite;
+}
+
+.activity-indicator--success {
+    background: rgba(33, 128, 141, 0.1);
+    color: var(--color-success);
+}
+
+.activity-indicator--error {
+    background: rgba(192, 21, 47, 0.1);
+    color: var(--color-error);
+}
+
+.activity-indicator--warning {
+    background: rgba(168, 75, 47, 0.1);
+    color: var(--color-warning);
+}
+
+/* ==================== PULSE ANIMATIONS ==================== */
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== STATUS GROUPS ==================== */
+
+.status-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding: var(--space-16);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-base);
+}
+
+.status-group__title {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
+    margin: 0 0 var(--space-8) 0;
+}
+
+.status-group__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-8) 0;
+    border-bottom: 1px solid var(--color-border-std);
+}
+
+.status-group__item:last-child {
+    border-bottom: none;
+}
+
+.status-group__label {
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+}
+
+.status-group__value {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-medium);
+}
+
+/* ==================== RESPONSIVE BEHAVIOR ==================== */
+
+@media (max-width: 640px) {
+    .steps {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-12);
+    }
+    
+    .step {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .step__connector {
+        display: none;
+    }
+    
+    .status-group__item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+    }
+    
+    .badge {
+        font-size: 10px;
+        padding: var(--space-2) var(--space-6);
+    }
+}
+
+/* ==================== ACCESSIBILITY ENHANCEMENTS ==================== */
+
+/* Screen reader support */
+.status-indicator[aria-label] .status-dot {
+    /* Dot is decorative when aria-label is present */
+}
+
+.progress[role="progressbar"] {
+    /* Ensure proper ARIA attributes are used */
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+    .badge {
+        border-width: 2px;
+    }
+    
+    .step__indicator {
+        border: 2px solid currentColor;
+    }
+    
+    .progress {
+        border: 1px solid var(--color-border-std);
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .status--pending .status-dot,
+    .status--processing .status-dot,
+    .loading-spinner,
+    .activity-indicator--processing .activity-indicator__icon,
+    .progress--indeterminate .progress__bar {
+        animation: none;
+    }
+    
+    .progress__bar,
+    .step__indicator {
+        transition: none;
+    }
+}
+
+/* ==================== DARK MODE ADJUSTMENTS ==================== */
+
+[data-color-scheme="dark"] .loading-spinner,
+[data-theme="dark"] .loading-spinner {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-color: var(--color-primary);
+}
+
+[data-color-scheme="dark"] .activity-indicator,
+[data-theme="dark"] .activity-indicator {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-color-scheme="dark"] .status-group,
+[data-theme="dark"] .status-group {
+    background: var(--color-surface);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-color-scheme="dark"] .status-group__item,
+[data-theme="dark"] .status-group__item {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== LEGACY COMPATIBILITY ==================== */
+
+/* Map old class names for backward compatibility */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-medium);
+    line-height: var(--line-height-body);
+}
+
+.status__dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-secondary);
+    border-radius: var(--radius-std-full);
+    overflow: hidden;
+    margin: var(--space-8) 0;
+    position: relative;
+}
+
+.progress-bar__fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-std-full);
+    transition: width var(--duration-normal) var(--ease-out);
+    min-width: 0;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-secondary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin var(--duration-slow) linear infinite;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    margin: var(--space-16) 0;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    flex: 1;
+    position: relative;
+}

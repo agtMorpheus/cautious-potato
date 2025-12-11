@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3 Advanced Components Demo</title>
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="../css/phase3-advanced.css">
+    
+    <style>
+        body {
+            font-family: var(--font-family-base);
+            background: var(--bg-app);
+            color: var(--text-main);
+            margin: 0;
+            padding: var(--space-lg);
+            line-height: var(--line-height-base);
+        }
+
+        .demo-section {
+            margin-bottom: var(--space-xxl);
+            padding: var(--space-xl);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .demo-section h2 {
+            margin: 0 0 var(--space-lg) 0;
+            color: var(--primary-main);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .demo-section h3 {
+            margin: var(--space-xl) 0 var(--space-md) 0;
+            color: var(--text-main);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        .demo-item {
+            padding: var(--space-lg);
+            background: var(--bg-surface);
+            border: var(--border-width-thin) solid var(--border-base);
+            border-radius: var(--radius-md);
+        }
+
+        .demo-item h4 {
+            margin: 0 0 var(--space-md) 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-main);
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: var(--space-sm);
+            margin: var(--space-md) 0;
+            flex-wrap: wrap;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            z-index: 1000;
+        }
+
+        .sample-content {
+            height: 200px;
+            background: var(--bg-hover);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .animation-demo {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-main);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            margin: var(--space-md) auto;
+        }
+
+        .responsive-demo {
+            padding: var(--space-md);
+            background: var(--bg-hover);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .breakpoint-indicator {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--primary-main);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-medium);
+        }
+    </style>
+</head>
+<body>
+    <button class="btn btn--secondary theme-toggle" onclick="toggleTheme()">
+        🌙 Toggle Theme
+    </button>
+
+    <div class="container">
+        <header style="text-align: center; margin-bottom: var(--space-xxl);">
+            <h1 style="margin: 0; color: var(--primary-main); font-size: var(--font-size-4xl);">
+                Phase 3 Advanced Components
+            </h1>
+            <p style="margin: var(--space-md) 0 0 0; color: var(--text-muted); font-size: var(--font-size-lg);">
+                Navigation, Loading States, Animations & Responsive Utilities
+            </p>
+        </header>
+
+        <!-- Navigation Components -->
+        <section class="demo-section">
+            <h2>🧭 Navigation Components</h2>
+            
+            <h3>Horizontal Tabs</h3>
+            <div class="demo-item">
+                <h4>Basic Tabs</h4>
+                <div class="tabs" id="demo-tabs-1">
+                    <div class="tabs__nav">
+                        <button class="tabs__tab">
+                            Overview
+                        </button>
+                        <button class="tabs__tab">
+                            Details
+                            <span class="tabs__badge">3</span>
+                        </button>
+                        <button class="tabs__tab">
+                            Settings
+                        </button>
+                        <button class="tabs__tab tabs__tab--disabled">
+                            Disabled
+                        </button>
+                    </div>
+                    <div class="tabs__content">
+                        <div class="tabs__panel" id="panel-1">
+                            <h4>Overview Panel</h4>
+                            <p>This is the overview content. It provides a general summary of the information.</p>
+                        </div>
+                        <div class="tabs__panel" id="panel-2">
+                            <h4>Details Panel</h4>
+                            <p>Here you can find detailed information and specific data points.</p>
+                        </div>
+                        <div class="tabs__panel" id="panel-3">
+                            <h4>Settings Panel</h4>
+                            <p>Configure your preferences and application settings here.</p>
+                        </div>
+                        <div class="tabs__panel" id="panel-4">
+                            <h4>Disabled Panel</h4>
+                            <p>This panel is disabled and cannot be accessed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Vertical Tabs</h3>
+            <div class="demo-item">
+                <h4>Vertical Layout</h4>
+                <div class="tabs tabs--vertical" id="demo-tabs-2">
+                    <div class="tabs__nav">
+                        <button class="tabs__tab">
+                            🏠 Dashboard
+                        </button>
+                        <button class="tabs__tab">
+                            📊 Analytics
+                            <span class="tabs__badge">12</span>
+                        </button>
+                        <button class="tabs__tab">
+                            👥 Users
+                        </button>
+                        <button class="tabs__tab">
+                            ⚙️ Settings
+                        </button>
+                    </div>
+                    <div class="tabs__content">
+                        <div class="tabs__panel">
+                            <h4>Dashboard</h4>
+                            <p>Welcome to your dashboard. Here's an overview of your key metrics.</p>
+                        </div>
+                        <div class="tabs__panel">
+                            <h4>Analytics</h4>
+                            <p>Detailed analytics and reporting data for your application.</p>
+                        </div>
+                        <div class="tabs__panel">
+                            <h4>Users</h4>
+                            <p>Manage user accounts, permissions, and access controls.</p>
+                        </div>
+                        <div class="tabs__panel">
+                            <h4>Settings</h4>
+                            <p>Configure application settings and preferences.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Breadcrumbs</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Basic Breadcrumbs</h4>
+                    <nav class="breadcrumbs" id="breadcrumb-1">
+                        <div class="breadcrumbs__item">
+                            <a href="#" class="breadcrumbs__link">Home</a>
+                            <span class="breadcrumbs__separator">/</span>
+                        </div>
+                        <div class="breadcrumbs__item">
+                            <a href="#" class="breadcrumbs__link">Products</a>
+                            <span class="breadcrumbs__separator">/</span>
+                        </div>
+                        <div class="breadcrumbs__item">
+                            <a href="#" class="breadcrumbs__link">Electronics</a>
+                            <span class="breadcrumbs__separator">/</span>
+                        </div>
+                        <div class="breadcrumbs__item">
+                            <span class="breadcrumbs__current">Laptops</span>
+                        </div>
+                    </nav>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--secondary" onclick="updateBreadcrumbDemo()">
+                            Update Path
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Breadcrumbs with Icons</h4>
+                    <nav class="breadcrumbs">
+                        <div class="breadcrumbs__item">
+                            <a href="#" class="breadcrumbs__link">
+                                🏠 Home
+                            </a>
+                            <span class="breadcrumbs__separator">/</span>
+                        </div>
+                        <div class="breadcrumbs__item">
+                            <a href="#" class="breadcrumbs__link">
+                                📁 Documents
+                            </a>
+                            <span class="breadcrumbs__separator">/</span>
+                        </div>
+                        <div class="breadcrumbs__item">
+                            <span class="breadcrumbs__current">
+                                📄 Report.pdf
+                            </span>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading States -->
+        <section class="demo-section">
+            <h2>⏳ Loading States</h2>
+            
+            <h3>Spinners</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Spinner Sizes</h4>
+                    <div style="display: flex; align-items: center; gap: var(--space-lg); margin: var(--space-md) 0;">
+                        <div class="spinner spinner--sm"></div>
+                        <div class="spinner"></div>
+                        <div class="spinner spinner--lg"></div>
+                        <div class="spinner spinner--xl"></div>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Spinner Variants</h4>
+                    <div style="display: flex; align-items: center; gap: var(--space-lg); margin: var(--space-md) 0;">
+                        <div class="spinner spinner--primary"></div>
+                        <div class="spinner spinner--success"></div>
+                        <div class="spinner spinner--warning"></div>
+                        <div class="spinner spinner--danger"></div>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Dots Spinner</h4>
+                    <div class="spinner-dots">
+                        <div class="spinner-dots__dot"></div>
+                        <div class="spinner-dots__dot"></div>
+                        <div class="spinner-dots__dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Skeleton Loaders</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Text Skeletons</h4>
+                    <div class="skeleton skeleton--heading"></div>
+                    <div class="skeleton skeleton--text"></div>
+                    <div class="skeleton skeleton--text" style="width: 80%;"></div>
+                    <div class="skeleton skeleton--text" style="width: 60%;"></div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Component Skeletons</h4>
+                    <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                        <div class="skeleton skeleton--avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton--text" style="width: 40%;"></div>
+                            <div class="skeleton skeleton--text skeleton--text--sm" style="width: 60%;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton--button"></div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Card Skeleton</h4>
+                    <div class="skeleton skeleton--image" style="height: 120px; margin-bottom: var(--space-md);"></div>
+                    <div class="skeleton skeleton--heading" style="width: 70%;"></div>
+                    <div class="skeleton skeleton--text"></div>
+                    <div class="skeleton skeleton--text" style="width: 80%;"></div>
+                </div>
+            </div>
+
+            <h3>Loading Overlays</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Basic Loading Overlay</h4>
+                    <div class="sample-content" id="loading-demo-1">
+                        <p>Content Area</p>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="showLoadingDemo('loading-demo-1')">
+                            Show Loading
+                        </button>
+                        <button class="btn btn--sm btn--secondary" onclick="hideLoadingDemo('loading-demo-1')">
+                            Hide Loading
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Loading with Text</h4>
+                    <div class="sample-content" id="loading-demo-2">
+                        <p>Content Area</p>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="showLoadingWithText('loading-demo-2')">
+                            Show with Text
+                        </button>
+                        <button class="btn btn--sm btn--secondary" onclick="hideLoadingDemo('loading-demo-2')">
+                            Hide Loading
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Skeleton Loading Demo</h4>
+                    <div id="skeleton-demo-content">
+                        <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                            <div style="width: 48px; height: 48px; background: var(--primary-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                JD
+                            </div>
+                            <div>
+                                <h4 style="margin: 0;">John Doe</h4>
+                                <p style="margin: 0; color: var(--text-muted); font-size: var(--font-size-small);">Software Engineer</p>
+                            </div>
+                        </div>
+                        <p>This is some sample content that will be replaced with skeleton loaders when loading.</p>
+                        <button class="btn btn--primary">Action Button</button>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="showSkeletonDemo()">
+                            Show Skeleton
+                        </button>
+                        <button class="btn btn--sm btn--secondary" onclick="hideSkeletonDemo()">
+                            Show Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Animations -->
+        <section class="demo-section">
+            <h2>✨ Animations</h2>
+            
+            <h3>Basic Animations</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Fade Animations</h4>
+                    <div class="animation-demo" id="fade-demo" onclick="animateElement('fade-demo', 'fade-in')">
+                        Fade In
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('fade-demo', 'fade-in')">
+                            Fade In
+                        </button>
+                        <button class="btn btn--sm btn--secondary" onclick="animateElement('fade-demo', 'fade-out')">
+                            Fade Out
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Slide Animations</h4>
+                    <div class="animation-demo" id="slide-demo" onclick="animateElement('slide-demo', 'slide-in-up')">
+                        Slide
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('slide-demo', 'slide-in-up')">
+                            Slide Up
+                        </button>
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('slide-demo', 'slide-in-down')">
+                            Slide Down
+                        </button>
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('slide-demo', 'slide-in-left')">
+                            Slide Left
+                        </button>
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('slide-demo', 'slide-in-right')">
+                            Slide Right
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Scale & Special Effects</h4>
+                    <div class="animation-demo" id="scale-demo" onclick="animateElement('scale-demo', 'scale-in')">
+                        Scale
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('scale-demo', 'scale-in')">
+                            Scale In
+                        </button>
+                        <button class="btn btn--sm btn--primary" onclick="animateElement('scale-demo', 'bounce')">
+                            Bounce
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Hover Effects</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Hover Lift</h4>
+                    <div class="card hover-lift" style="padding: var(--space-lg); text-align: center; cursor: pointer;">
+                        <h4 style="margin: 0;">Hover me!</h4>
+                        <p style="margin: var(--space-sm) 0 0 0; color: var(--text-muted);">I lift up on hover</p>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Hover Scale</h4>
+                    <div class="card hover-scale" style="padding: var(--space-lg); text-align: center; cursor: pointer;">
+                        <h4 style="margin: 0;">Hover me!</h4>
+                        <p style="margin: var(--space-sm) 0 0 0; color: var(--text-muted);">I scale up on hover</p>
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Hover Glow</h4>
+                    <div class="card hover-glow" style="padding: var(--space-lg); text-align: center; cursor: pointer;">
+                        <h4 style="margin: 0;">Hover me!</h4>
+                        <p style="margin: var(--space-sm) 0 0 0; color: var(--text-muted);">I glow on hover</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Scroll Animations</h3>
+            <div class="demo-item">
+                <h4>Scroll-triggered Animations</h4>
+                <p>Scroll down to see elements animate in:</p>
+                <div style="height: 100px;"></div>
+                <div data-animate="fade-in" style="padding: var(--space-lg); background: var(--bg-hover); border-radius: var(--radius-md); margin: var(--space-md) 0;">
+                    <h4>Fade In Animation</h4>
+                    <p>This element fades in when it comes into view.</p>
+                </div>
+                <div data-animate="slide-in-left" data-animate-delay="200" style="padding: var(--space-lg); background: var(--bg-hover); border-radius: var(--radius-md); margin: var(--space-md) 0;">
+                    <h4>Slide In Left (Delayed)</h4>
+                    <p>This element slides in from the left with a delay.</p>
+                </div>
+                <div data-animate="scale-in" data-animate-delay="400" style="padding: var(--space-lg); background: var(--bg-hover); border-radius: var(--radius-md); margin: var(--space-md) 0;">
+                    <h4>Scale In (More Delay)</h4>
+                    <p>This element scales in with an even longer delay.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Responsive Utilities -->
+        <section class="demo-section">
+            <h2>📱 Responsive Utilities</h2>
+            
+            <h3>Breakpoint Detection</h3>
+            <div class="demo-item">
+                <h4>Current Breakpoint</h4>
+                <div class="responsive-demo">
+                    <p>Current breakpoint: <span class="breakpoint-indicator" id="current-breakpoint">Loading...</span></p>
+                    <p>Resize your browser window to see the breakpoint change.</p>
+                </div>
+            </div>
+
+            <h3>Responsive Display</h3>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Mobile Only</h4>
+                    <div class="mobile-only" style="padding: var(--space-md); background: var(--success-light); border-radius: var(--radius-md); color: var(--c-success);">
+                        📱 Visible only on mobile devices
+                    </div>
+                    <div class="tablet-up" style="padding: var(--space-md); background: var(--info-light); border-radius: var(--radius-md); color: var(--c-info);">
+                        💻 Visible on tablet and larger screens
+                    </div>
+                </div>
+
+                <div class="demo-item">
+                    <h4>Desktop Up</h4>
+                    <div class="desktop-up" style="padding: var(--space-md); background: var(--warning-light); border-radius: var(--radius-md); color: var(--c-warning);">
+                        🖥️ Visible only on desktop and larger screens
+                    </div>
+                    <div class="tablet-up desktop-only" style="padding: var(--space-md); background: var(--danger-light); border-radius: var(--radius-md); color: var(--c-danger);">
+                        📱💻 Visible only on tablet (between mobile and desktop)
+                    </div>
+                </div>
+            </div>
+
+            <h3>Responsive Grid</h3>
+            <div class="demo-item">
+                <h4>Auto-responsive Grid</h4>
+                <div class="grid grid--4">
+                    <div style="padding: var(--space-md); background: var(--bg-hover); border-radius: var(--radius-md); text-align: center;">
+                        Grid Item 1
+                    </div>
+                    <div style="padding: var(--space-md); background: var(--bg-hover); border-radius: var(--radius-md); text-align: center;">
+                        Grid Item 2
+                    </div>
+                    <div style="padding: var(--space-md); background: var(--bg-hover); border-radius: var(--radius-md); text-align: center;">
+                        Grid Item 3
+                    </div>
+                    <div style="padding: var(--space-md); background: var(--bg-hover); border-radius: var(--radius-md); text-align: center;">
+                        Grid Item 4
+                    </div>
+                </div>
+                <p style="margin-top: var(--space-md); color: var(--text-muted); font-size: var(--font-size-small);">
+                    This grid automatically adjusts: 4 columns on large screens, 2 on tablets, 1 on mobile.
+                </p>
+            </div>
+
+            <h3>Container Utilities</h3>
+            <div class="demo-item">
+                <h4>Container Variants</h4>
+                <div style="background: var(--bg-hover); padding: var(--space-sm); border-radius: var(--radius-md); margin: var(--space-sm) 0;">
+                    <div class="container container--narrow" style="background: var(--primary-light); padding: var(--space-sm); border-radius: var(--radius-sm);">
+                        Narrow Container (800px max)
+                    </div>
+                </div>
+                <div style="background: var(--bg-hover); padding: var(--space-sm); border-radius: var(--radius-md); margin: var(--space-sm) 0;">
+                    <div class="container" style="background: var(--success-light); padding: var(--space-sm); border-radius: var(--radius-sm);">
+                        Default Container (1200px max)
+                    </div>
+                </div>
+                <div style="background: var(--bg-hover); padding: var(--space-sm); border-radius: var(--radius-md); margin: var(--space-sm) 0;">
+                    <div class="container container--wide" style="background: var(--warning-light); padding: var(--space-sm); border-radius: var(--radius-sm);">
+                        Wide Container (1400px max)
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/phase3-advanced.js"></script>
+    
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const button = document.querySelector('.theme-toggle');
+            button.textContent = newTheme === 'dark' ? '☀️ Toggle Theme' : '🌙 Toggle Theme';
+        }
+
+        // Loading demo functions
+        function showLoadingDemo(targetId) {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.loading.show(targetId);
+            }
+        }
+
+        function hideLoadingDemo(targetId) {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.loading.hide(targetId);
+            }
+        }
+
+        function showLoadingWithText(targetId) {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.loading.show(targetId, {
+                    text: 'Loading data...',
+                    subtext: 'Please wait while we fetch your information'
+                });
+            }
+        }
+
+        // Skeleton demo functions
+        function showSkeletonDemo() {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.skeleton.show('skeleton-demo-content', [
+                    { type: 'avatar', options: { size: 'lg' } },
+                    { type: 'heading', options: { width: '60%' } },
+                    { type: 'text' },
+                    { type: 'text', options: { width: '80%' } },
+                    { type: 'button' }
+                ]);
+            }
+        }
+
+        function hideSkeletonDemo() {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.skeleton.hide('skeleton-demo-content');
+            }
+        }
+
+        // Animation demo functions
+        function animateElement(elementId, animation) {
+            if (window.Phase3Advanced) {
+                window.Phase3Advanced.animation.animate(elementId, animation);
+            }
+        }
+
+        // Breadcrumb demo
+        function updateBreadcrumbDemo() {
+            if (window.Phase3Advanced) {
+                const paths = [
+                    [
+                        { text: 'Home', href: '#' },
+                        { text: 'Categories', href: '#' },
+                        { text: 'Books', href: '#' },
+                        { text: 'Fiction' }
+                    ],
+                    [
+                        { text: 'Dashboard', href: '#' },
+                        { text: 'Reports', href: '#' },
+                        { text: 'Monthly Summary' }
+                    ],
+                    [
+                        { text: 'Home', href: '#' },
+                        { text: 'Products', href: '#' },
+                        { text: 'Electronics', href: '#' },
+                        { text: 'Laptops' }
+                    ]
+                ];
+                
+                const randomPath = paths[Math.floor(Math.random() * paths.length)];
+                window.Phase3Advanced.breadcrumb.update('breadcrumb-1', randomPath);
+            }
+        }
+
+        // Update current breakpoint display
+        function updateBreakpointDisplay() {
+            if (window.Phase3Advanced) {
+                const breakpoint = window.Phase3Advanced.responsive.getCurrentBreakpoint();
+                const indicator = document.getElementById('current-breakpoint');
+                if (indicator) {
+                    indicator.textContent = breakpoint;
+                }
+            }
+        }
+
+        // Listen for breakpoint changes
+        document.addEventListener('breakpoint:change', (e) => {
+            updateBreakpointDisplay();
+        });
+
+        // Initial breakpoint display
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateBreakpointDisplay, 100);
+        });
+
+        // Listen for window resize to update breakpoint
+        window.addEventListener('resize', updateBreakpointDisplay);
+
+        // Tab change event listener
+        document.addEventListener('tab:change', (e) => {
+            console.log('Tab changed:', e.detail);
+        });
+    </script>
+</body>
+</html>

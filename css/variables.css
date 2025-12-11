@@ -19,7 +19,8 @@
     --space-lg: 24px;
     --space-xl: 32px;
     --space-xxl: 48px;
-    --space-2xl: 48px; /* Alias for --space-xxl for legacy compatibility */
+    --space-2xl: 48px;
+    /* Alias for --space-xxl for legacy compatibility */
 
     /* --- Border Radius --- */
     --radius-sm: 4px;
@@ -72,7 +73,7 @@
     --warning-rgb: 245, 158, 11;
     --danger-rgb: 239, 68, 68;
     --info-rgb: 6, 182, 212;
-    
+
     /* Folder/Module Colors */
     --folder-purple: #8b5cf6;
     --folder-purple-rgb: 139, 92, 246;
@@ -188,7 +189,7 @@
     --layout-table-height: 600px;
     --layout-header-height: 100px;
     --layout-footer-height: 80px;
-    
+
     /* Border widths */
     --border-width-thin: 1px;
     --border-width-medium: 2px;
@@ -236,7 +237,143 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-    
+
     /* Shadow XL for larger elements */
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* ==================== UI STANDARDIZATION GUIDE VARIABLES ==================== */
+:root {
+    /* 1. TYPOGRAPHY STANDARDS */
+    --font-family-std-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica Neue, Arial, sans-serif;
+    --font-family-std-mono: 'Courier New', Courier, monospace;
+
+    /* Font Sizes (Hierarchical) */
+    --font-size-h1: 2.5rem;        /* 40px - Page titles */
+    --font-size-h2: 1.5rem;        /* 24px - Section headings */
+    --font-size-h3: 1.25rem;       /* 20px - Subsection headings */
+    --font-size-h4: 1.1rem;        /* 18px - Minor headings */
+    --font-size-std-base: 1rem;    /* 16px - Body text */
+    --font-size-small: 0.95rem;    /* 15px - Labels, helper text */
+    --font-size-tiny: 0.85rem;     /* 13px - Hints, captions */
+
+    /* Font Weights */
+    --font-weight-std-normal: 400;     /* Body text */
+    --font-weight-std-medium: 500;     /* Labels, smaller emphasis */
+    --font-weight-std-semibold: 600;   /* Headings */
+    --font-weight-std-bold: 700;       /* Strong emphasis (use sparingly) */
+
+    /* Line Heights */
+    --line-height-headings: 1.2;       /* Tight for headings */
+    --line-height-body: 1.5;           /* Comfortable reading */
+    --line-height-form: 1.5;           /* Input text */
+
+    /* Letter Spacing */
+    --letter-spacing-normal: 0;        /* Default text */
+    --letter-spacing-tight: -0.01em;   /* Headings for cohesion */
+    --letter-spacing-relaxed: 0.02em;  /* Small caps or special emphasis */
+
+    /* 2. COLOR SYSTEM */
+    /* Primitive Colors */
+    --color-white: #ffffff;
+    --color-cream-50: #fcfcf9;
+    --color-cream-100: #fffffe;
+    --color-gray-200: #f5f5f5;
+    --color-gray-300: #a7a9a9;
+    --color-gray-400: #777c7c;
+
+    --color-slate-500: #626c71;
+    --color-slate-900: #133452;
+    --color-charcoal-700: #1f2121;
+    --color-charcoal-800: #262828;
+
+    --color-teal-300: #32b8c6;
+    --color-teal-400: #2da6b2;
+    --color-teal-500: #21808d;
+    --color-teal-600: #1d7480;
+
+    --color-red-400: #ff5459;
+    --color-red-500: #c0152f;
+    --color-orange-400: #e68161;
+    --color-orange-500: #a84b2f;
+
+    /* Semantic Color Tokens (Light Mode - Default) */
+    --color-background: #fcfcf9;       /* Page background */
+    --color-surface: #fffffe;          /* Card/panel background */
+    --color-text: #133452;             /* Primary text */
+    --color-text-secondary: #626c71;   /* Muted text */
+    --color-primary: #21808d;          /* Primary action */
+    --color-primary-hover: #1d7480;    /* Hover state */
+    --color-primary-active: #1a6c73;   /* Active/pressed state */
+    --color-secondary: rgba(94, 82, 64, 0.12);     /* Secondary action background */
+    --color-secondary-hover: rgba(94, 82, 64, 0.2);
+    --color-border-std: rgba(94, 82, 64, 0.2);     /* Borders */
+    --color-error: #c0152f;            /* Error state */
+    --color-success: #21808d;          /* Success state */
+    --color-warning: #a84b2f;          /* Warning state */
+    --color-info: #626c71;             /* Info state */
+    --color-focus-ring: rgba(33, 128, 141, 0.4);   /* Focus indicator */
+
+    /* 3. SPACING SYSTEM (Based on 4px unit) */
+    --space-0: 0;
+    --space-1: 1px;
+    --space-2: 2px;
+    --space-4: 4px;
+    --space-6: 6px;
+    --space-8: 8px;
+    --space-10: 10px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-40: 40px;
+
+    /* 12. BORDER RADIUS */
+    --radius-std-sm: 4px;      /* Small elements, inputs */
+    --radius-std-base: 6px;    /* Default (buttons, cards) */
+    --radius-std-md: 8px;      /* Medium (panels) */
+    --radius-std-lg: 12px;     /* Large (modals, large cards) */
+    --radius-std-full: 9999px; /* Pill buttons, avatars */
+
+    /* 13. SHADOWS */
+    --shadow-std-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-std-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-std-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-std-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-std-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+    --shadow-std-inner: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+    /* 14. ANIMATIONS & TRANSITIONS */
+    --duration-fast: 150ms;     /* Micro interactions */
+    --duration-normal: 250ms;   /* Standard transitions */
+    --duration-slow: 400ms;     /* Longer animations */
+
+    /* Easing Functions */
+    --ease-linear: linear;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);        /* Material standard */
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* 16. RESPONSIVE DESIGN BREAKPOINTS */
+    --breakpoint-mobile: 320px;
+    --breakpoint-tablet: 641px;
+    --breakpoint-desktop: 1025px;
+    --breakpoint-large: 1281px;
+}
+
+/* Dark Mode Overrides for Standardization */
+[data-color-scheme="dark"], [data-theme="dark"] {
+    --color-background: #1f2121;
+    --color-surface: #262828;
+    --color-text: #f5f5f5;
+    --color-text-secondary: rgba(167, 169, 169, 0.7);
+    --color-primary: #32b8c6;
+    --color-error: #ff5459;
+    --color-success: #32b8c6;
+
+    --color-border-std: rgba(255, 255, 255, 0.1);
+    --color-secondary: rgba(255, 255, 255, 0.1);
+    --color-secondary-hover: rgba(255, 255, 255, 0.2);
 }
