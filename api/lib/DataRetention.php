@@ -24,6 +24,27 @@ class DataRetention {
     ];
     
     /**
+     * @var PDO|null
+     */
+    private static $pdo;
+
+    /**
+     * Set database connection (for testing)
+     * @param PDO $pdo
+     */
+    public static function setPdo($pdo) {
+        self::$pdo = $pdo;
+    }
+
+    /**
+     * Get database connection
+     * @return PDO
+     */
+    private static function getPdo() {
+        return self::$pdo ?? db();
+    }
+
+    /**
      * Archive old contracts based on retention policy
      * 
      * @param int|null $tenantId Optional tenant filter
@@ -34,7 +55,7 @@ class DataRetention {
         $retentionDays = $retentionDays ?? self::DEFAULT_RETENTION_DAYS;
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
         
-        $pdo = db();
+        $pdo = self::getPdo();
         $archived = 0;
         $errors = [];
         
@@ -89,7 +110,7 @@ class DataRetention {
      * @return bool Success
      */
     public static function archiveContract($contractId, $userId = null, $reason = 'retention_policy') {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Get contract data
         $stmt = $pdo->prepare('SELECT * FROM contracts WHERE id = ?');
@@ -155,7 +176,7 @@ class DataRetention {
      * @return string Restored contract ID
      */
     public static function restoreContract($archiveId, $userId = null) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Get archive record
         $stmt = $pdo->prepare('SELECT * FROM contract_archives WHERE id = ?');
@@ -238,7 +259,7 @@ class DataRetention {
      * @return array Cleanup results
      */
     public static function pruneLogs() {
-        $pdo = db();
+        $pdo = self::getPdo();
         $deleted = [];
         
         foreach (self::LOG_RETENTION as $level => $days) {
@@ -273,7 +294,7 @@ class DataRetention {
      * @return array Retention report
      */
     public static function getRetentionReport($tenantId = null) {
-        $pdo = db();
+        $pdo = self::getPdo();
         $report = [];
         
         // Active contracts
@@ -335,7 +356,7 @@ class DataRetention {
      * @return int Deletion request ID
      */
     public static function createDeletionRequest($requestType, $targetId, $requestedBy, $reason = null, $tenantId = null) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         $stmt = $pdo->prepare('
             INSERT INTO deletion_requests 
@@ -372,7 +393,7 @@ class DataRetention {
      * @return bool Success
      */
     public static function processDeletionRequest($requestId, $processedBy, $approve = true) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Get request
         $stmt = $pdo->prepare('SELECT * FROM deletion_requests WHERE id = ? AND status = "pending"');
@@ -433,7 +454,7 @@ class DataRetention {
      * Delete contract data (anonymize rather than hard delete)
      */
     private static function deleteContractData($contractId) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Archive first
         self::archiveContract($contractId, null, 'data_request');
@@ -443,7 +464,7 @@ class DataRetention {
      * Delete user's personal data from contracts
      */
     private static function deleteUserData($userId) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Anonymize user references in contracts
         $stmt = $pdo->prepare('
@@ -468,7 +489,7 @@ class DataRetention {
     private static function deleteAllUserData($userId) {
         self::deleteUserData($userId);
         
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Deactivate user account
         $stmt = $pdo->prepare('
@@ -489,7 +510,7 @@ class DataRetention {
      * @return array Compliance report
      */
     public static function getComplianceReport($tenantId = null) {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         // Count users
         $stmt = $pdo->query('SELECT COUNT(*) FROM users');
@@ -528,7 +549,7 @@ class DataRetention {
      * @return int Number of records deleted
      */
     public static function purgeExpiredArchives() {
-        $pdo = db();
+        $pdo = self::getPdo();
         
         $stmt = $pdo->prepare('
             DELETE FROM contract_archives 

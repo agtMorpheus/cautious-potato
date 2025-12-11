@@ -10,25 +10,37 @@
 
 class AuthController {
     /**
+     * @var PDO
+     */
+    private $pdo;
+
+    /**
+     * Constructor with dependency injection
+     * @param PDO|null $pdo Database connection
+     */
+    public function __construct($pdo = null) {
+        $this->pdo = $pdo ?? db();
+    }
+
+    /**
      * POST /api/auth/login
      * Authenticate user with username/password
+     * @param array|null $inputData Optional injected data for testing
      */
-    public function login() {
-        $data = getJsonBody();
+    public function login($inputData = null) {
+        $data = $inputData ?? getJsonBody();
         
         $username = sanitize($data['username'] ?? '');
         $password = $data['password'] ?? '';
         
         // Validate input
         if (empty($username) || empty($password)) {
-            errorResponse('Username and password are required', 400, 'missing_credentials');
+            return $this->sendError('Username and password are required', 400, 'missing_credentials');
         }
         
         try {
-            $pdo = db();
-            
             // Find user by username
-            $stmt = $pdo->prepare('
+            $stmt = $this->pdo->prepare('
                 SELECT id, username, email, password_hash, role, is_active
                 FROM users
                 WHERE username = ?
@@ -40,13 +52,13 @@ class AuthController {
             // Validate credentials
             if (!$user || !Auth::verifyPassword($password, $user['password_hash'])) {
                 Logger::warning('Failed login attempt', ['username' => $username]);
-                errorResponse('Invalid username or password', 401, 'invalid_credentials');
+                return $this->sendError('Invalid username or password', 401, 'invalid_credentials');
             }
             
             // Check if user is active
             if (!$user['is_active']) {
                 Logger::warning('Inactive user login attempt', ['username' => $username]);
-                errorResponse('Account is deactivated', 403, 'user_inactive');
+                return $this->sendError('Account is deactivated', 403, 'user_inactive');
             }
             
             // Create session
@@ -55,7 +67,7 @@ class AuthController {
             Logger::info('User logged in', ['user_id' => $user['id']]);
             
             // Return user info (exclude sensitive data)
-            jsonResponse([
+            return $this->sendJson([
                 'user' => [
                     'id' => $user['id'],
                     'username' => $user['username'],
@@ -66,7 +78,7 @@ class AuthController {
             
         } catch (Exception $e) {
             Logger::error('Login error', ['error' => $e->getMessage()]);
-            errorResponse('Login failed', 500, 'login_error');
+            return $this->sendError('Login failed', 500, 'login_error');
         }
     }
     
@@ -81,7 +93,7 @@ class AuthController {
         
         Logger::info('User logged out', ['user_id' => $userId]);
         
-        jsonResponse(['logged_out' => true]);
+        return $this->sendJson(['logged_out' => true]);
     }
     
     /**
@@ -92,9 +104,23 @@ class AuthController {
         $user = Auth::user();
         
         if (!$user) {
-            errorResponse('Not authenticated', 401, 'unauthorized');
+            return $this->sendError('Not authenticated', 401, 'unauthorized');
         }
         
-        jsonResponse(['user' => $user]);
+        return $this->sendJson(['user' => $user]);
+    }
+
+    /**
+     * Wrapper for jsonResponse to allow mocking
+     */
+    protected function sendJson($data, $code = 200, $status = 'success') {
+        jsonResponse($data, $code, $status);
+    }
+
+    /**
+     * Wrapper for errorResponse to allow mocking
+     */
+    protected function sendError($message, $code = 400, $errorCode = 'error', $details = []) {
+        errorResponse($message, $code, $errorCode, $details);
     }
 }

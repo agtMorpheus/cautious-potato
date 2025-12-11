@@ -3,6 +3,7 @@
  * Unit tests for event handlers module
  */
 
+import { jest } from '@jest/globals';
 import * as handlers from '../../js/protokoll/protokoll-handlers.js';
 import * as state from '../../js/protokoll/protokoll-state.js';
 import * as validator from '../../js/protokoll/protokoll-validator.js';
@@ -15,6 +16,17 @@ describe('Protokoll Handlers', () => {
     
     // Clear any DOM elements from previous tests
     document.body.innerHTML = '';
+
+    // Mock confirm
+    global.confirm = jest.fn(() => true);
+
+    // Spy on console
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   // ===== METADATA HANDLERS =====
@@ -129,11 +141,50 @@ describe('Protokoll Handlers', () => {
       expect(state.getPositions().length).toBe(0);
     });
 
+    test('deletes position with confirm dialog confirmed', () => {
+        const posNr = handlers.handleAddPosition();
+        global.confirm.mockReturnValue(true);
+
+        const result = handlers.handleDeletePosition(posNr, false);
+
+        expect(global.confirm).toHaveBeenCalled();
+        expect(result).toBe(true);
+        expect(state.getPositions().length).toBe(0);
+    });
+
+    test('does not delete position when confirm cancelled', () => {
+        const posNr = handlers.handleAddPosition();
+        global.confirm.mockReturnValue(false);
+
+        const result = handlers.handleDeletePosition(posNr, false);
+
+        expect(global.confirm).toHaveBeenCalled();
+        expect(result).toBe(false);
+        expect(state.getPositions().length).toBe(1);
+    });
+
     test('returns false for non-existent position', () => {
       const result = handlers.handleDeletePosition('nonexistent', true);
       
       expect(result).toBe(false);
     });
+  });
+
+  describe('handleAddChildPosition', () => {
+      test('adds child position to parent', () => {
+          const parentNr = handlers.handleAddPosition();
+          const childNr = handlers.handleAddChildPosition(parentNr);
+
+          expect(childNr).toBeDefined();
+          const child = state.getPosition(childNr);
+          expect(child.parentCircuitId).toBe(parentNr);
+      });
+
+      test('fails if parent does not exist', () => {
+          const result = handlers.handleAddChildPosition('non-existent');
+          expect(result).toBeNull();
+          expect(console.error).toHaveBeenCalled();
+      });
   });
 
   describe('handlePositionChange', () => {
@@ -406,6 +457,20 @@ describe('Protokoll Handlers', () => {
       expect(state.getPositions().length).toBe(0);
     });
 
+    test('resets state when confirmed', () => {
+        global.confirm.mockReturnValue(true);
+        const result = handlers.handleReset(false);
+        expect(result).toBe(true);
+        expect(global.confirm).toHaveBeenCalled();
+    });
+
+    test('cancels reset when not confirmed', () => {
+        global.confirm.mockReturnValue(false);
+        const result = handlers.handleReset(false);
+        expect(result).toBe(false);
+        expect(global.confirm).toHaveBeenCalled();
+    });
+
     test('emits reset event', () => {
       let resetEventFired = false;
       document.addEventListener('protokoll:reset', () => {
@@ -432,6 +497,180 @@ describe('Protokoll Handlers', () => {
       
       expect(() => handlers.init()).not.toThrow();
     });
+  });
+
+  // ===== EVENT DELEGATION & DOM =====
+  describe('DOM Interactions', () => {
+      let container;
+
+      beforeEach(() => {
+          container = document.createElement('div');
+          container.id = 'protokollFormContainer';
+          document.body.appendChild(container);
+          handlers.init();
+      });
+
+      test('handles input change for metadata', () => {
+          const input = document.createElement('input');
+          input.dataset.field = 'metadata.auftraggeber';
+          input.value = 'New Value';
+          container.appendChild(input);
+
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+
+          expect(state.getMetadataField('auftraggeber')).toBe('New Value');
+      });
+
+      test('handles checkbox change', () => {
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.dataset.field = 'metadata.someBool';
+          input.checked = true;
+          container.appendChild(input);
+
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+
+          expect(state.getMetadataField('someBool')).toBe(true);
+      });
+
+      test('handles input event for text fields (realtime update)', () => {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.dataset.field = 'metadata.auftraggeber';
+          input.value = 'Typing...';
+          container.appendChild(input);
+
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+
+          expect(state.getMetadataField('auftraggeber')).toBe('Typing...');
+      });
+
+      test('handles input event for non-text fields (validation only)', () => {
+          const input = document.createElement('input');
+          input.type = 'date';
+          input.dataset.field = 'metadata.date';
+          input.value = 'invalid-date';
+          container.appendChild(input);
+
+          // Spy on validator
+          const validateSpy = jest.spyOn(validator, 'validateField');
+
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+
+          expect(validateSpy).toHaveBeenCalled();
+          // State should NOT be updated for non-text on input, only validation error
+          // Note: validateField implementation determines validity.
+      });
+
+      test('handles blur event', () => {
+          const input = document.createElement('input');
+          input.dataset.field = 'metadata.auftraggeber';
+          input.value = 'Val';
+          container.appendChild(input);
+
+          const validateSpy = jest.spyOn(validator, 'validateField');
+
+          input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+
+          expect(validateSpy).toHaveBeenCalled();
+      });
+
+      test('handles button clicks via document delegation', () => {
+          const btn = document.createElement('button');
+          btn.dataset.action = 'add-position';
+          document.body.appendChild(btn);
+
+          btn.click();
+
+          expect(state.getPositions().length).toBe(1);
+      });
+
+      test('handles add-child-position button click', () => {
+          const parentNr = handlers.handleAddPosition();
+
+          const btn = document.createElement('button');
+          btn.dataset.action = 'add-child-position';
+          btn.dataset.posNr = parentNr;
+          document.body.appendChild(btn);
+
+          btn.click();
+
+          // Should have 2 positions (parent + child)
+          expect(state.getPositions().length).toBe(2);
+      });
+
+      test('handles unknown button action', () => {
+          const btn = document.createElement('button');
+          btn.dataset.action = 'unknown-action';
+          document.body.appendChild(btn);
+
+          // Should not throw
+          expect(() => btn.click()).not.toThrow();
+      });
+
+      test('handles position input without parent row', () => {
+          // Input claiming to be position field but not inside a row
+          const input = document.createElement('input');
+          input.dataset.field = 'position.stromkreisNr';
+          input.value = 'Val';
+          container.appendChild(input); // appended to container, not a row
+
+          // Should ignore gracefully
+          expect(() => {
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+          }).not.toThrow();
+      });
+
+      test('handles valid input for non-text field', () => {
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.dataset.field = 'results.count'; // hypothetical field
+          input.value = '5';
+          container.appendChild(input);
+
+          // Mock validator to return valid
+          const validateSpy = jest.spyOn(validator, 'validateField').mockReturnValue({ isValid: true });
+
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+
+          expect(validateSpy).toHaveBeenCalled();
+          // Should clear validation error
+          const errors = state.getValidationErrors();
+          expect(errors['results.count']).toBeUndefined();
+      });
+  });
+
+  // ===== SAFETY & ERROR HANDLING =====
+  describe('Safety & Error Handling', () => {
+      test('prevents prototype pollution via field path', () => {
+          const posNr = handlers.handleAddPosition();
+
+          // Try to pollute
+          const consoleSpy = jest.spyOn(console, 'error');
+          handlers.handlePositionChange(posNr, 'position.__proto__.polluted', 'bad');
+
+          expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid path key'));
+          // Check it didn't pollute
+          expect({}.polluted).toBeUndefined();
+      });
+
+      test('handles unexpected error during export', async () => {
+          // Setup valid state
+          state.setMetadata({ protokollNumber: '123' }); // minimal valid
+
+          // Mock validation to pass
+          jest.spyOn(validator, 'validateForm').mockReturnValue({ isValid: true });
+
+          // Force error in export logic by making state.getState throw
+          jest.spyOn(state, 'getState').mockImplementation(() => {
+              throw new Error('Unexpected Export Error');
+          });
+
+          const result = await handlers.handleExport();
+
+          expect(result).toBe(false);
+          expect(console.error).toHaveBeenCalledWith('Export failed:', expect.any(Error));
+      });
   });
 
   // ===== EVENT DISPATCHING =====
