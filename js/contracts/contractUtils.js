@@ -212,12 +212,15 @@ export function discoverContractSheets(workbook) {
             let dataType = 'string';
 
             if (sampleValue !== null) {
-                if (typeof sampleValue === 'number') {
-                    dataType = 'number';
-                } else if (sampleValue instanceof Date ||
-                    (typeof sampleValue === 'number' && sampleValue > 40000 && sampleValue < 50000)) {
-                    // Excel date serial numbers are typically in this range
+                if (sampleValue instanceof Date) {
                     dataType = 'date';
+                } else if (typeof sampleValue === 'number') {
+                    // Check for Excel date serial number (typically > 40000 for recent dates)
+                    if (sampleValue > 40000 && sampleValue < 50000) {
+                        dataType = 'date';
+                    } else {
+                        dataType = 'number';
+                    }
                 }
             }
 

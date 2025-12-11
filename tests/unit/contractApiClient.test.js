@@ -366,4 +366,251 @@ describe('Contract API Client (contractApiClient.js)', () => {
             expect(error.code).toBe('unknown_error');
         });
     });
+
+    describe('Analytics Endpoints', () => {
+        test('getDashboard returns data', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: { stats: {} } }) });
+            await apiClient.getDashboard();
+            expect(global.fetch).toHaveBeenCalledWith('/api/analytics/dashboard', expect.any(Object));
+        });
+
+        test('getContractTrends returns data', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.getContractTrends(60);
+            expect(global.fetch).toHaveBeenCalledWith('/api/analytics/trends?days=60', expect.any(Object));
+        });
+
+        test('getBottlenecks returns data', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.getBottlenecks();
+            expect(global.fetch).toHaveBeenCalledWith('/api/analytics/bottlenecks?threshold_days=30', expect.any(Object));
+        });
+
+        test('getSlaStatus returns data', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.getSlaStatus();
+            expect(global.fetch).toHaveBeenCalledWith('/api/analytics/sla-status', expect.any(Object));
+        });
+
+        test('calculateMetrics triggers calculation', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: { success: true } }) });
+             await apiClient.calculateMetrics('2023-01-01');
+             expect(global.fetch).toHaveBeenCalledWith('/api/analytics/calculate-metrics', expect.objectContaining({
+                 method: 'POST',
+                 body: JSON.stringify({ date: '2023-01-01' })
+             }));
+        });
+    });
+
+    describe('Workflow Endpoints', () => {
+        test('transitionContract sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.transitionContract('1', 'Active', 'Reason');
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/1/transition', expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ status: 'Active', reason: 'Reason' })
+            }));
+        });
+
+        test('requestApproval sends request', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+             await apiClient.requestApproval('1', 10, 'Please approve');
+             expect(global.fetch).toHaveBeenCalledWith('/api/contracts/1/request-approval', expect.objectContaining({
+                 method: 'POST',
+                 body: JSON.stringify({ approver_id: 10, note: 'Please approve' })
+             }));
+        });
+
+        test('processApproval sends request', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+             await apiClient.processApproval('1', true, 'Approved');
+             expect(global.fetch).toHaveBeenCalledWith('/api/contracts/1/process-approval', expect.objectContaining({
+                 method: 'POST',
+                 body: JSON.stringify({ approve: true, comments: 'Approved' })
+             }));
+        });
+
+        test('getPendingApprovals returns list', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.getPendingApprovals();
+            expect(global.fetch).toHaveBeenCalledWith('/api/approvals/pending', expect.any(Object));
+        });
+
+        test('getWorkflowHistory returns list', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.getWorkflowHistory('1');
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/1/workflow-history', expect.any(Object));
+        });
+    });
+
+    describe('Data Quality Endpoints', () => {
+        test('detectDuplicates sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.detectDuplicates(0.9);
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/duplicates?threshold=0.9', expect.any(Object));
+        });
+
+        test('findDuplicatesFor sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.findDuplicatesFor('1');
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/1/duplicates', expect.any(Object));
+        });
+
+        test('mergeDuplicates sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.mergeDuplicates('1', '2');
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/merge', expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ keep_id: '1', delete_id: '2' })
+            }));
+        });
+
+        test('dismissDuplicate sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.dismissDuplicate('1', '2');
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/duplicates/dismiss', expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ contract1_id: '1', contract2_id: '2' })
+            }));
+        });
+
+        test('validateContract sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.validateContract({ id: '1' });
+            expect(global.fetch).toHaveBeenCalledWith('/api/contracts/validate', expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ id: '1' })
+            }));
+        });
+    });
+
+    describe('Notifications Endpoints', () => {
+        test('getNotifications returns list', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+            await apiClient.getNotifications(true);
+            expect(global.fetch).toHaveBeenCalledWith('/api/notifications?unread=true', expect.any(Object));
+        });
+
+        test('markNotificationRead sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.markNotificationRead(1);
+            expect(global.fetch).toHaveBeenCalledWith('/api/notifications/1/read', expect.objectContaining({ method: 'PUT' }));
+        });
+
+        test('markAllNotificationsRead sends request', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            await apiClient.markAllNotificationsRead();
+            expect(global.fetch).toHaveBeenCalledWith('/api/notifications/read-all', expect.objectContaining({ method: 'PUT' }));
+        });
+    });
+
+    describe('Compliance Endpoints', () => {
+        test('getRetentionReport returns report', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+             await apiClient.getRetentionReport();
+             expect(global.fetch).toHaveBeenCalledWith('/api/compliance/retention', expect.any(Object));
+        });
+
+        test('getComplianceReport returns report', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+             await apiClient.getComplianceReport();
+             expect(global.fetch).toHaveBeenCalledWith('/api/compliance/report', expect.any(Object));
+        });
+
+        test('createDeletionRequest sends request', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+             await apiClient.createDeletionRequest('contract', '1', 'GDPR');
+             expect(global.fetch).toHaveBeenCalledWith('/api/compliance/deletion-request', expect.objectContaining({
+                 method: 'POST',
+                 body: JSON.stringify({ type: 'contract', target_id: '1', reason: 'GDPR' })
+             }));
+        });
+    });
+
+    describe('Session Management', () => {
+        test('handleUnauthorized clears session and redirects', () => {
+            Object.defineProperty(window, 'location', {
+                value: { href: '' },
+                writable: true
+            });
+            jest.useFakeTimers();
+
+            apiClient.handleUnauthorized();
+
+            expect(sessionStorage.getItem('user')).toBeNull();
+            jest.runAllTimers();
+            expect(window.location.href).toBe('/login.html');
+            jest.useRealTimers();
+        });
+    });
+
+    describe('Import Endpoints', () => {
+        test('uploadImport sends file', async () => {
+            global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+            const file = new File([''], 'test.xlsx');
+
+            await apiClient.uploadImport(file, { map: '1' });
+
+            expect(global.fetch).toHaveBeenCalledWith('/api/imports', expect.objectContaining({
+                method: 'POST',
+                body: expect.any(FormData)
+            }));
+        });
+
+        test('uploadImport throws on error', async () => {
+             global.fetch.mockResolvedValue({
+                 ok: false,
+                 status: 400,
+                 json: () => Promise.resolve({ message: 'Error' })
+             });
+             const file = new File([''], 'test.xlsx');
+
+             await expect(apiClient.uploadImport(file)).rejects.toThrow('Error');
+        });
+
+        test('listImports returns history', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+             await apiClient.listImports({ page: 1 });
+             expect(global.fetch).toHaveBeenCalledWith('/api/imports?page=1', expect.any(Object));
+        });
+
+        test('getImportErrors returns errors', async () => {
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) });
+             await apiClient.getImportErrors(1);
+             expect(global.fetch).toHaveBeenCalledWith('/api/imports/1/errors', expect.any(Object));
+        });
+    });
+
+    describe('Offline Queue Processing', () => {
+        test('handleOnline processes queue', async () => {
+             apiClient.offlineQueue = [
+                 { method: 'POST', endpoint: '/test', data: {}, timestamp: Date.now() }
+             ];
+             apiClient.isOnline = false;
+
+             global.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: {} }) });
+
+             await apiClient.handleOnline();
+
+             expect(apiClient.offlineQueue.length).toBe(0);
+             expect(global.fetch).toHaveBeenCalled();
+        });
+
+        test('handleOnline drops expired requests', async () => {
+             const oldTime = Date.now() - (25 * 60 * 60 * 1000); // 25 hours ago
+             apiClient.offlineQueue = [
+                 { method: 'POST', endpoint: '/test', data: {}, timestamp: oldTime }
+             ];
+
+             await apiClient.handleOnline();
+
+             expect(apiClient.offlineQueue.length).toBe(0);
+             expect(global.fetch).not.toHaveBeenCalled();
+        });
+
+        test('handleOffline sets online status', () => {
+            apiClient.handleOffline();
+            expect(apiClient.isOnline).toBe(false);
+        });
+    });
 });
