@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="css/assets.css" />
     <link rel="stylesheet" href="css/logs.css" />
     <link rel="stylesheet" href="css/templates.css" />
+    <link rel="stylesheet" href="css/cards.css" />
     <link rel="stylesheet" href="css/settings.css" />
     <link rel="stylesheet" href="css/help.css" />
 </head>
@@ -1070,11 +1071,13 @@
 
                     <!-- Sync Settings Card -->
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Datenspeicherung &amp; Synchronisation</h3>
-                            <p class="card-description">Wählen Sie, wie Ihre Vertragsdaten gespeichert werden sollen</p>
+                        <div class="card__header">
+                            <div>
+                                <h3 class="card__title">Datenspeicherung &amp; Synchronisation</h3>
+                                <p class="card__subtitle">Wählen Sie, wie Ihre Vertragsdaten gespeichert werden sollen</p>
+                            </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card__body">
                             <div class="settings-group">
                                 <h4 class="settings-label">Speichermodus</h4>
                                 <p class="settings-desc">Wählen Sie zwischen lokaler Speicherung und
@@ -1125,13 +1128,13 @@
                                 <h4 class="settings-label">Server Konfiguration</h4>
                                 <div class="form-group">
                                     <label for="api-base-url" class="form-label">API Base URL</label>
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="text" id="api-base-url" class="form-input"
+                                    <div style="display: flex; gap: var(--space-12); align-items: center;">
+                                        <input type="text" id="api-base-url" class="form-control"
                                             placeholder="z.B. http://localhost:8000/api" style="flex-grow: 1;">
-                                        <button type="button" class="btn btn-secondary btn-sm"
+                                        <button type="button" class="btn btn--secondary btn--sm"
                                             id="save-api-config-btn">Speichern</button>
                                     </div>
-                                    <p class="settings-desc" style="margin-top: 5px;">URL des Backend-Servers (Standard:
+                                    <p class="settings-desc" style="margin-top: var(--space-4);">URL des Backend-Servers (Standard:
                                         /api)</p>
                                 </div>
                             </div>
@@ -1151,7 +1154,7 @@
                                     <span class="sync-last-time" id="sync-last-time">Noch nicht synchronisiert</span>
                                 </div>
                                 <div class="sync-actions">
-                                    <button type="button" class="btn btn-primary btn-sm" id="sync-now-btn">
+                                    <button type="button" class="btn btn--primary btn--sm" id="sync-now-btn">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             style="width: 16px; height: 16px; margin-right: 8px;">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1176,7 +1179,7 @@
                                 <p class="settings-desc">Exportieren Sie Ihre Vertragsdaten als JSON-Backup oder
                                     importieren Sie eine vorhandene Sicherung.</p>
                                 <div class="backup-actions">
-                                    <button type="button" class="btn btn-secondary btn-sm" id="export-backup-btn">
+                                    <button type="button" class="btn btn--secondary btn--sm" id="export-backup-btn">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             style="width: 16px; height: 16px; margin-right: 8px;">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1184,7 +1187,7 @@
                                         </svg>
                                         Backup exportieren
                                     </button>
-                                    <label class="btn btn-secondary btn-sm" for="import-backup-input">
+                                    <label class="btn btn--secondary btn--sm" for="import-backup-input">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             style="width: 16px; height: 16px; margin-right: 8px;">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1199,22 +1202,22 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Anwendungseinstellungen</h3>
+                        <div class="card__header">
+                            <h3 class="card__title">Anwendungseinstellungen</h3>
                         </div>
-                        <div class="card-body">
+                        <div class="card__body">
                             <div class="settings-group">
                                 <h4 class="settings-label">Lokaler Speicher</h4>
                                 <p class="settings-desc">Lokale Daten werden im Browser-Speicher abgelegt.</p>
-                                <button type="button" class="btn btn-secondary btn-sm" id="clear-storage-btn">
+                                <button type="button" class="btn btn--secondary btn--sm" id="clear-storage-btn">
                                     Lokalen Speicher löschen
                                 </button>
                             </div>
                             <div class="settings-group">
-                                <h4 class="settings-label" style="color: var(--c-danger);">Gefahrenzone</h4>
+                                <h4 class="settings-label" style="color: var(--color-error);">Gefahrenzone</h4>
                                 <p class="settings-desc">Anwendung vollständig zurücksetzen und alle Daten löschen.</p>
-                                <button id="reset-button" type="button" class="btn btn-secondary btn-sm"
-                                    style="color: var(--c-danger); border-color: var(--c-danger);">
+                                <button id="reset-button" type="button" class="btn btn--secondary btn--sm"
+                                    style="color: var(--color-error); border-color: var(--color-error);">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         style="width: 16px; height: 16px; margin-right: 8px;">
                                         <path stroke-linecap="round" stroke-linejoin="round"
