@@ -231,7 +231,8 @@ describe('Protokoll State Management', () => {
     test('getPrüfungsergebnis() returns inspection results', () => {
       const results = state.getPrüfungsergebnis();
       expect(results.mängelFestgestellt).toBe(false);
-      expect(results.plakette).toBe('ja');
+      expect(results.plaketteJa).toBe(false);
+      expect(results.plaketteNein).toBe(false);
     });
 
     test('setPrüfungsergebnis() updates results', () => {
@@ -243,7 +244,7 @@ describe('Protokoll State Management', () => {
       const results = state.getPrüfungsergebnis();
       expect(results.mängelFestgestellt).toBe(true);
       expect(results.bemerkung).toBe('Test comment');
-      expect(results.plakette).toBe('ja'); // Original value preserved
+      expect(results.plaketteJa).toBe(false); // Original value preserved
     });
   });
 

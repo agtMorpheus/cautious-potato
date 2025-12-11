@@ -282,15 +282,15 @@ describe('Contract Utilities (contractUtils.js)', () => {
     
     describe('normalizeStatus()', () => {
         test('normalizes common status values', () => {
-            expect(normalizeStatus('INBEARB')).toBe('inbearb');
-            expect(normalizeStatus('fertig')).toBe('fertig');
-            expect(normalizeStatus('OFFEN')).toBe('offen');
+            expect(normalizeStatus('INBEARB')).toBe('In Bearbeitung');
+            expect(normalizeStatus('fertig')).toBe('Abgerechnet');
+            expect(normalizeStatus('OFFEN')).toBe('Erstellt');
         });
         
         test('maps status variations', () => {
-            expect(normalizeStatus('in bearbeitung')).toBe('inbearb');
-            expect(normalizeStatus('abgeschlossen')).toBe('fertig');
-            expect(normalizeStatus('done')).toBe('fertig');
+            expect(normalizeStatus('in bearbeitung')).toBe('In Bearbeitung');
+            expect(normalizeStatus('abgeschlossen')).toBe('Abgerechnet');
+            expect(normalizeStatus('done')).toBe('Abgerechnet');
         });
         
         test('handles empty and null values', () => {
@@ -307,17 +307,17 @@ describe('Contract Utilities (contractUtils.js)', () => {
     describe('getContractSummary()', () => {
         test('computes summary for contracts array', () => {
             const contracts = [
-                { contractId: '1406', status: 'inbearb', location: 'Berlin', plannedStart: '2025-06-01' },
-                { contractId: '1406', status: 'fertig', location: 'Berlin', plannedStart: '2025-07-01' },
-                { contractId: '1407', status: 'inbearb', location: 'Munich', plannedStart: '2025-05-15' }
+                { contractId: '1406', status: 'In Bearbeitung', location: 'Berlin', plannedStart: '2025-06-01' },
+                { contractId: '1406', status: 'Abgerechnet', location: 'Berlin', plannedStart: '2025-07-01' },
+                { contractId: '1407', status: 'In Bearbeitung', location: 'Munich', plannedStart: '2025-05-15' }
             ];
             
             const summary = getContractSummary(contracts);
             
             expect(summary.totalContracts).toBe(3);
             expect(summary.uniqueContractIds).toBe(2);
-            expect(summary.byStatus['inbearb']).toBe(2);
-            expect(summary.byStatus['fertig']).toBe(1);
+            expect(summary.byStatus['In Bearbeitung']).toBe(2);
+            expect(summary.byStatus['Abgerechnet']).toBe(1);
             expect(summary.byLocation['Berlin']).toBe(2);
             expect(summary.dateRange.earliest).toBe('2025-05-15');
             expect(summary.dateRange.latest).toBe('2025-07-01');
@@ -352,9 +352,9 @@ describe('Contract Utilities (contractUtils.js)', () => {
     
     describe('VALID_STATUS_VALUES', () => {
         test('contains expected status values', () => {
-            expect(VALID_STATUS_VALUES).toContain('inbearb');
-            expect(VALID_STATUS_VALUES).toContain('fertig');
-            expect(VALID_STATUS_VALUES).toContain('offen');
+            expect(VALID_STATUS_VALUES).toContain('In Bearbeitung');
+            expect(VALID_STATUS_VALUES).toContain('Abgerechnet');
+            expect(VALID_STATUS_VALUES).toContain('Erstellt');
         });
     });
 });

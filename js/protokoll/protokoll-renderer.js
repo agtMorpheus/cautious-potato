@@ -1092,43 +1092,33 @@ export function updatePositionRow(posNr, position) {
   if (!row) return;
 
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
-  const phaseLabel = getPhaseTypeLabel(position.phaseType);
   const hasParent = position.parentCircuitId ? true : false;
-  const cells = row.querySelectorAll('td');
   
   // Update row class for child circuits
   row.classList.toggle('child-circuit', hasParent);
-  
-  // Expected number of columns in the positions table
-  // Pos.Nr., Nr., Zielbezeichnung, Phase, Leitung/Kabel, Un, fn, Überstrom-Schutz, In, Riso, Status, Aktionen
-  const POSITIONS_TABLE_COLUMN_COUNT = 12;
-  
-  if (cells.length >= POSITIONS_TABLE_COLUMN_COUNT) {
-    // Column indices: Pos.Nr. (0), Nr. (1), Zielbezeichnung (2), Phase (3), Leitung/Kabel (4), 
-    // Un (5), fn (6), Überstrom-Schutz (7), In (8), Riso (9), Status (10), Aktionen (11)
-    cells[1].textContent = position.stromkreisNr || '-';
-    cells[2].textContent = position.zielbezeichnung || '-';
-    
-    // Update phase badge
-    const phaseBadge = cells[3].querySelector('.phase-badge');
-    if (phaseBadge) {
-      phaseBadge.className = `phase-badge phase-${position.phaseType || 'mono'}`;
-      phaseBadge.textContent = phaseLabel;
-    }
-    
-    cells[4].textContent = position.leitung?.typ || '-';
-    cells[5].textContent = position.spannung?.un || '-';
-    cells[6].textContent = position.spannung?.fn || '-';
-    cells[7].textContent = position.überstromschutz?.art || '-';
-    cells[8].textContent = position.überstromschutz?.inNennstrom || '-';
-    cells[9].textContent = position.messwerte?.riso || '-';
-    
-    const statusBadge = cells[10].querySelector('.status-badge');
-    if (statusBadge) {
-      statusBadge.className = `status-badge status-${status}`;
-      statusBadge.textContent = status;
-    }
-  }
+
+  // Helper to safely update input value
+  const updateInput = (field, value) => {
+    const input = row.querySelector(`[data-field="position.${field}"]`);
+    if (input) input.value = value || '';
+  };
+
+  // Helper to safely update select value
+  const updateSelect = (field, value) => {
+    const select = row.querySelector(`select[data-field="position.${field}"]`);
+    if (select) select.value = value || '';
+  };
+
+  updateInput('stromkreisNr', position.stromkreisNr);
+  updateInput('zielbezeichnung', position.zielbezeichnung);
+  updateSelect('phaseType', position.phaseType || 'mono');
+  updateInput('leitung.typ', position.leitung?.typ);
+  updateInput('spannung.un', position.spannung?.un);
+  updateInput('spannung.fn', position.spannung?.fn);
+  updateSelect('überstromschutz.art', position.überstromschutz?.art);
+  updateInput('überstromschutz.inNennstrom', position.überstromschutz?.inNennstrom);
+  updateInput('messwerte.riso', position.messwerte?.riso);
+  updateSelect('prüfergebnis.status', status);
 }
 
 // ============================================

@@ -134,7 +134,7 @@ describe('Contract Handlers Logic (Phase 3 & 4)', () => {
 
             const filters = {
                 searchText: 'A564',
-                status: 'fertig',
+                status: 'Abgerechnet', // Updated to match normalized status
                 dateRange: { from: '2025-06-01', to: '2025-06-30' }
             };
 
@@ -393,13 +393,13 @@ describe('Contract Handlers Logic (Phase 3 & 4)', () => {
         test('normalizes status on edit', () => {
             const inputStatus = 'FERTIG';
             const normalized = normalizeStatus(inputStatus);
-            expect(normalized).toBe('fertig');
+            expect(normalized).toBe('Abgerechnet');
         });
 
         test('normalizes German status variations', () => {
-            expect(normalizeStatus('in bearbeitung')).toBe('inbearb');
-            expect(normalizeStatus('abgeschlossen')).toBe('fertig');
-            expect(normalizeStatus('done')).toBe('fertig');
+            expect(normalizeStatus('in bearbeitung')).toBe('In Bearbeitung');
+            expect(normalizeStatus('abgeschlossen')).toBe('Abgerechnet');
+            expect(normalizeStatus('done')).toBe('Abgerechnet');
         });
 
         test('preserves unknown status values', () => {
