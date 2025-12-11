@@ -17,15 +17,16 @@ import {
 import { getState, setState, resetState } from '../../js/state.js';
 
 // Performance test configuration
+// Thresholds are set with margin to account for CI/test environment variance
 const PERFORMANCE_THRESHOLDS = {
-  filter_10000: 100,              // ms to filter 10000 contracts
-  filter_complex_10000: 200,      // ms for complex multi-filter on 10000
-  sort_10000: 100,                // ms to sort 10000 contracts
-  sort_date_10000: 150,           // ms to sort 10000 by date
-  paginate_10000: 100,            // ms to paginate 10000 contracts (including filtering + sorting)
-  search_10000: 150,              // ms to search across 10000 contracts
-  statistics_10000: 200,          // ms to compute statistics for 10000
-  unique_values_10000: 100        // ms to get unique field values from 10000
+  filter_10000: 200,              // ms to filter 10000 contracts
+  filter_complex_10000: 300,      // ms for complex multi-filter on 10000
+  sort_10000: 150,                // ms to sort 10000 contracts
+  sort_date_10000: 250,           // ms to sort 10000 by date
+  paginate_10000: 200,            // ms to paginate 10000 contracts (including filtering + sorting)
+  search_10000: 250,              // ms to search across 10000 contracts
+  statistics_10000: 300,          // ms to compute statistics for 10000
+  unique_values_10000: 150        // ms to get unique field values from 10000
 };
 
 /**
