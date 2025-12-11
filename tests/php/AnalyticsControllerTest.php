@@ -354,7 +354,7 @@ class AnalyticsControllerTest extends TestCase
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$thresholdDays} days"));
         
         // cutoffDate should be a valid datetime string
-        $this->assertRegExp('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $cutoffDate);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $cutoffDate);
     }
 
     /**
@@ -421,7 +421,7 @@ class AnalyticsControllerTest extends TestCase
         $type = 'dashboard';
         $filename = 'analytics_' . $type . '_' . date('Y-m-d') . '.csv';
         
-        $this->assertRegExp('/^analytics_dashboard_\d{4}-\d{2}-\d{2}\.csv$/', $filename);
+        $this->assertMatchesRegularExpression('/^analytics_dashboard_\d{4}-\d{2}-\d{2}\.csv$/', $filename);
     }
 
     /**
@@ -475,7 +475,7 @@ class AnalyticsControllerTest extends TestCase
         $date = date('Y-m-d');
         
         // Should be in YYYY-MM-DD format
-        $this->assertRegExp('/^\d{4}-\d{2}-\d{2}$/', $date);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date);
     }
 
     /**
@@ -486,7 +486,7 @@ class AnalyticsControllerTest extends TestCase
         $generatedAt = date('Y-m-d H:i:s');
         
         // Should be in YYYY-MM-DD HH:MM:SS format
-        $this->assertRegExp('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $generatedAt);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $generatedAt);
     }
 
     /**
@@ -832,7 +832,7 @@ class AnalyticsControllerTest extends TestCase
     {
         $date = '2023-11-15';
         
-        $this->assertRegExp('/^\d{4}-\d{2}-\d{2}$/', $date);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date);
         
         // Verify it's a valid date
         $timestamp = strtotime($date);
