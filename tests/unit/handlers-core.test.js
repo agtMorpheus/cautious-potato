@@ -163,6 +163,22 @@ describe('Event Handlers Core Logic', () => {
       }));
     });
 
+    test('should log warnings if import has warnings', async () => {
+      handleFileSelect({ target: { files: [mockFile] } });
+
+      utils.safeReadAndParseProtokoll.mockResolvedValue({
+        success: true,
+        metadata: {},
+        positionen: [],
+        positionSums: {},
+        warnings: ['Test Warning']
+      });
+
+      await handleImportFile({ preventDefault: jest.fn(), stopPropagation: jest.fn() });
+
+      expect(console.warn).toHaveBeenCalledWith('Import warnings:', ['Test Warning']);
+    });
+
     test('should handle parse errors', async () => {
       handleFileSelect({ target: { files: [mockFile] } });
 
@@ -336,6 +352,14 @@ describe('Event Handlers Core Logic', () => {
 
       expect(document.querySelector('.alert-error')).not.toBeNull();
       expect(utilsProtokoll.createAndExportProtokoll).not.toHaveBeenCalled();
+    });
+
+    test('should log warnings if validation has warnings', async () => {
+      utilsProtokoll.validateProtokollData.mockReturnValue({ valid: true, warnings: ['Validation Warning'] });
+
+      await handleExportProtokoll(validProtokollData);
+
+      expect(console.warn).toHaveBeenCalledWith('Protokoll validation warnings:', ['Validation Warning']);
     });
 
     test('should export successfully', async () => {

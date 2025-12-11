@@ -500,6 +500,16 @@ describe('Event Handlers Module (handlers.js)', () => {
       const alerts = document.querySelectorAll('.alert');
       expect(alerts).toHaveLength(0);
     });
+
+    test('should handle errors during reset', async () => {
+      window.confirm.mockReturnValue(true);
+      const { resetState } = require('../../js/state.js');
+      resetState.mockImplementationOnce(() => { throw new Error('Reset failed'); });
+
+      await handleResetApplication();
+
+      expect(document.querySelector('.alert-error')).not.toBeNull();
+    });
   });
 
   describe('initializeEventListeners()', () => {
@@ -543,6 +553,24 @@ describe('Event Handlers Module (handlers.js)', () => {
       // Either the listeners are already initialized (warn) or elements not found (warn)
       // Either way, function completes without error
       expect(true).toBe(true);
+    });
+
+    test('warns when specific elements are missing', () => {
+      jest.isolateModules(() => {
+        const { initializeEventListeners } = require('../../js/handlers.js');
+
+        document.body.innerHTML = `
+            <input type="file" id="file-input" />
+            <!-- Missing other buttons -->
+        `;
+
+        initializeEventListeners();
+
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Import button (#import-button) not found'));
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Generate button (#generate-button) not found'));
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Export button (#export-button) not found'));
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Reset button (#reset-button) not found'));
+      });
     });
   });
 
