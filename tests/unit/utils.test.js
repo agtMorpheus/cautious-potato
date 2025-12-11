@@ -11,7 +11,12 @@ import {
   extractPositions,
   fillAbrechnungHeader,
   fillAbrechnungPositions,
-  clearAbrechnungTemplateCache
+  clearAbrechnungTemplateCache,
+  validateFilledPositions,
+  generateExportFilename,
+  updateMetadataCellMap,
+  getMetadataCellMap,
+  resetMetadataCellMap
 } from '../../js/utils.js';
 
 describe('Utility Functions (utils.js)', () => {
@@ -381,6 +386,261 @@ describe('Utility Functions (utils.js)', () => {
     test('clearAbrechnungTemplateCache clears the cache', () => {
       // Just verify the function exists and can be called
       expect(() => clearAbrechnungTemplateCache()).not.toThrow();
+    });
+  });
+
+  describe('validateFilledPositions()', () => {
+    test('returns valid result for workbook with EAW sheet', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A9': { v: '01.01.0010' },
+            'B9': { v: 5 },
+            'A10': { v: '01.01.0020' },
+            'B10': { v: 3 }
+          }
+        }
+      };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.filledCount).toBeGreaterThanOrEqual(0);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    test('returns invalid when EAW sheet is missing', () => {
+      const mockWorkbook = {
+        Sheets: {}
+      };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result.isValid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    test('counts empty and filled positions correctly', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A9': { v: '01.01.0010' },
+            'B9': { v: 5 },
+            'A10': { v: '01.01.0020' }
+            // B10 is missing - empty
+          }
+        }
+      };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result.filledCount).toBeGreaterThanOrEqual(1);
+      expect(typeof result.emptyCount).toBe('number');
+    });
+  });
+
+  describe('generateExportFilename()', () => {
+    test('generates filename with order number', () => {
+      const filename = generateExportFilename('ORD-001');
+      
+      expect(filename).toContain('Abrechnung');
+      expect(filename).toContain('ORD-001');
+      expect(filename).toMatch(/\.xlsx$/);
+    });
+
+    test('includes timestamp in filename', () => {
+      const filename = generateExportFilename('TEST');
+      
+      // Timestamp format: YYYY-MM-DD or similar
+      expect(filename).toMatch(/\d{4}-\d{2}-\d{2}/);
+    });
+
+    test('handles special characters in order number', () => {
+      const filename = generateExportFilename('Test/Order');
+      
+      expect(filename).toBeDefined();
+      expect(filename).toContain('Test/Order');
+    });
+
+    test('handles empty order number', () => {
+      const filename = generateExportFilename('');
+      
+      expect(filename).toBeDefined();
+      expect(filename).toMatch(/\.xlsx$/);
+    });
+  });
+
+  describe('Metadata Cell Map Configuration', () => {
+    afterEach(() => {
+      resetMetadataCellMap();
+    });
+
+    test('updateMetadataCellMap updates field mapping', () => {
+      updateMetadataCellMap('auftragsNr', ['A1', 'B1', 'C1']);
+      
+      const map = getMetadataCellMap();
+      expect(map.auftragsNr).toEqual(['A1', 'B1', 'C1']);
+    });
+
+    test('getMetadataCellMap returns current configuration', () => {
+      const map = getMetadataCellMap();
+      
+      expect(map).toBeDefined();
+      expect(typeof map).toBe('object');
+    });
+
+    test('resetMetadataCellMap restores defaults', () => {
+      const originalMap = getMetadataCellMap();
+      updateMetadataCellMap('auftragsNr', ['Z99']);
+      resetMetadataCellMap();
+      
+      const resetMap = getMetadataCellMap();
+      expect(resetMap.auftragsNr).toEqual(originalMap.auftragsNr);
+    });
+
+    test('updateMetadataCellMap throws for invalid cellAddresses', () => {
+      expect(() => updateMetadataCellMap('field', [])).toThrow();
+      expect(() => updateMetadataCellMap('field', null)).toThrow();
+      expect(() => updateMetadataCellMap('field', 'not-array')).toThrow();
+    });
+
+    test('getMetadataCellMap returns defensive copy', () => {
+      const map1 = getMetadataCellMap();
+      map1.testField = ['X1'];
+      
+      const map2 = getMetadataCellMap();
+      expect(map2.testField).toBeUndefined();
+    });
+  });
+
+  describe('Edge Cases and Error Handling', () => {
+    test('sumByPosition handles position with zero quantity', () => {
+      const positions = [
+        { posNr: '01.01.0010', menge: 0 },
+        { posNr: '01.01.0020', menge: 5 }
+      ];
+      
+      const result = sumByPosition(positions);
+      
+      expect(result['01.01.0010']).toBe(0);
+      expect(result['01.01.0020']).toBe(5);
+    });
+
+    test('sumByPosition handles negative quantities', () => {
+      const positions = [
+        { posNr: '01.01.0010', menge: 10 },
+        { posNr: '01.01.0010', menge: -3 }
+      ];
+      
+      const result = sumByPosition(positions);
+      
+      expect(result['01.01.0010']).toBe(7);
+    });
+
+    test('getPositionSummary handles map with zero values', () => {
+      const positionMap = {
+        '01.01.0010': 0,
+        '01.01.0020': 0
+      };
+      
+      const summary = getPositionSummary(positionMap);
+      
+      expect(summary.totalQuantity).toBe(0);
+      expect(summary.uniquePositions).toBe(2);
+      expect(summary.minQuantity).toBe(0);
+      expect(summary.maxQuantity).toBe(0);
+    });
+
+    test('validateExtractedPositions handles empty posNr string', () => {
+      const positions = [
+        { posNr: '', menge: 5, row: 30 }
+      ];
+      
+      const result = validateExtractedPositions(positions);
+      
+      expect(result.warnings.length).toBeGreaterThan(0);
+    });
+
+    test('validateExtractedPositions handles zero quantity', () => {
+      const positions = [
+        { posNr: '01.01.0010', menge: 0, row: 30 }
+      ];
+      
+      const result = validateExtractedPositions(positions);
+      
+      // Zero is valid (not negative)
+      expect(result.valid).toBe(true);
+    });
+
+    test('extractPositions handles sparse worksheet data', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Vorlage': {
+            'A30': { v: '01.01.0010' },
+            'X30': { v: 5 },
+            // Row 31 is completely empty
+            'A32': { v: '01.01.0020' },
+            'X32': { v: 3 }
+          }
+        }
+      };
+      
+      const positions = extractPositions(mockWorkbook);
+      
+      expect(positions.length).toBe(2);
+    });
+
+    test('fillAbrechnungHeader handles undefined metadata values', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {}
+        }
+      };
+      
+      const metadata = {
+        datum: undefined,
+        auftragsNr: 'ORD-001',
+        anlage: null,
+        einsatzort: ''
+      };
+      
+      expect(() => fillAbrechnungHeader(mockWorkbook, metadata)).not.toThrow();
+    });
+
+    test('fillAbrechnungPositions handles empty positionSums', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A9': { v: '01.01.0010' }
+          }
+        }
+      };
+      
+      const positionSums = {};
+      
+      expect(() => fillAbrechnungPositions(mockWorkbook, positionSums)).not.toThrow();
+    });
+
+    test('sumByPosition handles very long position numbers', () => {
+      const positions = [
+        { posNr: '01.01.0010.0001.0002.0003', menge: 5 },
+        { posNr: '01.01.0010.0001.0002.0003', menge: 3 }
+      ];
+      
+      const result = sumByPosition(positions);
+      
+      expect(result['01.01.0010.0001.0002.0003']).toBe(8);
+    });
+
+    test('getPositionSummary handles very large quantities', () => {
+      const positionMap = {
+        '01.01.0010': Number.MAX_SAFE_INTEGER - 1,
+        '01.01.0020': 1
+      };
+      
+      const summary = getPositionSummary(positionMap);
+      
+      expect(summary.maxQuantity).toBe(Number.MAX_SAFE_INTEGER - 1);
     });
   });
 });
