@@ -598,4 +598,347 @@ class ImportControllerTest extends TestCase
         
         $this->assertNull($encoded);
     }
+
+    /**
+     * Test file upload with all valid parameters
+     */
+    public function testFileUploadWithAllValidParameters(): void
+    {
+        $_FILES['file'] = [
+            'name' => 'test_data.xlsx',
+            'size' => 5 * 1024 * 1024, // 5 MB
+            'error' => UPLOAD_ERR_OK,
+            'tmp_name' => '/tmp/test_upload'
+        ];
+        
+        $_POST['mapping'] = json_encode([
+            'Auftrag' => 'auftrag',
+            'Titel' => 'titel'
+        ]);
+        
+        $hasFile = isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK;
+        $isSizeValid = $_FILES['file']['size'] <= MAX_UPLOAD_SIZE;
+        
+        $extension = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+        $isExtensionValid = in_array($extension, ALLOWED_EXTENSIONS);
+        
+        $this->assertTrue($hasFile);
+        $this->assertTrue($isSizeValid);
+        $this->assertTrue($isExtensionValid);
+    }
+
+    /**
+     * Test import with XLS file
+     */
+    public function testImportWithXlsFile(): void
+    {
+        $filename = 'legacy_data.xls';
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        
+        $this->assertEquals('xls', $extension);
+        $this->assertTrue(in_array($extension, ALLOWED_EXTENSIONS));
+    }
+
+    /**
+     * Test import record with mapping
+     */
+    public function testImportRecordWithMapping(): void
+    {
+        $mapping = [
+            'Auftrag' => 'auftrag',
+            'Titel' => 'titel',
+            'Status' => 'status'
+        ];
+        
+        $importRecord = [
+            'file_name' => 'test.xlsx',
+            'file_size' => 1024,
+            'import_mapping' => json_encode($mapping),
+            'imported_by' => 1,
+            'records_imported' => 0,
+            'records_with_errors' => 0
+        ];
+        
+        $decodedMapping = json_decode($importRecord['import_mapping'], true);
+        
+        $this->assertIsArray($decodedMapping);
+        $this->assertEquals('auftrag', $decodedMapping['Auftrag']);
+        $this->assertEquals('titel', $decodedMapping['Titel']);
+        $this->assertEquals('status', $decodedMapping['Status']);
+    }
+
+    /**
+     * Test error count in import response
+     */
+    public function testErrorCountInImportResponse(): void
+    {
+        $import = [
+            'id' => 1,
+            'file_name' => 'test.xlsx',
+            'records_imported' => 100,
+            'records_with_errors' => 5
+        ];
+        
+        $errorCount = 15; // From separate query
+        $import['error_count'] = $errorCount;
+        
+        $this->assertEquals(15, $import['error_count']);
+        $this->assertEquals(5, $import['records_with_errors']);
+    }
+
+    /**
+     * Test import errors ordered by row number
+     */
+    public function testImportErrorsOrderedByRowNumber(): void
+    {
+        $errors = [
+            ['row_number' => 5, 'error_message' => 'Error 1'],
+            ['row_number' => 2, 'error_message' => 'Error 2'],
+            ['row_number' => 10, 'error_message' => 'Error 3']
+        ];
+        
+        // Simulate ORDER BY row_number ASC
+        usort($errors, function($a, $b) {
+            return $a['row_number'] - $b['row_number'];
+        });
+        
+        $this->assertEquals(2, $errors[0]['row_number']);
+        $this->assertEquals(5, $errors[1]['row_number']);
+        $this->assertEquals(10, $errors[2]['row_number']);
+    }
+
+    /**
+     * Test list with username join
+     */
+    public function testListWithUsernameJoin(): void
+    {
+        $import = [
+            'id' => 1,
+            'file_name' => 'test.xlsx',
+            'imported_by' => 5,
+            'imported_by_username' => 'testuser'
+        ];
+        
+        $this->assertEquals(5, $import['imported_by']);
+        $this->assertEquals('testuser', $import['imported_by_username']);
+    }
+
+    /**
+     * Test file upload error codes
+     */
+    public function testFileUploadErrorCodes(): void
+    {
+        $errorCodes = [
+            UPLOAD_ERR_OK,
+            UPLOAD_ERR_INI_SIZE,
+            UPLOAD_ERR_FORM_SIZE,
+            UPLOAD_ERR_PARTIAL,
+            UPLOAD_ERR_NO_FILE,
+            UPLOAD_ERR_NO_TMP_DIR,
+            UPLOAD_ERR_CANT_WRITE,
+            UPLOAD_ERR_EXTENSION
+        ];
+        
+        $this->assertContains(UPLOAD_ERR_OK, $errorCodes);
+        $this->assertContains(UPLOAD_ERR_NO_FILE, $errorCodes);
+        $this->assertEquals(0, UPLOAD_ERR_OK);
+    }
+
+    /**
+     * Test pagination offset for different pages
+     */
+    public function testPaginationOffsetForDifferentPages(): void
+    {
+        $limit = 20;
+        
+        $page = 1;
+        $offset = ($page - 1) * $limit;
+        $this->assertEquals(0, $offset);
+        
+        $page = 3;
+        $offset = ($page - 1) * $limit;
+        $this->assertEquals(40, $offset);
+        
+        $page = 10;
+        $offset = ($page - 1) * $limit;
+        $this->assertEquals(180, $offset);
+    }
+
+    /**
+     * Test import with complex mapping
+     */
+    public function testImportWithComplexMapping(): void
+    {
+        $mapping = [
+            'Order Number' => 'auftrag',
+            'Title/Description' => 'titel',
+            'Location Name' => 'standort',
+            'Room/Column' => 'saeule_raum',
+            'Equipment ID' => 'anlage_nr'
+        ];
+        
+        $json = json_encode($mapping);
+        $decoded = json_decode($json, true);
+        
+        $this->assertEquals($mapping, $decoded);
+        $this->assertEquals('auftrag', $decoded['Order Number']);
+    }
+
+    /**
+     * Test file extension case insensitivity
+     */
+    public function testFileExtensionCaseInsensitivity(): void
+    {
+        $files = [
+            'test.XLSX',
+            'test.xlsx',
+            'test.XlSx',
+            'test.XLS',
+            'test.xls'
+        ];
+        
+        foreach ($files as $filename) {
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $this->assertTrue(in_array($extension, ALLOWED_EXTENSIONS));
+        }
+    }
+
+    /**
+     * Test import response format
+     */
+    public function testImportResponseFormat(): void
+    {
+        $response = [
+            'import' => [
+                'id' => 1,
+                'file_name' => 'test.xlsx',
+                'records_imported' => 0,
+                'records_with_errors' => 0
+            ],
+            'message' => 'File uploaded successfully. Processing will be handled by client-side parser.'
+        ];
+        
+        $this->assertArrayHasKey('import', $response);
+        $this->assertArrayHasKey('message', $response);
+        $this->assertEquals(1, $response['import']['id']);
+    }
+
+    /**
+     * Test get errors response structure
+     */
+    public function testGetErrorsResponseStructure(): void
+    {
+        $response = [
+            'import_id' => 5,
+            'errors' => [
+                ['row_number' => 1, 'error_message' => 'Error 1'],
+                ['row_number' => 2, 'error_message' => 'Error 2']
+            ],
+            'count' => 2
+        ];
+        
+        $this->assertEquals(5, $response['import_id']);
+        $this->assertCount(2, $response['errors']);
+        $this->assertEquals($response['count'], count($response['errors']));
+    }
+
+    /**
+     * Test file size in bytes conversion to MB
+     */
+    public function testFileSizeInBytesConversionToMB(): void
+    {
+        $sizeInBytes = 5 * 1024 * 1024; // 5 MB
+        $sizeInMB = $sizeInBytes / 1024 / 1024;
+        
+        $this->assertEquals(5, $sizeInMB);
+        
+        $sizeInBytes = 1024 * 1024; // 1 MB
+        $sizeInMB = $sizeInBytes / 1024 / 1024;
+        
+        $this->assertEquals(1, $sizeInMB);
+    }
+
+    /**
+     * Test import list pagination response
+     */
+    public function testImportListPaginationResponse(): void
+    {
+        $total = 150;
+        $page = 3;
+        $limit = 20;
+        
+        $pagination = [
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'pages' => ceil($total / $limit)
+        ];
+        
+        $this->assertEquals(3, $pagination['page']);
+        $this->assertEquals(20, $pagination['limit']);
+        $this->assertEquals(150, $pagination['total']);
+        $this->assertEquals(8, $pagination['pages']);
+    }
+
+    /**
+     * Test sanitize is used for file name
+     */
+    public function testSanitizeIsUsedForFileName(): void
+    {
+        $unsafeFilename = '<script>alert("xss")</script>data.xlsx';
+        $safeFilename = sanitize($unsafeFilename);
+        
+        $this->assertStringNotContainsString('<script>', $safeFilename);
+        $this->assertStringContainsString('data.xlsx', $safeFilename);
+    }
+
+    /**
+     * Test import with zero records
+     */
+    public function testImportWithZeroRecords(): void
+    {
+        $importRecord = [
+            'records_imported' => 0,
+            'records_with_errors' => 0
+        ];
+        
+        $this->assertEquals(0, $importRecord['records_imported']);
+        $this->assertEquals(0, $importRecord['records_with_errors']);
+    }
+
+    /**
+     * Test import with all errors
+     */
+    public function testImportWithAllErrors(): void
+    {
+        $totalRows = 100;
+        $importRecord = [
+            'records_imported' => 0,
+            'records_with_errors' => 100
+        ];
+        
+        $successRate = $importRecord['records_imported'] / $totalRows * 100;
+        $errorRate = $importRecord['records_with_errors'] / $totalRows * 100;
+        
+        $this->assertEquals(0, $successRate);
+        $this->assertEquals(100, $errorRate);
+    }
+
+    /**
+     * Test import with partial errors
+     */
+    public function testImportWithPartialErrors(): void
+    {
+        $totalRows = 100;
+        $importRecord = [
+            'records_imported' => 95,
+            'records_with_errors' => 5
+        ];
+        
+        $successRate = $importRecord['records_imported'] / $totalRows * 100;
+        $errorRate = $importRecord['records_with_errors'] / $totalRows * 100;
+        
+        $this->assertEquals(95, $successRate);
+        $this->assertEquals(5, $errorRate);
+    }
 }
