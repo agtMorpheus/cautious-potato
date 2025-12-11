@@ -269,6 +269,16 @@ describe('Utility Functions (utils.js)', () => {
   });
 
   describe('extractPositions()', () => {
+    let consoleLogSpy;
+
+    beforeEach(() => {
+      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleLogSpy.mockRestore();
+    });
+
     test('extracts positions from valid worksheet', () => {
       const mockWorkbook = {
         Sheets: {
@@ -313,6 +323,8 @@ describe('Utility Functions (utils.js)', () => {
       
       expect(positions.length).toBe(1);
       expect(positions[0].posNr).toBe('01.01.0020');
+      // Verify skipped count logic was hit
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/skipped 1 rows/));
     });
 
     test('skips rows with non-numeric quantity', () => {
@@ -383,6 +395,16 @@ describe('Utility Functions (utils.js)', () => {
   });
 
   describe('fillAbrechnungPositions()', () => {
+    let consoleLogSpy;
+
+    beforeEach(() => {
+      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleLogSpy.mockRestore();
+    });
+
     test('fills position quantities', () => {
       const mockWorkbook = {
         Sheets: {
@@ -402,6 +424,27 @@ describe('Utility Functions (utils.js)', () => {
       
       expect(result.Sheets.EAW.B9).toBeDefined();
       expect(result.Sheets.EAW.B10).toBeDefined();
+    });
+
+    test('skips positions not in positionSums', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A9': { v: '01.01.0010' },
+            'A10': { v: '99.99.9999' } // Not in sums
+          }
+        }
+      };
+
+      const positionSums = {
+        '01.01.0010': 7
+      };
+
+      const result = fillAbrechnungPositions(mockWorkbook, positionSums);
+
+      expect(result.Sheets.EAW.B9).toBeDefined();
+      expect(result.Sheets.EAW.B10).toBeUndefined();
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/skipped 1 template positions/));
     });
 
     test('throws error if EAW sheet is missing', () => {
@@ -467,8 +510,8 @@ describe('Utility Functions (utils.js)', () => {
       
       const result = validateFilledPositions(mockWorkbook);
       
-      expect(result.filledCount).toBeGreaterThanOrEqual(1);
-      expect(typeof result.emptyCount).toBe('number');
+      expect(result.filledCount).toBe(1);
+      expect(result.emptyCount).toBe(1);
     });
   });
 
@@ -941,6 +984,10 @@ describe('Utility Functions (utils.js)', () => {
 
       expect(result.success).toBe(false);
       expect(result.errors[0]).toContain('Metadaten-Parsefehler');
+      // Check that details were pushed (missing fields error includes details)
+      // "Fehlende Pflichtfelder" has details attached in parseProtokollMetadata
+      expect(result.errors.length).toBeGreaterThan(1);
+      expect(result.errors.some(e => e.includes('Versuchen Sie'))).toBe(true);
     });
 
 
