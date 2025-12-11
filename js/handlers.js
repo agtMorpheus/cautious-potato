@@ -259,7 +259,7 @@ export async function handleGenerateAbrechnung() {
     const state = getState();
     
     // Validate preconditions
-    if (!state.protokollData || !state.protokollData.metadata) {
+    if (!state.protokollData || !state.protokollData.metadata || !state.protokollData.positionen || state.protokollData.positionen.length === 0) {
         showErrorAlert(
             'No Data',
             'Please import a protokoll.xlsx file first.'
@@ -368,7 +368,7 @@ export async function handleExportAbrechnung() {
     const state = getState();
     
     // Validate preconditions
-    if (!state.abrechnungData || !state.abrechnungData.header) {
+    if (!state.abrechnungData || !state.abrechnungData.header || !state.abrechnungData.positionen || Object.keys(state.abrechnungData.positionen).length === 0) {
         showErrorAlert(
             'No Data',
             'Please generate an abrechnung first.'
