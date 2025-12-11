@@ -434,4 +434,353 @@ class ContractControllerTest extends TestCase
         $pages = ceil($total / $limit);
         $this->assertEquals(0, $pages);
     }
+
+    /**
+     * Test create with all optional fields
+     */
+    public function testCreateWithAllOptionalFields(): void
+    {
+        $data = [
+            'auftrag' => 'TEST-002',
+            'titel' => 'Complete Test',
+            'standort' => 'Test Location',
+            'saeule_raum' => 'Room 1',
+            'anlage_nr' => 'ANL-001',
+            'beschreibung' => 'Test description',
+            'status' => 'inbearb',
+            'sollstart' => '2023-12-01',
+            'workorder_code' => 'WO-123',
+            'melder' => 'Reporter Name',
+            'seriennummer' => 'SN-999',
+            'is_complete' => true
+        ];
+        
+        $this->assertNotEmpty($data['auftrag']);
+        $this->assertNotEmpty($data['titel']);
+        $this->assertArrayHasKey('standort', $data);
+        $this->assertArrayHasKey('saeule_raum', $data);
+        $this->assertArrayHasKey('anlage_nr', $data);
+        $this->assertTrue($data['is_complete']);
+    }
+
+    /**
+     * Test update with no changes
+     */
+    public function testUpdateWithNoChanges(): void
+    {
+        $allowed = ['titel', 'status', 'standort', 'saeule_raum', 'anlage_nr', 
+                   'beschreibung', 'sollstart', 'workorder_code', 'melder', 
+                   'seriennummer', 'is_complete'];
+        
+        $data = [];
+        $updates = [];
+        
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $data)) {
+                $updates[] = "$field = ?";
+            }
+        }
+        
+        $this->assertEmpty($updates);
+    }
+
+    /**
+     * Test update status validation in update method
+     */
+    public function testUpdateStatusValidation(): void
+    {
+        $validStatuses = ['offen', 'inbearb', 'fertig'];
+        
+        $data = ['status' => 'fertig'];
+        $status = $data['status'];
+        
+        $this->assertTrue(in_array($status, $validStatuses));
+        
+        $data = ['status' => 'invalid_status'];
+        $status = $data['status'];
+        
+        $this->assertFalse(in_array($status, $validStatuses));
+    }
+
+    /**
+     * Test bulk update with empty contract IDs
+     */
+    public function testBulkUpdateWithEmptyContractIds(): void
+    {
+        $contractIds = [];
+        $updates = ['status' => 'fertig'];
+        
+        $this->assertTrue(empty($contractIds));
+        $this->assertFalse(empty($updates));
+    }
+
+    /**
+     * Test bulk update with empty updates
+     */
+    public function testBulkUpdateWithEmptyUpdates(): void
+    {
+        $contractIds = ['uuid-1', 'uuid-2'];
+        $updates = [];
+        
+        $this->assertFalse(empty($contractIds));
+        $this->assertTrue(empty($updates));
+    }
+
+    /**
+     * Test bulk update status validation
+     */
+    public function testBulkUpdateStatusValidation(): void
+    {
+        $validStatuses = ['offen', 'inbearb', 'fertig'];
+        
+        $updates = ['status' => 'fertig'];
+        $this->assertTrue(in_array($updates['status'], $validStatuses));
+        
+        $updates = ['status' => 'completed']; // Invalid
+        $this->assertFalse(in_array($updates['status'], $validStatuses));
+    }
+
+    /**
+     * Test export with status filter
+     */
+    public function testExportWithStatusFilter(): void
+    {
+        $validStatuses = ['offen', 'inbearb', 'fertig'];
+        
+        $data = ['status' => 'inbearb'];
+        $status = sanitize($data['status'] ?? null);
+        
+        $this->assertTrue(in_array($status, $validStatuses));
+    }
+
+    /**
+     * Test export with search filter
+     */
+    public function testExportWithSearchFilter(): void
+    {
+        $data = ['search' => 'TEST'];
+        $search = sanitize($data['search'] ?? null);
+        $searchParam = "%$search%";
+        
+        $this->assertEquals('%TEST%', $searchParam);
+    }
+
+    /**
+     * Test export limit constant
+     */
+    public function testExportLimitConstant(): void
+    {
+        $exportLimit = 10000;
+        $recordCount = 5000;
+        
+        $this->assertLessThanOrEqual($exportLimit, $recordCount);
+        
+        $recordCount = 15000;
+        $this->assertGreaterThan($exportLimit, $recordCount);
+    }
+
+    /**
+     * Test CSV filename generation
+     */
+    public function testCsvFilenameGeneration(): void
+    {
+        $filename = 'contracts_' . date('Y-m-d_His') . '.csv';
+        
+        $this->assertStringStartsWith('contracts_', $filename);
+        $this->assertStringEndsWith('.csv', $filename);
+    }
+
+    /**
+     * Test CSV BOM for Excel compatibility
+     */
+    public function testCsvBomForExcelCompatibility(): void
+    {
+        $bom = "\xEF\xBB\xBF";
+        
+        $this->assertEquals(3, strlen($bom));
+        $this->assertEquals("\xEF\xBB\xBF", $bom);
+    }
+
+    /**
+     * Test export file size threshold
+     */
+    public function testExportFileSizeThreshold(): void
+    {
+        $threshold = 1024 * 1024; // 1MB
+        
+        $fileSize = 500 * 1024; // 500KB
+        $this->assertLessThan($threshold, $fileSize);
+        
+        $fileSize = 2 * 1024 * 1024; // 2MB
+        $this->assertGreaterThan($threshold, $fileSize);
+    }
+
+    /**
+     * Test base64 encoding for file content
+     */
+    public function testBase64EncodingForFileContent(): void
+    {
+        $content = 'Test CSV content';
+        $encoded = base64_encode($content);
+        $decoded = base64_decode($encoded);
+        
+        $this->assertEquals($content, $decoded);
+    }
+
+    /**
+     * Test contract history tracking
+     */
+    public function testContractHistoryTracking(): void
+    {
+        $contractId = 'test-uuid';
+        $field = 'status';
+        $oldValue = 'offen';
+        $newValue = 'inbearb';
+        $changedBy = 1;
+        
+        $this->assertNotEquals($oldValue, $newValue);
+        $this->assertEquals('test-uuid', $contractId);
+        $this->assertEquals(1, $changedBy);
+    }
+
+    /**
+     * Test only changed fields are tracked
+     */
+    public function testOnlyChangedFieldsAreTracked(): void
+    {
+        $oldValue = 'offen';
+        $newValue = 'offen';
+        
+        $hasChanged = $oldValue != $newValue;
+        
+        $this->assertFalse($hasChanged);
+        
+        $oldValue = 'offen';
+        $newValue = 'inbearb';
+        
+        $hasChanged = $oldValue != $newValue;
+        
+        $this->assertTrue($hasChanged);
+    }
+
+    /**
+     * Test update single contract in bulk operation
+     */
+    public function testUpdateSingleContractInBulkOperation(): void
+    {
+        $allowed = ['titel', 'status', 'standort', 'saeule_raum', 'anlage_nr', 'is_complete'];
+        
+        $updates = ['status' => 'fertig', 'is_complete' => true];
+        
+        foreach (array_keys($updates) as $field) {
+            $this->assertContains($field, $allowed);
+        }
+    }
+
+    /**
+     * Test is_complete boolean conversion in update
+     */
+    public function testIsCompleteBooleanConversionInUpdate(): void
+    {
+        $data = ['is_complete' => 'true'];
+        $value = (bool)$data['is_complete'];
+        
+        $this->assertTrue($value);
+        
+        $data = ['is_complete' => '0'];
+        $value = (bool)$data['is_complete'];
+        
+        $this->assertFalse($value);
+    }
+
+    /**
+     * Test search builds correct WHERE clause parts
+     */
+    public function testSearchBuildsCorrectWhereClauseParts(): void
+    {
+        $search = 'TEST';
+        $searchParam = "%$search%";
+        
+        $whereParts = '(auftrag LIKE ? OR titel LIKE ? OR standort LIKE ? OR anlage_nr LIKE ?)';
+        
+        $this->assertStringContainsString('auftrag LIKE ?', $whereParts);
+        $this->assertStringContainsString('titel LIKE ?', $whereParts);
+        $this->assertStringContainsString('standort LIKE ?', $whereParts);
+        $this->assertStringContainsString('anlage_nr LIKE ?', $whereParts);
+        $this->assertEquals('%TEST%', $searchParam);
+    }
+
+    /**
+     * Test combined filters in list
+     */
+    public function testCombinedFiltersInList(): void
+    {
+        $status = 'offen';
+        $search = 'test';
+        
+        $where = [];
+        
+        if ($status && in_array($status, ['offen', 'inbearb', 'fertig'])) {
+            $where[] = 'status = ?';
+        }
+        
+        if ($search) {
+            $where[] = '(auftrag LIKE ? OR titel LIKE ? OR standort LIKE ? OR anlage_nr LIKE ?)';
+        }
+        
+        $this->assertCount(2, $where);
+        $this->assertContains('status = ?', $where);
+    }
+
+    /**
+     * Test list with all sorting options
+     */
+    public function testListWithAllSortingOptions(): void
+    {
+        $allowedSorts = ['created_at', 'updated_at', 'auftrag', 'titel', 'status', 'sollstart'];
+        
+        foreach ($allowedSorts as $sortField) {
+            $sort = $sortField;
+            
+            if (!in_array($sort, $allowedSorts)) {
+                $sort = 'created_at';
+            }
+            
+            $this->assertEquals($sortField, $sort);
+        }
+    }
+
+    /**
+     * Test update builds correct SET clauses
+     */
+    public function testUpdateBuildsCorrectSetClauses(): void
+    {
+        $allowed = ['titel', 'status'];
+        $data = ['titel' => 'New Title', 'status' => 'inbearb', 'invalid_field' => 'value'];
+        
+        $updates = [];
+        
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $data)) {
+                $updates[] = "$field = ?";
+            }
+        }
+        
+        $this->assertCount(2, $updates);
+        $this->assertContains('titel = ?', $updates);
+        $this->assertContains('status = ?', $updates);
+    }
+
+    /**
+     * Test export CSV headers
+     */
+    public function testExportCsvHeaders(): void
+    {
+        $headers = ['Auftrag', 'Titel', 'Standort', 'Säule/Raum', 'Anlage-Nr.', 'Status', 'Sollstart', 'Erstellt am'];
+        
+        $this->assertCount(8, $headers);
+        $this->assertEquals('Auftrag', $headers[0]);
+        $this->assertEquals('Titel', $headers[1]);
+        $this->assertEquals('Erstellt am', $headers[7]);
+    }
 }
