@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contract Manager – Logout">
+    <title>Contract Manager – Abgemeldet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body class="login-body">
+    <main class="login-container">
+        <section class="login-panel">
+            <div class="login-header">
+                <h1>Contract Manager</h1>
+                <p class="login-subtitle">Sie haben sich erfolgreich abgemeldet.</p>
+            </div>
+
+            <div class="form-group">
+                 <p class="logout-message">
+                    Vielen Dank für die Nutzung des Contract Managers. Ihre Sitzung wurde sicher beendet und alle temporären Daten wurden bereinigt.
+                </p>
+
+                <a href="login.html" class="btn btn-primary btn-full">
+                    <span class="btn-text">Erneut anmelden</span>
+                </a>
+            </div>
+
+            <div class="login-footer">
+                <p class="login-hint">
+                    Sie können dieses Fenster nun schließen.
+                </p>
+            </div>
+        </section>
+
+        <aside class="login-info">
+             <div class="info-content">
+                <h2>Auf Wiedersehen</h2>
+                <p>Bis zum nächsten Mal!</p>
+                 <ul class="feature-list">
+                    <li>🔒 Sitzung sicher beendet</li>
+                    <li>💾 Daten synchronisiert</li>
+                    <li>🛡️ Cache bereinigt</li>
+                    <li>✨ System bereit</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // Ensure session is cleared
+        sessionStorage.removeItem('user');
+        localStorage.removeItem('sessionWarningShown');
+
+        // Clear any other potential auth tokens
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+    </script>
+</body>
+</html>
