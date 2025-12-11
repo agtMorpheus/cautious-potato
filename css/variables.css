@@ -8,6 +8,7 @@
 :root {
     /* --- Typography --- */
     --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Monaco', monospace;
     --font-size-base: 14px;
     --line-height-base: 1.5;
 
@@ -17,7 +18,8 @@
     --space-md: 16px;
     --space-lg: 24px;
     --space-xl: 32px;
-    --space-2xl: 48px;
+    --space-xxl: 48px;
+    --space-2xl: 48px; /* Alias for --space-xxl for legacy compatibility */
 
     /* --- Border Radius --- */
     --radius-sm: 4px;
@@ -30,6 +32,8 @@
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --duration-fast: 150ms;
     --duration-normal: 250ms;
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
     /* --- Layout --- */
     --sidebar-width: 260px;
@@ -62,6 +66,24 @@
     --c-primary-800: #1e40af;
     --c-primary-900: #1e3a8a;
 
+    /* RGB Values for transparency calculations */
+    --primary-rgb: 59, 130, 246;
+    --success-rgb: 16, 185, 129;
+    --warning-rgb: 245, 158, 11;
+    --danger-rgb: 239, 68, 68;
+    --info-rgb: 6, 182, 212;
+    
+    /* Folder/Module Colors */
+    --folder-purple: #8b5cf6;
+    --folder-purple-rgb: 139, 92, 246;
+    --folder-purple-light: rgba(139, 92, 246, 0.1);
+    --folder-green: #10b981;
+    --folder-green-rgb: 16, 185, 129;
+    --folder-green-light: rgba(16, 185, 129, 0.1);
+    --folder-orange: #f59e0b;
+    --folder-orange-rgb: 245, 158, 11;
+    --folder-orange-light: rgba(245, 158, 11, 0.1);
+
     /* Semantic Colors (Light Mode Mappings) */
     --bg-app: var(--c-neutral-50);
     --bg-sidebar: #ffffff;
@@ -76,6 +98,7 @@
 
     --border-base: var(--c-neutral-200);
     --border-highlight: var(--c-neutral-300);
+    --border-light: var(--c-neutral-200);
 
     --primary-main: var(--c-primary-600);
     --primary-hover: var(--c-primary-700);
@@ -90,11 +113,18 @@
     --c-warning: #f59e0b;
     --c-danger: #ef4444;
     --c-info: #06b6d4;
+    
+    /* Status Light Variants */
+    --success-light: rgba(16, 185, 129, 0.1);
+    --warning-light: rgba(245, 158, 11, 0.1);
+    --danger-light: rgba(239, 68, 68, 0.1);
+    --info-light: rgba(6, 182, 212, 0.1);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
     /* --- Legacy Compatibility (Mappings for older modules) --- */
     --color-bg-tertiary: var(--bg-surface);
@@ -127,6 +157,14 @@
     --font-size-lg: 1.125rem;
     --font-size-xl: 1.25rem;
     --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
 
     --transition-fast: var(--duration-fast);
 }
@@ -156,6 +194,7 @@
     /* slate-700 */
     --border-highlight: #475569;
     /* slate-600 */
+    --border-light: #334155;
 
     --primary-main: #60a5fa;
     /* primary-400 - lighter for dark mode */
@@ -171,4 +210,7 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    
+    /* Shadow XL for larger elements */
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
 }
