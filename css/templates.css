@@ -7,17 +7,17 @@
 .template-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: var(--space-lg);
 }
 
 .template-item {
     background: var(--bg-surface);
     border: 1px solid var(--border-base);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: var(--space-lg);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-md);
     transition: all 0.2s ease;
     cursor: pointer;
     position: relative;
@@ -55,8 +55,8 @@
 }
 
 .template-info h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
+    margin: 0 0 var(--space-xs) 0;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text-main);
     font-family: 'JetBrains Mono', monospace;

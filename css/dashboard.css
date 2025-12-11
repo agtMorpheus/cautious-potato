@@ -11,7 +11,7 @@
     grid-template-rows: auto auto 1fr;
     gap: var(--space-lg);
     padding: var(--space-lg);
-    max-width: 1920px;
+    max-width: var(--layout-max-width);
     margin: 0 auto;
     min-height: calc(100vh - 80px);
     align-items: start;
@@ -38,7 +38,7 @@
 .header-content {
     z-index: 2;
     position: relative;
-    max-width: 600px;
+    max-width: var(--layout-form-width);
 }
 
 .header-content h3 {
@@ -72,8 +72,8 @@
             rgba(var(--primary-rgb), 0.05) 10px,
             rgba(var(--primary-rgb), 0.05) 11px);
     pointer-events: none;
-    mask-image: linear-gradient(to right, transparent, black);
-    -webkit-mask-image: linear-gradient(to right, transparent, black);
+    mask-image: linear-gradient(to right, transparent, var(--text-main));
+    -webkit-mask-image: linear-gradient(to right, transparent, var(--text-main));
 }
 
 /* ==================== Metrics Row ==================== */
@@ -104,8 +104,8 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 12px;
-    height: 12px;
+    width: var(--radius-lg);
+    height: var(--radius-lg);
     background: linear-gradient(45deg, transparent 50%, var(--border-base) 50%);
     opacity: 0.5;
 }
@@ -142,13 +142,13 @@
 }
 
 .metric-icon-wrapper.process {
-    color: var(--folder-purple);
-    background: var(--folder-purple-light);
+    color: var(--folder-var(--folder-purple));
+    background: var(--folder-var(--folder-purple)-light);
 }
 
 .metric-icon-wrapper.export {
-    color: var(--folder-green);
-    background: var(--folder-green-light);
+    color: var(--folder-var(--c-success));
+    background: var(--folder-var(--c-success)-light);
 }
 
 .metric-icon-wrapper.templates {
@@ -298,7 +298,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    max-height: 600px;
+    max-height: var(--layout-table-height);
     overflow-y: auto;
 }
 
@@ -377,7 +377,7 @@
 }
 
 /* ==================== Responsive ==================== */
-@media (max-width: 1200px) {
+@media (max-width: var(--layout-content-width)) {
 
     .dashboard-actions,
     .dashboard-activity {
@@ -389,7 +389,7 @@
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: var(--layout-modal-width)) {
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: var(--space-md);
@@ -433,7 +433,7 @@
 }
 
 .welcome-message-icon {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     flex-shrink: 0;
     animation: welcome-pulse 2s ease-in-out infinite;
 }
@@ -452,7 +452,7 @@
 .welcome-message-content {
     flex: 1;
     overflow: hidden;
-    white-space: nowrap;
+    var(--bg-card)-space: nowrap;
     position: relative;
     min-width: 0;
 }
@@ -462,7 +462,7 @@
     font-family: var(--font-family-mono);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    white-space: nowrap;
+    var(--bg-card)-space: nowrap;
     padding-right: var(--space-md);
 }
 
@@ -497,13 +497,13 @@
 }
 
 /* Responsive - hide on smaller screens */
-@media (max-width: 1200px) {
+@media (max-width: var(--layout-content-width)) {
     .welcome-message-container {
         max-width: 300px;
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: var(--layout-modal-width)) {
     .welcome-message-container {
         display: none;
     }

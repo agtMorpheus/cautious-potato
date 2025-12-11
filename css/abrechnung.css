@@ -6,7 +6,7 @@
 #view-workflow {
     /* Ensure clear spacing within the view container matching Dashboard */
     padding: var(--space-lg);
-    max-width: 1920px;
+    max-width: var(--layout-max-width);
     margin: 0 auto;
 }
 
@@ -113,13 +113,13 @@
 #view-workflow .btn svg {
     width: 24px;
     height: 24px;
-    stroke-width: 2px;
+    stroke-width: var(--border-width-medium);
 }
 
 /* Specific Button Colors */
 #import-button {
     background: var(--primary-main);
-    color: #ffffff;
+    color: var(--bg-card);
     box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
     border: 1px solid transparent;
 }
@@ -132,7 +132,7 @@
 
 #generate-button {
     background: var(--folder-purple);
-    color: #ffffff;
+    color: var(--bg-card);
     box-shadow: 0 4px 12px rgba(var(--folder-purple-rgb), 0.3);
     border: 1px solid transparent;
 }
@@ -144,15 +144,15 @@
 }
 
 #export-button {
-    background: var(--folder-green);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(var(--folder-green-rgb), 0.3);
+    background: var(--c-success);
+    color: var(--bg-card);
+    box-shadow: 0 4px 12px rgba(var(--success-rgb), 0.3);
     border: 1px solid transparent;
 }
 
 #export-button:hover:not(:disabled) {
     filter: brightness(1.1);
-    box-shadow: 0 6px 16px rgba(var(--folder-green-rgb), 0.4);
+    box-shadow: 0 6px 16px rgba(var(--success-rgb), 0.4);
     transform: translateY(-2px);
 }
 
@@ -271,7 +271,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 900px) {
+@media (max-width: var(--layout-modal-width)) {
     #view-workflow .row {
         grid-template-columns: 1fr;
     }

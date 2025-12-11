@@ -25,7 +25,7 @@
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
     /* Tech border on left */
-    border-left: 3px solid var(--primary-main);
+    border-left: var(--border-width-thick) solid var(--primary-main);
     box-shadow: var(--shadow-sm);
 }
 
@@ -33,17 +33,17 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 1rem;
+    gap: var(--space-md);
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-sm);
 }
 
 .filter-group label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
     color: var(--text-secondary);
@@ -59,7 +59,7 @@
     border-radius: var(--radius-md);
     color: var(--text-main);
     font-size: 0.85rem;
-    font-family: 'Inter', sans-serif;
+    font(--font-family-base), sans-serif;
     transition: all 0.2s;
 }
 
@@ -74,7 +74,7 @@
 .contract-import-section {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-lg);
 }
 
 .contract-file-upload {
@@ -82,7 +82,7 @@
     border: 1px dashed var(--border-highlight);
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    padding: 2rem;
+    padding: var(--space-xl);
     text-align: center;
     transition: all 0.2s;
 }
@@ -109,20 +109,20 @@
 
 .cm-contract-table th {
     text-align: left;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem var(--space-md);
     background: var(--bg-surface);
     color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid var(--border-base);
-    white-space: nowrap;
+    border-bottom: var(--border-width-medium) solid var(--border-base);
+    var(--bg-card)-space: nowrap;
 }
 
 .cm-contract-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem var(--space-md);
     border-bottom: 1px solid var(--border-light);
     color: var(--text-main);
     transition: background 0.1s;
@@ -134,12 +134,12 @@
 
 /* Action buttons in table */
 .action-cell {
-    white-space: nowrap;
+    var(--bg-card)-space: nowrap;
 }
 
 .action-cell .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
     font-family: 'JetBrains Mono', monospace;
 }
 
@@ -147,7 +147,7 @@
 .status-badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.6rem;
+    padding: 0.var(--space-xl) 0.6rem;
     border-radius: 4px;
     /* More squared for tech look */
     font-size: 0.7rem;
@@ -180,9 +180,9 @@
 }
 
 .status-badge.status-unknown {
-    background: rgba(148, 163, 184, 0.15);
+    background: rgba(var(--text-muted), 0.15);
     color: var(--contract-status-unknown);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid rgba(var(--text-muted), 0.2);
 }
 
 .status-badge.status-error {
@@ -196,7 +196,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--space-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-lg);
 }
 
 .contract-stat-card {
@@ -206,7 +206,7 @@
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-sm);
     position: relative;
     overflow: hidden;
 }
@@ -217,7 +217,7 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 4px;
+    width: var(--radius-sm);
     background: var(--border-base);
     /* default */
 }
@@ -247,10 +247,10 @@
 }
 
 .contract-stat-card .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     color: var(--text-muted);
-    font-family: 'Inter', sans-serif;
+    font(--font-family-base), sans-serif;
     font-weight: 500;
 }
 

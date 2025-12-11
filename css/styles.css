@@ -85,7 +85,7 @@ ul {
     gap: var(--space-sm);
     font-weight: 700;
     font-size: 1.1rem;
-    white-space: nowrap;
+    var(--bg-card)-space: nowrap;
     color: var(--text-main);
     letter-spacing: -0.01em;
 }
@@ -102,8 +102,8 @@ ul {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: var(--space-xl);
+    height: var(--space-xl);
     border-radius: var(--radius-md);
     color: var(--text-muted);
     transition: all 0.2s ease;
@@ -123,7 +123,7 @@ ul {
 }
 
 .nav-item {
-    margin-bottom: 2px;
+    margin-bottom: var(--border-width-medium);
 }
 
 .nav-link {
@@ -135,7 +135,7 @@ ul {
     color: var(--text-secondary);
     font-weight: 500;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    var(--bg-card)-space: nowrap;
     position: relative;
     overflow: hidden;
 }
@@ -156,7 +156,7 @@ ul {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 3px;
+    width: var(--border-width-thick);
     height: 20px;
     background-color: var(--primary-main);
     box-shadow: 0 0 8px var(--primary-main);
@@ -198,8 +198,8 @@ ul {
     /* Remove absolute positioning to allow natural flex centering from parent .sidebar-header */
     margin: 0;
     /* Ensure size remains accessible */
-    width: 32px;
-    height: 32px;
+    width: var(--space-xl);
+    height: var(--space-xl);
 }
 
 .app-container.sidebar-collapsed .sidebar-logo {
@@ -265,7 +265,7 @@ ul {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     user-select: none;
 }
@@ -303,9 +303,9 @@ ul {
 
 .cmd-search-icon {
     position: absolute;
-    left: 12px;
-    width: 16px;
-    height: 16px;
+    left: var(--radius-lg);
+    width: var(--radius-xl);
+    height: var(--radius-xl);
     color: var(--text-muted);
     pointer-events: none;
 }
@@ -318,7 +318,7 @@ ul {
     border: 1px solid transparent;
     background-color: var(--bg-surface);
     color: var(--text-main);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -335,7 +335,7 @@ ul {
 
 .cmd-search-shortcut {
     position: absolute;
-    right: 12px;
+    right: var(--radius-lg);
     padding: 2px 6px;
     background-color: var(--bg-app);
     border: 1px solid var(--border-base);
@@ -350,23 +350,23 @@ ul {
 .cmd-status {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
+    gap: var(--radius-md);
+    padding: 6px var(--radius-lg);
     border-radius: var(--radius-full);
     background-color: var(--bg-surface);
     border: 1px solid var(--border-light);
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
+    width: var(--radius-md);
+    height: var(--radius-md);
     border-radius: 50%;
     background-color: var(--c-success);
     box-shadow: 0 0 0 2px rgba(var(--success-rgb), 0.2);
 }
 
 .status-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     color: var(--text-secondary);
     letter-spacing: 0.02em;
@@ -453,13 +453,13 @@ ul {
 }
 
 .card-title {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text-main);
 }
 
 .card-description {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
 }
 
@@ -472,10 +472,10 @@ ul {
     display: inline-flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: 0.5rem 1rem;
+    padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     transition: all var(--duration-fast);
 }
 
@@ -518,7 +518,7 @@ ul {
     display: block;
     margin-bottom: var(--space-xs);
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-main);
 }
 
@@ -528,13 +528,13 @@ input[type="text"],
 input[type="date"],
 select {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: var(--space-sm) 0.75rem;
     border: 1px solid var(--border-base);
     border-radius: var(--radius-md);
     background-color: var(--bg-surface);
     color: var(--text-main);
     font-family: inherit;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     transition: border-color var(--duration-fast);
 }
 
@@ -602,14 +602,14 @@ select:focus {
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .stat-value {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
     font-weight: 600;
     color: var(--text-main);
 }
@@ -654,7 +654,7 @@ select:focus {
 
 /* --- Command Footer (Status Bar) --- */
 .cmd-footer {
-    height: 32px;
+    height: var(--space-xl);
     background: var(--bg-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -663,7 +663,7 @@ select:focus {
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--space-md);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     z-index: 40;
     margin-top: auto;
@@ -711,7 +711,7 @@ select:focus {
 }
 
 .version-tag {
-    font-family: monospace;
+    font-family: var(--font-family-mono);
     background: var(--bg-surface);
     padding: 1px 4px;
     border-radius: 4px;

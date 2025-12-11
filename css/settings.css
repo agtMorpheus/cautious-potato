@@ -8,15 +8,15 @@
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
 }
 
 .settings-label {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-main);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-sm);
     font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -25,8 +25,8 @@
 .settings-desc {
     font-size: 0.9rem;
     color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    max-width: 600px;
+    margin-bottom: var(--space-lg);
+    max-width: var(--layout-form-width);
     line-height: 1.5;
 }
 
@@ -34,7 +34,7 @@
 .storage-mode-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
+    gap: var(--space-md);
 }
 
 .storage-mode-option {
@@ -49,7 +49,7 @@
 
 .storage-mode-content {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-md);
     padding: 1.25rem;
     background: var(--bg-surface);
     border: 1px solid var(--border-base);
@@ -78,7 +78,7 @@
     display: block;
     color: var(--text-main);
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-xs);
 }
 
 .storage-mode-text span {
@@ -92,18 +92,18 @@
 .sync-status-display {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    padding: 1rem;
+    gap: var(--space-lg);
+    padding: var(--space-md);
     background: var(--bg-surface);
     border-radius: var(--radius-md);
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-md);
     border: 1px solid var(--border-base);
 }
 
 .sync-status-indicator {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-sm);
     font-weight: 600;
     color: var(--c-success);
 }
@@ -112,7 +112,7 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     margin-left: auto;
-    font-family: monospace;
+    font-family: var(--font-family-mono);
 }
 
 .checkbox-label {
@@ -121,11 +121,11 @@
     gap: 0.75rem;
     cursor: pointer;
     user-select: none;
-    margin-top: 1rem;
+    margin-top: var(--space-md);
 }
 
 .backup-actions {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-md);
     flex-wrap: wrap;
 }

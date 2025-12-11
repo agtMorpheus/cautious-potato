@@ -2,7 +2,7 @@
 
 #view-help {
     padding: var(--space-lg);
-    max-width: 1200px;
+    max-width: var(--layout-content-width);
     margin: 0 auto;
     animation: fadeIn var(--duration-normal) var(--ease-out);
 }

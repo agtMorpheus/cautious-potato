@@ -26,7 +26,7 @@
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-xl);
-    max-width: 900px;
+    max-width: var(--layout-modal-width);
     width: 90%;
     max-height: 85vh;
     display: flex;
@@ -56,7 +56,7 @@
 .cell-mapper-header h2 {
     margin: 0 0 var(--space-xs);
     font-family: var(--font-family-heading);
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
     font-weight: 600;
     color: var(--text-main);
     letter-spacing: -0.01em;
@@ -64,7 +64,7 @@
 
 .cell-mapper-description {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     line-height: 1.5;
 }
@@ -73,7 +73,7 @@
     padding: var(--space-lg);
     overflow-y: auto;
     flex: 1;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0) 0%, rgba(30, 41, 59, 0.3) 100%);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0) 0%, var(--overlay-subtle) 100%);
 }
 
 .cell-mapper-grid {
@@ -101,7 +101,7 @@
 }
 
 .cell-mapper-row.required {
-    border-left: 3px solid var(--c-warning);
+    border-left: var(--border-width-thick) solid var(--c-warning);
 }
 
 .cell-mapper-label {
@@ -126,11 +126,11 @@
 
 .cell-mapper-select select {
     width: 100%;
-    padding: 8px 12px;
+    padding: var(--radius-md) var(--radius-lg);
     background: var(--bg-body);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-main);
     cursor: pointer;
     transition: all var(--duration-fast);
@@ -148,11 +148,11 @@
 
 .cell-preview-input {
     width: 100%;
-    padding: 8px 12px;
+    padding: var(--radius-md) var(--radius-lg);
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-base);
     border-radius: var(--radius-sm);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-premium);
     font-family: var(--font-family-heading);
 }
@@ -184,7 +184,7 @@
 
 .cell-mapper-help p {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--c-brand-lighter);
     line-height: 1.5;
 }
@@ -218,7 +218,7 @@
     margin: 0;
     padding-left: 20px;
     color: var(--text-premium);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
 }
 
 .cell-mapper-error li {
@@ -236,7 +236,7 @@
 
 .cell-mapper-footer .btn {
     padding: 10px 20px;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     font-weight: 500;
     font-family: var(--font-family-heading);
     border-radius: var(--radius-sm);
@@ -245,7 +245,7 @@
     transition: all var(--duration-fast);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--radius-md);
     letter-spacing: 0.02em;
 }
 

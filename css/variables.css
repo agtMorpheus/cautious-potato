@@ -42,27 +42,27 @@
 
     /* --- Colors (Light Mode Default) --- */
     /* Neutrals */
-    --c-neutral-50: #f9fafb;
-    --c-neutral-100: #f3f4f6;
-    --c-neutral-200: #e5e7eb;
-    --c-neutral-300: #d1d5db;
-    --c-neutral-400: #9ca3af;
-    --c-neutral-500: #6b7280;
-    --c-neutral-600: #4b5563;
-    --c-neutral-700: #374151;
-    --c-neutral-800: #1f2937;
-    --c-neutral-900: #111827;
+    --c-neutral-50: var(--c-neutral-50);
+    --c-neutral-100: var(--c-neutral-100);
+    --c-neutral-200: var(--border-base);
+    --c-neutral-300: var(--c-neutral-300);
+    --c-neutral-400: var(--text-muted);
+    --c-neutral-500: var(--text-muted);
+    --c-neutral-600: var(--text-secondary);
+    --c-neutral-700: var(--c-neutral-700);
+    --c-neutral-800: var(--c-neutral-800);
+    --c-neutral-900: var(--text-main);
     --c-neutral-950: #030712;
 
     /* Brand / Primary */
     --c-primary-50: #eff6ff;
-    --c-primary-100: #dbeafe;
+    --c-primary-100: var(--primary-light);
     --c-primary-200: #bfdbfe;
-    --c-primary-300: #93c5fd;
-    --c-primary-400: #60a5fa;
-    --c-primary-500: #3b82f6;
-    --c-primary-600: #2563eb;
-    --c-primary-700: #1d4ed8;
+    --c-primary-300: var(--c-primary-300);
+    --c-primary-400: var(--c-primary-400);
+    --c-primary-500: var(--primary-main);
+    --c-primary-600: var(--primary-hover);
+    --c-primary-700: var(--c-primary-700);
     --c-primary-800: #1e40af;
     --c-primary-900: #1e3a8a;
 
@@ -77,24 +77,24 @@
     --folder-purple: #8b5cf6;
     --folder-purple-rgb: 139, 92, 246;
     --folder-purple-light: rgba(var(--folder-purple-rgb), 0.1);
-    --folder-green: #10b981;
+    --folder-green: var(--c-success);
     --folder-green-rgb: 16, 185, 129;
     --folder-green-light: rgba(var(--success-rgb), 0.1);
-    --folder-orange: #f59e0b;
+    --folder-orange: var(--c-warning);
     --folder-orange-rgb: 245, 158, 11;
     --folder-orange-light: rgba(var(--warning-rgb), 0.1);
 
     /* Semantic Colors (Light Mode Mappings) */
     --bg-app: var(--c-neutral-50);
-    --bg-sidebar: #ffffff;
-    --bg-card: #ffffff;
-    --bg-surface: #ffffff;
+    --bg-sidebar: var(--bg-card);
+    --bg-card: var(--bg-card);
+    --bg-surface: var(--bg-card);
     --bg-hover: var(--c-neutral-100);
     --bg-active: var(--c-neutral-200);
 
     --text-main: var(--c-neutral-900);
     --text-muted: var(--c-neutral-500);
-    --text-inverse: #ffffff;
+    --text-inverse: var(--bg-card);
 
     --border-base: var(--c-neutral-200);
     --border-highlight: var(--c-neutral-300);
@@ -105,14 +105,14 @@
     --primary-light: var(--c-primary-100);
 
     /* Glassmorphism Tokens */
-    --bg-glass: rgba(255, 255, 255, 0.8);
+    --bg-glass: var(--bg-glass);
     --border-glass: var(--c-neutral-200);
 
     /* Status */
-    --c-success: #10b981;
-    --c-warning: #f59e0b;
-    --c-danger: #ef4444;
-    --c-info: #06b6d4;
+    --c-success: var(--c-success);
+    --c-warning: var(--c-warning);
+    --c-danger: var(--c-danger);
+    --c-info: var(--c-info);
     
     /* Status Light Variants */
     --success-light: rgba(var(--success-rgb), 0.1);
@@ -167,6 +167,31 @@
     --font-weight-bold: 700;
 
     --transition-fast: var(--duration-fast);
+    /* --- Additional Color Variables --- */
+    --overlay-dark: rgba(15, 23, 42, 0.8);
+    --overlay-darker: rgba(15, 23, 42, 0.9);
+    --overlay-light: rgba(30, 41, 59, 0.6);
+    --overlay-subtle: rgba(30, 41, 59, 0.3);
+    --muted-overlay: rgba(148, 163, 184, 0.7);
+    --success-overlay: rgba(34, 197, 94, 0.3);
+    --slate-overlay: rgba(100, 116, 139, 0.15);
+
+
+    /* --- Layout Specific Variables --- */
+    --layout-max-width: 1920px;
+    --layout-content-width: 1200px;
+    --layout-sidebar-width: 260px;
+    --layout-modal-width: 900px;
+    --layout-card-width: 420px;
+    --layout-form-width: 600px;
+    --layout-table-height: 600px;
+    --layout-header-height: 100px;
+    --layout-footer-height: 80px;
+    
+    /* Border widths */
+    --border-width-thin: 1px;
+    --border-width-medium: 2px;
+    --border-width-thick: 3px;
 }
 
 /* --- Dark Mode Overrides --- */
@@ -196,9 +221,9 @@
     /* slate-600 */
     --border-light: #334155;
 
-    --primary-main: #60a5fa;
+    --primary-main: var(--c-primary-400);
     /* primary-400 - lighter for dark mode */
-    --primary-hover: #93c5fd;
+    --primary-hover: var(--c-primary-300);
     /* primary-300 */
     --primary-light: rgba(var(--primary-rgb), 0.2);
 

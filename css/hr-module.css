@@ -9,23 +9,23 @@
 .hr-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  font-family: 'Inter', sans-serif;
+  gap: var(--space-xl);
+  font(--font-family-base), sans-serif;
 }
 
 /* ==================== HR Statistics ==================== */
 .hr-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .hr-stat-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-base);
   border-radius: var(--radius-lg, 8px);
-  padding: 1.5rem;
+  padding: var(--space-lg);
   display: flex;
   align-items: center;
   /* Dashboard row layout */
@@ -64,7 +64,7 @@
 }
 
 .hr-stat-icon.active {
-  background: rgba(34, 197, 94, 0.1);
+  background: var(--success-light);
   color: var(--c-success);
 }
 
@@ -74,8 +74,8 @@
 }
 
 .hr-stat-icon.departments {
-  background: rgba(var(--folder-purple-rgb), 0.1);
-  color: var(--folder-purple);
+  background: rgba(var(--folder-var(--folder-purple)-rgb), 0.1);
+  color: var(--folder-var(--folder-purple));
 }
 
 .hr-stat-info {
@@ -104,8 +104,8 @@
 /* ==================== HR Tab Navigation ==================== */
 .hr-header__nav {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
   border-bottom: 1px solid var(--border-glass);
   padding-bottom: 0px;
   overflow-x: auto;
@@ -124,7 +124,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s ease;
-  white-space: nowrap;
+  var(--bg-card)-space: nowrap;
 }
 
 .hr-nav-btn:hover {
@@ -161,20 +161,20 @@
 
 .hr-data-table th {
   background-color: var(--bg-surface);
-  padding: 1rem 1.25rem;
+  padding: var(--space-md) 1.25rem;
   text-align: left;
   font-weight: 600;
   color: var(--text-secondary);
   border-bottom: 2px solid var(--border-base);
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.05em;
-  white-space: nowrap;
+  var(--bg-card)-space: nowrap;
 }
 
 .hr-data-table td {
-  padding: 1rem 1.25rem;
+  padding: var(--space-md) 1.25rem;
   border-bottom: 1px solid var(--border-light);
   color: var(--text-main);
   vertical-align: middle;
@@ -187,10 +187,10 @@
 /* ==================== HR Filters ==================== */
 .hr-filters {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
   flex-wrap: wrap;
-  padding: 1rem;
+  padding: var(--space-md);
   background: var(--bg-surface);
   border: 1px solid var(--border-base);
   border-radius: var(--radius-lg);
@@ -198,7 +198,7 @@
 
 .hr-filters__input,
 .hr-filters__select {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem var(--space-md);
   background: var(--bg-card);
   border: 1px solid var(--border-base);
   border-radius: 6px;
@@ -207,7 +207,7 @@
   flex: 1;
   min-width: 200px;
   transition: border-color 0.2s;
-  font-family: 'Inter', sans-serif;
+  font(--font-family-base), sans-serif;
 }
 
 .hr-filters__input:focus,
@@ -222,7 +222,7 @@
 .hr-employee-name {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .hr-employee-avatar {
@@ -245,7 +245,7 @@
 .hr-status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.6rem;
+  padding: var(--space-xs) 0.6rem;
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 600;
@@ -255,7 +255,7 @@
 }
 
 .hr-status-active {
-  background: rgba(34, 197, 94, 0.15);
+  background: var(--success-light);
   color: var(--c-success);
 }
 
@@ -266,8 +266,8 @@
 
 /* ==================== Action Buttons ==================== */
 .hr-btn-icon {
-  width: 32px;
-  height: 32px;
+  width: var(--space-xl);
+  height: var(--space-xl);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -289,7 +289,7 @@
   background: var(--primary-main);
   color: var(--text-inverse);
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem var(--space-lg);
   border-radius: 6px;
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
@@ -308,7 +308,7 @@
 
 /* ==================== Empty State ==================== */
 .hr-empty-state {
-  padding: 4rem 2rem;
+  padding: 4rem var(--space-xl);
   text-align: center;
 }
 
@@ -317,7 +317,7 @@
   opacity: 0.3;
   width: 64px;
   height: 64px;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
 }
 
 .hr-empty-title {
