@@ -625,6 +625,21 @@ select:focus {
     background-color: var(--primary-light);
 }
 
+.file-upload-area.drag-over {
+    border-color: var(--primary-main);
+    background-color: var(--primary-light);
+    transform: scale(1.02);
+}
+
+.file-input-hidden {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
 .upload-icon {
     width: 48px;
     height: 48px;
