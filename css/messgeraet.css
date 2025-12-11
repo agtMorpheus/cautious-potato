@@ -1,9 +1,13 @@
 /**
- * Messgerät Module CSS (Command Center Theme)
+ * Messgerät Module CSS (Standardized)
  * 
  * Styles for the measurement devices management module.
- * Implements Glassmorphism and Technical/Precision aesthetic
+ * Follows UI Standardization Guide (Phase 1-6).
  */
+
+@import 'cards.css';
+@import 'modals.css';
+@import 'tables.css';
 
 /* ============================================
    MODULE CONTAINER
@@ -12,8 +16,7 @@
 .messgeraet-module {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
-  font(--font-family-base), sans-serif;
+  gap: var(--space-32);
 }
 
 /* ============================================
@@ -22,168 +25,8 @@
 
 .messgeraet-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.25rem;
-}
-
-.messgeraet-stat-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg, 8px);
-  padding: var(--space-lg);
-  display: flex;
-  align-items: center;
-  /* Row layout for stats like dashboard */
-  gap: 1.25rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.messgeraet-stat-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--primary-main);
-  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
-}
-
-/* Tech corner accent */
-.messgeraet-stat-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 24px 24px 0;
-  border-color: transparent var(--bg-hover) transparent transparent;
-}
-
-.messgeraet-stat-card .stat-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 6px;
-  /* Squarer tech look */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: var(--bg-hover);
-}
-
-.messgeraet-stat-card .stat-icon svg {
-  width: 1.75rem;
-  height: 1.75rem;
-  stroke-width: 1.5;
-}
-
-.messgeraet-stat-card .stat-icon.devices {
-  color: var(--primary-main);
-  background: rgba(var(--primary-rgb), 0.1);
-}
-
-.messgeraet-stat-card .stat-icon.valid {
-  color: var(--c-success);
-  background: var(--success-light);
-}
-
-.messgeraet-stat-card .stat-icon.expired {
-  color: var(--c-warning);
-  background: rgba(var(--warning-rgb), 0.1);
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.messgeraet-stat-card .stat-value {
-  font-size: 2rem;
-  font-weight: 500;
-  color: var(--text-main);
-  line-height: 1;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: -0.05em;
-}
-
-.messgeraet-stat-card .stat-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 4px;
-}
-
-/* ============================================
-   HEADER & ACTIONS
-   ============================================ */
-
-.messgeraet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-lg);
-  padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--border-glass);
-}
-
-.messgeraet-header h3 {
-  font-size: var(--font-size-2xl);
-  font-weight: 400;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--text-main);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.messgeraet-header h3 svg {
-  color: var(--primary-main);
-  opacity: 0.8;
-}
-
-/* ============================================
-   FILTERS
-   ============================================ */
-
-.messgeraet-filters {
-  display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-  padding: var(--space-md);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  align-items: center;
-}
-
-.messgeraet-filters .filter-group {
-  flex: 1;
-  min-width: 220px;
-}
-
-.messgeraet-filters .form-input,
-.messgeraet-filters .form-select {
-  width: 100%;
-  padding: 0.75rem var(--space-md);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md, 6px);
-  font-size: 0.9rem;
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  transition: all 0.2s;
-  font(--font-family-base), sans-serif;
-}
-
-.messgeraet-filters .form-input:focus,
-.messgeraet-filters .form-select:focus {
-  outline: none;
-  border-color: var(--primary-main);
-  box-shadow: 0 0 0 1px var(--primary-main);
-  background-color: var(--bg-surface);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-20);
 }
 
 /* ============================================
@@ -191,117 +34,7 @@
    ============================================ */
 
 .messgeraet-list-container {
-  background-color: var(--bg-glass, rgba(30, 41, 59, 0.5));
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg, 8px);
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-lg);
-}
-
-.messgeraet-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.messgeraet-table th {
-  background-color: var(--bg-surface);
-  /* slightly darker header */
-  padding: var(--space-md) 1.25rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 2px solid var(--border-base);
-  text-align: left;
-  var(--bg-card)-space: nowrap;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.messgeraet-table td {
-  padding: var(--space-md) 1.25rem;
-  border-bottom: 1px solid var(--border-light);
-  color: var(--text-main);
-  background-clip: padding-box;
-}
-
-.messgeraet-table tr:hover td {
-  background-color: var(--bg-hover);
-}
-
-.messgeraet-table .device-name strong {
-  font-weight: 600;
-  color: var(--primary-main);
-  /* Pop color for name */
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.messgeraet-table code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 0.var(--space-xl) 0.4rem;
-  border-radius: 4px;
-  color: var(--text-muted);
-  border: 1px solid var(--border-light);
-}
-
-/* ============================================
-   CALIBRATION BADGES
-   ============================================ */
-
-.calibration-status {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-xs) 0.6rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: 'JetBrains Mono', monospace;
-  border: 1px solid transparent;
-}
-
-.calibration-status.status-valid {
-  background-color: var(--success-light);
-  color: var(--c-success);
-  border-color: rgba(34, 197, 94, 0.2);
-}
-
-.calibration-status.status-expired {
-  background-color: rgba(var(--danger-rgb), 0.1);
-  color: var(--c-danger);
-  border-color: rgba(var(--danger-rgb), 0.2);
-}
-
-/* ============================================
-   MODAL (Glassmorphism)
-   ============================================ */
-
-.messgeraet-modal .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-}
-
-.messgeraet-modal .modal-content {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.messgeraet-modal .modal-header {
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-base);
-  background: var(--bg-card);
-  /* Slight distinction */
-}
-
-.messgeraet-modal .modal-header h3 {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: var(--font-size-xl);
+  /* Inherits card styles */
 }
 
 /* ============================================
@@ -309,16 +42,50 @@
    ============================================ */
 
 .messgeraet-empty-state {
-  padding: 4rem var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-40) var(--space-20);
+  text-align: center;
+  color: var(--color-text-secondary);
 }
 
 .messgeraet-empty-state .empty-icon {
-  color: var(--text-muted);
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-16);
   opacity: 0.5;
-  stroke-width: 1.5;
 }
 
 .messgeraet-empty-state .empty-title {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-std-medium);
+  margin-bottom: var(--space-8);
+  color: var(--color-text);
+}
+
+.messgeraet-empty-state .empty-text {
+  font-size: var(--font-size-std-base);
+  max-width: 400px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+  .messgeraet-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .messgeraet-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-16);
+  }
+
+  .messgeraet-filters {
+    flex-direction: column;
+  }
 }

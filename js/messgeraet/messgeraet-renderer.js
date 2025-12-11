@@ -4,6 +4,8 @@
  * Handles all UI rendering and updates for the Messgerät module.
  * Dynamically generates HTML and updates DOM based on state changes.
  * German interface language.
+ *
+ * Updated to support UI Standardization Guide (Phase 1-6).
  */
 
 import * as state from './messgeraet-state.js';
@@ -124,39 +126,53 @@ export function renderDeviceList() {
     <div class="messgeraet-module">
       <!-- Statistics -->
       <div class="messgeraet-stats-grid">
-        <div class="messgeraet-stat-card">
-          <div class="stat-icon devices">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-            </svg>
+        <div class="card stat-card">
+          <div class="card__body" style="display: flex; align-items: center; gap: var(--space-16);">
+            <div class="stat-icon" style="background: var(--color-primary-light); color: var(--color-primary); padding: var(--space-8); border-radius: var(--radius-std-md);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-value" style="font-size: var(--font-size-h2); font-weight: var(--font-weight-std-bold);">${devices.length}</div>
+              <div class="stat-label" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">Messgeräte</div>
+            </div>
           </div>
-          <span class="stat-value">${devices.length}</span>
-          <span class="stat-label">Messgeräte</span>
         </div>
-        <div class="messgeraet-stat-card">
-          <div class="stat-icon valid">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+
+        <div class="card stat-card">
+           <div class="card__body" style="display: flex; align-items: center; gap: var(--space-16);">
+            <div class="stat-icon" style="background: rgba(33, 128, 141, 0.1); color: var(--color-success); padding: var(--space-8); border-radius: var(--radius-std-md);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-value" style="font-size: var(--font-size-h2); font-weight: var(--font-weight-std-bold);">${state.getValidDevices().length}</div>
+              <div class="stat-label" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">Gültige Kalibrierung</div>
+            </div>
           </div>
-          <span class="stat-value">${state.getValidDevices().length}</span>
-          <span class="stat-label">Gültige Kalibrierung</span>
         </div>
-        <div class="messgeraet-stat-card">
-          <div class="stat-icon expired">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+
+        <div class="card stat-card">
+           <div class="card__body" style="display: flex; align-items: center; gap: var(--space-16);">
+            <div class="stat-icon" style="background: rgba(192, 21, 47, 0.1); color: var(--color-error); padding: var(--space-8); border-radius: var(--radius-std-md);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-value" style="font-size: var(--font-size-h2); font-weight: var(--font-weight-std-bold);">${devices.length - state.getValidDevices().length}</div>
+              <div class="stat-label" style="color: var(--color-text-secondary); font-size: var(--font-size-small);">Abgelaufen/Ohne Datum</div>
+            </div>
           </div>
-          <span class="stat-value">${devices.length - state.getValidDevices().length}</span>
-          <span class="stat-label">Abgelaufen/Ohne Datum</span>
         </div>
       </div>
 
       <!-- Header with Add Button -->
-      <div class="messgeraet-header">
-        <h3>Messgeräte-Verwaltung</h3>
-        <button type="button" class="btn btn-primary" data-messgeraet-action="add">
+      <div class="messgeraet-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-16);">
+        <h3 style="font-size: var(--font-size-h3); margin: 0;">Messgeräte-Verwaltung</h3>
+        <button type="button" class="btn btn--primary" data-messgeraet-action="add">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -165,21 +181,21 @@ export function renderDeviceList() {
       </div>
 
       <!-- Filters -->
-      <div class="messgeraet-filters">
-        <div class="filter-group">
+      <div class="messgeraet-filters panel" style="display: flex; gap: var(--space-16); padding: var(--space-16); background: var(--color-surface); border: 1px solid var(--color-border-std); border-radius: var(--radius-std-lg); margin-bottom: var(--space-16);">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
           <input 
             type="search" 
             id="messgeraet-search" 
-            class="form-input"
+            class="form-control"
             placeholder="Suche nach Name, Typ, Fabrikat oder ID..."
             value="${escapeHtml(formState.searchTerm || '')}"
             aria-label="Messgeräte suchen"
           >
         </div>
-        <div class="filter-group">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
           <select 
             id="messgeraet-type-filter" 
-            class="form-select"
+            class="form-control"
             aria-label="Nach Typ filtern"
           >
             <option value="">Alle Typen</option>
@@ -193,32 +209,34 @@ export function renderDeviceList() {
       </div>
 
       <!-- Device List -->
-      <div class="messgeraet-list-container">
+      <div class="messgeraet-list-container card" style="overflow: hidden;">
         ${filteredDevices.length === 0 ? `
-          <div class="messgeraet-empty-state">
-            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="messgeraet-empty-state" style="padding: var(--space-32); text-align: center;">
+            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" style="color: var(--color-text-secondary); opacity: 0.5; margin-bottom: var(--space-16);">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
             </svg>
-            <p class="empty-title">Keine Messgeräte vorhanden</p>
-            <p class="empty-text">Fügen Sie ein neues Messgerät hinzu, um zu beginnen.</p>
+            <p class="empty-title" style="font-weight: var(--font-weight-std-medium); margin-bottom: var(--space-8);">Keine Messgeräte vorhanden</p>
+            <p class="empty-text" style="color: var(--color-text-secondary);">Fügen Sie ein neues Messgerät hinzu, um zu beginnen.</p>
           </div>
         ` : `
-          <table class="messgeraet-table" role="grid" aria-label="Messgeräte-Liste">
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Typ</th>
-                <th scope="col">Fabrikat</th>
-                <th scope="col">Ident-Nr.</th>
-                <th scope="col">Nächste Kalibrierung</th>
-                <th scope="col">Status</th>
-                <th scope="col">Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredDevices.map(device => renderDeviceRow(device)).join('')}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table" role="grid" aria-label="Messgeräte-Liste">
+              <thead class="table__head">
+                <tr>
+                  <th class="table__th" scope="col">Name</th>
+                  <th class="table__th" scope="col">Typ</th>
+                  <th class="table__th" scope="col">Fabrikat</th>
+                  <th class="table__th" scope="col">Ident-Nr.</th>
+                  <th class="table__th" scope="col">Nächste Kalibrierung</th>
+                  <th class="table__th" scope="col">Status</th>
+                  <th class="table__th" scope="col">Aktionen</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredDevices.map(device => renderDeviceRow(device)).join('')}
+              </tbody>
+            </table>
+          </div>
         `}
       </div>
     </div>
@@ -235,30 +253,30 @@ export function renderDeviceList() {
  */
 function renderDeviceRow(device) {
   const isExpired = isCalibrationExpired(device.calibrationDate);
-  const statusClass = isExpired ? 'expired' : 'valid';
+  const badgeClass = isExpired ? 'badge--error' : 'badge--success';
   const statusText = isExpired ? 'Abgelaufen' : 'Gültig';
 
   return `
-    <tr data-device-id="${escapeHtml(device.id)}">
-      <td>
+    <tr class="table__tr" data-device-id="${escapeHtml(device.id)}">
+      <td class="table__td">
         <div class="device-name">
           <strong>${escapeHtml(device.name)}</strong>
         </div>
       </td>
-      <td>${escapeHtml(device.type)}</td>
-      <td>${escapeHtml(device.fabrikat || '-')}</td>
-      <td><code>${escapeHtml(device.identNr || '-')}</code></td>
-      <td>${device.calibrationDate ? formatDate(device.calibrationDate) : '-'}</td>
-      <td>
-        <span class="calibration-status status-${statusClass}">
+      <td class="table__td">${escapeHtml(device.type)}</td>
+      <td class="table__td">${escapeHtml(device.fabrikat || '-')}</td>
+      <td class="table__td"><code style="font-family: var(--font-family-std-mono); background: var(--color-secondary); padding: 2px 4px; border-radius: var(--radius-std-sm); font-size: var(--font-size-tiny);">${escapeHtml(device.identNr || '-')}</code></td>
+      <td class="table__td">${device.calibrationDate ? formatDate(device.calibrationDate) : '-'}</td>
+      <td class="table__td">
+        <span class="badge ${badgeClass}">
           ${statusText}
         </span>
       </td>
-      <td>
-        <div class="device-actions">
+      <td class="table__td">
+        <div class="btn-group">
           <button 
             type="button" 
-            class="btn-icon" 
+            class="btn btn--icon btn--ghost"
             data-messgeraet-action="edit" 
             data-device-id="${escapeHtml(device.id)}"
             title="Bearbeiten"
@@ -270,7 +288,8 @@ function renderDeviceRow(device) {
           </button>
           <button 
             type="button" 
-            class="btn-icon btn-danger" 
+            class="btn btn--icon btn--ghost"
+            style="color: var(--color-error);"
             data-messgeraet-action="delete" 
             data-device-id="${escapeHtml(device.id)}"
             title="Löschen"
@@ -306,91 +325,92 @@ export function showDeviceForm(mode, deviceId = null) {
   const deviceTypes = state.getDeviceTypes();
 
   const modalHtml = `
-    <div id="${FORM_MODAL_ID}" class="messgeraet-modal" role="dialog" aria-labelledby="messgeraet-modal-title" aria-modal="true">
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="messgeraet-modal-title">${escapeHtml(title)}</h3>
-          <button type="button" class="modal-close" data-messgeraet-action="cancel" aria-label="Schließen">&times;</button>
+    <div id="${FORM_MODAL_ID}" class="modal is-open" role="dialog" aria-labelledby="messgeraet-modal-title" aria-modal="true">
+      <div class="modal__overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;" data-messgeraet-action="cancel"></div>
+      <div class="modal__content" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; background: var(--color-surface); width: 100%; max-width: 500px; border-radius: var(--radius-std-lg); box-shadow: var(--shadow-std-xl);">
+        <div class="modal__header" style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-20); border-bottom: 1px solid var(--color-border-std);">
+          <h3 id="messgeraet-modal-title" style="margin: 0; font-size: var(--font-size-h3);">${escapeHtml(title)}</h3>
+          <button type="button" class="btn btn--icon btn--ghost" data-messgeraet-action="cancel" aria-label="Schließen">&times;</button>
         </div>
-        <form id="messgeraetForm" class="messgeraet-form">
-          <div class="form-group">
-            <label for="device-name">Name <span class="required">*</span></label>
-            <input 
-              type="text" 
-              id="device-name" 
-              name="name" 
-              class="form-control" 
-              value="${escapeHtml(device?.name || '')}"
-              required
-              placeholder="z.B. Fluke 1654b"
-              autocomplete="off"
-            >
-            <div class="field-error" id="error-name" role="alert" aria-live="polite"></div>
-          </div>
-
-          <div class="form-row">
+        <form id="messgeraetForm">
+          <div class="modal__body" style="padding: var(--space-20);">
             <div class="form-group">
-              <label for="device-type">Typ <span class="required">*</span></label>
-              <select id="device-type" name="type" class="form-control" required>
-                <option value="">-- Typ auswählen --</option>
-                ${deviceTypes.map(type => `
-                  <option value="${escapeHtml(type)}" ${device?.type === type ? 'selected' : ''}>
-                    ${escapeHtml(type)}
-                  </option>
-                `).join('')}
-              </select>
-              <div class="field-error" id="error-type" role="alert" aria-live="polite"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="device-fabrikat">Fabrikat</label>
+              <label for="device-name" class="form-label">Name <span style="color: var(--color-error);">*</span></label>
               <input 
                 type="text" 
-                id="device-fabrikat" 
-                name="fabrikat" 
+                id="device-name"
+                name="name"
                 class="form-control" 
-                value="${escapeHtml(device?.fabrikat || '')}"
-                placeholder="z.B. Fluke"
+                value="${escapeHtml(device?.name || '')}"
+                required
+                placeholder="z.B. Fluke 1654b"
                 autocomplete="off"
               >
-              <div class="field-error" id="error-fabrikat" role="alert" aria-live="polite"></div>
+              <div class="form-error" id="error-name" role="alert" aria-live="polite" style="display: none; color: var(--color-error); font-size: var(--font-size-small); margin-top: var(--space-4);"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16);">
+              <div class="form-group">
+                <label for="device-type" class="form-label">Typ <span style="color: var(--color-error);">*</span></label>
+                <select id="device-type" name="type" class="form-control" required>
+                  <option value="">-- Typ auswählen --</option>
+                  ${deviceTypes.map(type => `
+                    <option value="${escapeHtml(type)}" ${device?.type === type ? 'selected' : ''}>
+                      ${escapeHtml(type)}
+                    </option>
+                  `).join('')}
+                </select>
+                <div class="form-error" id="error-type" role="alert" aria-live="polite" style="display: none; color: var(--color-error); font-size: var(--font-size-small); margin-top: var(--space-4);"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="device-fabrikat" class="form-label">Fabrikat</label>
+                <input
+                  type="text"
+                  id="device-fabrikat"
+                  name="fabrikat"
+                  class="form-control"
+                  value="${escapeHtml(device?.fabrikat || '')}"
+                  placeholder="z.B. Fluke"
+                  autocomplete="off"
+                >
+                <div class="form-error" id="error-fabrikat" role="alert" aria-live="polite" style="display: none; color: var(--color-error); font-size: var(--font-size-small); margin-top: var(--space-4);"></div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16);">
+              <div class="form-group">
+                <label for="device-identNr" class="form-label">Ident-Nr.</label>
+                <input
+                  type="text"
+                  id="device-identNr"
+                  name="identNr"
+                  class="form-control"
+                  value="${escapeHtml(device?.identNr || '')}"
+                  placeholder="z.B. 4312061"
+                  autocomplete="off"
+                >
+                <div class="form-error" id="error-identNr" role="alert" aria-live="polite" style="display: none; color: var(--color-error); font-size: var(--font-size-small); margin-top: var(--space-4);"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="device-calibrationDate" class="form-label">Nächste Kalibrierung</label>
+                <input
+                  type="date"
+                  id="device-calibrationDate"
+                  name="calibrationDate"
+                  class="form-control"
+                  value="${device?.calibrationDate || ''}"
+                >
+                <div class="form-error" id="error-calibrationDate" role="alert" aria-live="polite" style="display: none; color: var(--color-error); font-size: var(--font-size-small); margin-top: var(--space-4);"></div>
+              </div>
             </div>
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="device-identNr">Ident-Nr.</label>
-              <input 
-                type="text" 
-                id="device-identNr" 
-                name="identNr" 
-                class="form-control" 
-                value="${escapeHtml(device?.identNr || '')}"
-                placeholder="z.B. 4312061"
-                autocomplete="off"
-              >
-              <div class="field-error" id="error-identNr" role="alert" aria-live="polite"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="device-calibrationDate">Nächste Kalibrierung</label>
-              <input 
-                type="date" 
-                id="device-calibrationDate" 
-                name="calibrationDate" 
-                class="form-control" 
-                value="${device?.calibrationDate || ''}"
-              >
-              <div class="field-error" id="error-calibrationDate" role="alert" aria-live="polite"></div>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" data-messgeraet-action="cancel">
+          <div class="modal__footer" style="padding: var(--space-16) var(--space-20); border-top: 1px solid var(--color-border-std); display: flex; justify-content: flex-end; gap: var(--space-12);">
+            <button type="button" class="btn btn--secondary" data-messgeraet-action="cancel">
               Abbrechen
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn--primary">
               ${escapeHtml(submitText)}
             </button>
           </div>
@@ -446,7 +466,8 @@ export function displayFieldError(fieldName, errorMessage) {
   }
 
   if (field) {
-    field.classList.add('error');
+    field.classList.add('is-invalid'); // Standard bootstrap-like class, but styles might need specific handling
+    field.style.borderColor = 'var(--color-error)';
     field.setAttribute('aria-invalid', 'true');
     field.setAttribute('aria-describedby', `error-${fieldName}`);
   }
@@ -467,7 +488,8 @@ export function clearFieldError(fieldName) {
   }
 
   if (field) {
-    field.classList.remove('error');
+    field.classList.remove('is-invalid');
+    field.style.borderColor = '';
     field.removeAttribute('aria-invalid');
     field.removeAttribute('aria-describedby');
   }
@@ -490,24 +512,55 @@ export function displayMessage(type, message) {
   if (!container) {
     container = document.createElement('div');
     container.id = MESSAGE_CONTAINER_ID;
-    container.className = 'messgeraet-message-container';
+    // Use toast container style if not globally defined, but we'll manually position it fixed
+    container.style.position = 'fixed';
+    container.style.top = 'var(--space-20)';
+    container.style.right = 'var(--space-20)';
+    container.style.zIndex = '1100';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = 'var(--space-12)';
     container.setAttribute('role', 'status');
     container.setAttribute('aria-live', 'polite');
     document.body.appendChild(container);
   }
 
   const div = document.createElement('div');
-  div.className = `message message-${type}`;
+  div.className = `toast toast--${type}`;
   div.setAttribute('role', type === 'error' ? 'alert' : 'status');
 
+  // Icon based on type
+  let iconHtml = '';
+  if (type === 'success') {
+     iconHtml = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
+  } else if (type === 'error') {
+     iconHtml = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`;
+  } else if (type === 'warning') {
+     iconHtml = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+  } else {
+     iconHtml = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+  }
+
+  const titleMap = {
+    'success': 'Erfolg',
+    'error': 'Fehler',
+    'warning': 'Warnung',
+    'info': 'Info'
+  };
+
   div.innerHTML = `
-    <span class="message-text">${escapeHtml(message)}</span>
-    <button type="button" class="message-close" aria-label="Schließen">&times;</button>
+    ${iconHtml}
+    <div class="toast__content">
+      <h4 class="toast__title">${titleMap[type] || 'Info'}</h4>
+      <p class="toast__message">${escapeHtml(message)}</p>
+    </div>
+    <button type="button" class="toast__close" aria-label="Schließen">&times;</button>
   `;
 
   // Add close handler
-  div.querySelector('.message-close').addEventListener('click', () => {
-    div.remove();
+  div.querySelector('.toast__close').addEventListener('click', () => {
+    div.classList.add('toast--removing');
+    setTimeout(() => div.remove(), 250); // wait for animation
   });
 
   container.appendChild(div);
@@ -515,7 +568,10 @@ export function displayMessage(type, message) {
   // Auto-remove after 5 seconds
   setTimeout(() => {
     if (div.parentNode) {
-      div.remove();
+      div.classList.add('toast--removing');
+      setTimeout(() => {
+        if (div.parentNode) div.remove();
+      }, 250);
     }
   }, 5000);
 }

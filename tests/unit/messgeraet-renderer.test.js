@@ -116,7 +116,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('renders device table when devices exist', () => {
       renderDeviceList();
       
-      expect(container.querySelector('.messgeraet-table')).not.toBeNull();
+      expect(container.querySelector('.table')).not.toBeNull();
     });
 
     test('renders empty state when no devices', () => {
@@ -215,7 +215,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('shows calibration status', () => {
       renderDeviceList();
       
-      const statusBadges = container.querySelectorAll('.calibration-status');
+      const statusBadges = container.querySelectorAll('.badge');
       expect(statusBadges.length).toBe(2);
     });
 
@@ -356,7 +356,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       displayFieldError('name', 'Error');
       
       const field = document.querySelector('[name="name"]');
-      expect(field.classList.contains('error')).toBe(true);
+      expect(field.classList.contains('is-invalid')).toBe(true);
     });
 
     test('sets aria-invalid attribute', () => {
@@ -392,7 +392,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       clearFieldError('name');
       
       const field = document.querySelector('[name="name"]');
-      expect(field.classList.contains('error')).toBe(false);
+      expect(field.classList.contains('is-invalid')).toBe(false);
     });
 
     test('removes aria-invalid attribute', () => {
@@ -421,7 +421,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('displays success message', () => {
       displayMessage('success', 'Success message');
       
-      const message = document.querySelector('.message-success');
+      const message = document.querySelector('.toast--success');
       expect(message).not.toBeNull();
       expect(message.textContent).toContain('Success message');
     });
@@ -429,39 +429,43 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('displays error message', () => {
       displayMessage('error', 'Error message');
       
-      const message = document.querySelector('.message-error');
+      const message = document.querySelector('.toast--error');
       expect(message).not.toBeNull();
     });
 
     test('displays info message', () => {
       displayMessage('info', 'Info message');
       
-      const message = document.querySelector('.message-info');
+      const message = document.querySelector('.toast--info');
       expect(message).not.toBeNull();
     });
 
     test('displays warning message', () => {
       displayMessage('warning', 'Warning message');
       
-      const message = document.querySelector('.message-warning');
+      const message = document.querySelector('.toast--warning');
       expect(message).not.toBeNull();
     });
 
     test('message has close button', () => {
       displayMessage('success', 'Message');
       
-      const closeBtn = document.querySelector('.message-close');
+      const closeBtn = document.querySelector('.toast__close');
       expect(closeBtn).not.toBeNull();
     });
 
     test('close button removes message', () => {
+      jest.useFakeTimers();
       displayMessage('success', 'Message');
       
-      const closeBtn = document.querySelector('.message-close');
+      const closeBtn = document.querySelector('.toast__close');
       closeBtn.click();
       
-      const messages = document.querySelectorAll('.message');
+      jest.advanceTimersByTime(300);
+
+      const messages = document.querySelectorAll('.toast');
       expect(messages.length).toBe(0);
+      jest.useRealTimers();
     });
 
     test('message auto-removes after timeout', () => {
@@ -469,9 +473,9 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       
       displayMessage('success', 'Message');
       
-      jest.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(5500); // 5000 + 250 animation
       
-      const messages = document.querySelectorAll('.message');
+      const messages = document.querySelectorAll('.toast');
       expect(messages.length).toBe(0);
       
       jest.useRealTimers();
@@ -480,14 +484,14 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('sets role="alert" for error messages', () => {
       displayMessage('error', 'Error');
       
-      const message = document.querySelector('.message-error');
+      const message = document.querySelector('.toast--error');
       expect(message.getAttribute('role')).toBe('alert');
     });
 
     test('sets role="status" for non-error messages', () => {
       displayMessage('success', 'Success');
       
-      const message = document.querySelector('.message-success');
+      const message = document.querySelector('.toast--success');
       expect(message.getAttribute('role')).toBe('status');
     });
   });
@@ -511,7 +515,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('escapes HTML in messages', () => {
       displayMessage('success', '<img onerror="alert(1)" src="x">');
       
-      const messageText = document.querySelector('.message-text');
+      const messageText = document.querySelector('.toast__message');
       expect(messageText.innerHTML).not.toContain('<img');
     });
   });
@@ -549,7 +553,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       
       renderDeviceList();
       
-      const status = container.querySelector('.status-valid');
+      const status = container.querySelector('.badge--success');
       expect(status).not.toBeNull();
     });
 
@@ -563,7 +567,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       
       renderDeviceList();
       
-      const status = container.querySelector('.status-expired');
+      const status = container.querySelector('.badge--error');
       expect(status).not.toBeNull();
     });
 
@@ -577,7 +581,7 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
       
       renderDeviceList();
       
-      const status = container.querySelector('.status-expired');
+      const status = container.querySelector('.badge--error');
       expect(status).not.toBeNull();
     });
   });
@@ -586,14 +590,14 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('displays total device count', () => {
       renderDeviceList();
       
-      const statValue = container.querySelector('.messgeraet-stat-card .stat-value');
+      const statValue = container.querySelector('.stat-card .stat-value');
       expect(statValue.textContent).toBe('2');
     });
 
     test('displays valid calibration count', () => {
       renderDeviceList();
       
-      const statCards = container.querySelectorAll('.messgeraet-stat-card');
+      const statCards = container.querySelectorAll('.stat-card');
       expect(statCards.length).toBeGreaterThanOrEqual(2);
     });
   });
@@ -602,14 +606,14 @@ describe('Messgerät Renderer Module (messgeraet-renderer.js)', () => {
     test('table has role="grid"', () => {
       renderDeviceList();
       
-      const table = container.querySelector('.messgeraet-table');
+      const table = container.querySelector('.table');
       expect(table.getAttribute('role')).toBe('grid');
     });
 
     test('table has aria-label', () => {
       renderDeviceList();
       
-      const table = container.querySelector('.messgeraet-table');
+      const table = container.querySelector('.table');
       expect(table.getAttribute('aria-label')).toBe('Messgeräte-Liste');
     });
 
