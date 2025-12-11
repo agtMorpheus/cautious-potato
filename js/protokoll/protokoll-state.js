@@ -34,6 +34,9 @@ const MAX_DRAFTS = 5;
 export function init() {
   console.log('Initializing Protokoll State Management');
   
+  // Reset listeners
+  stateListeners = {};
+
   // Try to load from localStorage
   const saved = localStorage.getItem(STORAGE_KEY);
   

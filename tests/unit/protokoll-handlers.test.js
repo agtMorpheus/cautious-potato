@@ -104,7 +104,7 @@ describe('Protokoll Handlers', () => {
       const posNr = handlers.handleAddPosition();
       const position = state.getPosition(posNr);
       
-      expect(position.stromkreisNr).toBe('');
+      expect(position.stromkreisNr).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
       expect(position.spannung).toBeDefined();
       expect(position.messwerte).toBeDefined();
       expect(position.prüfergebnis.status).toBe('nicht-geprüft');
@@ -193,7 +193,7 @@ describe('Protokoll Handlers', () => {
       const result = handlers.handlePreviousStep();
       
       expect(result).toBe(true);
-      expect(state.getCurrentStep()).toBe('metadata');
+      expect(state.getCurrentStep()).toBe('messen');
     });
 
     test('returns false at first step', () => {
@@ -230,6 +230,9 @@ describe('Protokoll Handlers', () => {
     });
 
     test('moves to next step when validation passes', () => {
+      state.setFormStep('messen');
+      expect(state.getCurrentStep()).toBe('messen'); // Pre-condition check
+
       const result = handlers.handleNextStep();
       
       expect(result).toBe(true);

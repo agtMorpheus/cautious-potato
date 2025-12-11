@@ -12,6 +12,8 @@ import * as validator from './protokoll-validator.js';
 // INITIALIZATION
 // ============================================
 
+let documentListenersAttached = false;
+
 /**
  * Initialize event handlers
  * @returns {void}
@@ -40,12 +42,17 @@ function setupEventDelegation() {
   }
 
   // Listen for input changes
+  // It's safe to add listeners to container as it's usually a new element in tests
   container.addEventListener('change', handleFieldChange);
   container.addEventListener('input', handleFieldInput);
   container.addEventListener('blur', handleFieldBlur, true);
 
-  // Listen for button clicks
-  document.addEventListener('click', handleButtonClick);
+  // Listen for button clicks (on document)
+  // Only attach once to prevent duplicate listeners
+  if (!documentListenersAttached) {
+    document.addEventListener('click', handleButtonClick);
+    documentListenersAttached = true;
+  }
 }
 
 /**
