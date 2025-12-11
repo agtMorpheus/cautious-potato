@@ -67,6 +67,21 @@ export class VirtualList {
         this.container.addEventListener('scroll', this.scrollHandler, { passive: true });
         window.addEventListener('resize', this.resizeHandler);
         
+        // Use event delegation for row clicks (performance optimization)
+        if (this.options.onRowClick) {
+            this.clickHandler = (e) => {
+                const row = e.target.closest('[data-index]');
+                if (row) {
+                    const index = parseInt(row.dataset.index, 10);
+                    const item = this.items[index];
+                    if (item) {
+                        this.options.onRowClick(item, index, e);
+                    }
+                }
+            };
+            this.viewport.addEventListener('click', this.clickHandler);
+        }
+        
         // Use ResizeObserver if available
         if (typeof ResizeObserver !== 'undefined') {
             this.resizeObserver = new ResizeObserver(entries => {
@@ -159,14 +174,12 @@ export class VirtualList {
             const item = this.items[i];
             const row = this.options.renderRow(item, i, this.options);
             
-            // Set row height and add click handler
+            // Set row height and data attributes
             row.style.height = `${this.options.rowHeight}px`;
             row.dataset.index = i;
             
+            // Set cursor style if click handler exists (event delegation used in bindEvents)
             if (this.options.onRowClick) {
-                row.addEventListener('click', (e) => {
-                    this.options.onRowClick(item, i, e);
-                });
                 row.style.cursor = 'pointer';
             }
             
@@ -275,6 +288,11 @@ export class VirtualList {
     destroy() {
         this.container.removeEventListener('scroll', this.scrollHandler);
         window.removeEventListener('resize', this.resizeHandler);
+        
+        // Remove click handler if it was added
+        if (this.clickHandler) {
+            this.viewport.removeEventListener('click', this.clickHandler);
+        }
         
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
