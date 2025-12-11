@@ -780,7 +780,14 @@ describe('State Management (state.js)', () => {
       subscribe(goodListener);
       
       // Should not throw and goodListener should still be called
-      expect(() => setState({ ui: { import: { status: 'idle', message: '', fileName: '', fileSize: 0, importedAt: null }, generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 }, export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 } } })).not.toThrow();
+      const testUIState = {
+        ui: {
+          import: { status: 'idle', message: '', fileName: '', fileSize: 0, importedAt: null },
+          generate: { status: 'idle', message: '', positionCount: 0, uniquePositionCount: 0, generationTimeMs: 0 },
+          export: { status: 'idle', message: '', lastExportAt: null, lastExportSize: 0 }
+        }
+      };
+      expect(() => setState(testUIState)).not.toThrow();
       expect(goodListener).toHaveBeenCalled();
     });
 
