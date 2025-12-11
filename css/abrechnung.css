@@ -4,8 +4,10 @@
  */
 
 #view-workflow {
-    /* Ensure clear spacing within the view container */
-    padding-top: var(--space-md);
+    /* Ensure clear spacing within the view container matching Dashboard */
+    padding: var(--space-lg);
+    max-width: 1920px;
+    margin: 0 auto;
 }
 
 /* Custom Grid Layout for the 3 Steps */
