@@ -49,15 +49,13 @@ describe('Messgerät E2E Workflow', () => {
 
   describe('Device Management CRUD Operations', () => {
     test('should add a new device', () => {
-      const deviceData = {
+      const device = messgeraetState.addDevice({
         name: 'Fluke 1587',
         type: 'Isolationsmessgerät',
         calibrationDate: '2024-12-01',
         identNr: 'SN-12345',
         fabrikat: 'Fluke'
       });
-      
-      const device = messgeraetState.addDevice(deviceData);
       
       expect(device).toBeTruthy();
       expect(device.id).toBeTruthy();
