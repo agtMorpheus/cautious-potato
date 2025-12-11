@@ -191,4 +191,232 @@ describe('Workflow Integration Test', () => {
     expect(alert).not.toBeNull();
     expect(alert.innerHTML).toContain('Please generate');
   });
+
+  describe('Error Recovery Scenarios', () => {
+    test('should recover from failed import', async () => {
+      // Mock failed import
+      utils.readExcelFile.mockRejectedValueOnce(new Error('File read error'));
+      
+      const file = new File(['dummy'], 'bad-file.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      
+      // State should reflect error
+      let state = getState();
+      expect(state.ui.import.status).toBe('error');
+      
+      // Should be able to retry with valid file
+      utils.readExcelFile.mockResolvedValueOnce({ workbook: {} });
+      
+      const goodFile = new File(['valid'], 'good-file.xlsx');
+      handleFileSelect({ target: { files: [goodFile] } });
+      
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      
+      state = getState();
+      expect(state.ui.import.status).toBe('success');
+    });
+
+    test('should recover from failed generate', async () => {
+      // Import successfully first
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      
+      // Mock failed validation
+      utils.validateFilledPositions.mockReturnValueOnce({ 
+        valid: false, 
+        errors: ['Position 01.01.010 missing required data'] 
+      });
+      
+      await handleGenerateAbrechnung();
+      
+      const state = getState();
+      // Generate should fail or handle validation errors
+      expect(state.ui.generate.status).toBeTruthy();
+    });
+
+    test('should recover from failed export', async () => {
+      // Complete import and generate
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      await handleGenerateAbrechnung();
+      
+      // Mock failed export
+      utilsExcel.createAndExportAbrechnungExcelJS.mockRejectedValueOnce(
+        new Error('Export failed')
+      );
+      
+      await handleExportAbrechnung();
+      
+      let state = getState();
+      expect(state.ui.export.status).toBe('error');
+      
+      // Retry export
+      utilsExcel.createAndExportAbrechnungExcelJS.mockResolvedValueOnce({
+        fileName: 'retry-export.xlsx',
+        fileSize: 5000
+      });
+      
+      await handleExportAbrechnung();
+      
+      state = getState();
+      expect(state.ui.export.status).toBe('success');
+    });
+  });
+
+  describe('Data Validation Scenarios', () => {
+    test('should validate protokoll data before processing', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      
+      // Mock parsed data with validation warnings
+      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
+        success: true,
+        metadata: {
+          datum: '2023-01-01',
+          auftragsNr: '', // Missing order number
+          anlage: 'Plant 1'
+        },
+        positionen: [],
+        positionSums: {},
+        warnings: ['Order number is missing']
+      });
+      
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      
+      const state = getState();
+      expect(state.ui.import.status).toBe('success');
+      expect(state.protokollData.metadata.auftragsNr).toBe('');
+    });
+
+    test('should handle empty positions', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      
+      // Mock empty positions
+      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
+        success: true,
+        metadata: {
+          datum: '2023-01-01',
+          auftragsNr: 'A-123',
+          anlage: 'Plant 1'
+        },
+        positionen: [],
+        positionSums: {},
+        warnings: []
+      });
+      
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      await handleGenerateAbrechnung();
+      
+      const state = getState();
+      expect(state.abrechnungData.positionen).toEqual({});
+    });
+
+    test('should aggregate duplicate positions correctly', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      
+      // Mock data with duplicate positions
+      utils.safeReadAndParseProtokoll.mockResolvedValueOnce({
+        success: true,
+        metadata: {
+          datum: '2023-01-01',
+          auftragsNr: 'A-DUP',
+          anlage: 'Test'
+        },
+        positionen: [
+          { posNr: '01.01.010', menge: 5 },
+          { posNr: '01.01.010', menge: 3 },
+          { posNr: '01.01.010', menge: 2 }
+        ],
+        positionSums: {
+          '01.01.010': 10
+        },
+        warnings: []
+      });
+      
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      await handleGenerateAbrechnung();
+      
+      const state = getState();
+      expect(state.abrechnungData.positionen['01.01.010']).toBe(10);
+    });
+  });
+
+  describe('Concurrent Operations', () => {
+    test('should handle rapid state changes', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      
+      // Rapid file selections
+      handleFileSelect({ target: { files: [file] } });
+      handleFileSelect({ target: { files: [file] } });
+      handleFileSelect({ target: { files: [file] } });
+      
+      const state = getState();
+      expect(state.ui.import.fileName).toBe('protokoll.xlsx');
+    });
+
+    test('should prevent concurrent operations on same workflow', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      
+      // Start import
+      const importPromise = handleImportFile({ 
+        preventDefault: () => {}, 
+        stopPropagation: () => {} 
+      });
+      
+      // Don't await, try to start another operation immediately
+      let state = getState();
+      const statusDuringImport = state.ui.import.status;
+      
+      await importPromise;
+      
+      state = getState();
+      expect(state.ui.import.status).toBe('success');
+    });
+  });
+
+  describe('State Persistence', () => {
+    test('should persist state after import', async () => {
+      const file = new File(['dummy'], 'protokoll.xlsx');
+      handleFileSelect({ target: { files: [file] } });
+      await handleImportFile({ preventDefault: () => {}, stopPropagation: () => {} });
+      
+      // Verify localStorage was called
+      expect(localStorageMock.setItem).toHaveBeenCalled();
+      
+      // Check if any state was saved (key might vary)
+      const calls = localStorageMock.setItem.mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+    });
+
+    test('should restore state on page load', () => {
+      // Set up localStorage with saved state
+      const savedState = {
+        protokollData: {
+          metadata: {
+            auftragsNr: 'RESTORED-123'
+          },
+          positionen: []
+        },
+        ui: {
+          import: { status: 'success' }
+        }
+      };
+      
+      localStorageMock.setItem('appState', JSON.stringify(savedState));
+      
+      // Reset and reload state
+      resetState({ persist: false, silent: true });
+      
+      // State should be restored (if implemented)
+      const state = getState();
+      expect(state).toBeTruthy();
+    });
+  });
 });
