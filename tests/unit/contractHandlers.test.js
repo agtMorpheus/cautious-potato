@@ -1,525 +1,420 @@
 /**
- * Unit Tests for Contract Handlers Module (Phase 3 & 4)
- * 
- * Tests handler logic for filtering, sorting, and actions
- * Tests are designed to run without DOM dependencies where possible
+ * Unit Tests for Contract Handlers
  */
+import {
+    handleContractFileSelect,
+    handleContractSheetSelect,
+    handleContractMappingChange,
+    handleContractImportConfirm,
+    handleContractFilterChange,
+    handleContractSearch,
+    handleClearContractFilters,
+    handleResetContracts,
+    handleContractSubviewChange,
+    initializeContractEventListeners,
+    handleContractMappingConfirm,
+    handleContractImportSave,
+    handleContractCancelPreview,
+    handleContractSort,
+    handleContractActionClick,
+    handleContractEdit,
+    handleContractDelete,
+    handleContractDateRangeChange,
+    handleContractStatusChange,
+    handleContractWorkerChange
+} from '../../js/contracts/contractHandlers.js';
 
-import { getState, setState, resetState, subscribe } from '../../js/state.js';
-import { normalizeStatus } from '../../js/contracts/contractUtils.js';
+import * as stateModule from '../../js/state.js';
+import * as contractUtils from '../../js/contracts/contractUtils.js';
+import * as contractRepository from '../../js/contracts/contractRepository.js';
+import * as handlers from '../../js/handlers.js';
 
-// Helper to setup test contracts in state
-function setupTestContracts(contracts) {
-    resetState(true);
-    setState({
-        contracts: {
-            records: contracts,
-            filters: {
-                contractId: null,
-                status: null,
-                location: null,
-                equipmentId: null,
-                dateRange: { from: null, to: null },
-                searchText: ''
-            },
-            ui: {
-                sortKey: 'contractId',
-                sortDir: 'asc'
-            },
-            importState: {
-                isImporting: false,
-                currentFile: null,
-                currentSheet: null,
-                progress: 0,
-                status: 'idle',
-                message: '',
-                errors: [],
-                warnings: []
-            },
-            importedFiles: [],
-            rawSheets: {},
-            currentMapping: {}
-        }
-    }, { silent: true });
-}
+// Mock external dependencies
+jest.mock('../../js/state.js');
+jest.mock('../../js/contracts/contractUtils.js');
+jest.mock('../../js/contracts/contractRepository.js');
+jest.mock('../../js/handlers.js');
+jest.mock('../../js/contracts/contractRenderer.js');
 
-describe('Contract Handlers Logic (Phase 3 & 4)', () => {
+describe('Contract Handlers', () => {
+    let mockState;
 
     beforeEach(() => {
-        resetState(true);
-    });
+        // Clear all mocks
+        jest.clearAllMocks();
 
-    describe('Filter Logic', () => {
+        // Setup DOM
+        document.body.innerHTML = `
+            <input type="file" id="contract-file-input" />
+            <button id="contract-import-button" disabled></button>
+            <select id="contract-sheet-select">
+                <option value="">Select Sheet</option>
+                <option value="Sheet1">Sheet1</option>
+            </select>
+            <div id="contract-preview-container" style="display: none;"></div>
+            <div id="contract-subview-list" class="subview-container"></div>
+            <div id="contract-subview-import" class="subview-container"></div>
+            <button class="sub-nav-btn" data-subview="list"></button>
+            <button class="sub-nav-btn" data-subview="import"></button>
 
-        test('filters contracts by status', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', status: 'fertig', contractTitle: 'Contract 1' },
-                { id: '2', contractId: 'A002', status: 'inbearb', contractTitle: 'Contract 2' },
-                { id: '3', contractId: 'A003', status: 'fertig', contractTitle: 'Contract 3' },
-                { id: '4', contractId: 'A004', status: 'offen', contractTitle: 'Contract 4' }
-            ];
+            <!-- Filters -->
+            <input id="contract-search-input" />
+            <select id="contract-status-filter"></select>
+            <input id="contract-filter-from" />
+            <input id="contract-filter-to" />
+            <button id="contract-clear-filters"></button>
+            <button id="contract-reset-button"></button>
+            <button id="contract-refresh-btn"></button>
 
-            setupTestContracts(testContracts);
+            <!-- Drop zone -->
+            <div id="contract-file-drop-zone"></div>
+        `;
 
-            // Apply status filter
-            const state = getState();
-            const filters = { status: 'fertig' };
-            
-            const filtered = testContracts.filter(c => 
-                normalizeStatus(c.status) === normalizeStatus(filters.status)
-            );
-
-            expect(filtered.length).toBe(2);
-            expect(filtered.every(c => c.status === 'fertig')).toBe(true);
-        });
-
-        test('filters contracts by search text', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A564', status: 'fertig', contractTitle: 'Berlin Project' },
-                { id: '2', contractId: 'A565', status: 'inbearb', contractTitle: 'Munich Task' },
-                { id: '3', contractId: 'A564', status: 'offen', contractTitle: 'Hamburg Work' }
-            ];
-
-            setupTestContracts(testContracts);
-
-            const searchText = 'A564';
-            const searchLower = searchText.toLowerCase();
-            
-            const filtered = testContracts.filter(c => {
-                const searchableFields = [
-                    c.contractId,
-                    c.contractTitle
-                ];
-                return searchableFields.some(field => 
-                    field && String(field).toLowerCase().includes(searchLower)
-                );
-            });
-
-            expect(filtered.length).toBe(2);
-            expect(filtered.every(c => c.contractId === 'A564')).toBe(true);
-        });
-
-        test('filters contracts by date range', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', status: 'fertig', plannedStart: '2025-06-02' },
-                { id: '2', contractId: 'A002', status: 'inbearb', plannedStart: '2025-05-01' },
-                { id: '3', contractId: 'A003', status: 'fertig', plannedStart: '2025-06-15' }
-            ];
-
-            setupTestContracts(testContracts);
-
-            const dateRange = { from: '2025-06-01', to: '2025-06-30' };
-            const fromDate = new Date(dateRange.from);
-            const toDate = new Date(dateRange.to);
-
-            const filtered = testContracts.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate >= fromDate && contractDate <= toDate;
-            });
-
-            expect(filtered.length).toBe(2);
-            expect(filtered.every(c => c.contractId !== 'A002')).toBe(true);
-        });
-
-        test('combines multiple filters', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A564', status: 'fertig', plannedStart: '2025-06-02' },
-                { id: '2', contractId: 'B123', status: 'inbearb', plannedStart: '2025-05-01' },
-                { id: '3', contractId: 'A564', status: 'fertig', plannedStart: '2025-06-15' },
-                { id: '4', contractId: 'A564', status: 'offen', plannedStart: '2025-06-10' }
-            ];
-
-            setupTestContracts(testContracts);
-
-            const filters = {
-                searchText: 'A564',
-                status: 'Abgerechnet', // Updated to match normalized status
-                dateRange: { from: '2025-06-01', to: '2025-06-30' }
-            };
-
-            const fromDate = new Date(filters.dateRange.from);
-            const toDate = new Date(filters.dateRange.to);
-            const searchLower = filters.searchText.toLowerCase();
-
-            const filtered = testContracts.filter(c => {
-                // Search filter
-                const matchesSearch = String(c.contractId || '').toLowerCase().includes(searchLower);
-                // Status filter
-                const matchesStatus = normalizeStatus(c.status) === filters.status;
-                // Date filter
-                const contractDate = new Date(c.plannedStart);
-                const matchesDate = contractDate >= fromDate && contractDate <= toDate;
-                
-                return matchesSearch && matchesStatus && matchesDate;
-            });
-
-            expect(filtered.length).toBe(2);
-            expect(filtered.every(c => c.contractId === 'A564')).toBe(true);
-            expect(filtered.every(c => c.status === 'fertig')).toBe(true);
-        });
-    });
-
-    describe('Sort Logic', () => {
-
-        test('sorts contracts by contractId ascending', () => {
-            const testContracts = [
-                { id: '1', contractId: 'C123', contractTitle: 'Zebra' },
-                { id: '2', contractId: 'A123', contractTitle: 'Apple' },
-                { id: '3', contractId: 'B123', contractTitle: 'Banana' }
-            ];
-
-            const sortedAsc = [...testContracts].sort((a, b) => 
-                a.contractId.localeCompare(b.contractId)
-            );
-
-            expect(sortedAsc[0].contractId).toBe('A123');
-            expect(sortedAsc[1].contractId).toBe('B123');
-            expect(sortedAsc[2].contractId).toBe('C123');
-        });
-
-        test('sorts contracts by contractId descending', () => {
-            const testContracts = [
-                { id: '1', contractId: 'C123', contractTitle: 'Zebra' },
-                { id: '2', contractId: 'A123', contractTitle: 'Apple' },
-                { id: '3', contractId: 'B123', contractTitle: 'Banana' }
-            ];
-
-            const sortedDesc = [...testContracts].sort((a, b) => 
-                b.contractId.localeCompare(a.contractId)
-            );
-
-            expect(sortedDesc[0].contractId).toBe('C123');
-            expect(sortedDesc[1].contractId).toBe('B123');
-            expect(sortedDesc[2].contractId).toBe('A123');
-        });
-
-        test('sorts contracts by plannedStart date', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', plannedStart: '2025-07-01' },
-                { id: '2', contractId: 'A002', plannedStart: '2025-05-15' },
-                { id: '3', contractId: 'A003', plannedStart: '2025-06-01' }
-            ];
-
-            const sortedByDate = [...testContracts].sort((a, b) => {
-                const dateA = a.plannedStart ? new Date(a.plannedStart).getTime() : 0;
-                const dateB = b.plannedStart ? new Date(b.plannedStart).getTime() : 0;
-                return dateA - dateB;
-            });
-
-            expect(sortedByDate[0].contractId).toBe('A002');
-            expect(sortedByDate[1].contractId).toBe('A003');
-            expect(sortedByDate[2].contractId).toBe('A001');
-        });
-
-        test('handles null values in sorting', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', location: 'Berlin' },
-                { id: '2', contractId: 'A002', location: null },
-                { id: '3', contractId: 'A003', location: 'Munich' }
-            ];
-
-            const sortedByLocation = [...testContracts].sort((a, b) => {
-                const locA = a.location || '';
-                const locB = b.location || '';
-                return locA.localeCompare(locB);
-            });
-
-            // Empty string sorts first
-            expect(sortedByLocation[0].location).toBe(null);
-            expect(sortedByLocation[1].location).toBe('Berlin');
-            expect(sortedByLocation[2].location).toBe('Munich');
-        });
-    });
-
-    describe('State Management for Contracts', () => {
-
-        test('updates filter state correctly', () => {
-            setupTestContracts([]);
-
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    filters: {
-                        ...getState().contracts.filters,
-                        status: 'fertig'
-                    }
-                }
-            }, { silent: true });
-
-            const state = getState();
-            expect(state.contracts.filters.status).toBe('fertig');
-        });
-
-        test('updates sort state correctly', () => {
-            setupTestContracts([]);
-
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    ui: {
-                        sortKey: 'plannedStart',
-                        sortDir: 'desc'
-                    }
-                }
-            }, { silent: true });
-
-            const state = getState();
-            expect(state.contracts.ui.sortKey).toBe('plannedStart');
-            expect(state.contracts.ui.sortDir).toBe('desc');
-        });
-
-        test('toggles sort direction when same column clicked', () => {
-            setupTestContracts([]);
-
-            // Initial state
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    ui: {
-                        sortKey: 'contractId',
-                        sortDir: 'asc'
-                    }
-                }
-            }, { silent: true });
-
-            // Simulate clicking same column
-            const currentSortKey = getState().contracts.ui.sortKey;
-            const currentSortDir = getState().contracts.ui.sortDir;
-            const newSortKey = 'contractId';
-            
-            let newSortDir = 'asc';
-            if (newSortKey === currentSortKey) {
-                newSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+        // Mock State
+        mockState = {
+            contracts: {
+                importState: {
+                    status: 'idle',
+                    message: '',
+                    progress: 0,
+                    currentSheet: 'Sheet1',
+                    currentFile: 'test.xlsx',
+                    fileSize: 1024
+                },
+                rawSheets: {
+                    'Sheet1': { rowCount: 10, columns: ['A', 'B'] }
+                },
+                currentMapping: { ...contractUtils.DEFAULT_COLUMN_MAPPING },
+                records: [],
+                filters: {},
+                lastImportResult: null
             }
+        };
 
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    ui: {
-                        sortKey: newSortKey,
-                        sortDir: newSortDir
-                    }
-                }
-            }, { silent: true });
+        stateModule.getState.mockReturnValue(mockState);
 
-            expect(getState().contracts.ui.sortDir).toBe('desc');
+        // Mock XLSX
+        global.XLSX = {
+            read: jest.fn().mockReturnValue({
+                SheetNames: ['Sheet1'],
+                Sheets: { 'Sheet1': {} }
+            })
+        };
+
+        // Mock contractUtils
+        contractUtils.discoverContractSheets.mockReturnValue({
+            'Sheet1': { rowCount: 10, columns: ['A', 'B'] }
+        });
+        contractUtils.suggestContractColumnMapping.mockReturnValue({});
+        contractUtils.VALID_STATUS_VALUES = ['Draft', 'Active', 'Terminated'];
+    });
+
+    afterEach(() => {
+        delete window._contractWorkbook;
+        delete window._handleContractSort;
+        delete window._handleContractActionClick;
+        jest.restoreAllMocks();
+    });
+
+    describe('handleContractFileSelect', () => {
+        it('should handle valid file selection', async () => {
+            const file = new File(['content'], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            file.arrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(10));
+            
+            const event = { target: { files: [file] } };
+
+            await handleContractFileSelect(event);
+
+            expect(stateModule.setState).toHaveBeenCalled();
+            expect(document.getElementById('contract-import-button').disabled).toBe(false);
+            expect(global.XLSX.read).toHaveBeenCalled();
+        });
+
+        it('should reject invalid file extensions', () => {
+            const file = new File(['content'], 'test.txt', { type: 'text/plain' });
+            const event = { target: { files: [file] } };
+
+            handleContractFileSelect(event);
+
+            expect(handlers.showErrorAlert).toHaveBeenCalledWith(expect.stringContaining('Ungültiges Dateiformat'), expect.any(String));
+            expect(document.getElementById('contract-import-button').disabled).toBe(true);
+        });
+
+        it('should reset state when no file selected', () => {
+            const event = { target: { files: [] } };
+
+            handleContractFileSelect(event);
+
+            expect(stateModule.setState).toHaveBeenCalled();
+            expect(document.getElementById('contract-import-button').disabled).toBe(true);
         });
     });
 
-    describe('Import State Management', () => {
+    describe('handleContractSheetSelect', () => {
+        it('should update state on sheet selection', () => {
+            const event = { target: { value: 'Sheet1' } };
 
-        test('updates import status correctly', () => {
-            setupTestContracts([]);
+            handleContractSheetSelect(event);
 
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    importState: {
-                        ...getState().contracts.importState,
-                        status: 'pending',
-                        message: 'Importing...',
-                        progress: 50
-                    }
-                }
-            }, { silent: true });
-
-            const state = getState();
-            expect(state.contracts.importState.status).toBe('pending');
-            expect(state.contracts.importState.progress).toBe(50);
-            expect(state.contracts.importState.message).toBe('Importing...');
+            expect(contractUtils.suggestContractColumnMapping).toHaveBeenCalled();
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    importState: expect.objectContaining({
+                        currentSheet: 'Sheet1'
+                    })
+                })
+            }));
         });
 
-        test('stores last import result for preview', () => {
-            setupTestContracts([]);
+        it('should ignore empty selection', () => {
+            const event = { target: { value: '' } };
+            handleContractSheetSelect(event);
+            expect(stateModule.setState).not.toHaveBeenCalled();
+        });
+    });
 
-            const mockImportResult = {
-                contracts: [
-                    { id: '1', contractId: 'A001', contractTitle: 'Test' }
-                ],
+    describe('handleContractMappingChange', () => {
+        it('should update mapping in state', () => {
+            handleContractMappingChange('contractId', 'A');
+
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    currentMapping: expect.objectContaining({
+                        contractId: expect.objectContaining({ excelColumn: 'A' })
+                    })
+                })
+            }));
+        });
+    });
+
+    describe('handleContractImportConfirm (Legacy)', () => {
+        it('should show error if no workbook', async () => {
+            delete window._contractWorkbook;
+            await handleContractImportConfirm();
+            expect(handlers.showErrorAlert).toHaveBeenCalledWith('Keine Datei', expect.any(String));
+        });
+    });
+
+    describe('handleContractMappingConfirm (Preview)', () => {
+        it('should generate preview successfully', async () => {
+            window._contractWorkbook = {};
+            contractUtils.extractContractsFromSheetAsync.mockResolvedValue({
+                contracts: [{}],
                 errors: [],
-                warnings: [],
-                summary: { totalRows: 1, successCount: 1 }
+                warnings: []
+            });
+
+            await handleContractMappingConfirm();
+
+            expect(contractUtils.extractContractsFromSheetAsync).toHaveBeenCalled();
+            expect(stateModule.setState).toHaveBeenCalled();
+            expect(document.getElementById('contract-preview-container').style.display).toBe('block');
+        });
+
+        it('should handle errors during preview generation', async () => {
+            window._contractWorkbook = {};
+            contractUtils.extractContractsFromSheetAsync.mockRejectedValue(new Error('Test error'));
+
+            await handleContractMappingConfirm();
+
+            expect(handlers.showErrorAlert).toHaveBeenCalledWith('Vorschau-Fehler', expect.stringContaining('Test error'));
+        });
+    });
+
+    describe('handleContractImportSave', () => {
+        it('should save imported contracts', async () => {
+            mockState.contracts.lastImportResult = {
+                contracts: [{ id: '1' }],
+                errors: [],
+                warnings: []
             };
+            stateModule.getState.mockReturnValue(mockState);
 
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    lastImportResult: mockImportResult
-                }
-            }, { silent: true });
+            contractRepository.addContracts.mockReturnValue({ addedCount: 1 });
 
-            const state = getState();
-            expect(state.contracts.lastImportResult).toBeDefined();
-            expect(state.contracts.lastImportResult.contracts.length).toBe(1);
+            await handleContractImportSave();
+
+            expect(contractRepository.addContracts).toHaveBeenCalled();
+            expect(handlers.showSuccessAlert).toHaveBeenCalled();
+            expect(document.getElementById('contract-preview-container').style.display).toBe('none');
         });
 
-        test('clears preview on cancel', () => {
-            setupTestContracts([]);
+        it('should show error if no contracts to save', async () => {
+            mockState.contracts.lastImportResult = null;
+            stateModule.getState.mockReturnValue(mockState);
 
-            // Set up preview
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    lastImportResult: {
-                        contracts: [{ id: '1' }],
-                        errors: [],
-                        warnings: []
-                    }
-                }
-            }, { silent: true });
+            await handleContractImportSave();
 
-            // Cancel preview
-            setState({
-                contracts: {
-                    ...getState().contracts,
-                    lastImportResult: null,
-                    importState: {
-                        ...getState().contracts.importState,
-                        status: 'idle',
-                        message: 'Import cancelled'
-                    }
-                }
-            }, { silent: true });
-
-            const state = getState();
-            expect(state.contracts.lastImportResult).toBeNull();
-            expect(state.contracts.importState.status).toBe('idle');
+            expect(handlers.showErrorAlert).toHaveBeenCalledWith('Keine Verträge', expect.any(String));
         });
     });
 
-    describe('Contract Edit Logic', () => {
-
-        test('normalizes status on edit', () => {
-            const inputStatus = 'FERTIG';
-            const normalized = normalizeStatus(inputStatus);
-            expect(normalized).toBe('Abgerechnet');
-        });
-
-        test('normalizes German status variations', () => {
-            expect(normalizeStatus('in bearbeitung')).toBe('In Bearbeitung');
-            expect(normalizeStatus('abgeschlossen')).toBe('Abgerechnet');
-            expect(normalizeStatus('done')).toBe('Abgerechnet');
-        });
-
-        test('preserves unknown status values', () => {
-            expect(normalizeStatus('custom_status')).toBe('custom_status');
+    describe('handleContractFilterChange', () => {
+        it('should update filter state', () => {
+            handleContractFilterChange('status', 'Active');
+            
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    filters: expect.objectContaining({
+                        status: 'Active'
+                    })
+                })
+            }));
         });
     });
 
-    describe('Date Range Filter Edge Cases', () => {
-
-        test('handles contracts without plannedStart', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', plannedStart: '2025-06-02' },
-                { id: '2', contractId: 'A002', plannedStart: null },
-                { id: '3', contractId: 'A003', plannedStart: undefined }
-            ];
-
-            const dateRange = { from: '2025-06-01', to: '2025-06-30' };
-            const fromDate = new Date(dateRange.from);
-            const toDate = new Date(dateRange.to);
-
-            const filtered = testContracts.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate >= fromDate && contractDate <= toDate;
-            });
-
-            expect(filtered.length).toBe(1);
-            expect(filtered[0].contractId).toBe('A001');
-        });
-
-        test('handles only from date in range', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', plannedStart: '2025-06-02' },
-                { id: '2', contractId: 'A002', plannedStart: '2025-05-15' }
-            ];
-
-            const dateRange = { from: '2025-06-01', to: null };
-            const fromDate = new Date(dateRange.from);
-
-            const filtered = testContracts.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate >= fromDate;
-            });
-
-            expect(filtered.length).toBe(1);
-            expect(filtered[0].contractId).toBe('A001');
-        });
-
-        test('handles only to date in range', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', plannedStart: '2025-06-02' },
-                { id: '2', contractId: 'A002', plannedStart: '2025-05-15' }
-            ];
-
-            const dateRange = { from: null, to: '2025-05-31' };
-            const toDate = new Date(dateRange.to);
-
-            const filtered = testContracts.filter(c => {
-                if (!c.plannedStart) return false;
-                const contractDate = new Date(c.plannedStart);
-                return contractDate <= toDate;
-            });
-
-            expect(filtered.length).toBe(1);
-            expect(filtered[0].contractId).toBe('A002');
+    describe('handleContractSearch', () => {
+        it('should update search filter', () => {
+            handleContractSearch('query');
+            expect(stateModule.setState).toHaveBeenCalled();
         });
     });
 
-    describe('Search Filter Edge Cases', () => {
+    describe('handleContractDateRangeChange', () => {
+        it('should update date range', () => {
+            handleContractDateRangeChange('from', '2023-01-01');
+            expect(stateModule.setState).toHaveBeenCalled();
+        });
+    });
 
-        test('handles empty search text', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001' },
-                { id: '2', contractId: 'A002' }
-            ];
+    describe('handleClearContractFilters', () => {
+        it('should clear all filters', () => {
+            handleClearContractFilters();
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    filters: expect.objectContaining({
+                        contractId: null
+                    })
+                })
+            }));
+        });
+    });
 
-            const searchText = '';
-            
-            const filtered = searchText.trim() === '' 
-                ? testContracts 
-                : testContracts.filter(c => c.contractId.includes(searchText));
+    describe('handleContractSubviewChange', () => {
+        it('should switch subviews', () => {
+            jest.useFakeTimers();
+            handleContractSubviewChange('import');
+            jest.runAllTimers();
 
-            expect(filtered.length).toBe(2);
+            const importContainer = document.getElementById('contract-subview-import');
+            expect(importContainer.classList.contains('active')).toBe(true);
+            jest.useRealTimers();
+        });
+    });
+
+    describe('initializeContractEventListeners', () => {
+        it('should setup event listeners', () => {
+            const addListenerSpy = jest.spyOn(document.getElementById('contract-file-input'), 'addEventListener');
+
+            initializeContractEventListeners();
+
+            expect(addListenerSpy).toHaveBeenCalledWith('change', expect.any(Function));
+            expect(handlers.setupDragAndDrop).toHaveBeenCalled();
+            expect(window._handleContractSort).toBeDefined();
+        });
+    });
+
+    describe('handleContractSort', () => {
+        it('should toggle sort direction', () => {
+            mockState.contracts.ui = { sortKey: 'contractId', sortDir: 'asc' };
+            stateModule.getState.mockReturnValue(mockState);
+
+            handleContractSort('contractId');
+
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    ui: expect.objectContaining({
+                        sortKey: 'contractId',
+                        sortDir: 'desc'
+                    })
+                })
+            }));
+        });
+    });
+
+    describe('handleContractStatusChange', () => {
+        it('should update contract status', () => {
+            contractRepository.updateContract.mockReturnValue(true);
+
+            handleContractStatusChange('id-123', 'Active');
+
+            expect(contractRepository.updateContract).toHaveBeenCalledWith('id-123', { status: 'Active' });
         });
 
-        test('search is case-insensitive', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', contractTitle: 'Berlin Project' },
-                { id: '2', contractId: 'A002', contractTitle: 'Munich Task' }
-            ];
+        it('should validate status', () => {
+            handleContractStatusChange('id-123', 'InvalidStatus');
 
-            const searchText = 'BERLIN';
-            const searchLower = searchText.toLowerCase();
-            
-            const filtered = testContracts.filter(c => {
-                return c.contractTitle && c.contractTitle.toLowerCase().includes(searchLower);
-            });
+            expect(handlers.showErrorAlert).toHaveBeenCalledWith('Ungültiger Status', expect.any(String));
+            expect(contractRepository.updateContract).not.toHaveBeenCalled();
+        });
+    });
 
-            expect(filtered.length).toBe(1);
-            expect(filtered[0].contractId).toBe('A001');
+    describe('handleContractWorkerChange', () => {
+        it('should update worker assignment', () => {
+            contractRepository.updateContract.mockReturnValue(true);
+            handleContractWorkerChange('id-123', 'worker-1');
+            expect(contractRepository.updateContract).toHaveBeenCalledWith('id-123', { assignedWorkerId: 'worker-1' });
         });
 
-        test('searches across multiple fields', () => {
-            const testContracts = [
-                { id: '1', contractId: 'A001', contractTitle: 'Project', location: 'Berlin' },
-                { id: '2', contractId: 'A002', contractTitle: 'Berlin Task', location: 'Munich' }
-            ];
+        it('should unassign worker if empty', () => {
+            contractRepository.updateContract.mockReturnValue(true);
+            handleContractWorkerChange('id-123', '');
+            expect(contractRepository.updateContract).toHaveBeenCalledWith('id-123', { assignedWorkerId: null });
+        });
+    });
 
-            const searchText = 'berlin';
-            const searchLower = searchText.toLowerCase();
+    describe('handleResetContracts', () => {
+        it('should reset contracts on confirmation', () => {
+            window.confirm = jest.fn().mockReturnValue(true);
             
-            const filtered = testContracts.filter(c => {
-                const searchableFields = [c.contractId, c.contractTitle, c.location];
-                return searchableFields.some(field => 
-                    field && String(field).toLowerCase().includes(searchLower)
-                );
-            });
+            handleResetContracts();
 
-            expect(filtered.length).toBe(2);
+            expect(stateModule.setState).toHaveBeenCalledWith(expect.objectContaining({
+                contracts: expect.objectContaining({
+                    records: [],
+                    importState: expect.objectContaining({
+                        status: 'idle'
+                    })
+                })
+            }));
+            expect(window._contractWorkbook).toBeUndefined();
+        });
+
+        it('should cancel reset on rejection', () => {
+            window.confirm = jest.fn().mockReturnValue(false);
+            
+            handleResetContracts();
+
+            expect(stateModule.setState).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('handleContractActionClick', () => {
+        it('should call delete handler', () => {
+             // Mock console.log to catch "not implemented yet"
+             const consoleSpy = jest.spyOn(console, 'log');
+             handleContractActionClick('delete', 'id-123');
+             expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Delete contract'));
+        });
+
+        it('should call edit handler', () => {
+            // Mock prompt for edit
+            window.prompt = jest.fn().mockReturnValue('Active');
+            contractRepository.updateContract.mockReturnValue(true);
+            mockState.contracts.records = [{ id: 'id-123', contractId: 'C123', status: 'Draft' }];
+            stateModule.getState.mockReturnValue(mockState);
+
+            handleContractActionClick('edit', 'id-123');
+            
+            expect(contractRepository.updateContract).toHaveBeenCalled();
+        });
+    });
+
+    describe('handleContractCancelPreview', () => {
+        it('should cancel preview', () => {
+            handleContractCancelPreview();
+            expect(stateModule.setState).toHaveBeenCalled();
+            expect(document.getElementById('contract-preview-container').style.display).toBe('none');
         });
 
         test('handles whitespace in search text', () => {
