@@ -15,14 +15,18 @@
 }
 
 /* ==================== Controls & Filters ==================== */
+/* ==================== Controls & Filters ==================== */
 .filter-section {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
     /* Tech border on left */
     border-left: 3px solid var(--primary-main);
+    box-shadow: var(--shadow-sm);
 }
 
 .filter-row {
