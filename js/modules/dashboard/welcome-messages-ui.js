@@ -19,6 +19,9 @@ let isInitialized = false;
 /** @type {number|null} */
 let animationFrame = null;
 
+/** Delay in milliseconds before checking marquee overflow */
+const MARQUEE_CHECK_DELAY_MS = 100;
+
 /**
  * Initialize the welcome message UI component
  * Creates or finds the container and starts the display
@@ -98,8 +101,8 @@ function startMarquee() {
         }
     };
 
-    // Initial check
-    setTimeout(checkOverflow, 100);
+    // Initial check after DOM rendering
+    setTimeout(checkOverflow, MARQUEE_CHECK_DELAY_MS);
 
     // Re-check on window resize
     window.addEventListener('resize', checkOverflow);
