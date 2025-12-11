@@ -74,7 +74,7 @@ export async function readExcelFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { 
                     type: 'array',
-                    cellStyles: true  // Preserve cell formatting
+                    cellStyles: false  // Optimized: No need for styles during data extraction
                 });
                 
                 if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
