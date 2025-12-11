@@ -204,15 +204,13 @@ describe('Migration Module', () => {
       
       clearLocalDataAfterMigration(false);
       
-      expect(setState).toHaveBeenCalledWith({
-        contracts: {
-          records: [{ id: '1' }],
-          importedFiles: ['file1.xlsx'],
-          someOtherProp: 'value',
-          records: [],
-          importedFiles: []
-        }
-      });
+      // Check that setState was called with a contracts object containing empty arrays
+      expect(setState).toHaveBeenCalled();
+      const setStateCall = setState.mock.calls[0][0];
+      expect(setStateCall.contracts.records).toEqual([]);
+      expect(setStateCall.contracts.importedFiles).toEqual([]);
+      // Original props should be preserved via spread
+      expect(setStateCall.contracts.someOtherProp).toBe('value');
     });
 
     test('handles empty contracts state', () => {
@@ -261,17 +259,14 @@ describe('Migration Module', () => {
       const result = restoreFromBackup();
       
       expect(result).toBe(true);
-      expect(setState).toHaveBeenCalledWith({
-        contracts: {
-          records: [],
-          importedFiles: [],
-          records: [
-            { id: '1', contractId: 'C001' },
-            { id: '2', contractId: 'C002' }
-          ],
-          importedFiles: ['file1.xlsx']
-        }
-      });
+      // Check that setState was called with restored contracts
+      expect(setState).toHaveBeenCalled();
+      const setStateCall = setState.mock.calls[0][0];
+      expect(setStateCall.contracts.records).toEqual([
+        { id: '1', contractId: 'C001' },
+        { id: '2', contractId: 'C002' }
+      ]);
+      expect(setStateCall.contracts.importedFiles).toEqual(['file1.xlsx']);
     });
 
     test('clears migration flag after restore', () => {
