@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/protokoll.css" />
     <link rel="stylesheet" href="css/hr-module.css" />
     <link rel="stylesheet" href="css/messgeraet.css" />
+    <link rel="stylesheet" href="css/modals.css" />
     <link rel="stylesheet" href="css/dashboard.css" /> <!-- Moved dashboard.css here -->
     <link rel="stylesheet" href="css/assets.css" />
     <link rel="stylesheet" href="css/logs.css" />
@@ -877,51 +878,8 @@
                                     </div>
 
                                     <!-- Statistics -->
-                                    <div id="hr-employee-stats" class="hr-stats-grid">
-                                        <div class="hr-stat-card">
-                                            <div class="hr-stat-icon employees">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                            </div>
-                                            <span class="hr-stat-value" id="hr-total-employees">0</span>
-                                            <span class="hr-stat-label">Total Employees</span>
-                                        </div>
-                                        <div class="hr-stat-card">
-                                            <div class="hr-stat-icon active">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                            <span class="hr-stat-value" id="hr-active-employees">0</span>
-                                            <span class="hr-stat-label">Active</span>
-                                        </div>
-                                        <div class="hr-stat-card">
-                                            <div class="hr-stat-icon departments">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                            </div>
-                                            <span class="hr-stat-value" id="hr-departments">0</span>
-                                            <span class="hr-stat-label">Departments</span>
-                                        </div>
-                                        <div class="hr-stat-card">
-                                            <div class="hr-stat-icon inactive">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                            <span class="hr-stat-value" id="hr-pending-requests">0</span>
-                                            <span class="hr-stat-label">Pending Requests</span>
-                                        </div>
+                                    <div id="hr-employee-stats-container" class="hr-stats-grid">
+                                        <!-- Stats will be rendered here -->
                                     </div>
 
                                     <!-- Filters -->
@@ -946,8 +904,8 @@
                                     </div>
 
                                     <!-- Employee List -->
-                                    <div id="hr-employee-list" class="hr-table-container">
-                                        <div class="hr-empty-state">
+                                    <div id="hr-employee-list-container" class="hr-table-container">
+                                        <div id="hr-employees-empty" class="hr-empty-state">
                                             <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -955,6 +913,7 @@
                                             </svg>
                                             <p class="hr-empty-title">No employees found</p>
                                             <p class="hr-empty-text">Add your first employee to get started</p>
+                                            <button id="hr-add-employee-empty" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Add Employee</button>
                                         </div>
                                     </div>
                                 </div>
@@ -967,34 +926,58 @@
                                             <span>+ Record Attendance</span>
                                         </button>
                                     </div>
-                                    <div id="hr-attendance-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                        </svg>
-                                        <p class="hr-empty-title">Attendance Tracking</p>
-                                        <p class="hr-empty-text">Record and manage employee attendance here</p>
+
+                                    <!-- Attendance Stats -->
+                                    <div id="hr-attendance-stats-container" class="hr-stats-grid"></div>
+
+                                    <!-- Attendance Filters -->
+                                    <div class="hr-filters">
+                                        <select id="hr-attendance-employee-filter" class="hr-filters__select">
+                                            <option value="">All Employees</option>
+                                        </select>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <input type="date" id="hr-attendance-start-date" class="hr-filters__input">
+                                            <span>to</span>
+                                            <input type="date" id="hr-attendance-end-date" class="hr-filters__input">
+                                            <button id="hr-attendance-filter-btn" class="btn btn-secondary btn-sm">Filter</button>
+                                        </div>
                                     </div>
+
+                                    <!-- Calendar Container -->
+                                    <div id="hr-attendance-calendar-container"></div>
                                 </div>
 
                                 <!-- Schedule Tab -->
                                 <div id="hr-schedule-tab" class="hr-tab">
                                     <div class="hr-tab__header">
                                         <h4>Schedule Management</h4>
-                                        <button class="hr-btn hr-btn-primary" id="hr-create-schedule-btn">
-                                            <span>+ Create Schedule</span>
-                                        </button>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button class="hr-btn hr-btn-secondary" id="hr-submit-schedule-btn">
+                                                <span>Submit Schedule</span>
+                                            </button>
+                                            <button class="hr-btn hr-btn-primary" id="hr-create-schedule-btn">
+                                                <span>+ Create Schedule</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div id="hr-schedule-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <p class="hr-empty-title">Weekly Schedules</p>
-                                        <p class="hr-empty-text">Plan and manage employee weekly schedules</p>
+
+                                    <!-- Schedule Controls -->
+                                    <div class="hr-filters" style="justify-content: space-between;">
+                                        <div style="display: flex; gap: 16px; align-items: center;">
+                                            <button id="hr-prev-week-btn" class="hr-btn-icon">←</button>
+                                            <input type="date" id="hr-week-start-date" class="hr-filters__input">
+                                            <button id="hr-next-week-btn" class="hr-btn-icon">→</button>
+                                        </div>
+                                        <select id="hr-schedule-employee-select" class="hr-filters__select">
+                                            <option value="">Select Employee</option>
+                                        </select>
                                     </div>
+
+                                    <!-- Approvals -->
+                                    <div id="hr-pending-approvals-container"></div>
+
+                                    <!-- Schedule Grid -->
+                                    <div id="hr-schedule-grid-container"></div>
                                 </div>
 
                                 <!-- Vacation Tab -->
@@ -1005,14 +988,18 @@
                                             <span>+ Request Vacation</span>
                                         </button>
                                     </div>
-                                    <div id="hr-vacation-content" class="hr-empty-state">
-                                        <svg class="hr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 004 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <p class="hr-empty-title">Vacation Requests</p>
-                                        <p class="hr-empty-text">Manage vacation requests and balances</p>
+
+                                    <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 24px;">
+                                        <div>
+                                            <!-- Calendar -->
+                                            <div id="hr-vacation-calendar-container"></div>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                                            <!-- Balance -->
+                                            <div id="hr-vacation-balance-container"></div>
+                                            <!-- Requests -->
+                                            <div id="hr-vacation-requests-container"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1020,7 +1007,14 @@
                     </div>
 
                     <!-- HR Alerts -->
-                    <div id="hr-alerts" class="hr-alerts-container" role="status" aria-live="polite"></div>
+                    <div id="hr-error-alert" class="hr-alert hr-alert--error hidden" role="alert">
+                        <span class="hr-alert__message"></span>
+                        <button class="hr-alert__close" aria-label="Close">×</button>
+                    </div>
+                    <div id="hr-success-alert" class="hr-alert hr-alert--success hidden" role="status">
+                        <span class="hr-alert__message"></span>
+                        <button class="hr-alert__close" aria-label="Close">×</button>
+                    </div>
                 </section>
 
                 <!-- Asset Management View -->
@@ -1306,6 +1300,59 @@
     <!-- Application Modules -->
     <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
+
+    <!-- HR Modals -->
+    <!-- Employee Modal -->
+    <div id="employee-modal" class="modal" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 id="employee-modal-title" class="modal__title">Employee</h3>
+                <button class="modal__close" aria-label="Close modal">×</button>
+            </div>
+            <div id="employee-form-container" class="modal__body">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="attendance-modal" class="modal" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Record Attendance</h3>
+                <button class="modal__close" aria-label="Close modal">×</button>
+            </div>
+            <div id="attendance-form-container" class="modal__body">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal modal--lg" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Weekly Schedule</h3>
+                <button class="modal__close" aria-label="Close modal">×</button>
+            </div>
+            <div id="schedule-form-container" class="modal__body">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacation Modal -->
+    <div id="vacation-modal" class="modal" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Vacation Request</h3>
+                <button class="modal__close" aria-label="Close modal">×</button>
+            </div>
+            <div id="vacation-form-container" class="modal__body">
+                <!-- Form injected via JS -->
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
