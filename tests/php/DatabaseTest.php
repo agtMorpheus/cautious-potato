@@ -153,9 +153,10 @@ class DatabaseTest extends TestCase
         
         $uuid = generateUUID();
         // UUID v4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-        $this->assertRegExp(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
-            $uuid
+        // Using preg_match for forward compatibility with newer PHPUnit versions
+        $this->assertTrue(
+            (bool)preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $uuid),
+            'UUID should match v4 format'
         );
     }
 
