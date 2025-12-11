@@ -190,14 +190,15 @@ export function setState(partialUpdates, options = { silent: false }) {
  * @param {Object} options - Options { persist: boolean, silent: boolean }
  * @returns {Object} Reset state snapshot
  */
-export function resetState(options = { persist: true, silent: false }) {
+export function resetState(options = {}) {
+  const { persist = true, silent = false } = options;
   currentState = structuredClone(initialState);
 
-  if (options.persist) {
+  if (persist) {
     saveStateToStorage();
   }
 
-  if (!options.silent) {
+  if (!silent) {
     notifyListeners();
   }
 
