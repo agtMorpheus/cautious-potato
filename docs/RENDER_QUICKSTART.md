@@ -1,6 +1,8 @@
 # Render.com Quick Start Guide
 
-Deploy the Abrechnung App to Render.com in under 10 minutes!
+Deploy the Abrechnung App to Render.com in under 10 minutes - **completely FREE!**
+
+🎉 **No payment information required** - This blueprint uses free tier services by default.
 
 ## Prerequisites
 
@@ -88,15 +90,29 @@ https://abrechnung-app.onrender.com
   - ✅ Free SSL certificate
   - ✅ Auto-deployment on git push
 
-## Free Tier Limitations
+## Free Tier Configuration (Default)
 
-⚠️ **Important:** Free tier services will spin down after 15 minutes of inactivity.
+✅ **This blueprint is configured for FREE deployment!**
 
-- **Spin-up time:** ~30 seconds on first request
-- **Storage:** Limited to 10 GB
-- **Suitable for:** Development, testing, demos
+### Free Tier Features:
+- **Database:** MySQL 8.0 (free tier)
+- **Web Service:** Docker container (free tier)
+- **SSL Certificate:** Included
+- **Custom Domain:** Supported
+- **Auto-deployment:** On git push
 
-**For Production:** Upgrade to Starter plan ($7/month per service)
+### Free Tier Limitations:
+⚠️ **Services spin down after 15 minutes of inactivity**
+- **Cold start time:** 30-60 seconds on first request after sleep
+- **Database storage:** Limited
+- **Concurrent connections:** Limited
+- **Suitable for:** Development, testing, demos, low-traffic sites
+
+### Upgrading to Production:
+To upgrade services to always-on:
+1. Go to each service in Render dashboard
+2. Change plan from "Free" to "Starter" ($7/month each)
+3. Services will restart and stay always-on
 
 ## Next Steps
 
@@ -153,11 +169,13 @@ Use the `/api/auth/register` endpoint to create initial users.
 
 ## Cost Breakdown
 
-### Free Tier (Development)
-- Database: Free (limited resources)
-- Web Service: Free (limited resources)
+### Free Tier (Development) - **DEFAULT CONFIGURATION**
+- Database: Free (limited resources, spins down after inactivity)
+- Web Service: Free (limited resources, spins down after inactivity)
 - **Total:** $0/month
-- ⚠️ Services spin down after inactivity
+- ⚠️ Services spin down after 15 minutes of inactivity
+- ⚠️ Cold start time: ~30-60 seconds
+- ✅ Perfect for development, testing, and demos
 
 ### Starter (Production)
 - Database: $7/month (512 MB RAM, 1 GB storage)
@@ -196,6 +214,6 @@ See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for details.
 
 **Deployment Time:** ~10 minutes  
 **Difficulty:** ⭐⭐☆☆☆ (Easy)  
-**Cost:** Free tier available, $14/month for production
+**Cost:** **FREE** (no payment info required), $14/month for always-on production
 
-Ready to deploy? Let's go! 🚀
+Ready to deploy for free? Let's go! 🚀

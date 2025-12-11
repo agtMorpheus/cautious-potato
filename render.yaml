@@ -15,7 +15,7 @@ databases:
   - name: contract-manager-db
     databaseName: contract_manager
     user: contract_user
-    plan: starter  # Recommended: starter or higher for production
+    plan: free  # Free tier - upgrade to starter for production
 
 services:
   # ==========================================================================
@@ -24,7 +24,7 @@ services:
   - type: web
     name: abrechnung-app
     runtime: docker
-    plan: starter  # Upgrade to standard for production
+    plan: free  # Free tier - upgrade to starter for production
     dockerfilePath: ./docker/Dockerfile.php
     dockerContext: .
     healthCheckPath: /api/health
