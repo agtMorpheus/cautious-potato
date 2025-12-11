@@ -53,13 +53,12 @@ config/*.env
 *.zip
 *.tar.gz
 
-# Database files (will be managed by Render)
-*.sql
-db/
-
 # Large data files
 data/
 
 # Backup files
 *.bak
 *.backup
+
+# Note: db/ directory is needed for MySQL Docker image initialization
+# but excluded from PHP Docker image via specific Dockerfile logic
