@@ -1,51 +1,58 @@
 /**
- * Templates View CSS (Command Center Theme)
+ * Templates View CSS (UI Standardization Compliant)
  * 
- * Styles for the Templates management view
+ * Styles for the Templates management view following ui-standardization.md
  */
 
 .template-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-24);
 }
 
 .template-item {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    padding: var(--space-24);
     display: flex;
     align-items: center;
-    gap: var(--space-md);
-    transition: all 0.2s ease;
+    gap: var(--space-16);
+    transition: box-shadow 150ms var(--ease-standard), border-color 150ms var(--ease-standard), transform 150ms var(--ease-standard);
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    text-decoration: none; /* For anchor tags */
 }
 
-.template-item:hover {
-    border-color: var(--primary-main);
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+.template-item:hover,
+.template-item:focus-visible {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-std-md);
     transform: translateY(-2px);
-    background: var(--bg-card);
+    outline: none;
 }
 
-.template-item:hover .template-icon {
-    color: var(--primary-main);
-    background: rgba(var(--primary-rgb), 0.1);
+.template-item:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.template-item:hover .template-icon,
+.template-item:focus-visible .template-icon {
+    color: var(--color-primary);
+    background: var(--color-secondary);
 }
 
 .template-icon {
     width: 48px;
     height: 48px;
-    border-radius: 8px;
-    background: var(--bg-hover);
+    border-radius: var(--radius-std-base);
+    background: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
-    transition: all 0.2s;
+    color: var(--color-text-secondary);
+    transition: all 150ms var(--ease-standard);
     flex-shrink: 0;
 }
 
@@ -54,17 +61,34 @@
     height: 24px;
 }
 
+.template-info {
+    flex: 1;
+}
+
 .template-info h4 {
-    margin: 0 0 var(--space-xs) 0;
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    color: var(--text-main);
-    font-family: 'JetBrains Mono', monospace;
+    margin: 0 0 var(--space-4) 0;
+    font-size: var(--font-size-std-base);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
+    font-family: var(--font-family-std-mono);
 }
 
 .template-desc {
     margin: 0;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.4;
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-body);
+}
+
+/* Download Action Icon (optional, if we add it) */
+.template-action {
+    color: var(--color-text-secondary);
+    opacity: 0;
+    transition: opacity 150ms var(--ease-standard);
+}
+
+.template-item:hover .template-action,
+.template-item:focus-visible .template-action {
+    opacity: 1;
+    color: var(--color-primary);
 }
