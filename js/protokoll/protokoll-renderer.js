@@ -1318,12 +1318,29 @@ export function updatePositionRow(posNr, position) {
   updateInput('stromkreisNr', position.stromkreisNr);
   updateInput('zielbezeichnung', position.zielbezeichnung);
   updateSelect('phaseType', position.phaseType || 'mono');
-  updateInput('leitung.typ', position.leitung?.typ);
+  updateInput('kabel.typ', position.kabel?.typ);
+  updateInput('kabel.leiterAnzahl', position.kabel?.leiterAnzahl);
+  updateInput('kabel.querschnitt', position.kabel?.querschnitt);
   updateInput('spannung.un', position.spannung?.un);
   updateInput('spannung.fn', position.spannung?.fn);
   updateSelect('überstromschutz.art', position.überstromschutz?.art);
   updateInput('überstromschutz.inNennstrom', position.überstromschutz?.inNennstrom);
-  updateInput('messwerte.riso', position.messwerte?.riso);
+
+  updateInput('messwerte.rpe', position.messwerte?.rpe);
+  updateInput('messwerte.ikLPE', position.messwerte?.ikLPE);
+  updateInput('messwerte.zsLPE', position.messwerte?.zsLPE);
+  updateInput('messwerte.znLN', position.messwerte?.znLN);
+  updateInput('messwerte.risoOhne', position.messwerte?.risoOhne);
+  updateInput('messwerte.risoMit', position.messwerte?.risoMit);
+
+  updateInput('rcd.gewiss', position.rcd?.gewiss);
+  updateInput('rcd.inNennstrom', position.rcd?.inNennstrom);
+  updateInput('rcd.iDeltaN', position.rcd?.iDeltaN);
+  updateInput('rcd.iMess', position.rcd?.iMess);
+  updateInput('rcd.ausloesezeit', position.rcd?.ausloesezeit);
+  updateInput('rcd.uMess', position.rcd?.uMess);
+  updateInput('rcd.diffStrom', position.rcd?.diffStrom);
+
   updateSelect('prüfergebnis.status', status);
 }
 

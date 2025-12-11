@@ -251,10 +251,11 @@ export function handleAddPosition(options = {}) {
     zielbezeichnung: '',
     phaseType: options.phaseType || 'mono',
     parentCircuitId: options.parentCircuitId || null,
-    leitung: { typ: '', anzahl: '', querschnitt: '' },
+    kabel: { typ: '', leiterAnzahl: '', querschnitt: '' },
     spannung: { un: '', fn: 50 },
     überstromschutz: { art: '', inNennstrom: '' },
-    messwerte: { riso: '', differenzstrom: '' },
+    messwerte: { risoOhne: '', risoMit: '', rpe: '', zsLPE: '', znLN: '', ikLPE: '' },
+    rcd: { gewiss: '', inNennstrom: '', iDeltaN: '', iMess: '', ausloesezeit: '', uMess: '', diffStrom: '' },
     prüfergebnis: { status: 'nicht-geprüft', mängel: [] }
   };
 
@@ -298,9 +299,9 @@ export function handleAddChildPosition(parentPosNr) {
     zielbezeichnung: '',
     phaseType: 'mono',
     parentCircuitId: parentPosNr,
-    leitung: {
+    kabel: {
       typ: '',
-      anzahl: '',
+      leiterAnzahl: '',
       querschnitt: ''
     },
     spannung: {
@@ -309,17 +310,24 @@ export function handleAddChildPosition(parentPosNr) {
     },
     überstromschutz: {
       art: '',
-      inNennstrom: '',
-      zs: '',
-      zn: '',
-      ik: ''
+      inNennstrom: ''
     },
     messwerte: {
-      riso: '',
-      schutzleiterWiderstand: '',
-      rcd: '',
-      differenzstrom: '',
-      auslösezeit: ''
+      risoOhne: '',
+      risoMit: '',
+      rpe: '',
+      zsLPE: '',
+      znLN: '',
+      ikLPE: ''
+    },
+    rcd: {
+      gewiss: '',
+      inNennstrom: '',
+      iDeltaN: '',
+      iMess: '',
+      ausloesezeit: '',
+      uMess: '',
+      diffStrom: ''
     },
     prüfergebnis: {
       status: 'nicht-geprüft',
