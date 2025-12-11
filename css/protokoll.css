@@ -67,7 +67,7 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
-.protokoll-form .form-control {
+.protokoll-form .form-input {
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-base, #334155);
   border-radius: var(--radius-md, 6px);
@@ -78,31 +78,31 @@
   transition: all 0.2s ease;
 }
 
-.protokoll-form .form-control:focus {
+.protokoll-form .form-input:focus {
   outline: none;
   border-color: var(--primary-main, #3b82f6);
   background-color: var(--bg-card);
   box-shadow: 0 0 0 1px var(--primary-main), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.protokoll-form .form-control.error {
+.protokoll-form .form-input.error {
   border-color: var(--c-danger, #ef4444);
   box-shadow: 0 0 0 1px var(--c-danger);
 }
 
-.protokoll-form .form-control::placeholder {
+.protokoll-form .form-input::placeholder {
   color: var(--text-muted, #475569);
   opacity: 0.7;
 }
 
 /* Textarea specific */
-.protokoll-form textarea.form-control {
+.protokoll-form textarea.form-input {
   resize: vertical;
   min-height: 100px;
 }
 
 /* Select specific */
-.protokoll-form select.form-control {
+.protokoll-form select.form-input {
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 12 12'%3E%3Cpath d='M6 8.25L2.25 4.5h7.5L6 8.25z'/%3E%3C/svg%3E");

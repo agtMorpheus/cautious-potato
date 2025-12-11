@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Protocol Input Debug</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
-        .form-group { margin: 10px 0; }
-        label { display: block; margin-bottom: 5px; }
-        input { padding: 8px; width: 300px; border: 1px solid #ccc; }
-        .error { color: red; }
-        .success { color: green; }
+        body { font-family: var(--font-family-base); margin: 20px; background: var(--bg-app); color: var(--text-main); }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid var(--border-base); background: var(--bg-surface); border-radius: 8px; }
+        .error { color: var(--c-danger); }
+        .success { color: var(--c-success); }
     </style>
 </head>
 <body>
@@ -20,8 +19,8 @@
     <div class="test-section">
         <h2>1. Basic HTML Input Test</h2>
         <div class="form-group">
-            <label for="basic-test">Basic Text Input:</label>
-            <input type="text" id="basic-test" placeholder="Type here to test basic input">
+            <label for="basic-test" class="form-label">Basic Text Input:</label>
+            <input type="text" id="basic-test" placeholder="Type here to test basic input" class="form-input">
         </div>
         <p id="basic-result">Status: Ready</p>
     </div>
@@ -37,8 +36,8 @@
     <div class="test-section">
         <h2>3. Event Listener Test</h2>
         <div class="form-group">
-            <label for="event-test">Event Test Input:</label>
-            <input type="text" id="event-test" data-field="test.field" placeholder="Type to test events">
+            <label for="event-test" class="form-label">Event Test Input:</label>
+            <input type="text" id="event-test" data-field="test.field" placeholder="Type to test events" class="form-input">
         </div>
         <p id="event-result">Status: Ready</p>
     </div>
@@ -46,7 +45,7 @@
     <div class="test-section">
         <h2>4. Console Logs</h2>
         <div id="console-logs"></div>
-        <button onclick="clearLogs()">Clear Logs</button>
+        <button onclick="clearLogs()" class="btn btn-secondary">Clear Logs</button>
     </div>
 
     <script>
@@ -100,7 +99,7 @@
         function loadProtocolForm() {
             console.log('Loading protocol form...');
             
-            // Simulate the protocol form HTML
+            // Simulate the protocol form HTML (using updated classes)
             const html = `
                 <form class="protokoll-form metadata-form">
                     <fieldset>
@@ -115,7 +114,7 @@
                                 value=""
                                 required
                                 placeholder="z.B. EDM221020251123"
-                                class="form-control"
+                                class="form-input"
                                 autocomplete="off"
                             >
                         </div>
@@ -128,7 +127,7 @@
                                 data-field="metadata.auftraggeber"
                                 value=""
                                 required
-                                class="form-control"
+                                class="form-input"
                                 autocomplete="off"
                             >
                         </div>

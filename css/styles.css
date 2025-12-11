@@ -479,6 +479,11 @@ ul {
     transition: all var(--duration-fast);
 }
 
+.btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
 .btn-primary {
     background-color: var(--primary-main);
     color: white;
