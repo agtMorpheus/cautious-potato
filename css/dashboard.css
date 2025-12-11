@@ -1,6 +1,6 @@
 /**
  * Modern Dashboard Styles (Command Center Theme)
- * Grid-based layout with glassmorphism and minimalist aesthetics
+ * Grid-based layout aligned with UI Standardization Guide
  * Extends variables.css
  */
 
@@ -9,8 +9,10 @@
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: auto auto 1fr;
-    gap: var(--space-lg);
-    padding: var(--space-lg);
+    gap: var(--space-24);
+    /* was space-lg */
+    padding: var(--space-24);
+    /* was space-lg */
     max-width: var(--layout-max-width);
     margin: 0 auto;
     min-height: calc(100vh - 80px);
@@ -18,13 +20,17 @@
 }
 
 /* ==================== Header Card ==================== */
+/* Maps to Standard Card with extras */
 .dashboard-header-card {
     grid-column: 1 / -1;
     background: var(--bg-glass);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl) var(--space-xxl);
-    border: 1px solid var(--border-glass);
-    box-shadow: var(--shadow-lg);
+    /* Retaining glass effect as per theme, but could switch to --color-surface */
+    /* If strict standardization: background: var(--color-surface); */
+    border-radius: var(--radius-std-lg);
+    padding: var(--space-32) var(--space-40);
+    /* was space-xl space-xxl */
+    border: 1px solid var(--color-border-std);
+    box-shadow: var(--shadow-std-lg);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -42,18 +48,19 @@
 }
 
 .header-content h3 {
-    font-size: var(--font-size-4xl);
-    font-weight: var(--font-weight-normal);
-    /* Lighter weight for tech look */
-    font-family: var(--font-family-mono);
-    margin-bottom: var(--space-sm);
-    color: var(--text-main);
+    font-size: var(--font-size-h1);
+    /* was 4xl */
+    font-weight: var(--font-weight-std-normal);
+    font-family: var(--font-family-std-mono);
+    margin-bottom: var(--space-8);
+    /* was space-sm */
+    color: var(--color-text);
     letter-spacing: -0.04em;
 }
 
 .header-content p {
-    color: var(--text-muted);
-    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
     line-height: 1.5;
     margin: 0;
     max-width: 480px;
@@ -69,11 +76,12 @@
     background: repeating-linear-gradient(45deg,
             transparent,
             transparent 10px,
-            rgba(var(--primary-rgb), 0.05) 10px,
-            rgba(var(--primary-rgb), 0.05) 11px);
+            rgba(33, 128, 141, 0.05) 10px,
+            /* Using teal color manually or via var */
+            rgba(33, 128, 141, 0.05) 11px);
     pointer-events: none;
-    mask-image: linear-gradient(to right, transparent, var(--text-main));
-    -webkit-mask-image: linear-gradient(to right, transparent, var(--text-main));
+    mask-image: linear-gradient(to right, transparent, var(--color-text));
+    -webkit-mask-image: linear-gradient(to right, transparent, var(--color-text));
 }
 
 /* ==================== Metrics Row ==================== */
@@ -81,21 +89,25 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: var(--space-lg);
+    gap: var(--space-24);
+    /* was space-lg */
 }
 
 .metric-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    padding: var(--space-24);
+    /* was space-lg */
     display: flex;
     align-items: center;
-    gap: var(--space-lg);
-    transition: all var(--transition-normal);
+    gap: var(--space-24);
+    transition: all var(--duration-normal) var(--ease-standard);
+    /* Standard duration? */
     cursor: default;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-std-sm);
 }
 
 /* Tech notch corner */
@@ -104,29 +116,28 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: var(--radius-lg);
-    height: var(--radius-lg);
-    background: linear-gradient(45deg, transparent 50%, var(--border-base) 50%);
+    width: var(--radius-std-lg);
+    height: var(--radius-std-lg);
+    background: linear-gradient(45deg, transparent 50%, var(--color-border-std) 50%);
     opacity: 0.5;
 }
 
 .metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-main);
+    box-shadow: var(--shadow-std-md);
+    border-color: var(--color-primary);
 }
 
 .metric-icon-wrapper {
     width: 48px;
     height: 48px;
-    border-radius: var(--radius-sm);
-    /* Sharper */
+    border-radius: var(--radius-std-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--bg-hover);
-    color: var(--text-main);
+    background: var(--color-secondary);
+    color: var(--color-text);
 }
 
 .metric-icon-wrapper svg {
@@ -135,25 +146,29 @@
     stroke-width: 1.5;
 }
 
-/* Icon Colors */
+/* Icon Colors - Mapped to Standard Colors */
 .metric-icon-wrapper.import {
-    color: var(--primary-main);
-    background: var(--primary-light);
+    color: var(--color-primary);
+    background: rgba(33, 128, 141, 0.1);
+    /* Teal light */
 }
 
 .metric-icon-wrapper.process {
-    color: var(--folder-var(--folder-purple));
-    background: var(--folder-var(--folder-purple)-light);
+    color: var(--folder-purple);
+    /* Kept non-standard but consistent with logic? Or map to standard? Guide doesn't specify purple. */
+    background: var(--folder-purple-light);
 }
 
 .metric-icon-wrapper.export {
-    color: var(--folder-var(--c-success));
-    background: var(--folder-var(--c-success)-light);
+    color: var(--color-success);
+    /* Teal/Green */
+    background: rgba(33, 128, 141, 0.1);
 }
 
 .metric-icon-wrapper.templates {
-    color: var(--folder-orange);
-    background: var(--folder-orange-light);
+    color: var(--color-warning);
+    /* Orange */
+    background: rgba(168, 75, 47, 0.1);
 }
 
 .metric-info {
@@ -162,78 +177,85 @@
 }
 
 .metric-label {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-tiny);
+    /* was xs */
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-std-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: var(--space-xs);
-    font-family: var(--font-family-base);
+    margin-bottom: var(--space-4);
+    /* was space-xs */
+    font-family: var(--font-family-std-base);
 }
 
 .metric-value {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-medium);
-    font-family: var(--font-family-mono);
-    color: var(--text-main);
+    font-size: 2rem;
+    /* Map to nearest standard or keep 2xl */
+    font-weight: var(--font-weight-std-medium);
+    font-family: var(--font-family-std-mono);
+    color: var(--color-text);
     letter-spacing: -0.02em;
 }
 
 /* ==================== Action Hub ==================== */
 .dashboard-actions {
     grid-column: 1 / 9;
-    /* Takes up left 2/3 */
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-16);
+    /* was space-md */
 }
 
 .section-title {
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    margin: 0 0 var(--space-xs) 0;
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-std-base);
+    font-weight: var(--font-weight-std-medium);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-4) 0;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-8);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .section-title::before {
     content: '//';
-    color: var(--primary-main);
+    color: var(--color-primary);
     font-weight: 800;
-    margin-right: var(--space-xs);
+    margin-right: var(--space-4);
 }
 
 .action-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-lg);
+    gap: var(--space-24);
 }
 
 .action-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+    background: var(--color-surface);
+    /* was bg-card */
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    padding: var(--space-32);
+    /* was space-xl */
     text-align: left;
-    transition: all var(--transition-normal);
+    transition: all var(--duration-normal) var(--ease-standard);
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-16);
     cursor: pointer;
     min-height: 180px;
     position: relative;
+    box-shadow: var(--shadow-std-sm);
 }
 
 .action-card:hover:not(:disabled) {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
-    border-color: var(--primary-main);
-    background: var(--bg-surface);
+    box-shadow: var(--shadow-std-lg);
+    /* was xl */
+    border-color: var(--color-primary);
+    /* background: var(--bg-surface); surface is already bg */
 }
 
 .action-card:disabled {
@@ -245,19 +267,20 @@
 .action-icon {
     width: 42px;
     height: 42px;
-    border-radius: var(--radius-md);
-    background: var(--bg-hover);
+    border-radius: var(--radius-std-md);
+    background: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
-    transition: all var(--transition-normal);
+    color: var(--color-text-secondary);
+    transition: all var(--duration-normal) var(--ease-standard);
 }
 
 .action-card:hover:not(:disabled) .action-icon {
-    background: var(--primary-main);
-    color: var(--text-inverse);
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
+    background: var(--color-primary);
+    color: white;
+    /* Text inverse usually white in standardization for primary btns */
+    box-shadow: 0 4px 12px rgba(33, 128, 141, 0.4);
 }
 
 .action-icon svg {
@@ -267,16 +290,18 @@
 }
 
 .action-text {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-main);
+    font-size: 1.125rem;
+    /* ~lg */
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
     margin-top: auto;
-    font-family: var(--font-family-base);
+    font-family: var(--font-family-std-base);
 }
 
 .action-subtext {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
+    font-size: var(--font-size-std-base);
+    /* or small */
+    color: var(--color-text-secondary);
     line-height: 1.4;
 }
 
@@ -285,15 +310,14 @@
     grid-column: 9 / -1;
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-16);
     height: 100%;
 }
 
 .activity-feed-list {
-    background: var(--bg-surface);
-    /* slightly distinct background */
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -303,15 +327,14 @@
 }
 
 .activity-item {
-    padding: var(--space-md);
-    border-bottom: 1px solid var(--border-light);
+    padding: var(--space-16);
+    border-bottom: 1px solid var(--color-border-std);
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-16);
     align-items: flex-start;
-    transition: background var(--transition-fast);
-    font-family: var(--font-family-mono);
-    /* Log style */
-    font-size: var(--font-size-sm);
+    transition: background var(--duration-fast);
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-small);
 }
 
 .activity-item:last-child {
@@ -319,13 +342,14 @@
 }
 
 .activity-item:hover {
-    background: var(--bg-hover);
+    background: var(--color-secondary);
+    /* or bg-hover */
 }
 
 .activity-icon {
     width: 24px;
     height: 24px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-std-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -340,40 +364,40 @@
 
 /* Status dots style */
 .activity-icon.info {
-    color: var(--c-info);
-    background: var(--info-light);
+    color: var(--color-info);
+    background: rgba(98, 108, 113, 0.1);
 }
 
 .activity-icon.success {
-    color: var(--c-success);
-    background: var(--success-light);
+    color: var(--color-success);
+    background: rgba(33, 128, 141, 0.1);
 }
 
 .activity-icon.warning {
-    color: var(--c-warning);
-    background: var(--warning-light);
+    color: var(--color-warning);
+    background: rgba(168, 75, 47, 0.1);
 }
 
 .activity-icon.error {
-    color: var(--c-danger);
-    background: var(--danger-light);
+    color: var(--color-error);
+    background: rgba(192, 21, 47, 0.1);
 }
 
 .activity-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-4);
 }
 
 .activity-text {
-    color: var(--text-main);
+    color: var(--color-text);
     line-height: 1.4;
 }
 
 .activity-time {
-    color: var(--text-muted);
+    color: var(--color-text-secondary);
     opacity: 0.7;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-tiny);
 }
 
 /* ==================== Responsive ==================== */
@@ -392,17 +416,17 @@
 @media (max-width: var(--layout-modal-width)) {
     .dashboard-grid {
         grid-template-columns: 1fr;
-        gap: var(--space-md);
-        padding: var(--space-md);
+        gap: var(--space-16);
+        padding: var(--space-16);
     }
 
     .dashboard-header-card {
         min-height: auto;
-        padding: var(--space-lg);
+        padding: var(--space-24);
     }
 
     .header-content h3 {
-        font-size: var(--font-size-2xl);
+        font-size: var(--font-size-h2);
     }
 
     .action-cards-grid {
@@ -416,33 +440,36 @@
     align-items: center;
     max-width: 400px;
     height: 36px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-base);
-    border-radius: var(--radius-md);
-    padding: 0 var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    padding: 0 var(--space-8);
     overflow: hidden;
-    margin-right: var(--space-md);
+    margin-right: var(--space-16);
 }
 
 .welcome-message-wrapper {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-8);
     width: 100%;
     height: 100%;
 }
 
 .welcome-message-icon {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-std-base);
     flex-shrink: 0;
     animation: welcome-pulse 2s ease-in-out infinite;
 }
 
 @keyframes welcome-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         transform: scale(1);
     }
+
     50% {
         opacity: 0.7;
         transform: scale(1.1);
@@ -452,18 +479,18 @@
 .welcome-message-content {
     flex: 1;
     overflow: hidden;
-    var(--bg-card)-space: nowrap;
+    white-space: nowrap;
     position: relative;
     min-width: 0;
 }
 
 .welcome-message-text {
     display: inline-block;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    var(--bg-card)-space: nowrap;
-    padding-right: var(--space-md);
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-tiny);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    padding-right: var(--space-16);
 }
 
 /* Marquee animation for long messages */
@@ -475,6 +502,7 @@
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(-100%);
     }
@@ -486,12 +514,12 @@
 }
 
 .welcome-message-counter {
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
-    background: var(--bg-hover);
+    font-family: var(--font-family-std-mono);
+    font-size: var(--font-size-tiny);
+    color: var(--color-text-secondary);
+    background: var(--color-secondary);
     padding: 2px 6px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-std-sm);
     flex-shrink: 0;
     cursor: help;
 }

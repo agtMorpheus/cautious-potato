@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Components Demo - Standardized Design System</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            padding: var(--space-20);
+            background: var(--color-background);
+            color: var(--color-text);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: var(--space-32);
+            padding: var(--space-20);
+            background: var(--color-surface);
+            border-radius: var(--radius-std-lg);
+            border: 1px solid var(--color-border-std);
+        }
+        
+        .demo-title {
+            font-size: var(--font-size-h2);
+            font-weight: var(--font-weight-std-semibold);
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-16);
+            margin-bottom: var(--space-16);
+        }
+        
+        .demo-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: var(--space-20);
+            right: var(--space-20);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <button class="btn btn--secondary theme-toggle" onclick="toggleTheme()">
+        🌙 Toggle Dark Mode
+    </button>
+
+    <h1 style="font-size: var(--font-size-h1); margin-bottom: var(--space-32); text-align: center;">
+        UI Components Demo
+    </h1>
+
+    <!-- Buttons Section -->
+    <section class="demo-section">
+        <h2 class="demo-title">Buttons</h2>
+        
+        <h3 style="margin-bottom: var(--space-12);">Button Variants</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <button class="btn btn--primary">Primary</button>
+                <button class="btn btn--secondary">Secondary</button>
+                <button class="btn btn--outline">Outline</button>
+                <button class="btn btn--ghost">Ghost</button>
+            </div>
+            <div class="demo-item">
+                <button class="btn btn--success">Success</button>
+                <button class="btn btn--warning">Warning</button>
+                <button class="btn btn--danger">Danger</button>
+                <button class="btn btn--info">Info</button>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Button Sizes</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <button class="btn btn--primary btn--sm">Small</button>
+                <button class="btn btn--primary">Default</button>
+                <button class="btn btn--primary btn--lg">Large</button>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Button States</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <button class="btn btn--primary" disabled>Disabled</button>
+                <button class="btn btn--primary btn--loading">Loading</button>
+                <button class="btn btn--primary btn--full-width">Full Width</button>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Icon Buttons</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <button class="btn btn--primary btn--icon" aria-label="Settings">⚙️</button>
+                <button class="btn btn--secondary btn--icon" aria-label="Close">✕</button>
+                <button class="btn btn--primary">
+                    <span class="btn__icon">📁</span>
+                    With Icon
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forms Section -->
+    <section class="demo-section">
+        <h2 class="demo-title">Form Elements</h2>
+        
+        <form>
+            <div class="form-group">
+                <label for="email" class="form-label form-label--required">Email Address</label>
+                <input id="email" type="email" class="form-control" placeholder="Enter your email">
+                <p class="form-hint">We'll never share your email with anyone else.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label form-label--required">Password</label>
+                <input id="password" type="password" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="bio" class="form-label form-label--optional">Bio</label>
+                <textarea id="bio" class="form-control" rows="4" placeholder="Tell us about yourself"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="country" class="form-label">Country</label>
+                <select id="country" class="form-control">
+                    <option value="">Select a country</option>
+                    <option value="us">United States</option>
+                    <option value="ca">Canada</option>
+                    <option value="uk">United Kingdom</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col form-col--2">
+                    <label for="first-name" class="form-label">First Name</label>
+                    <input id="first-name" type="text" class="form-control">
+                </div>
+                <div class="form-col form-col--2">
+                    <label for="last-name" class="form-label">Last Name</label>
+                    <input id="last-name" type="text" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-check">
+                <input id="newsletter" type="checkbox" class="form-check-input">
+                <label for="newsletter" class="form-check-label">
+                    Subscribe to our newsletter for updates and special offers
+                </label>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn--primary">Submit Form</button>
+                <button type="button" class="btn btn--secondary">Cancel</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Alerts Section -->
+    <section class="demo-section">
+        <h2 class="demo-title">Alerts & Status Indicators</h2>
+        
+        <h3 style="margin-bottom: var(--space-12);">Alert Messages</h3>
+        <div class="alert alert--success" role="status" aria-live="polite">
+            <span class="alert__icon">✓</span>
+            <div class="alert__content">
+                <strong class="alert__title">Success</strong>
+                <p class="alert__message">Your changes have been saved successfully.</p>
+            </div>
+            <button class="alert__close" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert--error" role="alert" aria-live="assertive">
+            <span class="alert__icon">⚠️</span>
+            <div class="alert__content">
+                <strong class="alert__title">Error</strong>
+                <p class="alert__message">There was a problem processing your request. Please try again.</p>
+            </div>
+            <button class="alert__close" aria-label="Dismiss">×</button>
+        </div>
+
+        <div class="alert alert--warning">
+            <span class="alert__icon">⚡</span>
+            <div class="alert__content">
+                <strong class="alert__title">Warning</strong>
+                <p class="alert__message">This action cannot be undone. Please proceed with caution.</p>
+            </div>
+        </div>
+
+        <div class="alert alert--info">
+            <span class="alert__icon">ℹ️</span>
+            <div class="alert__content">
+                <strong class="alert__title">Information</strong>
+                <p class="alert__message">New features are available in this version. Check the changelog for details.</p>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Status Indicators</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <div class="status-indicator status--idle">
+                    <span class="status-dot"></span>
+                    Idle
+                </div>
+                <div class="status-indicator status--pending">
+                    <span class="status-dot"></span>
+                    Processing
+                </div>
+                <div class="status-indicator status--success">
+                    <span class="status-dot"></span>
+                    Complete
+                </div>
+                <div class="status-indicator status--error">
+                    <span class="status-dot"></span>
+                    Failed
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Badges</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <span class="badge badge--success">Active</span>
+                <span class="badge badge--warning">Pending</span>
+                <span class="badge badge--error">Rejected</span>
+                <span class="badge badge--info">Draft</span>
+                <span class="badge badge--neutral">Archived</span>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Progress Indicators</h3>
+        <div class="progress">
+            <div class="progress__bar" style="width: 75%;"></div>
+        </div>
+        <div class="progress progress--success">
+            <div class="progress__bar" style="width: 100%;"></div>
+        </div>
+        <div class="progress progress--indeterminate">
+            <div class="progress__bar"></div>
+        </div>
+
+        <h3 style="margin-bottom: var(--space-12);">Loading Spinners</h3>
+        <div class="demo-grid">
+            <div class="demo-item">
+                <div class="loading-spinner loading-spinner--sm"></div>
+                <div class="loading-spinner"></div>
+                <div class="loading-spinner loading-spinner--lg"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form States Section -->
+    <section class="demo-section">
+        <h2 class="demo-title">Form States</h2>
+        
+        <div class="form-group">
+            <label for="success-input" class="form-label">Success State</label>
+            <input id="success-input" type="text" class="form-control form-control--success" value="Valid input">
+            <p class="form-success">✓ This field is valid</p>
+        </div>
+
+        <div class="form-group">
+            <label for="error-input" class="form-label">Error State</label>
+            <input id="error-input" type="text" class="form-control form-control--error" value="Invalid input">
+            <p class="form-error">⚠️ This field is required</p>
+        </div>
+
+        <div class="form-group">
+            <label for="disabled-input" class="form-label">Disabled State</label>
+            <input id="disabled-input" type="text" class="form-control" value="Disabled input" disabled>
+        </div>
+    </section>
+
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            const button = document.querySelector('.theme-toggle');
+            button.textContent = newTheme === 'dark' ? '☀️ Toggle Light Mode' : '🌙 Toggle Dark Mode';
+        }
+
+        // Add click handlers for alert close buttons
+        document.querySelectorAll('.alert__close').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.target.closest('.alert').style.display = 'none';
+            });
+        });
+
+        // Demo toast notification
+        function showToast() {
+            const toast = document.createElement('div');
+            toast.className = 'toast toast--success';
+            toast.innerHTML = `
+                <span class="toast__icon">✓</span>
+                <div class="toast__content">
+                    <strong class="toast__title">Success</strong>
+                    <p class="toast__message">This is a demo toast notification!</p>
+                </div>
+                <button class="toast__close" aria-label="Close">×</button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            toast.querySelector('.toast__close').addEventListener('click', () => {
+                toast.classList.add('toast--removing');
+                setTimeout(() => toast.remove(), 300);
+            });
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.classList.add('toast--removing');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add demo toast button
+        const demoButton = document.createElement('button');
+        demoButton.className = 'btn btn--info';
+        demoButton.textContent = 'Show Toast Demo';
+        demoButton.onclick = showToast;
+        demoButton.style.position = 'fixed';
+        demoButton.style.bottom = '20px';
+        demoButton.style.right = '20px';
+        document.body.appendChild(demoButton);
+    </script>
+</body>
+</html>

@@ -22,6 +22,9 @@ import {
     initializeStaticUI
 } from './ui.js';
 
+// Phase 4: Enhanced UI Renderers with Accessibility
+import Phase4UIRenderers from './phase4-ui-renderers.js';
+
 // Contract Manager imports (Phase 1)
 import { initializeContractEventListeners, handleContractMappingChange } from './contracts/contractHandlers.js';
 import { initializeContractUI } from './contracts/contractRenderer.js';
@@ -1266,6 +1269,9 @@ async function initializeApp() {
 
     // 2. Initialize static UI (non-dynamic DOM tweaks, ARIA, etc.)
     initializeStaticUI();
+    
+    // 2b. Initialize Phase 4 UI enhancements (accessibility & dark mode)
+    Phase4UIRenderers.init();
 
     // 3. Initialize navigation
     initializeNavigation();
@@ -1342,9 +1348,16 @@ async function initializeApp() {
 
     // 6. Subscribe to state changes to keep UI reactive
     subscribe((nextState) => {
-        updateImportUI(nextState);
-        updateGenerateUI(nextState);
-        updateExportUI(nextState);
+        // Use Phase 4 enhanced renderers if available, fallback to original
+        if (Phase4UIRenderers && Phase4UIRenderers.updateImportUI) {
+            Phase4UIRenderers.updateImportUI(nextState);
+            Phase4UIRenderers.updateGenerateUI(nextState);
+            Phase4UIRenderers.updateExportUI(nextState);
+        } else {
+            updateImportUI(nextState);
+            updateGenerateUI(nextState);
+            updateExportUI(nextState);
+        }
         updateDashboardStats(nextState);
 
         // Log state changes
@@ -1384,9 +1397,16 @@ async function initializeApp() {
 
     // 7. Perform initial render based on loaded state
     const state = getState();
-    updateImportUI(state);
-    updateGenerateUI(state);
-    updateExportUI(state);
+    // Use Phase 4 enhanced renderers if available, fallback to original
+    if (Phase4UIRenderers && Phase4UIRenderers.updateImportUI) {
+        Phase4UIRenderers.updateImportUI(state);
+        Phase4UIRenderers.updateGenerateUI(state);
+        Phase4UIRenderers.updateExportUI(state);
+    } else {
+        updateImportUI(state);
+        updateGenerateUI(state);
+        updateExportUI(state);
+    }
     updateDashboardStats(state);
 
     // 7b. Initialize Contract Manager UI (Phase 1)

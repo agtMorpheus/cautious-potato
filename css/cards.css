@@ -1,0 +1,489 @@
+/**
+ * Cards & Panels System
+ * 
+ * Implements card and panel components from the UI Standardization Guide.
+ * Provides consistent container elements across all modules.
+ */
+
+/* ==================== BASE CARD STYLES ==================== */
+
+.card {
+    /* Structure */
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-sm);
+    overflow: hidden;
+    
+    /* Interaction */
+    transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-std-md);
+}
+
+/* ==================== CARD SECTIONS ==================== */
+
+.card__header {
+    padding: var(--space-16);
+    border-bottom: 1px solid var(--color-border-std);
+    background: var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
+}
+
+.card__title {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
+    margin: 0;
+    line-height: var(--line-height-headings);
+}
+
+.card__subtitle {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    margin: var(--space-4) 0 0 0;
+    line-height: var(--line-height-body);
+}
+
+.card__actions {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.card__body {
+    padding: var(--space-16);
+    color: var(--color-text);
+    line-height: var(--line-height-body);
+}
+
+.card__footer {
+    padding: var(--space-12) var(--space-16);
+    border-top: 1px solid var(--color-border-std);
+    background: var(--color-secondary);
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* ==================== CARD VARIANTS ==================== */
+
+/* Elevated Card */
+.card--elevated {
+    box-shadow: var(--shadow-std-md);
+}
+
+.card--elevated:hover {
+    box-shadow: var(--shadow-std-lg);
+}
+
+/* Flat Card (No shadow) */
+.card--flat {
+    box-shadow: none;
+    border: 1px solid var(--color-border-std);
+}
+
+.card--flat:hover {
+    box-shadow: var(--shadow-std-xs);
+}
+
+/* Interactive Card (Clickable) */
+.card--interactive {
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.card--interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-std-lg);
+}
+
+.card--interactive:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-std-md);
+}
+
+/* Status Cards */
+.card--success {
+    border-left: 4px solid var(--color-success);
+}
+
+.card--error {
+    border-left: 4px solid var(--color-error);
+}
+
+.card--warning {
+    border-left: 4px solid var(--color-warning);
+}
+
+.card--info {
+    border-left: 4px solid var(--color-info);
+}
+
+/* ==================== CARD SIZES ==================== */
+
+.card--sm {
+    border-radius: var(--radius-std-base);
+}
+
+.card--sm .card__header {
+    padding: var(--space-12);
+}
+
+.card--sm .card__body {
+    padding: var(--space-12);
+}
+
+.card--sm .card__footer {
+    padding: var(--space-8) var(--space-12);
+}
+
+.card--lg {
+    border-radius: var(--radius-std-xl);
+}
+
+.card--lg .card__header {
+    padding: var(--space-24);
+}
+
+.card--lg .card__body {
+    padding: var(--space-24);
+}
+
+.card--lg .card__footer {
+    padding: var(--space-16) var(--space-24);
+}
+
+/* ==================== PANELS ==================== */
+
+.panel {
+    background: var(--color-surface);
+    border-radius: var(--radius-std-md);
+    border: 1px solid var(--color-border-std);
+    padding: var(--space-20);
+    margin-bottom: var(--space-20);
+}
+
+.panel__header {
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-16);
+    border-bottom: 2px solid var(--color-border-std);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
+}
+
+.panel__title {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-std-semibold);
+    color: var(--color-text);
+    margin: 0;
+    line-height: var(--line-height-headings);
+}
+
+.panel__subtitle {
+    font-size: var(--font-size-std-base);
+    color: var(--color-text-secondary);
+    margin: var(--space-4) 0 0 0;
+    line-height: var(--line-height-body);
+}
+
+.panel__actions {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.panel__body {
+    color: var(--color-text);
+    line-height: var(--line-height-body);
+}
+
+.panel__footer {
+    margin-top: var(--space-16);
+    padding-top: var(--space-16);
+    border-top: 1px solid var(--color-border-std);
+    display: flex;
+    gap: var(--space-12);
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* ==================== PANEL VARIANTS ==================== */
+
+/* Section Panel (for module sections) */
+.panel--section {
+    background: var(--color-background);
+    border: none;
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-xs);
+    padding: var(--space-24);
+}
+
+/* Import Panel (for file upload sections) */
+.panel--import {
+    border: 2px dashed var(--color-border-std);
+    background: var(--color-surface);
+    text-align: center;
+    padding: var(--space-32);
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.panel--import:hover {
+    border-color: var(--color-primary);
+    background: var(--color-secondary);
+}
+
+.panel--import.is-dragover {
+    border-color: var(--color-primary);
+    background: var(--color-secondary);
+    transform: scale(1.02);
+}
+
+/* Status Panels */
+.panel--success {
+    border-left: 4px solid var(--color-success);
+    background: rgba(33, 128, 141, 0.05);
+}
+
+.panel--error {
+    border-left: 4px solid var(--color-error);
+    background: rgba(192, 21, 47, 0.05);
+}
+
+.panel--warning {
+    border-left: 4px solid var(--color-warning);
+    background: rgba(168, 75, 47, 0.05);
+}
+
+.panel--info {
+    border-left: 4px solid var(--color-info);
+    background: rgba(98, 108, 113, 0.05);
+}
+
+/* ==================== CARD GRID LAYOUTS ==================== */
+
+.card-grid {
+    display: grid;
+    gap: var(--space-16);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.card-grid--2 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.card-grid--3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.card-grid--4 {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* ==================== CARD CONTENT UTILITIES ==================== */
+
+/* Card with icon */
+.card__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--color-primary);
+}
+
+.card__icon--lg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Card with status indicator */
+.card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-std-medium);
+}
+
+.card__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Card metrics/stats */
+.card__metric {
+    text-align: center;
+    padding: var(--space-12);
+}
+
+.card__metric-value {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-std-bold);
+    color: var(--color-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+.card__metric-label {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    margin: var(--space-4) 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-relaxed);
+}
+
+/* ==================== RESPONSIVE BEHAVIOR ==================== */
+
+@media (max-width: 640px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-12);
+    }
+    
+    .card__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-8);
+    }
+    
+    .card__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .panel {
+        padding: var(--space-16);
+        margin-bottom: var(--space-16);
+    }
+    
+    .panel__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-8);
+    }
+    
+    .panel__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .panel--import {
+        padding: var(--space-20);
+    }
+}
+
+/* ==================== ACCESSIBILITY ENHANCEMENTS ==================== */
+
+/* Focus states for interactive cards */
+.card--interactive:focus {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+    .card {
+        border-width: 2px;
+    }
+    
+    .panel {
+        border-width: 2px;
+    }
+    
+    .card--interactive:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 3px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .card--interactive,
+    .panel--import {
+        transition: none;
+    }
+    
+    .card--interactive:hover {
+        transform: none;
+    }
+    
+    .panel--import.is-dragover {
+        transform: none;
+    }
+}
+
+/* ==================== DARK MODE ADJUSTMENTS ==================== */
+
+[data-color-scheme="dark"] .card__header,
+[data-theme="dark"] .card__header,
+[data-color-scheme="dark"] .card__footer,
+[data-theme="dark"] .card__footer,
+[data-color-scheme="dark"] .panel__header,
+[data-theme="dark"] .panel__header,
+[data-color-scheme="dark"] .panel__footer,
+[data-theme="dark"] .panel__footer {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-color-scheme="dark"] .panel--import,
+[data-theme="dark"] .panel--import {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-color-scheme="dark"] .panel--import:hover,
+[data-theme="dark"] .panel--import:hover,
+[data-color-scheme="dark"] .panel--import.is-dragover,
+[data-theme="dark"] .panel--import.is-dragover {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ==================== LEGACY COMPATIBILITY ==================== */
+
+/* Map old class names for backward compatibility */
+.card-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-sm);
+    overflow: hidden;
+    transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.section-panel {
+    background: var(--color-background);
+    border: none;
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-xs);
+    padding: var(--space-24);
+}
+
+.import-section {
+    border: 2px dashed var(--color-border-std);
+    background: var(--color-surface);
+    text-align: center;
+    padding: var(--space-32);
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.status-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-lg);
+    box-shadow: var(--shadow-std-sm);
+    overflow: hidden;
+    transition: box-shadow var(--duration-fast) var(--ease-standard);
+}

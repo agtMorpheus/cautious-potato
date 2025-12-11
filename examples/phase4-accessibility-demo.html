@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 4: Advanced Accessibility & Dark Mode Demo</title>
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="../css/modals.css">
+    <link rel="stylesheet" href="../css/alerts.css">
+    <link rel="stylesheet" href="../css/status.css">
+    <link rel="stylesheet" href="../css/tables.css">
+    
+    <!-- Phase 4 CSS -->
+    <link rel="stylesheet" href="../css/phase4-accessibility.css">
+    
+    <style>
+        body {
+            font-family: var(--font-family-std-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            margin: 0;
+            padding: var(--space-20);
+            line-height: var(--line-height-body);
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: var(--space-32);
+            padding: var(--space-20);
+            background: var(--color-surface);
+            border-radius: var(--radius-std-lg);
+            border: 1px solid var(--color-border-std);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-20);
+            margin-top: var(--space-16);
+        }
+        
+        .demo-item {
+            padding: var(--space-16);
+            background: var(--color-background);
+            border-radius: var(--radius-std-base);
+            border: 1px solid var(--color-border-std);
+        }
+        
+        .theme-controls {
+            position: fixed;
+            top: var(--space-20);
+            right: var(--space-20);
+            display: flex;
+            gap: var(--space-8);
+            z-index: 1000;
+        }
+        
+        .accessibility-info {
+            background: var(--info-light);
+            border: 1px solid var(--color-info);
+            border-radius: var(--radius-std-base);
+            padding: var(--space-12);
+            margin-bottom: var(--space-16);
+            font-size: var(--font-size-small);
+        }
+        
+        .keyboard-shortcut {
+            background: var(--color-secondary);
+            padding: var(--space-2) var(--space-6);
+            border-radius: var(--radius-std-sm);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-tiny);
+        }
+        
+        .progress-demo {
+            margin-top: var(--space-16);
+        }
+        
+        .status-demo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+            margin-bottom: var(--space-8);
+        }
+        
+        .form-demo {
+            max-width: 400px;
+        }
+        
+        .table-demo {
+            overflow-x: auto;
+        }
+        
+        .announcement-log {
+            background: var(--color-charcoal-800);
+            color: var(--color-white);
+            padding: var(--space-12);
+            border-radius: var(--radius-std-base);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-small);
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: var(--space-16);
+        }
+        
+        .announcement-log h4 {
+            margin: 0 0 var(--space-8) 0;
+            color: var(--color-primary);
+        }
+        
+        .announcement-item {
+            margin-bottom: var(--space-4);
+            padding: var(--space-4);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-std-sm);
+        }
+        
+        .announcement-time {
+            color: var(--color-gray-300);
+            font-size: var(--font-size-tiny);
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Links (Phase 4 Feature) -->
+    <div class="skip-links">
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+        <a href="#navigation" class="skip-link">Skip to navigation</a>
+    </div>
+    
+    <!-- Theme Controls -->
+    <div class="theme-controls">
+        <button id="theme-toggle-btn" class="btn btn--secondary btn--icon" 
+                title="Toggle theme" aria-label="Toggle between light, dark, and auto themes">
+            🌙
+        </button>
+        <button id="contrast-toggle" class="btn btn--secondary btn--icon" 
+                title="Toggle high contrast" aria-label="Toggle high contrast mode">
+            🔆
+        </button>
+    </div>
+    
+    <!-- Navigation (Landmark) -->
+    <nav role="navigation" id="navigation" aria-label="Demo navigation">
+        <div class="demo-container">
+            <h1>Phase 4: Advanced Accessibility & Dark Mode Demo</h1>
+            <p>This demo showcases the enhanced accessibility features and dark mode improvements implemented in Phase 4.</p>
+        </div>
+    </nav>
+    
+    <!-- Main Content (Landmark) -->
+    <main role="main" id="main-content" class="demo-container">
+        
+        <!-- Accessibility Info -->
+        <div class="accessibility-info">
+            <strong>Accessibility Features:</strong>
+            Try using keyboard navigation (<kbd class="keyboard-shortcut">Tab</kbd>, <kbd class="keyboard-shortcut">Enter</kbd>, <kbd class="keyboard-shortcut">Space</kbd>), 
+            screen readers, or keyboard shortcuts like <kbd class="keyboard-shortcut">Alt+M</kbd> (main content) and <kbd class="keyboard-shortcut">Alt+N</kbd> (navigation).
+        </div>
+        
+        <!-- Enhanced Focus Indicators -->
+        <section class="demo-section" role="region" aria-labelledby="focus-section">
+            <h2 id="focus-section">Enhanced Focus Indicators</h2>
+            <p>All interactive elements now have enhanced focus indicators that work with keyboard navigation and high contrast mode.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Buttons</h3>
+                    <div style="display: flex; gap: var(--space-8); flex-wrap: wrap;">
+                        <button class="btn btn--primary">Primary Button</button>
+                        <button class="btn btn--secondary">Secondary Button</button>
+                        <button class="btn btn--outline">Outline Button</button>
+                        <button class="btn btn--danger">Danger Button</button>
+                        <button class="btn btn--primary btn--icon" aria-label="Settings">⚙️</button>
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h3>Links & Interactive Elements</h3>
+                    <p><a href="#" onclick="return false;">Sample link</a> with focus indicator</p>
+                    <p><span role="button" tabindex="0" onclick="alert('Clicked!')">Custom button role</span></p>
+                    <p><span tabindex="0">Focusable span element</span></p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Enhanced Form Accessibility -->
+        <section class="demo-section" role="region" aria-labelledby="form-section">
+            <h2 id="form-section">Enhanced Form Accessibility</h2>
+            <p>Forms now include comprehensive ARIA attributes, error announcements, and enhanced validation feedback.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Accessible Form</h3>
+                    <form class="form-demo" novalidate>
+                        <div class="form-group">
+                            <label for="demo-name" class="form-label form-label--required">Full Name</label>
+                            <input type="text" id="demo-name" class="form-control" required 
+                                   aria-describedby="name-hint name-error">
+                            <p id="name-hint" class="form-hint">Enter your first and last name</p>
+                            <div id="name-error" class="form-error" role="alert" style="display: none;">
+                                Name is required
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="demo-email" class="form-label form-label--required">Email Address</label>
+                            <input type="email" id="demo-email" class="form-control" required 
+                                   aria-describedby="email-hint">
+                            <p id="email-hint" class="form-hint">We'll never share your email</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="demo-message" class="form-label form-label--optional">Message</label>
+                            <textarea id="demo-message" class="form-control" rows="3" 
+                                      aria-describedby="message-hint"></textarea>
+                            <p id="message-hint" class="form-hint">Optional feedback or questions</p>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="demo-agree" class="form-check-input" required>
+                            <label for="demo-agree" class="form-check-label">
+                                I agree to the terms and conditions (required)
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn--primary">Submit Form</button>
+                        <button type="button" class="btn btn--secondary" onclick="validateForm()">Test Validation</button>
+                    </form>
+                </div>
+                
+                <div class="demo-item">
+                    <h3>File Upload with Accessibility</h3>
+                    <div class="form-group">
+                        <label for="demo-file" class="form-label">Upload File</label>
+                        <input type="file" id="demo-file" class="form-control" 
+                               accept=".xlsx,.xls" aria-describedby="file-hint">
+                        <p id="file-hint" class="form-hint">Excel files only (.xlsx, .xls)</p>
+                    </div>
+                    
+                    <div id="file-drop-zone" class="card" style="padding: var(--space-20); text-align: center; cursor: pointer; border: 2px dashed var(--color-border-std);">
+                        <p>Drop files here or <span class="upload-link" style="color: var(--color-primary);">click to browse</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Status Indicators & Live Regions -->
+        <section class="demo-section" role="region" aria-labelledby="status-section">
+            <h2 id="status-section">Status Indicators & Live Regions</h2>
+            <p>Status changes are announced to screen readers and include proper ARIA attributes.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Status Indicators</h3>
+                    <div class="status-demo">
+                        <span class="status-indicator status-idle" role="status" aria-label="Status: Ready"></span>
+                        <span>Ready</span>
+                        <button class="btn btn--sm btn--secondary" onclick="cycleStatus(this.previousElementSibling.previousElementSibling)">Change</button>
+                    </div>
+                    <div class="status-demo">
+                        <span class="status-indicator status-pending" role="status" aria-label="Status: Loading"></span>
+                        <span>Loading</span>
+                        <button class="btn btn--sm btn--secondary" onclick="cycleStatus(this.previousElementSibling.previousElementSibling)">Change</button>
+                    </div>
+                    <div class="status-demo">
+                        <span class="status-indicator status-success" role="status" aria-label="Status: Success"></span>
+                        <span>Success</span>
+                        <button class="btn btn--sm btn--secondary" onclick="cycleStatus(this.previousElementSibling.previousElementSibling)">Change</button>
+                    </div>
+                    <div class="status-demo">
+                        <span class="status-indicator status-error" role="status" aria-label="Status: Error"></span>
+                        <span>Error</span>
+                        <button class="btn btn--sm btn--secondary" onclick="cycleStatus(this.previousElementSibling.previousElementSibling)">Change</button>
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h3>Progress Indicators</h3>
+                    <div class="progress-demo">
+                        <div class="progress" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" aria-label="File upload progress">
+                            <div class="progress__bar" style="width: 45%;"></div>
+                        </div>
+                        <p style="margin-top: var(--space-8);">File upload: 45% complete</p>
+                        <button class="btn btn--sm btn--primary" onclick="simulateProgress()">Simulate Progress</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Enhanced Table Accessibility -->
+        <section class="demo-section" role="region" aria-labelledby="table-section">
+            <h2 id="table-section">Enhanced Table Accessibility</h2>
+            <p>Tables include sortable headers, row selection, and proper ARIA attributes.</p>
+            
+            <div class="table-demo">
+                <table class="table" role="table" aria-label="Employee data">
+                    <thead class="table__head">
+                        <tr role="row">
+                            <th class="table__th" role="columnheader">
+                                <input type="checkbox" class="table__checkbox" role="checkbox" 
+                                       aria-label="Select all rows" onchange="toggleAllRows(this)">
+                            </th>
+                            <th class="table__th table__th--sortable" role="columnheader" 
+                                aria-sort="none" tabindex="0" onclick="sortTable(this, 0)">
+                                Name
+                            </th>
+                            <th class="table__th table__th--sortable" role="columnheader" 
+                                aria-sort="none" tabindex="0" onclick="sortTable(this, 1)">
+                                Department
+                            </th>
+                            <th class="table__th table__th--sortable" role="columnheader" 
+                                aria-sort="none" tabindex="0" onclick="sortTable(this, 2)">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table__tr" role="row" data-selectable tabindex="0" 
+                            aria-selected="false" onclick="toggleRow(this)">
+                            <td class="table__td" role="gridcell">
+                                <input type="checkbox" class="table__checkbox" role="checkbox" 
+                                       aria-label="Select John Doe">
+                            </td>
+                            <td class="table__td" role="gridcell">John Doe</td>
+                            <td class="table__td" role="gridcell">Engineering</td>
+                            <td class="table__td" role="gridcell">Active</td>
+                        </tr>
+                        <tr class="table__tr" role="row" data-selectable tabindex="0" 
+                            aria-selected="false" onclick="toggleRow(this)">
+                            <td class="table__td" role="gridcell">
+                                <input type="checkbox" class="table__checkbox" role="checkbox" 
+                                       aria-label="Select Jane Smith">
+                            </td>
+                            <td class="table__td" role="gridcell">Jane Smith</td>
+                            <td class="table__td" role="gridcell">Marketing</td>
+                            <td class="table__td" role="gridcell">Active</td>
+                        </tr>
+                        <tr class="table__tr" role="row" data-selectable tabindex="0" 
+                            aria-selected="false" onclick="toggleRow(this)">
+                            <td class="table__td" role="gridcell">
+                                <input type="checkbox" class="table__checkbox" role="checkbox" 
+                                       aria-label="Select Bob Johnson">
+                            </td>
+                            <td class="table__td" role="gridcell">Bob Johnson</td>
+                            <td class="table__td" role="gridcell">Sales</td>
+                            <td class="table__td" role="gridcell">Inactive</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- Modal Accessibility -->
+        <section class="demo-section" role="region" aria-labelledby="modal-section">
+            <h2 id="modal-section">Modal Accessibility</h2>
+            <p>Modals include focus trapping, proper ARIA attributes, and keyboard navigation.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Accessible Modal</h3>
+                    <button class="btn btn--primary" data-modal-target="demo-modal">Open Modal</button>
+                    <p style="margin-top: var(--space-8); font-size: var(--font-size-small);">
+                        Try using <kbd class="keyboard-shortcut">Tab</kbd> to navigate and <kbd class="keyboard-shortcut">Escape</kbd> to close.
+                    </p>
+                </div>
+                
+                <div class="demo-item">
+                    <h3>Alert Dialog</h3>
+                    <button class="btn btn--danger" onclick="showAlertDialog()">Show Alert</button>
+                    <p style="margin-top: var(--space-8); font-size: var(--font-size-small);">
+                        Alert dialogs are announced immediately to screen readers.
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Screen Reader Announcements -->
+        <section class="demo-section" role="region" aria-labelledby="announcements-section">
+            <h2 id="announcements-section">Screen Reader Announcements</h2>
+            <p>Test the announcement system that provides feedback to screen reader users.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Announcement Controls</h3>
+                    <button class="btn btn--primary" onclick="testAnnouncement('polite')">Polite Announcement</button>
+                    <button class="btn btn--secondary" onclick="testAnnouncement('assertive')">Assertive Announcement</button>
+                    <button class="btn btn--outline" onclick="clearAnnouncements()">Clear Log</button>
+                </div>
+                
+                <div class="demo-item">
+                    <div class="announcement-log" id="announcement-log">
+                        <h4>Announcement Log</h4>
+                        <div id="announcement-list">
+                            <p style="color: var(--color-gray-300); font-style: italic;">Announcements will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Dark Mode Features -->
+        <section class="demo-section" role="region" aria-labelledby="darkmode-section">
+            <h2 id="darkmode-section">Enhanced Dark Mode</h2>
+            <p>The enhanced dark mode includes better contrast ratios, improved focus indicators, and system preference detection.</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Theme Options</h3>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-8);">
+                        <button class="btn btn--outline" onclick="setTheme('light')">Light Mode</button>
+                        <button class="btn btn--outline" onclick="setTheme('dark')">Dark Mode</button>
+                        <button class="btn btn--outline" onclick="setTheme('auto')">Auto (System)</button>
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h3>Current Theme Info</h3>
+                    <div id="theme-info">
+                        <p><strong>Current:</strong> <span id="current-theme">Loading...</span></p>
+                        <p><strong>System:</strong> <span id="system-theme">Loading...</span></p>
+                        <p><strong>High Contrast:</strong> <span id="high-contrast">Loading...</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <!-- Demo Modal -->
+    <div id="demo-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title" hidden>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 id="demo-modal-title" class="modal__title">Accessible Modal Demo</h3>
+                <button class="modal__close" data-modal-close aria-label="Close dialog">×</button>
+            </div>
+            <div class="modal__body">
+                <p>This modal demonstrates proper accessibility features:</p>
+                <ul>
+                    <li>Focus is trapped within the modal</li>
+                    <li>Pressing Escape closes the modal</li>
+                    <li>Focus returns to the trigger button when closed</li>
+                    <li>Screen readers are notified when opened/closed</li>
+                </ul>
+                
+                <div class="form-group">
+                    <label for="modal-input" class="form-label">Test Input</label>
+                    <input type="text" id="modal-input" class="form-control" placeholder="Try tabbing around">
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close>Cancel</button>
+                <button class="btn btn--primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Screen Reader Announcer -->
+    <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+    
+    <!-- Live Region for Messages -->
+    <div id="global-messages" role="status" aria-live="polite" aria-atomic="false" class="sr-only"></div>
+    
+    <!-- Scripts -->
+    <script src="../js/phase4-accessibility.js"></script>
+    
+    <script>
+        // Demo-specific JavaScript
+        let announcementCount = 0;
+        
+        // Status cycling
+        function cycleStatus(element) {
+            const statuses = ['idle', 'pending', 'success', 'error'];
+            const currentStatus = Array.from(element.classList).find(cls => cls.startsWith('status-'));
+            const currentIndex = statuses.findIndex(status => currentStatus === `status-${status}`);
+            const nextIndex = (currentIndex + 1) % statuses.length;
+            const nextStatus = statuses[nextIndex];
+            
+            element.className = 'status-indicator';
+            element.classList.add(`status-${nextStatus}`);
+            
+            // Update aria-label
+            let ariaLabel = `Status: ${nextStatus}`;
+            switch (nextStatus) {
+                case 'idle': ariaLabel = 'Status: Ready'; break;
+                case 'pending': ariaLabel = 'Status: Loading'; break;
+                case 'success': ariaLabel = 'Status: Success'; break;
+                case 'error': ariaLabel = 'Status: Error'; break;
+            }
+            element.setAttribute('aria-label', ariaLabel);
+        }
+        
+        // Progress simulation
+        function simulateProgress() {
+            const progress = document.querySelector('.progress');
+            const bar = progress.querySelector('.progress__bar');
+            let value = 0;
+            
+            const interval = setInterval(() => {
+                value += Math.random() * 15;
+                if (value >= 100) {
+                    value = 100;
+                    clearInterval(interval);
+                }
+                
+                progress.setAttribute('aria-valuenow', Math.round(value));
+                bar.style.width = `${value}%`;
+                
+                if (value === 100) {
+                    window.AccessibilityManager?.announce('Upload completed successfully', 'polite');
+                }
+            }, 200);
+        }
+        
+        // Table functionality
+        function sortTable(header, columnIndex) {
+            const currentSort = header.getAttribute('aria-sort');
+            let newSort = 'ascending';
+            
+            if (currentSort === 'ascending') newSort = 'descending';
+            else if (currentSort === 'descending') newSort = 'none';
+            
+            // Reset other headers
+            document.querySelectorAll('.table__th--sortable').forEach(h => h.setAttribute('aria-sort', 'none'));
+            header.setAttribute('aria-sort', newSort);
+            
+            const columnName = header.textContent.trim();
+            const sortDirection = newSort === 'none' ? 'unsorted' : newSort;
+            window.AccessibilityManager?.announce(`Table sorted by ${columnName}, ${sortDirection}`, 'polite');
+        }
+        
+        function toggleRow(row) {
+            const isSelected = row.getAttribute('aria-selected') === 'true';
+            row.setAttribute('aria-selected', !isSelected);
+            
+            const checkbox = row.querySelector('.table__checkbox');
+            if (checkbox) {
+                checkbox.checked = !isSelected;
+            }
+            
+            const rowIndex = Array.from(row.parentNode.children).indexOf(row) + 1;
+            window.AccessibilityManager?.announce(`Row ${rowIndex} ${isSelected ? 'deselected' : 'selected'}`, 'polite');
+        }
+        
+        function toggleAllRows(checkbox) {
+            const rows = document.querySelectorAll('.table__tr[data-selectable]');
+            rows.forEach(row => {
+                row.setAttribute('aria-selected', checkbox.checked);
+                const rowCheckbox = row.querySelector('.table__checkbox');
+                if (rowCheckbox) {
+                    rowCheckbox.checked = checkbox.checked;
+                }
+            });
+            
+            window.AccessibilityManager?.announce(`${checkbox.checked ? 'Selected' : 'Deselected'} all rows`, 'polite');
+        }
+        
+        // Form validation demo
+        function validateForm() {
+            const form = document.querySelector('.form-demo');
+            const nameInput = document.getElementById('demo-name');
+            const emailInput = document.getElementById('demo-email');
+            const agreeCheckbox = document.getElementById('demo-agree');
+            
+            let hasErrors = false;
+            
+            // Validate name
+            if (!nameInput.value.trim()) {
+                showFieldError('demo-name', 'name-error', 'Name is required');
+                hasErrors = true;
+            } else {
+                hideFieldError('demo-name', 'name-error');
+            }
+            
+            // Validate email
+            if (!emailInput.value.trim()) {
+                showFieldError('demo-email', 'email-error', 'Email is required');
+                hasErrors = true;
+            } else if (!emailInput.value.includes('@')) {
+                showFieldError('demo-email', 'email-error', 'Please enter a valid email address');
+                hasErrors = true;
+            } else {
+                hideFieldError('demo-email', 'email-error');
+            }
+            
+            // Validate agreement
+            if (!agreeCheckbox.checked) {
+                window.AccessibilityManager?.announce('You must agree to the terms and conditions', 'assertive');
+                agreeCheckbox.focus();
+                hasErrors = true;
+            }
+            
+            if (hasErrors) {
+                window.AccessibilityManager?.announce('Form has errors. Please check the fields and try again.', 'assertive');
+            } else {
+                window.AccessibilityManager?.announce('Form validation passed successfully', 'polite');
+            }
+        }
+        
+        function showFieldError(fieldId, errorId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(errorId);
+            
+            if (!errorElement) {
+                const newError = document.createElement('div');
+                newError.id = errorId;
+                newError.className = 'form-error';
+                newError.setAttribute('role', 'alert');
+                field.parentNode.appendChild(newError);
+            }
+            
+            field.classList.add('form-control--error');
+            field.setAttribute('aria-invalid', 'true');
+            document.getElementById(errorId).textContent = message;
+            document.getElementById(errorId).style.display = 'block';
+        }
+        
+        function hideFieldError(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(errorId);
+            
+            field.classList.remove('form-control--error');
+            field.setAttribute('aria-invalid', 'false');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        }
+        
+        // Announcement testing
+        function testAnnouncement(priority) {
+            announcementCount++;
+            const message = `Test announcement ${announcementCount} (${priority} priority)`;
+            
+            window.AccessibilityManager?.announce(message, priority);
+            logAnnouncement(message, priority);
+        }
+        
+        function logAnnouncement(message, priority) {
+            const list = document.getElementById('announcement-list');
+            const item = document.createElement('div');
+            item.className = 'announcement-item';
+            
+            const time = new Date().toLocaleTimeString();
+            item.innerHTML = `
+                <div>${message}</div>
+                <div class="announcement-time">${time} - ${priority}</div>
+            `;
+            
+            list.appendChild(item);
+            list.scrollTop = list.scrollHeight;
+        }
+        
+        function clearAnnouncements() {
+            const list = document.getElementById('announcement-list');
+            list.innerHTML = '<p style="color: var(--color-gray-300); font-style: italic;">Announcements cleared...</p>';
+        }
+        
+        // Theme controls
+        function setTheme(theme) {
+            window.EnhancedDarkModeManager?.applyTheme(theme);
+            updateThemeInfo();
+        }
+        
+        function updateThemeInfo() {
+            if (window.EnhancedDarkModeManager) {
+                const info = window.EnhancedDarkModeManager.getThemeInfo();
+                document.getElementById('current-theme').textContent = info.effectiveTheme;
+                document.getElementById('system-theme').textContent = info.systemPreference;
+            }
+            
+            const highContrast = window.matchMedia('(prefers-contrast: more)').matches;
+            document.getElementById('high-contrast').textContent = highContrast ? 'Yes' : 'No';
+        }
+        
+        // Alert dialog
+        function showAlertDialog() {
+            window.AccessibilityManager?.announce('Critical alert: This is an important message that requires immediate attention!', 'assertive');
+            alert('This is a demo alert dialog. In a real application, this would be a custom accessible dialog.');
+        }
+        
+        // High contrast toggle
+        document.getElementById('contrast-toggle').addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-high-contrast') === 'true';
+            document.documentElement.setAttribute('data-high-contrast', !current);
+            window.AccessibilityManager?.announce(`High contrast mode ${!current ? 'enabled' : 'disabled'}`, 'polite');
+            updateThemeInfo();
+        });
+        
+        // Initialize theme info
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateThemeInfo, 100);
+            
+            // Listen for theme changes
+            window.addEventListener('themechange', updateThemeInfo);
+            
+            // File input demo
+            document.getElementById('demo-file').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    window.AccessibilityManager?.announce(`File selected: ${fileName}`, 'polite');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

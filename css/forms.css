@@ -1,0 +1,407 @@
+/**
+ * Standardized Form Elements
+ * 
+ * Implements form styling from the UI Standardization Guide.
+ * Provides consistent form controls across all modules.
+ */
+
+/* ==================== FORM GROUPS ==================== */
+
+.form-group {
+    margin-bottom: var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.form-group--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-12);
+}
+
+.form-group--compact {
+    margin-bottom: var(--space-12);
+}
+
+/* ==================== FORM LABELS ==================== */
+
+.form-label {
+    font-family: var(--font-family-std-base);
+    font-weight: var(--font-weight-std-medium);
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+    line-height: var(--line-height-form);
+    margin: 0;
+}
+
+.form-label--required::after {
+    content: ' *';
+    color: var(--color-error);
+}
+
+.form-label--optional::after {
+    content: ' (optional)';
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-std-normal);
+}
+
+/* ==================== FORM CONTROLS ==================== */
+
+.form-control {
+    /* Base Structure */
+    display: block;
+    width: 100%;
+    
+    /* Typography */
+    font-family: var(--font-family-std-base);
+    font-size: var(--font-size-std-base);
+    line-height: var(--line-height-form);
+    color: var(--color-text);
+    
+    /* Layout */
+    padding: var(--space-8) var(--space-12);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-base);
+    background: var(--color-surface);
+    
+    /* Interaction */
+    transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+    outline: none;
+}
+
+/* Focus State */
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Disabled State */
+.form-control:disabled {
+    background: var(--color-gray-200);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Placeholder Styling */
+.form-control::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+}
+
+/* Error State */
+.form-control--error {
+    border-color: var(--color-error);
+}
+
+.form-control--error:focus {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(192, 21, 47, 0.2);
+    outline-color: var(--color-error);
+}
+
+/* Success State */
+.form-control--success {
+    border-color: var(--color-success);
+}
+
+.form-control--success:focus {
+    border-color: var(--color-success);
+    box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.2);
+    outline-color: var(--color-success);
+}
+
+/* ==================== FORM CONTROL SIZES ==================== */
+
+.form-control--sm {
+    padding: var(--space-6) var(--space-10);
+    font-size: var(--font-size-small);
+}
+
+.form-control--lg {
+    padding: var(--space-12) var(--space-16);
+    font-size: var(--font-size-h4);
+}
+
+/* ==================== SPECIFIC INPUT TYPES ==================== */
+
+/* Textarea */
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Select */
+select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--space-8) center;
+    background-repeat: no-repeat;
+    background-size: 16px 12px;
+    padding-right: var(--space-32);
+    appearance: none;
+}
+
+/* File Input */
+input[type="file"].form-control {
+    padding: var(--space-6);
+    cursor: pointer;
+}
+
+input[type="file"].form-control::-webkit-file-upload-button {
+    background: var(--color-secondary);
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-sm);
+    padding: var(--space-4) var(--space-8);
+    margin-right: var(--space-8);
+    font-size: var(--font-size-small);
+    cursor: pointer;
+    transition: background-color var(--duration-fast);
+}
+
+input[type="file"].form-control::-webkit-file-upload-button:hover {
+    background: var(--color-secondary-hover);
+}
+
+/* ==================== CHECKBOXES AND RADIOS ==================== */
+
+.form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+.form-check-input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-sm);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    flex-shrink: 0;
+    margin-top: 2px; /* Align with first line of text */
+}
+
+.form-check-input[type="radio"] {
+    border-radius: 50%;
+}
+
+.form-check-input:checked {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.form-check-input:focus {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+}
+
+.form-check-label {
+    font-size: var(--font-size-std-base);
+    color: var(--color-text);
+    cursor: pointer;
+    line-height: var(--line-height-body);
+}
+
+/* ==================== FORM HELPER TEXT ==================== */
+
+.form-hint {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.form-error {
+    color: var(--color-error);
+    font-size: var(--font-size-small);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.form-success {
+    color: var(--color-success);
+    font-size: var(--font-size-small);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+/* ==================== INPUT GROUPS ==================== */
+
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group .form-control {
+    border-radius: 0;
+    border-right-width: 0;
+}
+
+.input-group .form-control:first-child {
+    border-top-left-radius: var(--radius-std-base);
+    border-bottom-left-radius: var(--radius-std-base);
+}
+
+.input-group .form-control:last-child {
+    border-top-right-radius: var(--radius-std-base);
+    border-bottom-right-radius: var(--radius-std-base);
+    border-right-width: 1px;
+}
+
+.input-group-text {
+    display: flex;
+    align-items: center;
+    padding: var(--space-8) var(--space-12);
+    background: var(--color-gray-200);
+    border: 1px solid var(--color-border-std);
+    border-left-width: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+}
+
+.input-group-text:first-child {
+    border-left-width: 1px;
+    border-top-left-radius: var(--radius-std-base);
+    border-bottom-left-radius: var(--radius-std-base);
+}
+
+.input-group-text:last-child {
+    border-top-right-radius: var(--radius-std-base);
+    border-bottom-right-radius: var(--radius-std-base);
+}
+
+/* ==================== FORM LAYOUTS ==================== */
+
+.form-row {
+    display: flex;
+    gap: var(--space-16);
+    margin-bottom: var(--space-16);
+}
+
+.form-col {
+    flex: 1;
+}
+
+.form-col--auto {
+    flex: 0 0 auto;
+}
+
+.form-col--2 {
+    flex: 0 0 calc(50% - var(--space-8));
+}
+
+.form-col--3 {
+    flex: 0 0 calc(33.333% - var(--space-12));
+}
+
+.form-col--4 {
+    flex: 0 0 calc(25% - var(--space-12));
+}
+
+/* ==================== FIELDSETS ==================== */
+
+.fieldset {
+    border: 1px solid var(--color-border-std);
+    border-radius: var(--radius-std-md);
+    padding: var(--space-16);
+    margin-bottom: var(--space-20);
+}
+
+.fieldset-legend {
+    font-weight: var(--font-weight-std-semibold);
+    font-size: var(--font-size-h4);
+    color: var(--color-text);
+    padding: 0 var(--space-8);
+    margin-bottom: var(--space-12);
+}
+
+/* ==================== RESPONSIVE BEHAVIOR ==================== */
+
+@media (max-width: 640px) {
+    .form-row {
+        flex-direction: column;
+        gap: var(--space-12);
+    }
+    
+    .form-col--2,
+    .form-col--3,
+    .form-col--4 {
+        flex: 1;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group .form-control,
+    .input-group-text {
+        border-radius: var(--radius-std-base);
+        border-width: 1px;
+    }
+    
+    .input-group .form-control:not(:last-child) {
+        margin-bottom: var(--space-4);
+    }
+}
+
+/* ==================== ACCESSIBILITY ENHANCEMENTS ==================== */
+
+/* High Contrast Mode */
+@media (prefers-contrast: more) {
+    .form-control:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 3px;
+    }
+    
+    .form-check-input:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 3px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .form-control,
+    .form-check-input,
+    input[type="file"].form-control::-webkit-file-upload-button {
+        transition: none;
+    }
+}
+
+/* ==================== DARK MODE ADJUSTMENTS ==================== */
+
+[data-color-scheme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control:disabled {
+    background: var(--color-charcoal-700);
+}
+
+[data-color-scheme="dark"] .input-group-text,
+[data-theme="dark"] .input-group-text {
+    background: var(--color-charcoal-700);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-color-scheme="dark"] .fieldset,
+[data-theme="dark"] .fieldset {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-color-scheme="dark"] input[type="file"].form-control::-webkit-file-upload-button,
+[data-theme="dark"] input[type="file"].form-control::-webkit-file-upload-button {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-text);
+}
+
+[data-color-scheme="dark"] input[type="file"].form-control::-webkit-file-upload-button:hover,
+[data-theme="dark"] input[type="file"].form-control::-webkit-file-upload-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
