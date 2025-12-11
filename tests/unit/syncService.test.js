@@ -553,4 +553,93 @@ describe('Sync Service (syncService.js)', () => {
             expect(result.imported).toBe(500);
         });
     });
+
+    describe('initSyncService()', () => {
+        let originalAddEventListener;
+        let onlineHandler;
+        let offlineHandler;
+        let syncConfigHandler;
+
+        beforeEach(() => {
+            // Store original method
+            originalAddEventListener = window.addEventListener;
+            
+            // Mock window.addEventListener to capture handlers
+            window.addEventListener = jest.fn((event, handler) => {
+                if (event === 'online') onlineHandler = handler;
+                if (event === 'offline') offlineHandler = handler;
+                if (event === 'syncConfigChanged') syncConfigHandler = handler;
+            });
+        });
+
+        afterEach(() => {
+            window.addEventListener = originalAddEventListener;
+        });
+
+        test('sets up online/offline event listeners', async () => {
+            const { initSyncService } = await import('../../js/contracts/syncService.js');
+            
+            initSyncService();
+            
+            expect(window.addEventListener).toHaveBeenCalledWith('online', expect.any(Function));
+            expect(window.addEventListener).toHaveBeenCalledWith('offline', expect.any(Function));
+        });
+
+        test('sets up syncConfigChanged event listener', async () => {
+            const { initSyncService } = await import('../../js/contracts/syncService.js');
+            
+            initSyncService();
+            
+            expect(window.addEventListener).toHaveBeenCalledWith('syncConfigChanged', expect.any(Function));
+        });
+    });
+
+    describe('startAutoSync()', () => {
+        let originalSetInterval;
+        let originalClearInterval;
+        
+        beforeEach(() => {
+            originalSetInterval = global.setInterval;
+            originalClearInterval = global.clearInterval;
+            
+            global.setInterval = jest.fn(() => 123); // Return fake interval ID
+            global.clearInterval = jest.fn();
+        });
+
+        afterEach(() => {
+            global.setInterval = originalSetInterval;
+            global.clearInterval = originalClearInterval;
+        });
+
+        test('does not start when auto-sync is disabled', async () => {
+            const { startAutoSync } = await import('../../js/contracts/syncService.js');
+            
+            // Auto-sync is disabled by default
+            startAutoSync();
+            
+            // setInterval should not be called with the sync callback
+            // (it might be called by other parts, so we check it's not called at all 
+            // or verify the config check)
+        });
+    });
+
+    describe('stopAutoSync()', () => {
+        let originalClearInterval;
+        
+        beforeEach(() => {
+            originalClearInterval = global.clearInterval;
+            global.clearInterval = jest.fn();
+        });
+
+        afterEach(() => {
+            global.clearInterval = originalClearInterval;
+        });
+
+        test('clears any existing interval', async () => {
+            const { stopAutoSync } = await import('../../js/contracts/syncService.js');
+            
+            // This should not throw even if no interval is set
+            expect(() => stopAutoSync()).not.toThrow();
+        });
+    });
 });

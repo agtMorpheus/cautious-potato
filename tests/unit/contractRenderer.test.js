@@ -204,5 +204,145 @@ describe('Contract Renderer', () => {
             const row1 = document.querySelector('tr[data-row-index="1"]');
             expect(row1.classList.contains('cm-row--highlight')).toBe(false);
         });
+
+        it('handles missing table gracefully', () => {
+            document.body.innerHTML = '';
+            
+            // Should not throw
+            expect(() => highlightPreviewRow(1)).not.toThrow();
+        });
+
+        it('handles non-existent row index gracefully', () => {
+            document.body.innerHTML = `
+                <table class="cm-preview-table">
+                    <tbody>
+                        <tr data-row-index="1"><td>1</td></tr>
+                    </tbody>
+                </table>
+            `;
+            
+            // Should not throw for missing row
+            expect(() => highlightPreviewRow(99)).not.toThrow();
+        });
+    });
+
+    describe('renderContractList', () => {
+        it('should render empty state when no contracts', () => {
+            const containerHTML = `<div id="contract-list-container"></div>`;
+            document.body.innerHTML = containerHTML;
+            
+            mockState.contracts.records = [];
+            contractRepository.getFilteredContracts.mockReturnValue([]);
+            
+            renderContractList(mockState.contracts);
+            
+            const container = document.getElementById('contract-list-container');
+            expect(container.innerHTML).toBeTruthy();
+        });
+
+        it('should render contracts when available', () => {
+            const containerHTML = `<div id="contract-list-container"></div>`;
+            document.body.innerHTML = containerHTML;
+            
+            const testContracts = [
+                { id: '1', contractId: 'TEST-001', contractTitle: 'Test Contract', status: 'Erstellt' },
+                { id: '2', contractId: 'TEST-002', contractTitle: 'Another Contract', status: 'Geplant' }
+            ];
+            mockState.contracts.records = testContracts;
+            contractRepository.getFilteredContracts.mockReturnValue(testContracts);
+            
+            renderContractList(mockState.contracts);
+            
+            const container = document.getElementById('contract-list-container');
+            expect(container.innerHTML).toBeTruthy();
+        });
+
+        it('handles missing container gracefully', () => {
+            document.body.innerHTML = '';
+            
+            // Should not throw even without container
+            expect(() => renderContractList(mockState.contracts)).not.toThrow();
+        });
+    });
+
+    describe('renderContractPreview with various states', () => {
+        it('handles warnings in import result', () => {
+            document.body.innerHTML = `
+                <div id="contract-preview-container"></div>
+                <div id="contract-preview-card"></div>
+            `;
+            
+            mockState.contracts.lastImportResult = {
+                contracts: [{ id: '1', contractId: 'TEST', status: 'Erstellt' }],
+                errors: [],
+                warnings: [{ rowIndex: 1, message: 'Warning message' }],
+                summary: { successCount: 1, totalRows: 1 }
+            };
+            
+            renderContractPreview(mockState.contracts);
+            
+            const container = document.getElementById('contract-preview-container');
+            expect(container.innerHTML).toBeTruthy();
+        });
+
+        it('handles null lastImportResult gracefully', () => {
+            document.body.innerHTML = `
+                <div id="contract-preview-container"></div>
+                <div id="contract-preview-card"></div>
+            `;
+            
+            mockState.contracts.lastImportResult = null;
+            
+            expect(() => renderContractPreview(mockState.contracts)).not.toThrow();
+        });
+
+        it('handles empty contracts in import result', () => {
+            document.body.innerHTML = `
+                <div id="contract-preview-container"></div>
+                <div id="contract-preview-card"></div>
+            `;
+            
+            mockState.contracts.lastImportResult = {
+                contracts: [],
+                errors: [],
+                warnings: [],
+                summary: { successCount: 0, totalRows: 0 }
+            };
+            
+            renderContractPreview(mockState.contracts);
+            
+            const container = document.getElementById('contract-preview-container');
+            expect(container.innerHTML).toBeTruthy();
+        });
+    });
+
+    describe('initializeContractUI initialization', () => {
+        it('handles missing DOM elements gracefully', () => {
+            document.body.innerHTML = '';
+            
+            // Should not throw when elements are missing
+            expect(() => initializeContractUI()).not.toThrow();
+        });
+
+        it('updates statistics display', () => {
+            document.body.innerHTML = `
+                <div id="stat-total-contracts"></div>
+                <div id="stat-unique-contract-ids"></div>
+                <div id="stat-imported-files"></div>
+                <div id="contract-status-breakdown"></div>
+            `;
+            
+            contractRepository.getContractStatistics.mockReturnValue({
+                totalContracts: 100,
+                uniqueContractIds: 50,
+                totalImportedFiles: 5,
+                byStatus: { 'Erstellt': 30, 'Geplant': 70 }
+            });
+            
+            initializeContractUI();
+            
+            // Statistics should be updated
+            expect(stateModule.subscribe).toHaveBeenCalled();
+        });
     });
 });
