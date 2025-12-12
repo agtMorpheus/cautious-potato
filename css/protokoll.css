@@ -681,136 +681,115 @@
    METADATA FORM UNIFIED LAYOUT
    ============================================ */
 
-/* Desktop unified form layout - removes card islands for better form flow */
+/* Desktop 7-column grid layout with inline section titles */
 @media (min-width: 1024px) {
   .protokoll-form.metadata-form {
-    display: block;
-    max-width: 1600px;
+    display: grid;
+    grid-template-columns: 200px repeat(6, 1fr);
+    gap: var(--space-md) var(--space-lg);
+    max-width: 1800px;
     margin: 0 auto;
     counter-reset: section-counter;
+    align-items: start;
   }
 }
 
-/* Ultra-wide 4-column optimization */
-@media (min-width: 1400px) {
+/* Ultra-wide 7-column optimization */
+@media (min-width: 1600px) {
   .protokoll-form.metadata-form {
-    max-width: 1800px;
+    max-width: 2000px;
+    gap: var(--space-lg) var(--space-xl);
   }
 
-  .protokoll-form.metadata-form .form-row {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-md) var(--space-lg);
-  }
-
-  .protokoll-form.metadata-form .checkbox-group {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--space-sm) var(--space-md);
+  .protokoll-form.metadata-form {
+    grid-template-columns: 220px repeat(6, 1fr);
   }
 }
 
-  /* Compact unified form appearance */
+  /* Inline section title styling - spans first column */
   .protokoll-form.metadata-form fieldset {
-    border: none !important;
-    border-radius: 0 !important;
-    padding: var(--space-md) 0 var(--space-sm) 0 !important;
-    margin-bottom: var(--space-md) !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    position: relative;
+    display: contents;
   }
 
-  /* Add subtle section separators */
-  .protokoll-form.metadata-form fieldset:not(:last-of-type)::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      var(--border-light) 20%, 
-      var(--border-light) 80%, 
-      transparent 100%
-    );
-    opacity: 0.5;
-  }
-
-  /* Compact legend styling for unified form */
+  /* Section title in first column */
   .protokoll-form.metadata-form legend {
-    font-size: 1rem !important;
+    grid-column: 1;
+    display: flex !important;
+    align-items: center !important;
+    padding: var(--space-md) var(--space-sm) !important;
+    margin: 0 !important;
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-base) !important;
+    border-radius: var(--radius-md) !important;
+    font-size: 0.9rem !important;
     font-weight: 600 !important;
     color: var(--text-main) !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    margin-bottom: var(--space-md) !important;
-    width: 100% !important;
-    position: relative;
-    display: flex;
-    align-items: center;
     text-transform: none !important;
     letter-spacing: normal !important;
+    min-height: 44px;
+    position: sticky;
+    top: var(--space-md);
+    z-index: 5;
   }
 
-  /* Compact section numbering */
+  /* Compact section numbering for inline layout */
   .protokoll-form.metadata-form legend::before {
     content: counter(section-counter);
     counter-increment: section-counter;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: var(--primary-main);
     color: var(--text-inverse);
-    border-radius: 3px;
-    font-size: 0.75rem;
+    border-radius: 2px;
+    font-size: 0.7rem;
     font-weight: 700;
-    margin-right: var(--space-sm);
+    margin-right: var(--space-xs);
     font-family: 'JetBrains Mono', monospace;
     flex-shrink: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
-  /* Add subtle section title styling */
-  .protokoll-form.metadata-form legend::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      var(--border-light) 0%, 
-      transparent 100%
-    );
-    margin-left: var(--space-md);
-    opacity: 0.3;
-  }
-
-  /* Multi-column form fields within sections - 4-column layout */
-  .protokoll-form.metadata-form .form-row {
+  /* Form content spans remaining 6 columns */
+  .protokoll-form.metadata-form .form-content {
+    grid-column: 2 / -1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: var(--space-sm) var(--space-md);
-    margin-bottom: var(--space-md);
+    align-items: start;
+    padding: var(--space-sm) 0;
   }
 
-  /* Specific column layouts for different field types */
-  .protokoll-form.metadata-form .form-row.four-col {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
+  /* Form fields within the 6-column content area */
+  .protokoll-form.metadata-form .form-row {
+    display: contents;
   }
 
-  .protokoll-form.metadata-form .form-row.three-col {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-md) var(--space-lg);
+  /* Individual form groups span appropriate columns */
+  .protokoll-form.metadata-form .form-group {
+    margin-bottom: var(--space-sm);
   }
 
-  .protokoll-form.metadata-form .form-row.two-col {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-lg) var(--space-xl);
+  /* Specific column spans for different field layouts */
+  .protokoll-form.metadata-form .form-row.six-col .form-group {
+    grid-column: span 1;
+  }
+
+  .protokoll-form.metadata-form .form-row.four-col .form-group {
+    grid-column: span 1;
+  }
+
+  .protokoll-form.metadata-form .form-row.three-col .form-group {
+    grid-column: span 2;
+  }
+
+  .protokoll-form.metadata-form .form-row.two-col .form-group {
+    grid-column: span 3;
+  }
+
+  .protokoll-form.metadata-form .form-row.single-col .form-group {
+    grid-column: span 6;
   }
 
   /* Compact form group spacing */
@@ -818,41 +797,55 @@
     margin-bottom: var(--space-md);
   }
 
-  /* Checkbox groups in horizontal layout - 4-column support */
+  /* Checkbox groups span all 6 content columns */
   .protokoll-form.metadata-form .checkbox-group {
+    grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: var(--space-xs) var(--space-sm);
     margin: var(--space-sm) 0;
   }
 
-  /* Specific checkbox layouts */
-  .protokoll-form.metadata-form .checkbox-group.four-col {
-    grid-template-columns: repeat(4, 1fr);
+  /* Specific checkbox layouts within 6-column area */
+  .protokoll-form.metadata-form .checkbox-group.six-col .checkbox-group-item {
+    grid-column: span 1;
   }
 
-  .protokoll-form.metadata-form .checkbox-group.three-col {
-    grid-template-columns: repeat(3, 1fr);
+  .protokoll-form.metadata-form .checkbox-group.four-col .checkbox-group-item {
+    grid-column: span 1;
+  }
+
+  .protokoll-form.metadata-form .checkbox-group.three-col .checkbox-group-item {
+    grid-column: span 2;
   }
 }
 
-/* Large tablet adjustments - 3-column fallback */
-@media (min-width: 1024px) and (max-width: 1399px) {
-  .protokoll-form.metadata-form .form-row {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--space-md) var(--space-lg);
+/* Medium desktop adjustments - 5-column content area */
+@media (min-width: 1024px) and (max-width: 1599px) {
+  .protokoll-form.metadata-form {
+    grid-template-columns: 180px repeat(5, 1fr);
+    gap: var(--space-md);
   }
 
-  .protokoll-form.metadata-form .form-row.four-col {
-    grid-template-columns: repeat(3, 1fr);
+  .protokoll-form.metadata-form .form-content {
+    grid-template-columns: repeat(5, 1fr);
   }
 
   .protokoll-form.metadata-form .checkbox-group {
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
   }
 
-  .protokoll-form.metadata-form .checkbox-group.four-col {
-    grid-template-columns: repeat(3, 1fr);
+  .protokoll-form.metadata-form .form-row.six-col .form-group,
+  .protokoll-form.metadata-form .form-row.four-col .form-group {
+    grid-column: span 1;
+  }
+
+  .protokoll-form.metadata-form .form-row.three-col .form-group {
+    grid-column: span 2;
+  }
+
+  .protokoll-form.metadata-form .form-row.two-col .form-group {
+    grid-column: span 2;
   }
 }
 

@@ -177,95 +177,113 @@ export function renderMetadataForm() {
 
       <fieldset>
         <legend>Prüfprotokoll VDE 0100</legend>
-        <div class="form-row four-col">
-          ${renderTextField('metadata.protokollNumber', 'Prüfprotokoll Nr.', metadata.protokollNumber, {
+        <div class="form-content">
+          <div class="form-row four-col">
+            ${renderTextField('metadata.protokollNumber', 'Prüfprotokoll Nr.', metadata.protokollNumber, {
     required: true,
     placeholder: 'z.B. EDM221020251123'
   })}
-          ${renderDateField('metadata.datum', 'Datum', metadata.datum, { required: true })}
-          ${renderTextField('metadata.blatt', 'Blatt', metadata.blatt, { placeholder: '1' })}
-          ${renderTextField('metadata.blattVon', 'von', metadata.blattVon, { placeholder: '3' })}
+            ${renderDateField('metadata.datum', 'Datum', metadata.datum, { required: true })}
+            ${renderTextField('metadata.blatt', 'Blatt', metadata.blatt, { placeholder: '1' })}
+            ${renderTextField('metadata.blattVon', 'von', metadata.blattVon, { placeholder: '3' })}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Auftraggeber</legend>
-        <div class="form-row three-col">
-          ${renderTextField('metadata.auftraggeber', 'Auftraggeber', metadata.auftraggeber, { required: true })}
-          ${renderTextField('metadata.auftragnummer', 'Auftrag Nr.', metadata.auftragnummer)}
-          ${renderTextField('metadata.kundennummer', 'Kunden Nr.', metadata.kundennummer)}
+        <div class="form-content">
+          <div class="form-row three-col">
+            ${renderTextField('metadata.auftraggeber', 'Auftraggeber', metadata.auftraggeber, { required: true })}
+            ${renderTextField('metadata.auftragnummer', 'Auftrag Nr.', metadata.auftragnummer)}
+            ${renderTextField('metadata.kundennummer', 'Kunden Nr.', metadata.kundennummer)}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Auftragnehmer</legend>
-        <div class="form-row">
-          ${renderTextField('metadata.auftragnehmer', 'Firma', metadata.auftragnehmer)}
-          ${renderTextField('metadata.auftragnehmerOrt', 'Ort', metadata.auftragnehmerOrt)}
+        <div class="form-content">
+          <div class="form-row two-col">
+            ${renderTextField('metadata.auftragnehmer', 'Firma', metadata.auftragnehmer)}
+            ${renderTextField('metadata.auftragnehmerOrt', 'Ort', metadata.auftragnehmerOrt)}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Kunde / Prüfobjekt</legend>
-        <div class="form-row four-col">
-          ${renderTextField('metadata.kunde', 'Kunde', metadata.kunde, { placeholder: 'z.B. Volkswagen AG, Werk Wolfsburg' })}
-          ${renderTextField('metadata.kundeOrt', 'Kunde Ort', metadata.kundeOrt, { placeholder: 'z.B. Berliner Ring 2, 38436 Wolfsburg' })}
-          ${renderTextField('metadata.firma', 'Firma', metadata.firma, { placeholder: 'z.B. EAW Wolfsburg' })}
-          ${renderTextField('metadata.firmaOrt', 'Firma Ort', metadata.firmaOrt, { placeholder: 'z.B. Dieselstraße 27, 38446 Wolfsburg' })}
+        <div class="form-content">
+          <div class="form-row four-col">
+            ${renderTextField('metadata.kunde', 'Kunde', metadata.kunde, { placeholder: 'z.B. Volkswagen AG, Werk Wolfsburg' })}
+            ${renderTextField('metadata.kundeOrt', 'Kunde Ort', metadata.kundeOrt, { placeholder: 'z.B. Berliner Ring 2, 38436 Wolfsburg' })}
+            ${renderTextField('metadata.firma', 'Firma', metadata.firma, { placeholder: 'z.B. EAW Wolfsburg' })}
+            ${renderTextField('metadata.firmaOrt', 'Firma Ort', metadata.firmaOrt, { placeholder: 'z.B. Dieselstraße 27, 38446 Wolfsburg' })}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Anlage</legend>
-        <div class="form-row three-col">
-          ${renderTextField('metadata.facility.anlage', 'Anlage', metadata.facility?.anlage || '', { placeholder: 'z.B. LVUM-Fc34' })}
-          ${renderTextField('metadata.facility.ort', 'Ort', metadata.facility?.ort || '', { placeholder: 'z.B. Halle 3' })}
-          ${renderTextField('metadata.facility.inv', 'INV (Inventar-Nr.)', metadata.facility?.inv || '', { placeholder: 'z.B. E03150AP17000093243' })}
+        <div class="form-content">
+          <div class="form-row three-col">
+            ${renderTextField('metadata.facility.anlage', 'Anlage', metadata.facility?.anlage || '', { placeholder: 'z.B. LVUM-Fc34' })}
+            ${renderTextField('metadata.facility.ort', 'Ort', metadata.facility?.ort || '', { placeholder: 'z.B. Halle 3' })}
+            ${renderTextField('metadata.facility.inv', 'INV (Inventar-Nr.)', metadata.facility?.inv || '', { placeholder: 'z.B. E03150AP17000093243' })}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Prüfen nach</legend>
-        <div class="checkbox-group four-col">
-          ${renderCheckboxField('metadata.prüfenNach.dinVde0100Gruppe700', metadata.prüfenNach?.dinVde0100Gruppe700, 'DIN VDE 0100 Gruppe 700')}
-          ${renderCheckboxField('metadata.prüfenNach.dinVde01000600', metadata.prüfenNach?.dinVde01000600, 'DIN VDE 0100-0600')}
-          ${renderCheckboxField('metadata.prüfenNach.dinVde01050100', metadata.prüfenNach?.dinVde01050100, 'DIN VDE 0105-0100')}
-          ${renderCheckboxField('metadata.dguvV3', metadata.dguvV3, 'DGUV V3')}
+        <div class="form-content">
+          <div class="checkbox-group four-col">
+            ${renderCheckboxField('metadata.prüfenNach.dinVde0100Gruppe700', metadata.prüfenNach?.dinVde0100Gruppe700, 'DIN VDE 0100 Gruppe 700')}
+            ${renderCheckboxField('metadata.prüfenNach.dinVde01000600', metadata.prüfenNach?.dinVde01000600, 'DIN VDE 0100-0600')}
+            ${renderCheckboxField('metadata.prüfenNach.dinVde01050100', metadata.prüfenNach?.dinVde01050100, 'DIN VDE 0105-0100')}
+            ${renderCheckboxField('metadata.dguvV3', metadata.dguvV3, 'DGUV V3')}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Prüfungsart</legend>
-        <div class="checkbox-group four-col">
-          ${renderCheckboxField('metadata.neuanlage', metadata.neuanlage, 'Neuanlage')}
-          ${renderCheckboxField('metadata.erweiterung', metadata.erweiterung, 'Erweiterung')}
-          ${renderCheckboxField('metadata.änderung', metadata.änderung, 'Änderung')}
-          ${renderCheckboxField('metadata.instandsetzung', metadata.instandsetzung, 'Instandsetzung')}
-          ${renderCheckboxField('metadata.wiederholungsprüfung', metadata.wiederholungsprüfung, 'Wiederholungsprüfung')}
+        <div class="form-content">
+          <div class="checkbox-group six-col">
+            ${renderCheckboxField('metadata.neuanlage', metadata.neuanlage, 'Neuanlage')}
+            ${renderCheckboxField('metadata.erweiterung', metadata.erweiterung, 'Erweiterung')}
+            ${renderCheckboxField('metadata.änderung', metadata.änderung, 'Änderung')}
+            ${renderCheckboxField('metadata.instandsetzung', metadata.instandsetzung, 'Instandsetzung')}
+            ${renderCheckboxField('metadata.wiederholungsprüfung', metadata.wiederholungsprüfung, 'Wiederholungsprüfung')}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Netz</legend>
-        <div class="form-row three-col">
-          ${renderSelectField('metadata.facility.netzspannung', 'Netzspannung',
+        <div class="form-content">
+          <div class="form-row three-col">
+            ${renderSelectField('metadata.facility.netzspannung', 'Netzspannung',
     ['230 / 400 V', '400 / 230 V', '230V', '400V'],
     metadata.facility?.netzspannung || '230 / 400 V'
   )}
-          ${renderSelectField('metadata.facility.netzform', 'Netzform',
+            ${renderSelectField('metadata.facility.netzform', 'Netzform',
     ['TN-C', 'TN-S', 'TN-C-S', 'TT', 'IT'],
     metadata.facility?.netzform || 'TN-S'
   )}
-          ${renderTextField('metadata.facility.netzbetreiber', 'Netzbetreiber', metadata.facility?.netzbetreiber || '')}
+            ${renderTextField('metadata.facility.netzbetreiber', 'Netzbetreiber', metadata.facility?.netzbetreiber || '')}
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Verantwortlicher Prüfer</legend>
-        <div class="form-row">
-          ${renderTextField('metadata.prüfer.name', 'Name', metadata.prüfer?.name || '', { required: true })}
-          ${renderTextField('metadata.prüfer.titel', 'Titel', metadata.prüfer?.titel || '')}
-          ${renderTextField('metadata.prüfer.ort', 'Ort', metadata.prüfer?.ort || '')}
+        <div class="form-content">
+          <div class="form-row three-col">
+            ${renderTextField('metadata.prüfer.name', 'Name', metadata.prüfer?.name || '', { required: true })}
+            ${renderTextField('metadata.prüfer.titel', 'Titel', metadata.prüfer?.titel || '')}
+            ${renderTextField('metadata.prüfer.ort', 'Ort', metadata.prüfer?.ort || '')}
+          </div>
         </div>
       </fieldset>
 
