@@ -520,24 +520,24 @@
 
 [data-color-scheme="dark"] .loading-spinner,
 [data-theme="dark"] .loading-spinner {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-base);
     border-top-color: var(--color-primary);
 }
 
 [data-color-scheme="dark"] .activity-indicator,
 [data-theme="dark"] .activity-indicator {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-hover);
 }
 
 [data-color-scheme="dark"] .status-group,
 [data-theme="dark"] .status-group {
     background: var(--color-surface);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-base);
 }
 
 [data-color-scheme="dark"] .status-group__item,
 [data-theme="dark"] .status-group__item {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--border-base);
 }
 
 /* ==================== LEGACY COMPATIBILITY ==================== */

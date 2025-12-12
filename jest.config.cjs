@@ -110,5 +110,5 @@ module.exports = {
   },
   
   // Test results processor
-  testResultsProcessor: '<rootDir>/tests/results-processor.js'
+  testResultsProcessor: '<rootDir>/tests/results-processor.cjs'
 };

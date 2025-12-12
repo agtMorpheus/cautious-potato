@@ -325,7 +325,7 @@ describe('Protokoll Handlers', () => {
         stromkreisNr: 'F1',
         zielbezeichnung: 'Circuit 1',
         spannung: { un: 230, fn: 50 },
-        messwerte: { riso: 100 }
+        messwerte: { risoOhne: 100 }
       });
       
       const result = handlers.handleNextStep();
@@ -396,7 +396,7 @@ describe('Protokoll Handlers', () => {
         stromkreisNr: 'F1',
         zielbezeichnung: 'Circuit 1',
         spannung: { un: 230, fn: 50 },
-        messwerte: { riso: 100 }
+        messwerte: { risoOhne: 100 }
       });
 
       state.setPrüfungsergebnis({
@@ -425,7 +425,7 @@ describe('Protokoll Handlers', () => {
         stromkreisNr: 'F1',
         zielbezeichnung: 'Circuit 1',
         spannung: { un: 230, fn: 50 },
-        messwerte: { riso: 100 }
+        messwerte: { risoOhne: 100 }
       });
 
       state.setPrüfungsergebnis({
@@ -724,7 +724,7 @@ describe('Protokoll Handlers', () => {
         stromkreisNr: 'F1',
         zielbezeichnung: 'Circuit 1',
         spannung: { un: 230, fn: 50 },
-        messwerte: { riso: 100 }
+        messwerte: { risoOhne: 100 }
       });
 
       state.setPrüfungsergebnis({

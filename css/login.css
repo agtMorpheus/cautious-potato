@@ -176,7 +176,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-base);
     padding-top: var(--space-24);
 }
 

@@ -99,11 +99,11 @@ const VALIDATION_RULES = {
     message: 'Frequency must be 50 or 60 Hz'
   },
 
-  'position.messwerte.riso': {
+  'position.messwerte.risoOhne': {
     required: true,
     type: 'number',
     min: 0,
-    message: 'Insulation resistance must be >= 0'
+    message: 'Insulation resistance (no load) must be >= 0'
   },
 
   // Results validation
@@ -244,7 +244,7 @@ export function validatePosition(position) {
     'zielbezeichnung',
     'spannung.un',
     'spannung.fn',
-    'messwerte.riso'
+    'messwerte.risoOhne'
   ];
 
   for (const field of requiredFields) {

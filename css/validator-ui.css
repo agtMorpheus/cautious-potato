@@ -133,7 +133,7 @@
 }
 
 .circuits-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-hover);
 }
 
 .circuits-table tbody tr.circuit-row--valid {

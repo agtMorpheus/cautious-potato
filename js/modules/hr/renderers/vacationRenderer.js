@@ -43,33 +43,33 @@ import {
 export function renderVacationCalendar(container, year, month, employeeMap = new Map()) {
   const calendarData = getVacationCalendarData(year, month);
   const monthName = new Date(year, month - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  
+
   // Helper to get employee name from map
   const getEmployeeName = (empId) => {
     const emp = employeeMap.get(empId);
     return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
   };
-  
+
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
   const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
   const daysInMonth = lastDay.getDate();
-  
+
   // Build calendar grid
   let calendarCells = '';
-  
+
   // Empty cells for days before the 1st
   for (let i = 0; i < startDayOfWeek; i++) {
     calendarCells += '<div class="hr-vacation-cell hr-vacation-empty"></div>';
   }
-  
+
   // Day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayVacations = calendarData.vacationsByDate[dateStr] || [];
     const hasVacations = dayVacations.length > 0;
     const isWeekend = new Date(year, month - 1, day).getDay() % 6 === 0;
-    
+
     calendarCells += `
       <div class="hr-vacation-cell ${hasVacations ? 'hr-vacation-has-data' : ''} ${isWeekend ? 'hr-vacation-weekend' : ''}"
            data-date="${dateStr}">
@@ -85,17 +85,17 @@ export function renderVacationCalendar(container, year, month, employeeMap = new
       </div>
     `;
   }
-  
+
   const html = `
     <div class="hr-vacation-calendar">
       <div class="hr-vacation-calendar-header">
-        <button type="button" class="hr-btn-icon" data-action="prev-month">
+        <button type="button" class="btn btn--icon btn--ghost" data-action="prev-month">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <h3>${monthName}</h3>
-        <button type="button" class="hr-btn-icon" data-action="next-month">
+        <button type="button" class="btn btn--icon btn--ghost" data-action="next-month">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -118,7 +118,7 @@ export function renderVacationCalendar(container, year, month, employeeMap = new
       </div>
       
       <div class="hr-vacation-calendar-footer">
-        <button type="button" class="hr-btn hr-btn-primary" data-action="new-request">
+        <button type="button" class="btn btn--primary" data-action="new-request">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -127,7 +127,7 @@ export function renderVacationCalendar(container, year, month, employeeMap = new
       </div>
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -144,7 +144,7 @@ export function renderVacationCalendar(container, year, month, employeeMap = new
 export function renderVacationForm(container, request = null, employees = []) {
   const isEdit = !!request;
   const today = new Date().toISOString().split('T')[0];
-  
+
   const html = `
     <form id="hr-vacation-form" class="hr-form">
       <div class="hr-form-row">
@@ -208,30 +208,30 @@ export function renderVacationForm(container, request = null, employees = []) {
       </div>
       
       <div class="hr-form-actions">
-        <button type="button" class="hr-btn hr-btn-secondary" data-action="cancel">
+        <button type="button" class="btn btn--secondary" data-action="cancel">
           Abbrechen
         </button>
-        <button type="submit" class="hr-btn hr-btn-primary">
+        <button type="submit" class="btn btn--primary">
           ${isEdit ? 'Speichern' : 'Antrag einreichen'}
         </button>
       </div>
     </form>
   `;
-  
+
   container.innerHTML = html;
-  
+
   // Set up date change listeners to calculate days
   const startInput = container.querySelector('#vac-start');
   const endInput = container.querySelector('#vac-end');
   const daysDisplay = container.querySelector('#vac-days-count');
-  
+
   const updateDays = () => {
     if (startInput.value && endInput.value) {
       const days = calculateWorkingDays(startInput.value, endInput.value);
       daysDisplay.textContent = days;
     }
   };
-  
+
   startInput?.addEventListener('change', updateDays);
   endInput?.addEventListener('change', updateDays);
 }
@@ -247,13 +247,13 @@ export function renderVacationForm(container, request = null, employees = []) {
  */
 export function renderPendingVacationApprovals(container, employeeMap = new Map()) {
   const pending = getPendingVacationRequests().map(formatVacationForDisplay);
-  
+
   // Helper to get employee name from map
   const getEmployeeName = (empId) => {
     const emp = employeeMap.get(empId);
     return emp ? `${emp.lastName}, ${emp.firstName}` : empId;
   };
-  
+
   const html = `
     <div class="hr-vacation-approvals">
       <h3>Ausstehende Urlaubsanträge (${pending.length})</h3>
@@ -278,10 +278,10 @@ export function renderPendingVacationApprovals(container, employeeMap = new Map(
               </div>
               ${request.reason ? `<div class="hr-approval-reason">${escapeHtml(request.reason)}</div>` : ''}
               <div class="hr-approval-actions">
-                <button type="button" class="hr-btn hr-btn-sm hr-btn-success" data-action="approve" data-id="${request.id}">
+                <button type="button" class="btn btn--sm btn--success" data-action="approve" data-id="${request.id}">
                   Genehmigen
                 </button>
-                <button type="button" class="hr-btn hr-btn-sm hr-btn-danger" data-action="reject" data-id="${request.id}">
+                <button type="button" class="btn btn--sm btn--danger" data-action="reject" data-id="${request.id}">
                   Ablehnen
                 </button>
               </div>
@@ -295,7 +295,7 @@ export function renderPendingVacationApprovals(container, employeeMap = new Map(
       `}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -312,7 +312,7 @@ export function renderPendingVacationApprovals(container, employeeMap = new Map(
 export function renderVacationBalance(container, employeeId, year = new Date().getFullYear()) {
   const balance = calculateVacationBalance(employeeId, year);
   const upcoming = getUpcomingVacation(employeeId, 90);
-  
+
   const html = `
     <div class="hr-vacation-balance">
       <h3>Urlaubskonto ${year}</h3>
@@ -356,7 +356,7 @@ export function renderVacationBalance(container, employeeId, year = new Date().g
       ` : ''}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -373,7 +373,7 @@ export function renderVacationBalance(container, employeeId, year = new Date().g
  */
 export function renderTeamCoverage(container, employeeIds, startDate, endDate) {
   const coverage = getTeamCoverageView(employeeIds, startDate, endDate);
-  
+
   const html = `
     <div class="hr-team-coverage">
       <h3>Team-Abdeckung</h3>
@@ -381,16 +381,16 @@ export function renderTeamCoverage(container, employeeIds, startDate, endDate) {
       
       <div class="hr-coverage-grid">
         ${Object.entries(coverage.dailyCoverage).map(([date, data]) => {
-          const coverageClass = data.coveragePercent >= 80 ? 'hr-coverage-good' : 
-                               data.coveragePercent >= 50 ? 'hr-coverage-warning' : 'hr-coverage-critical';
-          
-          return `
+    const coverageClass = data.coveragePercent >= 80 ? 'hr-coverage-good' :
+      data.coveragePercent >= 50 ? 'hr-coverage-warning' : 'hr-coverage-critical';
+
+    return `
             <div class="hr-coverage-day ${coverageClass}" data-date="${date}" title="${Math.round(data.coveragePercent)}% Abdeckung">
               <span class="hr-coverage-date">${new Date(date).getDate()}</span>
               <span class="hr-coverage-count">${data.presentCount}/${coverage.teamSize}</span>
             </div>
           `;
-        }).join('')}
+  }).join('')}
       </div>
       
       <div class="hr-coverage-legend">
@@ -400,7 +400,7 @@ export function renderTeamCoverage(container, employeeIds, startDate, endDate) {
       </div>
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -415,10 +415,10 @@ export function renderTeamCoverage(container, employeeIds, startDate, endDate) {
  */
 export function renderVacationList(container, employeeId) {
   const vacations = getVacationByEmployee(employeeId).map(formatVacationForDisplay);
-  
+
   // Sort by start date descending
   vacations.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-  
+
   const html = `
     <div class="hr-vacation-list">
       <h3>Urlaubsanträge</h3>
@@ -459,7 +459,7 @@ export function renderVacationList(container, employeeId) {
       `}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -493,11 +493,11 @@ export function bindVacationEvents(container, handlers) {
   container.addEventListener('click', (e) => {
     const button = e.target.closest('[data-action]');
     const cell = e.target.closest('[data-date]');
-    
+
     if (button) {
       const action = button.dataset.action;
       const id = button.dataset.id;
-      
+
       switch (action) {
         case 'prev-month':
           handlers.onPrevMonth?.();

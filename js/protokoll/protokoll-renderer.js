@@ -478,17 +478,39 @@ export function renderPositionsForm() {
           <table class="positions-table" role="grid" aria-label="Stromkreis-Tabelle">
             <thead>
               <tr>
-                <th scope="col">Pos.Nr.</th>
-                <th scope="col">Zielbezeichnung</th>
-                <th scope="col">Phase</th>
-                <th scope="col">Leitung/Kabel</th>
+                <th scope="col" rowspan="2">Pos.Nr.</th>
+                <th scope="col" rowspan="2">Nr.</th>
+                <th scope="col" rowspan="2">Zielbezeichnung</th>
+                <th scope="col" colspan="4">Kabel/Leitung</th>
+                <th scope="col" colspan="2">Spannung/Frequenz</th>
+                <th scope="col" colspan="2">Überstrom-Schutz</th>
+                <th scope="col" colspan="3">Impedanzen</th>
+                <th scope="col" colspan="2">Isolationswiderstand</th>
+                <th scope="col" colspan="7">Fehlerstrom-Schutzeinrichtung</th>
+                <th scope="col" rowspan="2">Status</th>
+                <th scope="col" rowspan="2">Aktionen</th>
+              </tr>
+              <tr>
+                <th scope="col">Kabel Typ</th>
+                <th scope="col">Leiter Anzahl</th>
+                <th scope="col">Querschnitt</th>
+                <th scope="col">RPE (max. 1Ω)</th>
                 <th scope="col">Un (V)</th>
                 <th scope="col">fn (Hz)</th>
-                <th scope="col">Überstrom-Schutz</th>
+                <th scope="col">Art Charakteristik</th>
                 <th scope="col">In (A)</th>
-                <th scope="col">Riso (MΩ)</th>
-                <th scope="col">Status</th>
-                <th scope="col">Aktionen</th>
+                <th scope="col">Ik (kA) L-PE</th>
+                <th scope="col">ZS(Ω) L-PE</th>
+                <th scope="col">ZN(Ω) L-N</th>
+                <th scope="col">ohne Verbraucher (MΩ)</th>
+                <th scope="col">mit Verbraucher (MΩ)</th>
+                <th scope="col">GEWISS RCD</th>
+                <th scope="col">In (A)</th>
+                <th scope="col">I∆n (mA)</th>
+                <th scope="col">Imess (mA)</th>
+                <th scope="col">tA (ms)</th>
+                <th scope="col">UL≤50V (V)</th>
+                <th scope="col">Diff. Strom (mA)</th>
               </tr>
             </thead>
             <tbody id="positionsTableBody">
@@ -697,7 +719,8 @@ export function renderReviewForm() {
   `;
 
   container.innerHTML = html;
-  attachExportListeners();
+  // Export listeners are handled by main.js
+  attachFieldListeners();
 }
 
 // ============================================
@@ -938,11 +961,11 @@ function getPhaseTypeLabel(phaseType) {
  */
 function renderPositionRow(position, index) {
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
-  const phaseLabel = getPhaseTypeLabel(position.phaseType);
   const hasParent = position.parentCircuitId ? true : false;
   
   return `
     <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
+      <!-- Pos.Nr. -->
       <td class="editable-cell" data-field="stromkreisNr">
         <input type="text" 
                value="${escapeHtml(position.stromkreisNr || '')}" 
@@ -952,6 +975,18 @@ function renderPositionRow(position, index) {
                pattern="\\d{2}\\.\\d{2}\\.\\d{4}"
                class="table-input pos-nr-input">
       </td>
+      
+      <!-- Nr. -->
+      <td class="editable-cell" data-field="nr">
+        <input type="text" 
+               value="${escapeHtml(position.nr || '')}" 
+               data-field="position.nr"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="1"
+               class="table-input">
+      </td>
+      
+      <!-- Zielbezeichnung -->
       <td class="editable-cell" data-field="zielbezeichnung">
         <input type="text" 
                value="${escapeHtml(position.zielbezeichnung || '')}" 
@@ -960,23 +995,53 @@ function renderPositionRow(position, index) {
                placeholder="Bezeichnung eingeben"
                class="table-input">
       </td>
-      <td class="editable-cell" data-field="phaseType">
-        <select data-field="position.phaseType" 
-                data-pos-nr="${escapeHtml(position.posNr)}"
-                class="table-select">
-          <option value="mono" ${position.phaseType === 'mono' ? 'selected' : ''}>1-phasig</option>
-          <option value="bi" ${position.phaseType === 'bi' ? 'selected' : ''}>2-phasig</option>
-          <option value="tri" ${position.phaseType === 'tri' ? 'selected' : ''}>3-phasig</option>
-        </select>
-      </td>
-      <td class="editable-cell" data-field="leitung.typ">
+      
+      <!-- Kabel Typ -->
+      <td class="editable-cell" data-field="kabel.typ">
         <input type="text" 
-               value="${escapeHtml(position.leitung?.typ || '')}" 
-               data-field="position.leitung.typ"
+               value="${escapeHtml(position.kabel?.typ || '')}" 
+               data-field="position.kabel.typ"
                data-pos-nr="${escapeHtml(position.posNr)}"
-               placeholder="NYM-J 3x1,5"
+               placeholder="NYM-J"
                class="table-input">
       </td>
+      
+      <!-- Leiter Anzahl -->
+      <td class="editable-cell" data-field="kabel.leiterAnzahl">
+        <input type="number" 
+               value="${position.kabel?.leiterAnzahl || ''}" 
+               data-field="position.kabel.leiterAnzahl"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="3"
+               min="1"
+               max="10"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Leiter Querschnitt -->
+      <td class="editable-cell" data-field="kabel.querschnitt">
+        <input type="text" 
+               value="${escapeHtml(position.kabel?.querschnitt || '')}" 
+               data-field="position.kabel.querschnitt"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="1,5 mm²"
+               class="table-input">
+      </td>
+      
+      <!-- RPE (max. 1Ω) -->
+      <td class="editable-cell" data-field="messwerte.rpe">
+        <input type="number" 
+               value="${position.messwerte?.rpe || ''}" 
+               data-field="position.messwerte.rpe"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="0.5"
+               min="0"
+               max="1"
+               step="0.01"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Un (V) -->
       <td class="editable-cell" data-field="spannung.un">
         <input type="number" 
                value="${position.spannung?.un || ''}" 
@@ -987,6 +1052,8 @@ function renderPositionRow(position, index) {
                max="1000"
                class="table-input number-input">
       </td>
+      
+      <!-- fn (Hz) -->
       <td class="editable-cell" data-field="spannung.fn">
         <input type="number" 
                value="${position.spannung?.fn || ''}" 
@@ -997,6 +1064,8 @@ function renderPositionRow(position, index) {
                max="100"
                class="table-input number-input">
       </td>
+      
+      <!-- Art Charakteristik -->
       <td class="editable-cell" data-field="überstromschutz.art">
         <select data-field="position.überstromschutz.art" 
                 data-pos-nr="${escapeHtml(position.posNr)}"
@@ -1008,6 +1077,8 @@ function renderPositionRow(position, index) {
           <option value="K" ${position.überstromschutz?.art === 'K' ? 'selected' : ''}>K</option>
         </select>
       </td>
+      
+      <!-- In (A) -->
       <td class="editable-cell" data-field="überstromschutz.inNennstrom">
         <input type="number" 
                value="${position.überstromschutz?.inNennstrom || ''}" 
@@ -1018,16 +1089,150 @@ function renderPositionRow(position, index) {
                max="1000"
                class="table-input number-input">
       </td>
-      <td class="editable-cell" data-field="messwerte.riso">
+      
+      <!-- Ik (kA) L-PE -->
+      <td class="editable-cell" data-field="messwerte.ikLPE">
         <input type="number" 
-               value="${position.messwerte?.riso || ''}" 
-               data-field="position.messwerte.riso"
+               value="${position.messwerte?.ikLPE || ''}" 
+               data-field="position.messwerte.ikLPE"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="1.2"
+               min="0"
+               step="0.1"
+               class="table-input number-input">
+      </td>
+      
+      <!-- ZS(Ω) L-PE -->
+      <td class="editable-cell" data-field="messwerte.zsLPE">
+        <input type="number" 
+               value="${position.messwerte?.zsLPE || ''}" 
+               data-field="position.messwerte.zsLPE"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="0.8"
+               min="0"
+               step="0.01"
+               class="table-input number-input">
+      </td>
+      
+      <!-- ZN(Ω) L-N -->
+      <td class="editable-cell" data-field="messwerte.znLN">
+        <input type="number" 
+               value="${position.messwerte?.znLN || ''}" 
+               data-field="position.messwerte.znLN"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="0.5"
+               min="0"
+               step="0.01"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Riso ohne Verbraucher (MΩ) -->
+      <td class="editable-cell" data-field="messwerte.risoOhne">
+        <input type="number" 
+               value="${position.messwerte?.risoOhne || ''}" 
+               data-field="position.messwerte.risoOhne"
                data-pos-nr="${escapeHtml(position.posNr)}"
                placeholder="500"
                min="0"
                step="0.1"
                class="table-input number-input">
       </td>
+      
+      <!-- Riso mit Verbraucher (MΩ) -->
+      <td class="editable-cell" data-field="messwerte.risoMit">
+        <input type="number" 
+               value="${position.messwerte?.risoMit || ''}" 
+               data-field="position.messwerte.risoMit"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="300"
+               min="0"
+               step="0.1"
+               class="table-input number-input">
+      </td>
+      
+      <!-- GEWISS RCD -->
+      <td class="editable-cell" data-field="rcd.gewiss">
+        <input type="text" 
+               value="${escapeHtml(position.rcd?.gewiss || '')}" 
+               data-field="position.rcd.gewiss"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="GEWISS"
+               class="table-input">
+      </td>
+      
+      <!-- RCD In (A) -->
+      <td class="editable-cell" data-field="rcd.inNennstrom">
+        <input type="number" 
+               value="${position.rcd?.inNennstrom || ''}" 
+               data-field="position.rcd.inNennstrom"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="25"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      
+      <!-- I∆n (mA) -->
+      <td class="editable-cell" data-field="rcd.iDeltaN">
+        <input type="number" 
+               value="${position.rcd?.iDeltaN || ''}" 
+               data-field="position.rcd.iDeltaN"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="30"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Imess (mA) -->
+      <td class="editable-cell" data-field="rcd.iMess">
+        <input type="number" 
+               value="${position.rcd?.iMess || ''}" 
+               data-field="position.rcd.iMess"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="15"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Auslösezeit tA (ms) -->
+      <td class="editable-cell" data-field="rcd.ausloesezeit">
+        <input type="number" 
+               value="${position.rcd?.ausloesezeit || ''}" 
+               data-field="position.rcd.ausloesezeit"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="25"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      
+      <!-- UL≤50V Umess (V) -->
+      <td class="editable-cell" data-field="rcd.uMess">
+        <input type="number" 
+               value="${position.rcd?.uMess || ''}" 
+               data-field="position.rcd.uMess"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="25"
+               min="0"
+               max="50"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Diff. Strom (mA) -->
+      <td class="editable-cell" data-field="rcd.diffStrom">
+        <input type="number" 
+               value="${position.rcd?.diffStrom || ''}" 
+               data-field="position.rcd.diffStrom"
+               data-pos-nr="${escapeHtml(position.posNr)}"
+               placeholder="5"
+               min="0"
+               max="1000"
+               class="table-input number-input">
+      </td>
+      
+      <!-- Status -->
       <td class="status-cell">
         <select data-field="position.prüfergebnis.status" 
                 data-pos-nr="${escapeHtml(position.posNr)}"
@@ -1038,6 +1243,8 @@ function renderPositionRow(position, index) {
           <option value="nicht-zugänglich" ${status === 'nicht-zugänglich' ? 'selected' : ''}>Nicht zugänglich</option>
         </select>
       </td>
+      
+      <!-- Aktionen -->
       <td class="position-actions">
         ${hasParent ? `<button type="button" class="btn-icon btn-tree" data-action="view-parent" data-pos-nr="${escapeHtml(position.posNr)}" title="Zum Vater-Stromkreis" aria-label="Vater-Stromkreis anzeigen">↑</button>` : ''}
         <button type="button" class="btn-icon btn-success" data-action="add-child-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Unterkreis hinzufügen" aria-label="Unterkreis hinzufügen">+</button>
@@ -1112,12 +1319,29 @@ export function updatePositionRow(posNr, position) {
   updateInput('stromkreisNr', position.stromkreisNr);
   updateInput('zielbezeichnung', position.zielbezeichnung);
   updateSelect('phaseType', position.phaseType || 'mono');
-  updateInput('leitung.typ', position.leitung?.typ);
+  updateInput('kabel.typ', position.kabel?.typ);
+  updateInput('kabel.leiterAnzahl', position.kabel?.leiterAnzahl);
+  updateInput('kabel.querschnitt', position.kabel?.querschnitt);
   updateInput('spannung.un', position.spannung?.un);
   updateInput('spannung.fn', position.spannung?.fn);
   updateSelect('überstromschutz.art', position.überstromschutz?.art);
   updateInput('überstromschutz.inNennstrom', position.überstromschutz?.inNennstrom);
-  updateInput('messwerte.riso', position.messwerte?.riso);
+
+  updateInput('messwerte.rpe', position.messwerte?.rpe);
+  updateInput('messwerte.ikLPE', position.messwerte?.ikLPE);
+  updateInput('messwerte.zsLPE', position.messwerte?.zsLPE);
+  updateInput('messwerte.znLN', position.messwerte?.znLN);
+  updateInput('messwerte.risoOhne', position.messwerte?.risoOhne);
+  updateInput('messwerte.risoMit', position.messwerte?.risoMit);
+
+  updateInput('rcd.gewiss', position.rcd?.gewiss);
+  updateInput('rcd.inNennstrom', position.rcd?.inNennstrom);
+  updateInput('rcd.iDeltaN', position.rcd?.iDeltaN);
+  updateInput('rcd.iMess', position.rcd?.iMess);
+  updateInput('rcd.ausloesezeit', position.rcd?.ausloesezeit);
+  updateInput('rcd.uMess', position.rcd?.uMess);
+  updateInput('rcd.diffStrom', position.rcd?.diffStrom);
+
   updateSelect('prüfergebnis.status', status);
 }
 
@@ -1356,32 +1580,8 @@ function attachFieldListeners() {
   const form = document.querySelector('.protokoll-form');
   if (!form) return;
 
-  // Note: Input and change events are handled by event delegation in protokoll-handlers.js
-  // This function now only handles navigation and action buttons
-
-  // Navigation button clicks
-  form.addEventListener('click', (e) => {
-    const button = e.target.closest('[data-action]');
-    if (!button) return;
-
-    const action = button.getAttribute('data-action');
-    
-    switch (action) {
-      case 'previous-step':
-        handlers.handlePreviousStep();
-        break;
-      case 'next-step':
-        handlers.handleNextStep();
-        break;
-      case 'add-position':
-        handlers.handleAddPosition();
-        break;
-      case 'export':
-      case 'export-both':
-        handlers.handleExport();
-        break;
-    }
-  });
+  // Note: Most button clicks are handled by protokoll-handlers.js via document delegation.
+  // We only handle specific UI interactions here like progress steps.
 
   // Progress step clicks
   document.querySelectorAll('.progress-step').forEach(step => {
@@ -1412,14 +1612,10 @@ function attachPositionListeners() {
   if (tbody._positionClickHandler) {
     tbody.removeEventListener('click', tbody._positionClickHandler);
   }
-  if (tbody._positionInputHandler) {
-    tbody.removeEventListener('input', tbody._positionInputHandler);
-  }
-  if (tbody._positionChangeHandler) {
-    tbody.removeEventListener('change', tbody._positionChangeHandler);
-  }
 
   // Create click handler for buttons
+  // Note: add-child, delete etc are handled by handlers.js
+  // We only handle view-parent for scrolling which is UI specific
   tbody._positionClickHandler = function(e) {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -1429,55 +1625,24 @@ function attachPositionListeners() {
 
     if (!posNr) return;
 
-    e.preventDefault();
-
-    switch (action) {
-      case 'delete-position':
-        handlers.handleDeletePosition(posNr);
-        break;
-      case 'add-child-position':
-        handlers.handleAddChildPosition(posNr);
-        break;
-      case 'view-parent':
-        // Scroll to parent position or highlight it
-        const parentRow = document.querySelector(`tr[data-pos-nr="${posNr}"]`);
+    if (action === 'view-parent') {
+      e.preventDefault();
+      // Scroll to the parent row, not the current row
+      const position = state.getPosition(posNr);
+      if (position && position.parentCircuitId) {
+        const parentRow = document.querySelector(`tr[data-pos-nr="${position.parentCircuitId}"]`);
         if (parentRow) {
           parentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
           parentRow.classList.add('highlight');
           setTimeout(() => parentRow.classList.remove('highlight'), 2000);
         }
-        break;
+      }
     }
   };
 
-  // Create input handler for real-time updates
-  tbody._positionInputHandler = function(e) {
-    const input = e.target;
-    const fieldPath = input.getAttribute('data-field');
-    const posNr = input.getAttribute('data-pos-nr');
-
-    if (!fieldPath || !posNr) return;
-
-    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
-    handlers.handlePositionChange(posNr, fieldPath, value);
-  };
-
-  // Create change handler for final validation
-  tbody._positionChangeHandler = function(e) {
-    const input = e.target;
-    const fieldPath = input.getAttribute('data-field');
-    const posNr = input.getAttribute('data-pos-nr');
-
-    if (!fieldPath || !posNr) return;
-
-    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
-    handlers.handlePositionChange(posNr, fieldPath, value);
-  };
-
-  // Attach all listeners
+  // Attach listeners
   tbody.addEventListener('click', tbody._positionClickHandler);
-  tbody.addEventListener('input', tbody._positionInputHandler);
-  tbody.addEventListener('change', tbody._positionChangeHandler);
+  // Input/Change events are handled by handlers.js
 }
 
 /**
@@ -1485,14 +1650,7 @@ function attachPositionListeners() {
  * @returns {void}
  */
 function attachExportListeners() {
-  document.querySelectorAll('[data-action^="export-"]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      handlers.handleExport();
-    });
-  });
-
-  // Navigation buttons
+  // handled by main.js / handlers.js
   attachFieldListeners();
 }
 
