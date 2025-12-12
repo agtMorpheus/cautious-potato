@@ -142,7 +142,15 @@ describe('Contract Handlers', () => {
             read: jest.fn().mockReturnValue({
                 SheetNames: ['Sheet1'],
                 Sheets: { 'Sheet1': {} }
-            })
+            }),
+            write: jest.fn(),
+            writeFile: jest.fn(),
+            utils: {
+                sheet_to_json: jest.fn(),
+                json_to_sheet: jest.fn(),
+                book_new: jest.fn(),
+                book_append_sheet: jest.fn()
+            }
         };
 
         // Mock contractUtils

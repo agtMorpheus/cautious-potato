@@ -12,7 +12,9 @@ import {
   transformAssets,
   parseDate,
   generateId,
-  formatAssetsForExport
+  formatAssetsForExport,
+  readAssetExcel,
+  detectExcelStructure
 } from '../../js/modules/assets/asset-utils.js';
 
 describe('Asset Utils Module', () => {
@@ -468,6 +470,84 @@ describe('Asset Utils Module', () => {
       
       expect(timestamp).toBeGreaterThanOrEqual(before);
       expect(timestamp).toBeLessThanOrEqual(after);
+    });
+  });
+  
+  // ============================================
+  // readAssetExcel Tests
+  // ============================================
+  describe('readAssetExcel()', () => {
+    test('throws error when XLSX library is not loaded', async () => {
+      // Temporarily remove XLSX
+      const original = global.XLSX;
+      delete global.XLSX;
+      
+      const file = new File(['content'], 'test.xlsx');
+      
+      await expect(async () => {
+        const { readAssetExcel } = await import('../../js/modules/assets/asset-utils.js?t=' + Date.now());
+        return readAssetExcel(file);
+      }).rejects.toThrow();
+      
+      global.XLSX = original;
+    });
+    
+    test('reads Excel file and returns parsed rows', async () => {
+      const mockRows = [
+        { Anlage: 'AST-001', Beschreibung: 'Test', Status: 'AKTIV' }
+      ];
+      
+      global.XLSX.utils.sheet_to_json.mockReturnValue(mockRows);
+      global.XLSX.read.mockReturnValue({
+        SheetNames: ['Sheet1'],
+        Sheets: { Sheet1: {} }
+      });
+      
+      const file = new File(['dummy'], 'test.xlsx', {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      file.arrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(10));
+      
+      const { readAssetExcel } = await import('../../js/modules/assets/asset-utils.js');
+      const result = await readAssetExcel(file);
+      
+      expect(result).toEqual(mockRows);
+      expect(global.XLSX.read).toHaveBeenCalled();
+      expect(global.XLSX.utils.sheet_to_json).toHaveBeenCalled();
+    });
+  });
+  
+  // ============================================
+  // detectExcelStructure Tests
+  // ============================================
+  describe('detectExcelStructure()', () => {
+    test('detects Excel file structure with sheets and columns', async () => {
+      const mockWorkbook = {
+        SheetNames: ['Sheet1'],
+        Sheets: {
+          Sheet1: {
+            '!ref': 'A1:C10',
+            A1: { v: 'Anlage' },
+            B1: { v: 'Beschreibung' },
+            C1: { v: 'Status' }
+          }
+        }
+      };
+      
+      global.XLSX.read.mockReturnValue(mockWorkbook);
+      
+      const file = new File(['dummy'], 'test.xlsx', {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      file.arrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(10));
+      
+      const { detectExcelStructure } = await import('../../js/modules/assets/asset-utils.js');
+      const result = await detectExcelStructure(file);
+      
+      expect(result.fileName).toBe('test.xlsx');
+      expect(result.sheetNames).toEqual(['Sheet1']);
+      expect(result.sheets.Sheet1.columns).toContain('Anlage');
+      expect(result.sheets.Sheet1.rowCount).toBeGreaterThanOrEqual(0);
     });
   });
   

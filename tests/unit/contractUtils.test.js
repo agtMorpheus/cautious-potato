@@ -22,8 +22,13 @@ import {
 // Mock XLSX global
 global.XLSX = {
   read: jest.fn(),
+  write: jest.fn(),
+  writeFile: jest.fn(),
   utils: {
-    sheet_to_json: jest.fn()
+    sheet_to_json: jest.fn(),
+    json_to_sheet: jest.fn(),
+    book_new: jest.fn(),
+    book_append_sheet: jest.fn()
   }
 };
 

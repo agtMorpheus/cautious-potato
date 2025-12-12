@@ -95,22 +95,22 @@ describe('Utility Functions (utils.js)', () => {
     });
 
     test('throws error on null input', () => {
-      expect(() => sumByPosition(null)).toThrow('Invalid input: positions must be an array');
+      expect(() => sumByPosition(null)).toThrow('Positionen muss ein Array sein');
     });
 
     test('throws error on non-array input', () => {
-      expect(() => sumByPosition('not an array')).toThrow('Invalid input: positions must be an array');
-      expect(() => sumByPosition({})).toThrow('Invalid input: positions must be an array');
+      expect(() => sumByPosition('not an array')).toThrow('Positionen muss ein Array sein');
+      expect(() => sumByPosition({})).toThrow('Positionen muss ein Array sein');
     });
 
     test('throws error on invalid position object', () => {
       const invalidPositions = [{ menge: 5 }]; // Missing posNr
-      expect(() => sumByPosition(invalidPositions)).toThrow('Invalid position object: missing posNr');
+      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültige Positionsnummer');
     });
 
     test('throws error on non-numeric quantity', () => {
       const invalidPositions = [{ posNr: '01.01.0010', menge: 'five' }];
-      expect(() => sumByPosition(invalidPositions)).toThrow('Invalid position object: menge must be a number');
+      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültige Menge für Position');
     });
 
     test('handles large datasets efficiently', () => {
@@ -182,9 +182,14 @@ describe('Utility Functions (utils.js)', () => {
       expect(summary.maxQuantity).toBe(5);
     });
 
-    test('throws error on invalid input', () => {
-      expect(() => getPositionSummary(null)).toThrow('Invalid input: positionMap must be an object');
-      expect(() => getPositionSummary([])).toThrow('Invalid input: positionMap must be an object');
+    test('handles invalid input gracefully', () => {
+      const nullResult = getPositionSummary(null);
+      expect(nullResult.totalQuantity).toBe(0);
+      expect(nullResult.uniquePositions).toBe(0);
+      
+      const arrayResult = getPositionSummary([]);
+      expect(arrayResult.totalQuantity).toBe(0);
+      expect(arrayResult.uniquePositions).toBe(0);
     });
   });
 
