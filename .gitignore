@@ -19,6 +19,8 @@ Desktop.ini
 # Logs
 logs/
 *.log
+# But allow js/modules/logs module
+!js/modules/logs/
 
 # Build outputs
 dist/
