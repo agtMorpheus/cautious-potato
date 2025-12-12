@@ -529,6 +529,7 @@ function renderPositionsTableHeader() {
       <th scope="col" rowspan="2" class="col-sticky-1">Pos.</th>
       <th scope="col" rowspan="2" class="col-sticky-2">Nr.</th>
       <th scope="col" rowspan="2" class="col-sticky-3">Zielbezeichnung</th>
+      <th scope="col" rowspan="2" class="col-sm">Phase</th>
       <th scope="col" colspan="4" class="group-header">Kabel/Leitung</th>
       <th scope="col" colspan="2" class="group-header">Spannung/Freq.</th>
       <th scope="col" colspan="2" class="group-header">Überstrom-Schutz</th>
@@ -1047,6 +1048,17 @@ function renderPositionRow(position, index) {
                class="table-input">
       </td>
       
+      <!-- Phase Type -->
+      <td class="editable-cell" data-field="phaseType">
+        <select data-field="position.phaseType"
+                data-pos-nr="${escapeHtml(position.posNr)}"
+                class="table-select">
+          <option value="mono" ${position.phaseType === 'mono' ? 'selected' : ''}>1P</option>
+          <option value="bi" ${position.phaseType === 'bi' ? 'selected' : ''}>2P</option>
+          <option value="tri" ${position.phaseType === 'tri' ? 'selected' : ''}>3P</option>
+        </select>
+      </td>
+
       <!-- Kabel Typ -->
       <td class="editable-cell" data-field="kabel.typ">
         <input type="text" 
