@@ -619,7 +619,7 @@ export function clearValidationErrors() {
  * @returns {void}
  */
 export function setFormState(key, value) {
-  if (state.formState.hasOwnProperty(key)) {
+  if (Object.prototype.hasOwnProperty.call(state.formState, key)) {
     state.formState[key] = value;
     emit('formStateChanged', { key, value });
   } else {
