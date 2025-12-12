@@ -1404,13 +1404,15 @@ function attachPositionListeners() {
 
     if (action === 'view-parent') {
       e.preventDefault();
-      // Logic seems to scroll to *this* row, maybe intended to show where it is?
-      // Or maybe it should find parent. Assuming existing logic is what's desired for now.
-      const parentRow = document.querySelector(`tr[data-pos-nr="${posNr}"]`);
-      if (parentRow) {
-        parentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        parentRow.classList.add('highlight');
-        setTimeout(() => parentRow.classList.remove('highlight'), 2000);
+      // Scroll to the parent row, not the current row
+      const position = state.getPosition(posNr);
+      if (position && position.parentCircuitId) {
+        const parentRow = document.querySelector(`tr[data-pos-nr="${position.parentCircuitId}"]`);
+        if (parentRow) {
+          parentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          parentRow.classList.add('highlight');
+          setTimeout(() => parentRow.classList.remove('highlight'), 2000);
+        }
       }
     }
   };
