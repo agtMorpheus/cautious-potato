@@ -1155,6 +1155,7 @@
   border-spacing: 0;
   font-size: 0.85rem;
   color: var(--text-main);
+  --header-row-height: 36px;
 }
 
 /* Headers */
@@ -1633,10 +1634,19 @@
 }
 
 /* Header Z-Index Fixes */
-.positions-table thead th {
+.positions-table thead tr:first-child th {
   position: sticky;
   top: 0;
   z-index: 20;
+  height: var(--header-row-height);
+}
+
+.positions-table thead tr:nth-child(2) th {
+  position: sticky;
+  top: var(--header-row-height);
+  z-index: 20;
+  height: var(--header-row-height);
+  border-top: none;
 }
 
 .positions-table thead th.col-sticky-1,
