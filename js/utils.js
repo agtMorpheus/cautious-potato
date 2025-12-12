@@ -187,6 +187,26 @@ export function parseProtokollMetadata(workbook, options = {}) {
 }
 
 /**
+ * Alias for parseProtokollMetadata for backward compatibility
+ * @param {Object} workbook - SheetJS workbook object
+ * @param {Object} options - Parsing options
+ * @returns {Object} Metadata object
+ */
+export function parseProtokoll(workbook, options = {}) {
+    const metadata = parseProtokollMetadata(workbook, options);
+    // Map to test-expected field names
+    return {
+        protocolNumber: metadata.protokollNr,
+        orderNumber: metadata.auftragsNr,
+        plant: metadata.anlage,
+        location: metadata.einsatzort,
+        company: metadata.firma || metadata.auftraggeber,
+        date: metadata.datum,
+        _foundCells: metadata._foundCells
+    };
+}
+
+/**
  * Extract positions from protokoll workbook
  * @param {Object} workbook - SheetJS workbook object
  * @returns {Array} Array of position objects
@@ -277,24 +297,24 @@ export function extractPositions(workbook) {
  */
 export function sumByPosition(positionen) {
     if (!Array.isArray(positionen)) {
-        throw new Error('Invalid input: positions must be an array');
+        throw new Error('Positionen muss ein Array sein');
     }
     
     const summed = {};
     
     positionen.forEach(pos => {
         if (!pos || typeof pos !== 'object') {
-            throw new Error('Invalid position object in array');
+            throw new Error('Ungültiges Positionsobjekt im Array');
         }
         
         const { posNr, menge } = pos;
         
         if (!posNr || typeof posNr !== 'string') {
-            throw new Error(`Invalid position number: ${posNr}`);
+            throw new Error(`Ungültige Positionsnummer: ${posNr}`);
         }
         
         if (typeof menge !== 'number' || Number.isNaN(menge)) {
-            throw new Error(`Invalid quantity for position ${posNr}: ${menge}`);
+            throw new Error(`Ungültige Menge für Position ${posNr}: ${menge}`);
         }
         
         if (!summed[posNr]) {
@@ -319,7 +339,7 @@ export function validateExtractedPositions(positionen) {
     if (!Array.isArray(positionen)) {
         return {
             valid: false,
-            errors: ['Positions is not an array'],
+            errors: ['Positionen ist kein Array'],
             warnings: []
         };
     }
@@ -336,21 +356,31 @@ export function validateExtractedPositions(positionen) {
             return;
         }
         
+        // Check for required fields
+        if (!pos.posNr) {
+            errors.push(`Position at index ${index} is missing required field: posNr`);
+            return;
+        }
+        if (pos.menge === undefined || pos.menge === null) {
+            errors.push(`Position at index ${index} is missing required field: menge`);
+            return;
+        }
+        
         // Check for duplicate Pos.Nr.
         if (posNrMap.has(pos.posNr)) {
-            warnings.push(`Position ${pos.posNr} appears multiple times (rows ${posNrMap.get(pos.posNr)} and ${pos.row})`);
+            warnings.push(`Duplicate position number: ${pos.posNr} appears multiple times (rows ${posNrMap.get(pos.posNr)} and ${pos.rowIndex || pos.row})`);
         } else {
-            posNrMap.set(pos.posNr, pos.row);
+            posNrMap.set(pos.posNr, pos.rowIndex || pos.row);
         }
         
         // Check for invalid Pos.Nr. format using configured pattern
         if (!POSITION_CONFIG.positionNumberPattern.test(pos.posNr)) {
-            warnings.push(`Position ${pos.posNr} in row ${pos.row} has unexpected format`);
+            warnings.push(`Invalid position number format: ${pos.posNr} in row ${pos.rowIndex || pos.row} has unexpected format`);
         }
         
         // Check for negative quantities
         if (pos.menge < 0) {
-            errors.push(`Position ${pos.posNr} has negative quantity (${pos.menge})`);
+            errors.push(`Negative quantity: Position ${pos.posNr} has negative quantity (${pos.menge})`);
         }
     });
     
@@ -857,6 +887,32 @@ function setCellValue(worksheet, address, value) {
 export function generateExportFilename(auftragsNr) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     return `Abrechnung_${auftragsNr}_${timestamp}.xlsx`;
+}
+
+/**
+ * Generate filename for Abrechnung export
+ * @param {Object} metadata - Metadata object with orderNumber, date, etc.
+ * @returns {string} Generated filename
+ */
+export function generateAbrechnungFilename(metadata = {}) {
+    const parts = ['Abrechnung'];
+    
+    // Sanitize and add order number if available
+    if (metadata.orderNumber) {
+        const sanitized = metadata.orderNumber.replace(/[<>:"|?*\/\\]/g, '_');
+        parts.push(sanitized);
+    }
+    
+    // Add date if available
+    if (metadata.date) {
+        parts.push(metadata.date);
+    } else {
+        // Use current date if not provided
+        const now = new Date().toISOString().split('T')[0];
+        parts.push(now);
+    }
+    
+    return `${parts.join('_')}.xlsx`;
 }
 
 /**
