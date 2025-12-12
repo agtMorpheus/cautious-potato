@@ -213,7 +213,8 @@ global.window = {
   setTimeout: jest.fn((fn, delay) => setTimeout(fn, delay)),
   clearTimeout: jest.fn(id => clearTimeout(id)),
   setInterval: jest.fn((fn, delay) => setInterval(fn, delay)),
-  clearInterval: jest.fn(id => clearInterval(id))
+  clearInterval: jest.fn(id => clearInterval(id)),
+  scrollTo: jest.fn()
 };
 
 // Mock console methods for cleaner test output
@@ -316,6 +317,14 @@ beforeEach(() => {
   
   // Reset DOM
   document.body.innerHTML = '';
+  
+  // Mock window methods to prevent JSDOM "Not implemented" errors
+  if (typeof window !== 'undefined') {
+    window.scrollTo = jest.fn();
+    window.alert = jest.fn();
+    window.confirm = jest.fn(() => true);
+    window.prompt = jest.fn();
+  }
   
   // Reset localStorage mock
   localStorageMock.getItem.mockReturnValue(null);
