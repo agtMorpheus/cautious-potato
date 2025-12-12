@@ -96,6 +96,7 @@
     --text-main: var(--c-neutral-900);
     --text-secondary: var(--c-neutral-500);
     --text-muted: var(--c-neutral-500);
+    --text-disabled: var(--c-neutral-400);
     --text-inverse: #ffffff;
 
     --border-base: var(--c-neutral-200);
@@ -215,6 +216,8 @@
     /* slate-50 */
     --text-muted: #94a3b8;
     /* slate-400 */
+    --text-disabled: #64748b;
+    /* slate-500 */
     --text-inverse: #020617;
 
     --border-base: #334155;
