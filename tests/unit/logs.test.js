@@ -101,8 +101,8 @@ describe('Logs Module', () => {
       unsubscribe();
       logsModule.addLog('Test', 'info');
       
-      // Should only be called once during subscribe
-      expect(callback).toHaveBeenCalledTimes(1);
+      // Should not be called after unsubscribe
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 
