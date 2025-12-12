@@ -308,7 +308,7 @@ export function updateDevice(deviceId, updates) {
 
   if (index === -1) {
     console.error(`Device not found: ${deviceId}`);
-    return false;
+    return null;
   }
 
   // Merge updates
@@ -323,7 +323,7 @@ export function updateDevice(deviceId, updates) {
   emit('deviceUpdated', { deviceId, device: updatedDevice });
   saveToLocalStorage();
 
-  return true;
+  return updatedDevice;
 }
 
 /**
