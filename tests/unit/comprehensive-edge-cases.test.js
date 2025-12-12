@@ -40,7 +40,7 @@ describe('Comprehensive Edge Case Tests', () => {
       const radiusValues = Object.values(DESIGN_TOKENS.borderRadius);
       
       radiusValues.forEach(value => {
-        expect(value).toMatch(/^\d+(px|%)$/);
+        expect(value).toMatch(/^\d+(px|%|rem)$/);
       });
     });
 
@@ -191,11 +191,13 @@ describe('Comprehensive Edge Case Tests', () => {
 
     test('all border radius values parse to numbers', () => {
       Object.values(DESIGN_TOKENS.borderRadius).forEach(value => {
-        if (value !== '9999px') { // Special case for full radius
-          const numValue = parseInt(value);
-          expect(numValue).toBeGreaterThan(0);
-          expect(isNaN(numValue)).toBe(false);
-        }
+        // Extract numeric value using regex
+        const match = value.match(/\d+/);
+        expect(match).not.toBeNull();
+        
+        const numValue = parseInt(match[0]);
+        expect(numValue).toBeGreaterThan(0);
+        expect(isNaN(numValue)).toBe(false);
       });
     });
 
