@@ -251,11 +251,14 @@ export function getAssetsByType(type) {
  * @returns {Array} Array of matching asset objects
  */
 export function searchAssets(query) {
-  if (!query || query.trim() === '') {
+  // Use provided query or fall back to state.formState.searchTerm
+  const searchQuery = query || (state.formState && state.formState.searchTerm) || '';
+  
+  if (!searchQuery || searchQuery.trim() === '') {
     return getAllAssets();
   }
   
-  const q = query.toLowerCase().trim();
+  const q = searchQuery.toLowerCase().trim();
   return JSON.parse(JSON.stringify(
     state.assets.filter(a => 
       a.active !== false && (
@@ -969,6 +972,198 @@ function generateAssetId() {
  */
 function generateComponentId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// ============================================
+// E2E TEST HELPER FUNCTIONS (Aliases and Extensions)
+// ============================================
+
+/**
+ * Get all assets (alias for getAllAssets)
+ * @returns {Array} All assets
+ */
+export function getAssets() {
+  return getAllAssets();
+}
+
+/**
+ * Add protocol to an asset
+ * @param {string} assetId - Asset ID
+ * @param {Object} protocolData - Protocol data
+ * @returns {Object} New protocol
+ */
+export function addProtocol(assetId, protocolData) {
+  const asset = getAsset(assetId);
+  if (!asset) {
+    console.error(`Asset ${assetId} not found`);
+    return null;
+  }
+  
+  const protocol = {
+    ...protocolData,
+    id: generateComponentId('PROT'),
+    assetId,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Update asset with protocol reference
+  updateAsset(assetId, {
+    protocols: [...(asset.protocols || []), protocol.id]
+  });
+  
+  // Store protocol in state
+  state.protocols = state.protocols || [];
+  state.protocols.push(protocol);
+  
+  saveState();
+  emit('protocol:added', { protocol });
+  
+  return protocol;
+}
+
+/**
+ * Get protocols by asset ID
+ * @param {string} assetId - Asset ID
+ * @returns {Array} Protocols for asset
+ */
+export function getProtocolsByAsset(assetId) {
+  if (!state.protocols) return [];
+  return state.protocols.filter(p => p.assetId === assetId);
+}
+
+/**
+ * Add contract to an asset
+ * @param {string} assetId - Asset ID
+ * @param {Object} contractData - Contract data
+ * @returns {Object} New contract
+ */
+export function addContract(assetId, contractData) {
+  const asset = getAsset(assetId);
+  if (!asset) {
+    console.error(`Asset ${assetId} not found`);
+    return null;
+  }
+  
+  const contract = {
+    ...contractData,
+    id: generateComponentId('CONT'),
+    assetId,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Update asset with contract reference
+  updateAsset(assetId, {
+    contracts: [...(asset.contracts || []), contract.id]
+  });
+  
+  // Store contract in state
+  state.contracts = state.contracts || [];
+  state.contracts.push(contract);
+  
+  saveState();
+  emit('contract:added', { contract });
+  
+  return contract;
+}
+
+/**
+ * Get contracts by asset ID
+ * @param {string} assetId - Asset ID
+ * @returns {Array} Contracts for asset
+ */
+export function getContractsByAsset(assetId) {
+  if (!state.contracts) return [];
+  return state.contracts.filter(c => c.assetId === assetId);
+}
+
+/**
+ * Add document to an asset
+ * @param {string} assetId - Asset ID
+ * @param {Object} documentData - Document data
+ * @returns {Object} New document
+ */
+export function addDocument(assetId, documentData) {
+  const asset = getAsset(assetId);
+  if (!asset) {
+    console.error(`Asset ${assetId} not found`);
+    return null;
+  }
+  
+  const document = {
+    ...documentData,
+    id: generateComponentId('DOC'),
+    assetId,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Update asset with document reference
+  updateAsset(assetId, {
+    documents: [...(asset.documents || []), document.id]
+  });
+  
+  // Store document in state
+  state.documents = state.documents || [];
+  state.documents.push(document);
+  
+  saveState();
+  emit('document:added', { document });
+  
+  return document;
+}
+
+/**
+ * Get documents by asset ID
+ * @param {string} assetId - Asset ID
+ * @returns {Array} Documents for asset
+ */
+export function getDocumentsByAsset(assetId) {
+  if (!state.documents) return [];
+  return state.documents.filter(d => d.assetId === assetId);
+}
+
+/**
+ * Add picture to an asset
+ * @param {string} assetId - Asset ID
+ * @param {Object} pictureData - Picture data
+ * @returns {Object} New picture
+ */
+export function addPicture(assetId, pictureData) {
+  const asset = getAsset(assetId);
+  if (!asset) {
+    console.error(`Asset ${assetId} not found`);
+    return null;
+  }
+  
+  const picture = {
+    ...pictureData,
+    id: generateComponentId('PIC'),
+    assetId,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Update asset with picture reference
+  updateAsset(assetId, {
+    pictures: [...(asset.pictures || []), picture.id]
+  });
+  
+  // Store picture in state
+  state.pictures = state.pictures || [];
+  state.pictures.push(picture);
+  
+  saveState();
+  emit('picture:added', { picture });
+  
+  return picture;
+}
+
+/**
+ * Get pictures by asset ID
+ * @param {string} assetId - Asset ID
+ * @returns {Array} Pictures for asset
+ */
+export function getPicturesByAsset(assetId) {
+  if (!state.pictures) return [];
+  return state.pictures.filter(p => p.assetId === assetId);
 }
 
 // ============================================

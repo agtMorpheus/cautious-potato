@@ -146,11 +146,14 @@ export function setHrState(partialUpdates, options = { silent: false }) {
  * @param {Object} options - Options { persist: boolean, silent: boolean }
  * @returns {Object} Reset state snapshot
  */
-export function resetHrState(options = { persist: true, silent: false }) {
+export function resetHrState(options = { persist: false, silent: false }) {
   currentHrState = structuredClone(initialHrState);
 
   if (options.persist) {
     saveHrStateToStorage();
+  } else {
+    // Clear localStorage when resetting without persist
+    clearHrPersistedState();
   }
 
   if (!options.silent) {
@@ -268,60 +271,88 @@ export function addEmployee(employeeData) {
     updatedAt: new Date().toISOString()
   };
   
-  return setHrState({
+  setHrState({
     employees: [...currentHrState.employees, newEmployee],
     metadata: {
       ...currentHrState.metadata,
       totalEmployees: currentHrState.employees.length + 1,
-      activeEmployees: currentHrState.employees.filter(e => e.employmentStatus === 'active').length + 
-                       (newEmployee.employmentStatus === 'active' ? 1 : 0)
+      activeEmployees: currentHrState.employees.filter(e => e.status === 'active').length + 
+                       (newEmployee.status === 'active' ? 1 : 0)
     }
   });
+  
+  // Save to history AFTER making the change
+  saveToHistory('Add Employee');
+  
+  return newEmployee;
 }
 
 /**
  * Update an existing employee
  * @param {string} employeeId - Employee ID to update
  * @param {Object} updates - Partial updates to apply
- * @returns {Object} New state snapshot
+ * @returns {Object} Updated employee
  */
 export function updateEmployee(employeeId, updates) {
+  let updatedEmployee = null;
+  
   const employees = currentHrState.employees.map(emp => {
     if (emp.id === employeeId) {
-      return {
+      updatedEmployee = {
         ...emp,
         ...updates,
         updatedAt: new Date().toISOString()
+      };
+      return updatedEmployee;
+    }
+    return emp;
+  });
+  
+  setHrState({
+    employees,
+    metadata: {
+      ...currentHrState.metadata,
+      activeEmployees: employees.filter(e => e.status === 'active').length
+    }
+  });
+  
+  // Save to history AFTER making the change
+  saveToHistory('Update Employee');
+  
+  return updatedEmployee;
+}
+
+/**
+ * Delete an employee from the state (soft delete - marks as inactive)
+ * @param {string} employeeId - Employee ID to delete
+ * @returns {boolean} Success status
+ */
+export function deleteEmployee(employeeId) {
+  // Soft delete - mark as inactive instead of removing
+  let found = false;
+  const employees = currentHrState.employees.map(emp => {
+    if (emp.id === employeeId) {
+      found = true;
+      return {
+        ...emp,
+        status: 'inactive',
+        deletedAt: new Date().toISOString()
       };
     }
     return emp;
   });
   
-  return setHrState({
-    employees,
-    metadata: {
-      ...currentHrState.metadata,
-      activeEmployees: employees.filter(e => e.employmentStatus === 'active').length
-    }
-  });
-}
-
-/**
- * Delete an employee from the state
- * @param {string} employeeId - Employee ID to delete
- * @returns {Object} New state snapshot
- */
-export function deleteEmployee(employeeId) {
-  const employees = currentHrState.employees.filter(emp => emp.id !== employeeId);
+  if (!found) return false;
   
-  return setHrState({
+  setHrState({
     employees,
     metadata: {
       ...currentHrState.metadata,
-      totalEmployees: employees.length,
-      activeEmployees: employees.filter(e => e.employmentStatus === 'active').length
+      activeEmployees: employees.filter(e => e.status === 'active').length
     }
   });
+  
+  return true;
 }
 
 // ============================================================
@@ -352,21 +383,26 @@ export function recordAttendance(employeeId, attendanceData) {
  * Update an existing attendance record
  * @param {string} attendanceId - Attendance record ID
  * @param {Object} updates - Partial updates to apply
- * @returns {Object} New state snapshot
+ * @returns {Object} Updated attendance record
  */
 export function updateAttendance(attendanceId, updates) {
+  let updatedRecord = null;
+  
   const attendance = currentHrState.attendance.map(record => {
     if (record.id === attendanceId) {
-      return {
+      updatedRecord = {
         ...record,
         ...updates,
         lastModified: new Date().toISOString()
       };
+      return updatedRecord;
     }
     return record;
   });
   
-  return setHrState({ attendance });
+  setHrState({ attendance });
+  
+  return updatedRecord;
 }
 
 // ============================================================
@@ -377,33 +413,37 @@ export function updateAttendance(attendanceId, updates) {
  * Update or create a schedule record
  * @param {string} scheduleId - Schedule ID (or null for new)
  * @param {Object} scheduleData - Schedule data
- * @returns {Object} New state snapshot
+ * @returns {Object} Updated/created schedule
  */
 export function updateSchedule(scheduleId, scheduleData) {
   let schedules;
+  let resultSchedule = null;
   
   if (scheduleId) {
     // Update existing
     schedules = currentHrState.schedules.map(sched => {
       if (sched.id === scheduleId) {
-        return {
+        resultSchedule = {
           ...sched,
           ...scheduleData
         };
+        return resultSchedule;
       }
       return sched;
     });
   } else {
     // Create new
-    const newSchedule = {
+    resultSchedule = {
       ...scheduleData,
       id: `SCHED${Date.now()}`,
       status: scheduleData.status || 'draft'
     };
-    schedules = [...currentHrState.schedules, newSchedule];
+    schedules = [...currentHrState.schedules, resultSchedule];
   }
   
-  return setHrState({ schedules });
+  setHrState({ schedules });
+  
+  return resultSchedule;
 }
 
 // ============================================================
@@ -517,7 +557,7 @@ export function filterEmployees(criteria) {
   }
   
   if (criteria.status) {
-    filtered = filtered.filter(emp => emp.employmentStatus === criteria.status);
+    filtered = filtered.filter(emp => emp.status === criteria.status);
   }
   
   if (criteria.searchText) {
@@ -1085,4 +1125,259 @@ export function triggerHrEvent(eventType, data) {
   document.dispatchEvent(new CustomEvent('hrStateChanged', {
     detail: { eventType, data, timestamp: new Date().toISOString() }
   }));
+}
+
+// ============================================================
+// E2E Test Helper Functions (Aliases and Wrappers)
+// ============================================================
+
+/**
+ * Initialize HR state (alias for resetHrState for test compatibility)
+ */
+export function initHrState() {
+  // Try to load from storage first
+  try {
+    const serialized = window.localStorage.getItem(HR_STORAGE_KEY);
+    if (serialized) {
+      // Data exists, load it
+      loadHrStateFromStorage();
+    } else {
+      // No data, reset to initial state
+      resetHrState({ persist: false, silent: false });
+    }
+  } catch (error) {
+    // Error loading, reset to initial state
+    resetHrState({ persist: false, silent: false });
+  }
+}
+
+/**
+ * Save HR state to localStorage (wrapper for compatibility)
+ */
+export function saveHrState() {
+  const stateToSave = {
+    employees: currentHrState.employees,
+    attendance: currentHrState.attendance,
+    schedules: currentHrState.schedules,
+    vacation: currentHrState.vacation,
+    departments: currentHrState.departments,
+    metadata: currentHrState.metadata
+  };
+  
+  try {
+    localStorage.setItem(HR_STORAGE_KEY, JSON.stringify(stateToSave));
+  } catch (error) {
+    console.error('Failed to save HR state:', error);
+  }
+}
+
+/**
+ * Get employee by ID
+ * @param {string} employeeId - Employee ID
+ * @returns {Object|null} Employee or null
+ */
+export function getEmployee(employeeId) {
+  return currentHrState.employees.find(emp => emp.id === employeeId) || null;
+}
+
+/**
+ * Get all active employees
+ * @returns {Array} Active employees
+ */
+export function getActiveEmployees() {
+  return currentHrState.employees.filter(emp => emp.status === 'active');
+}
+
+/**
+ * Get employees by department
+ * @param {string} department - Department name
+ * @returns {Array} Employees in department
+ */
+export function getEmployeesByDepartment(department) {
+  return currentHrState.employees.filter(emp => emp.department === department);
+}
+
+/**
+ * Archive an employee (soft delete)
+ * @param {string} employeeId - Employee ID
+ * @returns {Object|null} Updated employee or null
+ */
+export function archiveEmployee(employeeId) {
+  const updated = updateEmployee(employeeId, { 
+    status: 'inactive',
+    archivedAt: new Date().toISOString()
+  });
+  
+  return updated;
+}
+
+/**
+ * Add attendance record
+ * @param {Object} attendanceData - Attendance data
+ * @returns {Object} New attendance record
+ */
+export function addAttendance(attendanceData) {
+  const newRecord = {
+    ...attendanceData,
+    id: attendanceData.id || `ATT${Date.now()}`,
+    createdAt: new Date().toISOString()
+  };
+  
+  setHrState({
+    attendance: [...currentHrState.attendance, newRecord]
+  });
+  
+  return newRecord;
+}
+
+/**
+ * Get attendance by employee ID
+ * @param {string} employeeId - Employee ID
+ * @returns {Array} Attendance records
+ */
+export function getAttendanceByEmployee(employeeId) {
+  return currentHrState.attendance.filter(record => record.employeeId === employeeId);
+}
+
+/**
+ * Get attendance by date range
+ * @param {string} startDate - Start date
+ * @param {string} endDate - End date
+ * @returns {Array} Attendance records in range
+ */
+export function getAttendanceByDateRange(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  return currentHrState.attendance.filter(record => {
+    const recordDate = new Date(record.date);
+    return recordDate >= start && recordDate <= end;
+  });
+}
+
+/**
+ * Add schedule
+ * @param {Object} scheduleData - Schedule data
+ * @returns {Object} New schedule record
+ */
+export function addSchedule(scheduleData) {
+  const newSchedule = {
+    ...scheduleData,
+    id: scheduleData.id || `SCHED${Date.now()}`,
+    createdAt: new Date().toISOString()
+  };
+  
+  setHrState({
+    schedules: [...currentHrState.schedules, newSchedule]
+  });
+  
+  return newSchedule;
+}
+
+/**
+ * Get schedules by employee ID
+ * @param {string} employeeId - Employee ID
+ * @returns {Array} Schedule records
+ */
+export function getSchedulesByEmployee(employeeId) {
+  return currentHrState.schedules.filter(sched => sched.employeeId === employeeId);
+}
+
+/**
+ * Delete schedule
+ * @param {string} scheduleId - Schedule ID
+ * @returns {boolean} True if deleted
+ */
+export function deleteSchedule(scheduleId) {
+  const schedules = currentHrState.schedules.filter(sched => sched.id !== scheduleId);
+  
+  setHrState({ schedules });
+  
+  return true;
+}
+
+/**
+ * Add vacation request (alias for createVacationRequest)
+ * @param {Object} vacationData - Vacation data
+ * @returns {Object} New vacation request
+ */
+export function addVacation(vacationData) {
+  const newRequest = {
+    ...vacationData,
+    id: vacationData.id || `VAC${Date.now()}`,
+    status: vacationData.status || 'pending',
+    createdAt: new Date().toISOString()
+  };
+  
+  setHrState({
+    vacation: [...currentHrState.vacation, newRequest],
+    metadata: {
+      ...currentHrState.metadata,
+      pendingApprovals: newRequest.status === 'pending' 
+        ? currentHrState.metadata.pendingApprovals + 1 
+        : currentHrState.metadata.pendingApprovals
+    }
+  });
+  
+  return newRequest;
+}
+
+/**
+ * Approve vacation (alias for approveVacationRequest)
+ * @param {string} vacationId - Vacation ID
+ * @returns {Object|null} Updated vacation or null
+ */
+export function approveVacation(vacationId) {
+  approveVacationRequest(vacationId);
+  return currentHrState.vacation.find(v => v.id === vacationId) || null;
+}
+
+/**
+ * Reject vacation (alias for rejectVacationRequest)
+ * @param {string} vacationId - Vacation ID
+ * @param {string} reason - Rejection reason
+ * @returns {Object|null} Updated vacation or null
+ */
+export function rejectVacation(vacationId, reason = '') {
+  rejectVacationRequest(vacationId, 'HR_ADMIN', reason);
+  return currentHrState.vacation.find(v => v.id === vacationId) || null;
+}
+
+/**
+ * Get vacation by employee ID
+ * @param {string} employeeId - Employee ID
+ * @returns {Array} Vacation records
+ */
+export function getVacationByEmployee(employeeId) {
+  return currentHrState.vacation.filter(vac => vac.employeeId === employeeId);
+}
+
+/**
+ * Set a single filter value
+ * @param {string} filterName - Filter name
+ * @param {*} value - Filter value
+ */
+export function setFilter(filterName, value) {
+  setFilters({ [filterName]: value });
+}
+
+/**
+ * Clear all filters
+ */
+export function clearFilters() {
+  resetFilters();
+}
+
+/**
+ * Get filtered employees based on current filter state
+ * @returns {Array} Filtered employees
+ */
+export function getFilteredEmployees() {
+  const { department, status, searchTerm } = currentHrState.filters;
+  
+  return filterEmployees({
+    department,
+    status,
+    searchText: searchTerm
+  });
 }

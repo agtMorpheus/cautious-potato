@@ -458,7 +458,7 @@ describe('Messgerät E2E - Complete User Journey', () => {
         expect(event.detail.device).toBeTruthy();
         expect(event.detail.device.name).toBe('Event Test Device');
         done();
-      });
+      }, { once: true });
       
       messgeraetState.addDevice({
         name: 'Event Test Device',
@@ -475,7 +475,7 @@ describe('Messgerät E2E - Complete User Journey', () => {
       document.addEventListener('messgeraet:device-updated', (event) => {
         expect(event.detail.device.name).toBe('Updated Name');
         done();
-      });
+      }, { once: true });
       
       messgeraetState.updateDevice(device.id, {
         name: 'Updated Name'
@@ -491,7 +491,7 @@ describe('Messgerät E2E - Complete User Journey', () => {
       document.addEventListener('messgeraet:device-deleted', (event) => {
         expect(event.detail.deviceId).toBe(device.id);
         done();
-      });
+      }, { once: true });
       
       messgeraetState.deleteDevice(device.id);
     });
