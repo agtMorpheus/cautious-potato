@@ -78,7 +78,7 @@ export async function readExcelFile(file) {
                 });
                 
                 if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
-                    throw new Error('Arbeitsmappe enthält keine Arbeitsblätter');
+                    throw new Error('Workbook contains no worksheets');
                 }
                 
                 // Return object with workbook and metadata (Phase 3 structure)
@@ -277,24 +277,24 @@ export function extractPositions(workbook) {
  */
 export function sumByPosition(positionen) {
     if (!Array.isArray(positionen)) {
-        throw new Error('Positionen muss ein Array sein');
+        throw new Error('Invalid input: positions must be an array');
     }
     
     const summed = {};
     
     positionen.forEach(pos => {
         if (!pos || typeof pos !== 'object') {
-            throw new Error('Ungültiges Positionsobjekt im Array');
+            throw new Error('Invalid position object in array');
         }
         
         const { posNr, menge } = pos;
         
         if (!posNr || typeof posNr !== 'string') {
-            throw new Error(`Ungültige Positionsnummer: ${posNr}`);
+            throw new Error(`Invalid position number: ${posNr}`);
         }
         
         if (typeof menge !== 'number' || Number.isNaN(menge)) {
-            throw new Error(`Ungültige Menge für Position ${posNr}: ${menge}`);
+            throw new Error(`Invalid quantity for position ${posNr}: ${menge}`);
         }
         
         if (!summed[posNr]) {
@@ -319,38 +319,38 @@ export function validateExtractedPositions(positionen) {
     if (!Array.isArray(positionen)) {
         return {
             valid: false,
-            errors: ['Positionen ist kein Array'],
+            errors: ['Positions is not an array'],
             warnings: []
         };
     }
     
     if (positionen.length === 0) {
-        warnings.push('Keine Positionen wurden aus dem Protokoll extrahiert');
+        warnings.push('No positions were extracted from the protocol');
     }
     
     const posNrMap = new Map();
     
     positionen.forEach((pos, index) => {
         if (!pos || typeof pos !== 'object') {
-            errors.push(`Position an Index ${index} ist kein Objekt`);
+            errors.push(`Position at index ${index} is not an object`);
             return;
         }
         
         // Check for duplicate Pos.Nr.
         if (posNrMap.has(pos.posNr)) {
-            warnings.push(`Position ${pos.posNr} erscheint mehrfach (Zeilen ${posNrMap.get(pos.posNr)} und ${pos.row})`);
+            warnings.push(`Position ${pos.posNr} appears multiple times (rows ${posNrMap.get(pos.posNr)} and ${pos.row})`);
         } else {
             posNrMap.set(pos.posNr, pos.row);
         }
         
         // Check for invalid Pos.Nr. format using configured pattern
         if (!POSITION_CONFIG.positionNumberPattern.test(pos.posNr)) {
-            warnings.push(`Position ${pos.posNr} in Zeile ${pos.row} hat unerwartetes Format`);
+            warnings.push(`Position ${pos.posNr} in row ${pos.row} has unexpected format`);
         }
         
         // Check for negative quantities
         if (pos.menge < 0) {
-            errors.push(`Position ${pos.posNr} hat negative Menge (${pos.menge})`);
+            errors.push(`Position ${pos.posNr} has negative quantity (${pos.menge})`);
         }
     });
     
@@ -398,7 +398,8 @@ export function getPositionSummary(positionMap) {
         totalQuantity,
         uniquePositions: Object.keys(positionMap).length,
         minQuantity: count > 0 ? minQuantity : 0,
-        maxQuantity: count > 0 ? maxQuantity : 0
+        maxQuantity: count > 0 ? maxQuantity : 0,
+        averageQuantity: count > 0 ? totalQuantity / count : 0
     };
 }
 
@@ -419,11 +420,11 @@ export async function loadAbrechnungTemplate() {
             
             if (!response.ok) {
                 if (response.status === 404) {
-                    throw new Error('Abrechnung-Template nicht gefunden. Bitte stellen Sie sicher, dass templates/abrechnung.xlsx existiert.');
+                    throw new Error('Abrechnung template not found. Please ensure templates/abrechnung.xlsx exists.');
                 } else if (response.status >= 500) {
-                    throw new Error('Server-Fehler beim Laden des Templates. Bitte versuchen Sie es später erneut.');
+                    throw new Error('Server error loading template. Please try again later.');
                 } else {
-                    throw new Error(`HTTP Fehler ${response.status}: ${response.statusText}`);
+                    throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
                 }
             }
             
@@ -447,7 +448,7 @@ export async function loadAbrechnungTemplate() {
         return workbook;
     } catch (error) {
         if (error.message.includes('Failed to fetch') || error instanceof TypeError) {
-            throw new Error('Netzwerkfehler: Konnte Template nicht laden. Stellen Sie sicher, dass der Server läuft und die Datei existiert.');
+            throw new Error('Network error: Could not load template. Ensure the server is running and the file exists.');
         }
         throw error;
     }
@@ -602,7 +603,7 @@ export function validateFilledPositions(workbook) {
  */
 export async function createExportWorkbook(abrechnungData) {
     if (!abrechnungData || typeof abrechnungData !== 'object') {
-        throw new Error('Ungültige abrechnungData');
+        throw new Error('Invalid abrechnungData');
     }
     
     const { header, positionen } = abrechnungData;

@@ -31,7 +31,12 @@ export const MigrationStatus = {
  * @returns {boolean} True if migration is complete
  */
 export function isMigrationComplete() {
-    return localStorage.getItem('contract_manager_migrated') === 'true';
+    try {
+        return localStorage.getItem('contract_manager_migrated') === 'true';
+    } catch (error) {
+        console.error('Error checking migration status:', error);
+        return false;
+    }
 }
 
 /**
@@ -39,9 +44,13 @@ export function isMigrationComplete() {
  * @returns {Object} Migration status object
  */
 export function getMigrationStatus() {
-    const statusJson = localStorage.getItem('contract_manager_migration_status');
-    if (statusJson) {
-        return JSON.parse(statusJson);
+    try {
+        const statusJson = localStorage.getItem('contract_manager_migration_status');
+        if (statusJson) {
+            return JSON.parse(statusJson);
+        }
+    } catch (error) {
+        console.error('Error getting migration status:', error);
     }
     return {
         status: MigrationStatus.NOT_STARTED,
@@ -58,7 +67,11 @@ export function getMigrationStatus() {
  * @param {Object} status - Migration status object
  */
 function saveMigrationStatus(status) {
-    localStorage.setItem('contract_manager_migration_status', JSON.stringify(status));
+    try {
+        localStorage.setItem('contract_manager_migration_status', JSON.stringify(status));
+    } catch (error) {
+        console.error('Error saving migration status:', error);
+    }
 }
 
 /**
@@ -135,7 +148,11 @@ export async function migrateLocalStorageToBackend(options = {}) {
             details: []
         };
         saveMigrationStatus(status);
-        localStorage.setItem('contract_manager_migrated', 'true');
+        try {
+            localStorage.setItem('contract_manager_migrated', 'true');
+        } catch (error) {
+            console.error('Error setting migration flag:', error);
+        }
         return { success: true, migratedCount: 0 };
     }
 
@@ -217,7 +234,11 @@ export async function migrateLocalStorageToBackend(options = {}) {
     console.log(`Migration complete: ${successCount} success, ${failCount} failed`);
 
     if (failCount === 0) {
-        localStorage.setItem('contract_manager_migrated', 'true');
+        try {
+            localStorage.setItem('contract_manager_migrated', 'true');
+        } catch (error) {
+            console.error('Error setting migration flag:', error);
+        }
     }
 
     return {
@@ -242,8 +263,12 @@ export function clearLocalDataAfterMigration(keepBackup = true) {
             importedFiles: state.contracts?.importedFiles || [],
             backupDate: new Date().toISOString()
         };
-        localStorage.setItem('contract_manager_backup', JSON.stringify(backupData));
-        console.log('Backup created in localStorage');
+        try {
+            localStorage.setItem('contract_manager_backup', JSON.stringify(backupData));
+            console.log('Backup created in localStorage');
+        } catch (error) {
+            console.error('Error creating backup:', error);
+        }
     }
     
     // Clear contract records from state
@@ -263,7 +288,13 @@ export function clearLocalDataAfterMigration(keepBackup = true) {
  * @returns {boolean} True if restore was successful
  */
 export function restoreFromBackup() {
-    const backupJson = localStorage.getItem('contract_manager_backup');
+    let backupJson;
+    try {
+        backupJson = localStorage.getItem('contract_manager_backup');
+    } catch (error) {
+        console.error('Error reading backup:', error);
+        return false;
+    }
     
     if (!backupJson) {
         console.warn('No backup found');
@@ -283,7 +314,11 @@ export function restoreFromBackup() {
         });
         
         // Clear migration flag
-        localStorage.removeItem('contract_manager_migrated');
+        try {
+            localStorage.removeItem('contract_manager_migrated');
+        } catch (error) {
+            console.error('Error clearing migration flag:', error);
+        }
         
         console.log(`Restored ${backup.contracts.length} contracts from backup`);
         return true;
@@ -297,9 +332,13 @@ export function restoreFromBackup() {
  * Reset migration status (for testing or retry)
  */
 export function resetMigrationStatus() {
-    localStorage.removeItem('contract_manager_migrated');
-    localStorage.removeItem('contract_manager_migration_status');
-    console.log('Migration status reset');
+    try {
+        localStorage.removeItem('contract_manager_migrated');
+        localStorage.removeItem('contract_manager_migration_status');
+        console.log('Migration status reset');
+    } catch (error) {
+        console.error('Error resetting migration status:', error);
+    }
 }
 
 /**
@@ -327,7 +366,11 @@ export async function initializeWithMigration() {
     
     if (localContracts.length === 0) {
         console.log('No local contracts to migrate');
-        localStorage.setItem('contract_manager_migrated', 'true');
+        try {
+            localStorage.setItem('contract_manager_migrated', 'true');
+        } catch (error) {
+            console.error('Error setting migration flag:', error);
+        }
         return { success: true, migratedCount: 0 };
     }
     

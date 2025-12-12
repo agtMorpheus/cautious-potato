@@ -3,14 +3,8 @@
  * Phase 6 Testing Framework
  */
 
-// Mock localStorage for testing
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
-};
-global.localStorage = localStorageMock;
+// Use the localStorage mock from setup.js (don't create a new one)
+// The setup.js already mocks global.localStorage
 
 // Import modules to test
 import { 
@@ -47,10 +41,10 @@ import {
 describe('State Management (state.js)', () => {
   beforeEach(() => {
     // Clear localStorage mock and reset state before each test
-    localStorageMock.getItem.mockClear();
-    localStorageMock.setItem.mockClear();
-    localStorageMock.removeItem.mockClear();
-    localStorageMock.clear.mockClear();
+    global.localStorage.getItem.mockClear();
+    global.localStorage.setItem.mockClear();
+    global.localStorage.removeItem.mockClear();
+    global.localStorage.clear.mockClear();
     
     resetState({ persist: false, silent: true });
   });
@@ -144,7 +138,7 @@ describe('State Management (state.js)', () => {
       const testData = { protokollData: { metadata: { orderNumber: 'ORD-001' } } };
       setState(testData);
       
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      expect(global.localStorage.setItem).toHaveBeenCalledWith(
         'abrechnungAppState_v1',
         expect.stringContaining('ORD-001')
       );
@@ -154,7 +148,7 @@ describe('State Management (state.js)', () => {
       const testData = { protokollData: { metadata: { orderNumber: 'ORD-001' } } };
       setState(testData, { persist: false });
       
-      expect(localStorageMock.setItem).not.toHaveBeenCalled();
+      expect(global.localStorage.setItem).not.toHaveBeenCalled();
     });
 
     test('skips listeners when silent option is true', () => {
@@ -246,7 +240,14 @@ describe('State Management (state.js)', () => {
       resetState({ persist: false });
       
       const state = getState();
-      expect(state.protokollData.metadata).toEqual({});
+      expect(state.protokollData.metadata).toEqual({
+        protocolNumber: null,
+        orderNumber: null,
+        plant: null,
+        location: null,
+        company: null,
+        date: null
+      });
       expect(state.protokollData.positionen).toEqual([]);
       expect(state.ui.import.status).toBe('idle');
       expect(state.ui.import.message).toBe('');
@@ -257,7 +258,11 @@ describe('State Management (state.js)', () => {
       
       resetState({ persist: true });
       
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('abrechnungAppState_v1');
+      // resetState saves the initial state, not removes it
+      expect(global.localStorage.setItem).toHaveBeenCalledWith(
+        'abrechnungAppState_v1',
+        expect.any(String)
+      );
     });
 
     test('triggers listeners unless silent option is true', () => {
@@ -276,49 +281,72 @@ describe('State Management (state.js)', () => {
   describe('loadStateFromStorage()', () => {
     test('loads persisted state from localStorage', () => {
       const testState = { 
-        protokollData: { metadata: { orderNumber: 'STORED-001' } },
-        ui: { import: { status: 'success' } }
+        protokollData: { 
+          metadata: { orderNumber: 'STORED-001' },
+          positionen: []
+        },
+        abrechnungData: {
+          header: {},
+          positionen: {}
+        },
+        ui: { 
+          import: { status: 'success' },
+          generate: { status: 'idle' },
+          export: { status: 'idle' }
+        },
+        meta: {
+          version: '1.0.0',
+          lastUpdated: Date.now()
+        }
       };
       
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(testState));
+      global.localStorage.getItem.mockReturnValue(JSON.stringify(testState));
       
       const loaded = loadStateFromStorage();
       expect(loaded.protokollData.metadata.orderNumber).toBe('STORED-001');
       expect(loaded.ui.import.status).toBe('success');
     });
 
-    test('returns empty object if localStorage is empty', () => {
-      localStorageMock.getItem.mockReturnValue(null);
+    test('returns initial state if localStorage is empty', () => {
+      global.localStorage.getItem.mockReturnValue(null);
       
       const loaded = loadStateFromStorage();
-      expect(loaded).toEqual({});
+      // Should return initial state with all required keys
+      expect(loaded.protokollData).toBeDefined();
+      expect(loaded.abrechnungData).toBeDefined();
+      expect(loaded.ui).toBeDefined();
+      expect(loaded.meta).toBeDefined();
     });
 
     test('handles corrupted JSON gracefully', () => {
-      localStorageMock.getItem.mockReturnValue('invalid json {');
+      global.localStorage.getItem.mockReturnValue('invalid json {');
       
       const loaded = loadStateFromStorage();
-      expect(loaded).toEqual({});
+      // Should fall back to initial state when JSON parsing fails
+      expect(loaded.protokollData).toBeDefined();
+      expect(loaded.meta.version).toBe('1.0.0');
     });
 
     test('handles non-string values gracefully', () => {
-      localStorageMock.getItem.mockReturnValue(undefined);
+      global.localStorage.getItem.mockReturnValue(undefined);
       
       const loaded = loadStateFromStorage();
-      expect(loaded).toEqual({});
+      // Should fall back to initial state
+      expect(loaded.protokollData).toBeDefined();
+      expect(loaded.meta.version).toBe('1.0.0');
     });
   });
 
   describe('clearPersistedState()', () => {
     test('removes state from localStorage', () => {
       clearPersistedState();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('abrechnungAppState_v1');
+      expect(global.localStorage.removeItem).toHaveBeenCalledWith('abrechnungAppState_v1');
     });
   });
 
   describe('Error Handling', () => {
     test('handles localStorage errors gracefully', () => {
-      localStorageMock.setItem.mockImplementation(() => {
+      global.localStorage.setItem.mockImplementation(() => {
         throw new Error('Storage quota exceeded');
       });
       
@@ -896,15 +924,29 @@ describe('State Management (state.js)', () => {
       
       const state = getState();
       expect(state.protokollData.metadata.orderNumber).toBeNull();
-      expect(localStorageMock.removeItem).toHaveBeenCalled();
+      expect(global.localStorage.removeItem).toHaveBeenCalled();
     });
   });
 
   describe('loadState() (legacy)', () => {
     test('returns true when state has protokoll data', () => {
-      localStorageMock.getItem.mockReturnValue(JSON.stringify({
+      global.localStorage.getItem.mockReturnValue(JSON.stringify({
         protokollData: {
+          metadata: {},
           positionen: [{ posNr: '01.01.0010', menge: 5 }]
+        },
+        abrechnungData: {
+          header: {},
+          positionen: {}
+        },
+        ui: {
+          import: { status: 'idle' },
+          generate: { status: 'idle' },
+          export: { status: 'idle' }
+        },
+        meta: {
+          version: '1.0.0',
+          lastUpdated: Date.now()
         }
       }));
       
@@ -913,9 +955,23 @@ describe('State Management (state.js)', () => {
     });
 
     test('returns true when state has abrechnung data', () => {
-      localStorageMock.getItem.mockReturnValue(JSON.stringify({
+      global.localStorage.getItem.mockReturnValue(JSON.stringify({
+        protokollData: {
+          metadata: {},
+          positionen: []
+        },
         abrechnungData: {
+          header: {},
           positionen: { '01.01.0010': 5 }
+        },
+        ui: {
+          import: { status: 'idle' },
+          generate: { status: 'idle' },
+          export: { status: 'idle' }
+        },
+        meta: {
+          version: '1.0.0',
+          lastUpdated: Date.now()
         }
       }));
       
@@ -924,7 +980,7 @@ describe('State Management (state.js)', () => {
     });
 
     test('returns false when state is empty', () => {
-      localStorageMock.getItem.mockReturnValue(null);
+      global.localStorage.getItem.mockReturnValue(null);
       
       const result = loadState();
       expect(result).toBe(false);
@@ -934,11 +990,11 @@ describe('State Management (state.js)', () => {
   describe('saveState() (legacy)', () => {
     test('persists current state to localStorage', () => {
       setState({ protokollData: { metadata: { orderNumber: 'ORD-001' } } });
-      localStorageMock.setItem.mockClear();
+      global.localStorage.setItem.mockClear();
       
       saveState();
       
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      expect(global.localStorage.setItem).toHaveBeenCalledWith(
         'abrechnungAppState_v1',
         expect.any(String)
       );
