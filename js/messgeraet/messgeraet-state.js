@@ -323,7 +323,7 @@ export function updateDevice(deviceId, updates) {
   emit('deviceUpdated', { deviceId, device: updatedDevice });
   saveToLocalStorage();
 
-  return updatedDevice;
+  return true;
 }
 
 /**

@@ -14,18 +14,25 @@ global.performance = global.performance || {
 };
 
 // Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-  length: 0,
-  key: jest.fn()
+const createStorageMock = () => {
+  let storage = {};
+  return {
+    getItem: jest.fn((key) => storage[key] || null),
+    setItem: jest.fn((key, value) => { storage[key] = String(value); }),
+    removeItem: jest.fn((key) => { delete storage[key]; }),
+    clear: jest.fn(() => { storage = {}; }),
+    get length() { return Object.keys(storage).length; },
+    key: jest.fn((index) => Object.keys(storage)[index] || null),
+    _storage: storage // For debugging
+  };
 };
+
+const localStorageMock = createStorageMock();
 global.localStorage = localStorageMock;
 
 // Mock sessionStorage
-global.sessionStorage = localStorageMock;
+const sessionStorageMock = createStorageMock();
+global.sessionStorage = sessionStorageMock;
 
 // IMPORTANT: In jsdom environment, window.localStorage needs to be set to the same mock
 // This ensures code using window.localStorage uses our mock
@@ -35,7 +42,7 @@ if (typeof window !== 'undefined') {
     writable: true
   });
   Object.defineProperty(window, 'sessionStorage', {
-    value: localStorageMock,
+    value: sessionStorageMock,
     writable: true
   });
 }
@@ -345,11 +352,18 @@ beforeEach(() => {
     window.prompt = jest.fn();
   }
   
-  // Reset localStorage mock
-  localStorageMock.getItem.mockReturnValue(null);
+  // Reset localStorage mock - actually clear the storage
+  localStorageMock.clear();
+  sessionStorageMock.clear();
+  // Clear the mock call history
+  localStorageMock.getItem.mockClear();
   localStorageMock.setItem.mockClear();
   localStorageMock.removeItem.mockClear();
   localStorageMock.clear.mockClear();
+  sessionStorageMock.getItem.mockClear();
+  sessionStorageMock.setItem.mockClear();
+  sessionStorageMock.removeItem.mockClear();
+  sessionStorageMock.clear.mockClear();
   
   // Reset XLSX mock - only if the methods exist (some tests override with custom mocks)
   if (global.XLSX?.read?.mockReturnValue) {
