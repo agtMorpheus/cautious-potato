@@ -251,8 +251,8 @@ export function getAssetsByType(type) {
  * @returns {Array} Array of matching asset objects
  */
 export function searchAssets(query) {
-  // Use provided query or fall back to formState.searchTerm
-  const searchQuery = query || formState.searchTerm || '';
+  // Use provided query or fall back to state.formState.searchTerm
+  const searchQuery = query || (state.formState && state.formState.searchTerm) || '';
   
   if (!searchQuery || searchQuery.trim() === '') {
     return getAllAssets();

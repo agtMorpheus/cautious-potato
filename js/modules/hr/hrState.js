@@ -264,9 +264,6 @@ export function clearHrPersistedState() {
  * @returns {Object} New state snapshot
  */
 export function addEmployee(employeeData) {
-  // Save current state to history before making changes
-  saveToHistory('Add Employee');
-  
   const newEmployee = {
     ...employeeData,
     id: employeeData.id || `EMP${Date.now()}`,
@@ -284,6 +281,9 @@ export function addEmployee(employeeData) {
     }
   });
   
+  // Save to history AFTER making the change
+  saveToHistory('Add Employee');
+  
   return newEmployee;
 }
 
@@ -294,9 +294,6 @@ export function addEmployee(employeeData) {
  * @returns {Object} Updated employee
  */
 export function updateEmployee(employeeId, updates) {
-  // Save current state to history before making changes
-  saveToHistory('Update Employee');
-  
   let updatedEmployee = null;
   
   const employees = currentHrState.employees.map(emp => {
@@ -318,6 +315,9 @@ export function updateEmployee(employeeId, updates) {
       activeEmployees: employees.filter(e => e.status === 'active').length
     }
   });
+  
+  // Save to history AFTER making the change
+  saveToHistory('Update Employee');
   
   return updatedEmployee;
 }
@@ -557,7 +557,7 @@ export function filterEmployees(criteria) {
   }
   
   if (criteria.status) {
-    filtered = filtered.filter(emp => emp.employmentStatus === criteria.status);
+    filtered = filtered.filter(emp => emp.status === criteria.status);
   }
   
   if (criteria.searchText) {
@@ -1135,8 +1135,20 @@ export function triggerHrEvent(eventType, data) {
  * Initialize HR state (alias for resetHrState for test compatibility)
  */
 export function initHrState() {
-  resetHrState({ persist: false, silent: false });
-  loadHrStateFromStorage();
+  // Try to load from storage first
+  try {
+    const serialized = window.localStorage.getItem(HR_STORAGE_KEY);
+    if (serialized) {
+      // Data exists, load it
+      loadHrStateFromStorage();
+    } else {
+      // No data, reset to initial state
+      resetHrState({ persist: false, silent: false });
+    }
+  } catch (error) {
+    // Error loading, reset to initial state
+    resetHrState({ persist: false, silent: false });
+  }
 }
 
 /**
