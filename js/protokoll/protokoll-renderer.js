@@ -482,11 +482,11 @@ export function renderPositionsForm() {
                 <th scope="col" rowspan="2">Nr.</th>
                 <th scope="col" rowspan="2">Zielbezeichnung</th>
                 <th scope="col" colspan="4">Kabel/Leitung</th>
-                <th scope="col" colspan="3">Spannung/Frequenz</th>
+                <th scope="col" colspan="2">Spannung/Frequenz</th>
                 <th scope="col" colspan="2">Überstrom-Schutz</th>
-                <th scope="col" colspan="4">Impedanzen</th>
-                <th scope="col" colspan="3">Isolationswiderstand</th>
-                <th scope="col" colspan="6">Fehlerstrom-Schutzeinrichtung</th>
+                <th scope="col" colspan="3">Impedanzen</th>
+                <th scope="col" colspan="2">Isolationswiderstand</th>
+                <th scope="col" colspan="7">Fehlerstrom-Schutzeinrichtung</th>
                 <th scope="col" rowspan="2">Status</th>
                 <th scope="col" rowspan="2">Aktionen</th>
               </tr>
@@ -719,7 +719,8 @@ export function renderReviewForm() {
   `;
 
   container.innerHTML = html;
-  attachExportListeners();
+  // Export listeners are handled by main.js
+  attachFieldListeners();
 }
 
 // ============================================
@@ -1579,32 +1580,8 @@ function attachFieldListeners() {
   const form = document.querySelector('.protokoll-form');
   if (!form) return;
 
-  // Note: Input and change events are handled by event delegation in protokoll-handlers.js
-  // This function now only handles navigation and action buttons
-
-  // Navigation button clicks
-  form.addEventListener('click', (e) => {
-    const button = e.target.closest('[data-action]');
-    if (!button) return;
-
-    const action = button.getAttribute('data-action');
-    
-    switch (action) {
-      case 'previous-step':
-        handlers.handlePreviousStep();
-        break;
-      case 'next-step':
-        handlers.handleNextStep();
-        break;
-      case 'add-position':
-        handlers.handleAddPosition();
-        break;
-      case 'export':
-      case 'export-both':
-        handlers.handleExport();
-        break;
-    }
-  });
+  // Note: Most button clicks are handled by protokoll-handlers.js via document delegation.
+  // We only handle specific UI interactions here like progress steps.
 
   // Progress step clicks
   document.querySelectorAll('.progress-step').forEach(step => {
@@ -1635,14 +1612,10 @@ function attachPositionListeners() {
   if (tbody._positionClickHandler) {
     tbody.removeEventListener('click', tbody._positionClickHandler);
   }
-  if (tbody._positionInputHandler) {
-    tbody.removeEventListener('input', tbody._positionInputHandler);
-  }
-  if (tbody._positionChangeHandler) {
-    tbody.removeEventListener('change', tbody._positionChangeHandler);
-  }
 
   // Create click handler for buttons
+  // Note: add-child, delete etc are handled by handlers.js
+  // We only handle view-parent for scrolling which is UI specific
   tbody._positionClickHandler = function(e) {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -1652,55 +1625,24 @@ function attachPositionListeners() {
 
     if (!posNr) return;
 
-    e.preventDefault();
-
-    switch (action) {
-      case 'delete-position':
-        handlers.handleDeletePosition(posNr);
-        break;
-      case 'add-child-position':
-        handlers.handleAddChildPosition(posNr);
-        break;
-      case 'view-parent':
-        // Scroll to parent position or highlight it
-        const parentRow = document.querySelector(`tr[data-pos-nr="${posNr}"]`);
+    if (action === 'view-parent') {
+      e.preventDefault();
+      // Scroll to the parent row, not the current row
+      const position = state.getPosition(posNr);
+      if (position && position.parentCircuitId) {
+        const parentRow = document.querySelector(`tr[data-pos-nr="${position.parentCircuitId}"]`);
         if (parentRow) {
           parentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
           parentRow.classList.add('highlight');
           setTimeout(() => parentRow.classList.remove('highlight'), 2000);
         }
-        break;
+      }
     }
   };
 
-  // Create input handler for real-time updates
-  tbody._positionInputHandler = function(e) {
-    const input = e.target;
-    const fieldPath = input.getAttribute('data-field');
-    const posNr = input.getAttribute('data-pos-nr');
-
-    if (!fieldPath || !posNr) return;
-
-    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
-    handlers.handlePositionChange(posNr, fieldPath, value);
-  };
-
-  // Create change handler for final validation
-  tbody._positionChangeHandler = function(e) {
-    const input = e.target;
-    const fieldPath = input.getAttribute('data-field');
-    const posNr = input.getAttribute('data-pos-nr');
-
-    if (!fieldPath || !posNr) return;
-
-    const value = input.type === 'number' ? parseFloat(input.value) || '' : input.value;
-    handlers.handlePositionChange(posNr, fieldPath, value);
-  };
-
-  // Attach all listeners
+  // Attach listeners
   tbody.addEventListener('click', tbody._positionClickHandler);
-  tbody.addEventListener('input', tbody._positionInputHandler);
-  tbody.addEventListener('change', tbody._positionChangeHandler);
+  // Input/Change events are handled by handlers.js
 }
 
 /**
@@ -1708,14 +1650,7 @@ function attachPositionListeners() {
  * @returns {void}
  */
 function attachExportListeners() {
-  document.querySelectorAll('[data-action^="export-"]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      handlers.handleExport();
-    });
-  });
-
-  // Navigation buttons
+  // handled by main.js / handlers.js
   attachFieldListeners();
 }
 
