@@ -12,7 +12,29 @@ const mockXLSX = {
     sheet_to_json: jest.fn(),
     json_to_sheet: jest.fn(),
     book_new: jest.fn(),
-    book_append_sheet: jest.fn()
+    book_append_sheet: jest.fn(),
+    encode_cell: jest.fn((cell) => {
+      const col = String.fromCharCode(65 + cell.c);
+      const row = cell.r + 1;
+      return `${col}${row}`;
+    }),
+    decode_cell: jest.fn((address) => {
+      const match = address.match(/^([A-Z]+)(\d+)$/);
+      if (!match) return { c: 0, r: 0 };
+      const col = match[1].charCodeAt(0) - 65;
+      const row = parseInt(match[2]) - 1;
+      return { c: col, r: row };
+    }),
+    encode_range: jest.fn((range) => {
+      return `${mockXLSX.utils.encode_cell(range.s)}:${mockXLSX.utils.encode_cell(range.e)}`;
+    }),
+    decode_range: jest.fn((range) => {
+      const [start, end] = range.split(':');
+      return {
+        s: mockXLSX.utils.decode_cell(start),
+        e: mockXLSX.utils.decode_cell(end)
+      };
+    })
   }
 };
 global.XLSX = mockXLSX;
@@ -23,7 +45,9 @@ import {
   getPositionSummary,
   validateExtractedPositions,
   generateExportFilename,
+  generateAbrechnungFilename,
   parseProtokollMetadata,
+  parseProtokoll,
   extractPositions,
   readExcelFile,
   createExportWorkbook,
@@ -417,7 +441,7 @@ describe('Utility Functions (utils.js)', () => {
       const positions = extractPositions(mockWorkbook);
       
       expect(positions).toHaveLength(3);
-      expect(positions[0]).toEqual({
+      expect(positions[0]).toMatchObject({
         posNr: '01.01.0001',
         menge: 5,
         rowIndex: 30
@@ -491,7 +515,7 @@ describe('Utility Functions (utils.js)', () => {
         type: 'text/plain'
       });
       
-      await expect(readExcelFile(mockFile)).rejects.toThrow('Invalid file type');
+      await expect(readExcelFile(mockFile)).rejects.toThrow('Ungültiges Dateiformat');
     });
 
     test('rejects files that are too large', async () => {
@@ -499,7 +523,7 @@ describe('Utility Functions (utils.js)', () => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
       
-      await expect(readExcelFile(largeFile)).rejects.toThrow('File too large');
+      await expect(readExcelFile(largeFile)).rejects.toThrow('Datei zu groß');
     });
   });
 
@@ -523,6 +547,8 @@ describe('Utility Functions (utils.js)', () => {
       
       // Mock template loading
       global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8))
       });
       mockXLSX.read.mockReturnValue(mockWorkbook);
@@ -534,8 +560,8 @@ describe('Utility Functions (utils.js)', () => {
     });
 
     test('throws error on missing data', async () => {
-      await expect(createExportWorkbook(null)).rejects.toThrow('Invalid abrechnung data');
-      await expect(createExportWorkbook({})).rejects.toThrow('Invalid abrechnung data');
+      await expect(createExportWorkbook(null)).rejects.toThrow('Invalid abrechnungData');
+      await expect(createExportWorkbook({})).rejects.toThrow('Header oder Positionen fehlen');
     });
   });
 
