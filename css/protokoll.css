@@ -1586,80 +1586,102 @@
   color: var(--text-muted);
 }
 
-/* Compact column widths for measurement table */
-.positions-table thead tr:first-child th:nth-child(1),
-/* Pos.Nr. */
-.positions-table td:nth-child(1) {
+/* Column 1: Pos (100px) */
+.col-sticky-1 {
   min-width: 100px;
   width: 100px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
 }
 
-.positions-table thead tr:first-child th:nth-child(2),
-/* Nr. */
-.positions-table td:nth-child(2) {
+/* Column 2: Nr (50px) */
+.col-sticky-2 {
   min-width: 50px;
   width: 50px;
+  position: sticky;
+  left: 100px;
+  z-index: 10;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
 }
 
-.positions-table thead tr:first-child th:nth-child(3),
-/* Zielbezeichnung */
-.positions-table td:nth-child(3) {
+/* Column 3: Zielbezeichnung (150px) */
+.col-sticky-3 {
   min-width: 150px;
   width: 150px;
+  position: sticky;
+  left: 150px;
+  z-index: 10;
+  background: var(--bg-card);
+  border-right: 2px solid var(--border-base);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Kabel/Leitung columns */
-.positions-table th:nth-child(4),
-/* Kabel Typ */
-.positions-table td:nth-child(4),
-.positions-table th:nth-child(6),
-/* Querschnitt */
-.positions-table td:nth-child(6) {
-  min-width: 80px;
-  width: 80px;
+/* Right Sticky: Actions (120px) */
+.col-sticky-right {
+  min-width: 120px;
+  width: 120px;
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-base);
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
 }
 
-.positions-table th:nth-child(5),
-/* Leiter Anzahl */
-.positions-table td:nth-child(5) {
-  min-width: 60px;
-  width: 60px;
+/* Header Z-Index Fixes */
+.positions-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
-/* Measurement columns - compact width */
-.positions-table th:nth-child(n+7):nth-child(-n+23),
-/* Measurement columns */
-.positions-table td:nth-child(n+7):nth-child(-n+23) {
+.positions-table thead th.col-sticky-1,
+.positions-table thead th.col-sticky-2,
+.positions-table thead th.col-sticky-3,
+.positions-table thead th.col-sticky-right {
+  z-index: 30;
+  background: var(--bg-surface);
+}
+
+/* Row Hover effects for sticky columns */
+.positions-table tr:hover .col-sticky-1,
+.positions-table tr:hover .col-sticky-2,
+.positions-table tr:hover .col-sticky-3,
+.positions-table tr:hover .col-sticky-right {
+  background-color: var(--bg-hover);
+}
+
+/* Standard Column Widths */
+.positions-table th,
+.positions-table td {
   min-width: 70px;
   width: 70px;
 }
 
-/* Status and Actions columns */
-.positions-table th:nth-child(24),
-/* Status */
-.positions-table td:nth-child(24) {
+/* Kabel/Leitung columns overrides */
+.positions-table th[title="Kabel Typ"],
+.positions-table td[data-field="kabel.typ"],
+.positions-table th[title="Querschnitt"],
+.positions-table td[data-field="kabel.querschnitt"] {
+  min-width: 80px;
+  width: 80px;
+}
+
+.positions-table th[title="Leiter Anzahl"],
+.positions-table td[data-field="kabel.leiterAnzahl"] {
+  min-width: 60px;
+  width: 60px;
+}
+
+/* Status Column */
+.positions-table th.col-sm,
+.positions-table td.status-cell {
   min-width: 100px;
   width: 100px;
-}
-
-.positions-table th:nth-child(25),
-/* Aktionen */
-.positions-table td:nth-child(25) {
-  min-width: 120px;
-  width: 120px;
-}
-
-/* Compact input styling for measurement table */
-.positions-table .table-input,
-.positions-table .table-select {
-  font-size: 0.7rem;
-  /* Smaller font for compact view */
-  padding: 0.2rem 0.3rem;
-  /* Reduced padding */
-  min-height: 24px;
-  /* Smaller height */
-  border-radius: 3px;
-  /* Smaller border radius */
 }
 
 /* Header grouping styles */
@@ -1670,45 +1692,13 @@
   border-bottom: 2px solid var(--border-base);
 }
 
-/* Sticky first columns for better navigation - updated for compact view */
-.positions-table thead tr:first-child th:nth-child(1),
-.positions-table td:nth-child(1),
-.positions-table thead tr:first-child th:nth-child(2),
-.positions-table td:nth-child(2),
-.positions-table thead tr:first-child th:nth-child(3),
-.positions-table td:nth-child(3) {
-  position: sticky;
-  background: var(--bg-card);
-  z-index: 10;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-}
-
-.positions-table thead tr:first-child th:nth-child(1),
-.positions-table td:nth-child(1) {
-  left: 0;
-}
-
-.positions-table thead tr:first-child th:nth-child(2),
-.positions-table td:nth-child(2) {
-  left: 100px;
-  /* Updated for compact width */
-}
-
-.positions-table thead tr:first-child th:nth-child(3),
-.positions-table td:nth-child(3) {
-  left: 150px;
-  /* Updated for compact width */
-}
-
-/* Sticky actions column */
-.positions-table th:nth-child(25),
-.positions-table td:nth-child(25) {
-  position: sticky;
-  right: 0;
-  background: var(--bg-card);
-  z-index: 10;
-  border-left: 1px solid var(--border-base);
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
+/* Compact input styling */
+.positions-table .table-input,
+.positions-table .table-select {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.3rem;
+  min-height: 24px;
+  border-radius: 3px;
 }
 
 /* Scroll indicators for better UX */
@@ -1729,49 +1719,26 @@
   border: 1px solid var(--border-info);
 }
 
-/* Enhanced mobile responsiveness */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .positions-table {
     min-width: 1800px;
-    /* Reduced for mobile */
     font-size: 0.65rem;
-    /* Even smaller on mobile */
   }
 
-  .positions-table th,
-  .positions-table td {
-    padding: 0.25rem 0.15rem;
-  }
-
-  .positions-table .table-input,
-  .positions-table .table-select {
-    font-size: 0.65rem;
-    padding: 0.15rem 0.2rem;
-    min-height: 20px;
-  }
-
-  /* Adjust sticky column positions for mobile */
-  .positions-table thead tr:first-child th:nth-child(2),
-  .positions-table td:nth-child(2) {
+  .col-sticky-2 {
     left: 80px;
+    width: 40px;
+    min-width: 40px;
   }
 
-  .positions-table thead tr:first-child th:nth-child(3),
-  .positions-table td:nth-child(3) {
+  .col-sticky-1 {
+    width: 80px;
+    min-width: 80px;
+  }
+
+  .col-sticky-3 {
     left: 120px;
-  }
-}
-
-/* Tablet responsiveness */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .positions-table {
-    min-width: 1900px;
-    font-size: 0.68rem;
-  }
-
-  .positions-table th,
-  .positions-table td {
-    padding: 0.3rem 0.2rem;
   }
 }
 

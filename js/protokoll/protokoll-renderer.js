@@ -526,9 +526,9 @@ export function renderPositionsForm() {
 function renderPositionsTableHeader() {
   return `
     <tr>
-      <th scope="col" rowspan="2" class="col-fixed-left">Pos.</th>
-      <th scope="col" rowspan="2" class="col-sm">Nr.</th>
-      <th scope="col" rowspan="2" class="col-md">Zielbezeichnung</th>
+      <th scope="col" rowspan="2" class="col-sticky-1">Pos.</th>
+      <th scope="col" rowspan="2" class="col-sticky-2">Nr.</th>
+      <th scope="col" rowspan="2" class="col-sticky-3">Zielbezeichnung</th>
       <th scope="col" colspan="4" class="group-header">Kabel/Leitung</th>
       <th scope="col" colspan="2" class="group-header">Spannung/Freq.</th>
       <th scope="col" colspan="2" class="group-header">Überstrom-Schutz</th>
@@ -536,7 +536,7 @@ function renderPositionsTableHeader() {
       <th scope="col" colspan="2" class="group-header">Isolationswid.</th>
       <th scope="col" colspan="7" class="group-header">Fehlerstrom-Schutzeinrichtung (RCD)</th>
       <th scope="col" rowspan="2" class="col-sm">Status</th>
-      <th scope="col" rowspan="2" class="col-fixed-right">Aktionen</th>
+      <th scope="col" rowspan="2" class="col-sticky-right">Aktionen</th>
     </tr>
     <tr>
       <th scope="col" class="sub-header" title="Kabel Typ">Typ</th>
@@ -1014,7 +1014,7 @@ function renderPositionRow(position, index) {
   return `
     <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
       <!-- Pos.Nr. -->
-      <td class="editable-cell" data-field="stromkreisNr">
+      <td class="editable-cell col-sticky-1" data-field="stromkreisNr">
         <input type="text" 
                value="${escapeHtml(position.stromkreisNr || '')}" 
                data-field="position.stromkreisNr"
@@ -1025,7 +1025,7 @@ function renderPositionRow(position, index) {
       </td>
       
       <!-- Nr. -->
-      <td class="editable-cell" data-field="nr">
+      <td class="editable-cell col-sticky-2" data-field="nr">
         <input type="text" 
                value="${escapeHtml(position.nr || '')}" 
                data-field="position.nr"
@@ -1035,7 +1035,7 @@ function renderPositionRow(position, index) {
       </td>
       
       <!-- Zielbezeichnung -->
-      <td class="editable-cell" data-field="zielbezeichnung">
+      <td class="editable-cell col-sticky-3" data-field="zielbezeichnung">
         <input type="text" 
                value="${escapeHtml(position.zielbezeichnung || '')}" 
                data-field="position.zielbezeichnung"
@@ -1293,7 +1293,7 @@ function renderPositionRow(position, index) {
       </td>
       
       <!-- Aktionen -->
-      <td class="position-actions">
+      <td class="position-actions col-sticky-right">
         ${hasParent ? `<button type="button" class="btn-icon btn-tree" data-action="view-parent" data-pos-nr="${escapeHtml(position.posNr)}" title="Zum Vater-Stromkreis" aria-label="Vater-Stromkreis anzeigen">↑</button>` : ''}
         <button type="button" class="btn-icon btn-success" data-action="add-child-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Unterkreis hinzufügen" aria-label="Unterkreis hinzufügen">+</button>
         <button type="button" class="btn-icon btn-danger" data-action="delete-position" data-pos-nr="${escapeHtml(position.posNr)}" title="Löschen" aria-label="Position löschen">✕</button>
