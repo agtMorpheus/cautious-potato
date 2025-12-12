@@ -855,19 +855,19 @@
   color: var(--text-muted);
 }
 /* Compact column widths for measurement table */
-.positions-table th:nth-child(1),  /* Pos.Nr. */
+.positions-table thead tr:first-child th:nth-child(1),  /* Pos.Nr. */
 .positions-table td:nth-child(1) {
   min-width: 100px;
   width: 100px;
 }
 
-.positions-table th:nth-child(2),  /* Nr. */
+.positions-table thead tr:first-child th:nth-child(2),  /* Nr. */
 .positions-table td:nth-child(2) {
   min-width: 50px;
   width: 50px;
 }
 
-.positions-table th:nth-child(3),  /* Zielbezeichnung */
+.positions-table thead tr:first-child th:nth-child(3),  /* Zielbezeichnung */
 .positions-table td:nth-child(3) {
   min-width: 150px;
   width: 150px;
@@ -926,11 +926,11 @@
 }
 
 /* Sticky first columns for better navigation - updated for compact view */
-.positions-table th:nth-child(1),
+.positions-table thead tr:first-child th:nth-child(1),
 .positions-table td:nth-child(1),
-.positions-table th:nth-child(2),
+.positions-table thead tr:first-child th:nth-child(2),
 .positions-table td:nth-child(2),
-.positions-table th:nth-child(3),
+.positions-table thead tr:first-child th:nth-child(3),
 .positions-table td:nth-child(3) {
   position: sticky;
   background: var(--bg-card);
@@ -938,17 +938,17 @@
   box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
 }
 
-.positions-table th:nth-child(1),
+.positions-table thead tr:first-child th:nth-child(1),
 .positions-table td:nth-child(1) {
   left: 0;
 }
 
-.positions-table th:nth-child(2),
+.positions-table thead tr:first-child th:nth-child(2),
 .positions-table td:nth-child(2) {
   left: 100px; /* Updated for compact width */
 }
 
-.positions-table th:nth-child(3),
+.positions-table thead tr:first-child th:nth-child(3),
 .positions-table td:nth-child(3) {
   left: 150px; /* Updated for compact width */
 }
@@ -1001,12 +1001,12 @@
   }
   
   /* Adjust sticky column positions for mobile */
-  .positions-table th:nth-child(2),
+  .positions-table thead tr:first-child th:nth-child(2),
   .positions-table td:nth-child(2) {
     left: 80px;
   }
   
-  .positions-table th:nth-child(3),
+  .positions-table thead tr:first-child th:nth-child(3),
   .positions-table td:nth-child(3) {
     left: 120px;
   }

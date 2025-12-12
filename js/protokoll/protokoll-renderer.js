@@ -482,11 +482,11 @@ export function renderPositionsForm() {
                 <th scope="col" rowspan="2">Nr.</th>
                 <th scope="col" rowspan="2">Zielbezeichnung</th>
                 <th scope="col" colspan="4">Kabel/Leitung</th>
-                <th scope="col" colspan="3">Spannung/Frequenz</th>
+                <th scope="col" colspan="2">Spannung/Frequenz</th>
                 <th scope="col" colspan="2">Überstrom-Schutz</th>
-                <th scope="col" colspan="4">Impedanzen</th>
-                <th scope="col" colspan="3">Isolationswiderstand</th>
-                <th scope="col" colspan="6">Fehlerstrom-Schutzeinrichtung</th>
+                <th scope="col" colspan="3">Impedanzen</th>
+                <th scope="col" colspan="2">Isolationswiderstand</th>
+                <th scope="col" colspan="7">Fehlerstrom-Schutzeinrichtung</th>
                 <th scope="col" rowspan="2">Status</th>
                 <th scope="col" rowspan="2">Aktionen</th>
               </tr>
