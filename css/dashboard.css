@@ -136,8 +136,8 @@
 
 /* Icon Colors - Mapped to Standard Colors using RGB vars */
 .metric-icon-wrapper.import {
-    color: var(--color-primary);
-    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--primary-main);
+    background: rgba(var(--primary-rgb), 0.1);
 }
 
 .metric-icon-wrapper.process {
@@ -146,8 +146,8 @@
 }
 
 .metric-icon-wrapper.export {
-    color: var(--color-success);
-    background: rgba(var(--color-success-rgb), 0.1);
+    color: var(--c-success);
+    background: rgba(var(--success-rgb), 0.1);
 }
 
 .metric-icon-wrapper.templates {

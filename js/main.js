@@ -177,6 +177,11 @@ function initializeNavigation() {
             // Update icon to point right (expand)
             const iconPath = sidebarToggle.querySelector('path');
             if (iconPath) iconPath.setAttribute('d', 'M9 5l7 7-7 7');
+        } else {
+            appContainer.classList.remove('sidebar-collapsed');
+            // Update icon to point left (collapse)
+            const iconPath = sidebarToggle.querySelector('path');
+            if (iconPath) iconPath.setAttribute('d', 'M15 19l-7-7 7-7');
         }
 
         // Apply workspace wide mode if wide screen
