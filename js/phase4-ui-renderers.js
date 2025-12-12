@@ -423,6 +423,49 @@ const Phase4UIRenderers = (() => {
             return;
         }
         
+        // Update Drop Zone Visuals
+        const dropZone = document.querySelector('#file-drop-zone');
+        if (dropZone) {
+            const uploadText = dropZone.querySelector('.upload-text');
+            const uploadHint = dropZone.querySelector('.upload-hint');
+            const uploadIcon = dropZone.querySelector('.upload-icon');
+
+            if (importState.fileName) {
+                dropZone.classList.add('has-file');
+                // Use inline styles for immediate feedback, though classes are better if CSS allows
+                dropZone.style.borderColor = 'var(--c-success)';
+                dropZone.style.backgroundColor = 'var(--success-light)';
+
+                if (uploadText) {
+                    uploadText.innerHTML = `<strong>${escapeHtml(importState.fileName)}</strong>`;
+                }
+                if (uploadHint) {
+                    uploadHint.textContent = 'Klicken oder ziehen, um zu ändern';
+                }
+                if (uploadIcon) {
+                    // Change to document check icon
+                    uploadIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                    uploadIcon.style.color = 'var(--c-success)';
+                }
+            } else {
+                dropZone.classList.remove('has-file');
+                dropZone.style.borderColor = '';
+                dropZone.style.backgroundColor = '';
+
+                if (uploadText) {
+                    uploadText.innerHTML = 'Datei hierher ziehen oder <span class="upload-link">durchsuchen</span>';
+                }
+                if (uploadHint) {
+                    uploadHint.textContent = 'Die Datei wird nur lokal im Browser verarbeitet.';
+                }
+                if (uploadIcon) {
+                    // Restore upload icon
+                    uploadIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />';
+                    uploadIcon.style.color = '';
+                }
+            }
+        }
+
         // Update button loading state with accessibility
         if (window.AccessibilityManager) {
             const isLoading = importState.status === 'pending';
