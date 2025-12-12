@@ -454,14 +454,11 @@ describe('Messgerät E2E - Complete User Journey', () => {
 
   describe('User Journey: Event System', () => {
     test('should emit events on device addition', (done) => {
-      const handler = (event) => {
+      document.addEventListener('messgeraet:device-added', (event) => {
         expect(event.detail.device).toBeTruthy();
         expect(event.detail.device.name).toBe('Event Test Device');
-        document.removeEventListener('messgeraet:device-added', handler);
         done();
-      };
-      
-      document.addEventListener('messgeraet:device-added', handler, { once: true });
+      }, { once: true });
       
       messgeraetState.addDevice({
         name: 'Event Test Device',
@@ -475,13 +472,10 @@ describe('Messgerät E2E - Complete User Journey', () => {
         type: 'Multimeter'
       });
       
-      const handler = (event) => {
+      document.addEventListener('messgeraet:device-updated', (event) => {
         expect(event.detail.device.name).toBe('Updated Name');
-        document.removeEventListener('messgeraet:device-updated', handler);
         done();
-      };
-      
-      document.addEventListener('messgeraet:device-updated', handler, { once: true });
+      }, { once: true });
       
       messgeraetState.updateDevice(device.id, {
         name: 'Updated Name'
@@ -494,13 +488,10 @@ describe('Messgerät E2E - Complete User Journey', () => {
         type: 'Multimeter'
       });
       
-      const handler = (event) => {
+      document.addEventListener('messgeraet:device-deleted', (event) => {
         expect(event.detail.deviceId).toBe(device.id);
-        document.removeEventListener('messgeraet:device-deleted', handler);
         done();
-      };
-      
-      document.addEventListener('messgeraet:device-deleted', handler, { once: true });
+      }, { once: true });
       
       messgeraetState.deleteDevice(device.id);
     });
