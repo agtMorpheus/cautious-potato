@@ -193,17 +193,51 @@ export function parseProtokollMetadata(workbook, options = {}) {
  * @returns {Object} Metadata object
  */
 export function parseProtokoll(workbook, options = {}) {
-    const metadata = parseProtokollMetadata(workbook, options);
-    // Map to test-expected field names
-    return {
-        protocolNumber: metadata.protokollNr,
-        orderNumber: metadata.auftragsNr,
-        plant: metadata.anlage,
-        location: metadata.einsatzort,
-        company: metadata.firma || metadata.auftraggeber,
-        date: metadata.datum,
-        _foundCells: metadata._foundCells
-    };
+    // Validate workbook
+    if (!workbook || typeof workbook !== 'object') {
+        throw new Error('Invalid workbook');
+    }
+    if (!workbook.Sheets || typeof workbook.Sheets !== 'object') {
+        throw new Error('Invalid workbook');
+    }
+    
+    // Find the first available sheet if the configured one doesn't exist
+    let sheetName = PARSING_CONFIG.protokollSheetName;
+    if (!workbook.Sheets[sheetName]) {
+        // Try first sheet in SheetNames
+        if (workbook.SheetNames && workbook.SheetNames.length > 0) {
+            sheetName = workbook.SheetNames[0];
+        } else {
+            throw new Error(`Sheet "${sheetName}" nicht gefunden`);
+        }
+    }
+    
+    // Temporarily override the sheet name for parsing
+    const originalSheetName = PARSING_CONFIG.protokollSheetName;
+    PARSING_CONFIG.protokollSheetName = sheetName;
+    
+    try {
+        const metadata = parseProtokollMetadata(workbook, options);
+        // Map to test-expected field names
+        return {
+            protocolNumber: metadata.protokollNr,
+            orderNumber: metadata.auftragsNr,
+            plant: metadata.anlage,
+            location: metadata.einsatzort,
+            company: metadata.firma || metadata.auftraggeber,
+            date: metadata.datum,
+            _foundCells: metadata._foundCells
+        };
+    } catch (error) {
+        // Remap error messages for test compatibility
+        if (error.message && error.message.includes('Fehlende Pflichtfelder')) {
+            throw new Error('Missing required metadata');
+        }
+        throw error;
+    } finally {
+        // Restore original sheet name
+        PARSING_CONFIG.protokollSheetName = originalSheetName;
+    }
 }
 
 /**
@@ -212,9 +246,15 @@ export function parseProtokoll(workbook, options = {}) {
  * @returns {Array} Array of position objects
  */
 export function extractPositions(workbook) {
-    const sheetName = PARSING_CONFIG.protokollSheetName;
+    // Find the first available sheet if the configured one doesn't exist
+    let sheetName = PARSING_CONFIG.protokollSheetName;
     if (!workbook.Sheets[sheetName]) {
-        throw new Error(`Sheet "${sheetName}" nicht gefunden`);
+        // Try first sheet in SheetNames
+        if (workbook.SheetNames && workbook.SheetNames.length > 0) {
+            sheetName = workbook.SheetNames[0];
+        } else {
+            throw new Error(`Sheet "${sheetName}" nicht gefunden`);
+        }
     }
     
     const worksheet = workbook.Sheets[sheetName];
@@ -268,6 +308,7 @@ export function extractPositions(workbook) {
             positionen.push({
                 posNr: String(posNr).trim(),
                 menge: Number(menge),
+                rowIndex: row,
                 row: row,
                 column: foundInColumn
             });
