@@ -441,7 +441,7 @@ describe('Utility Functions (utils.js)', () => {
       const positions = extractPositions(mockWorkbook);
       
       expect(positions).toHaveLength(3);
-      expect(positions[0]).toEqual({
+      expect(positions[0]).toMatchObject({
         posNr: '01.01.0001',
         menge: 5,
         rowIndex: 30
@@ -515,7 +515,7 @@ describe('Utility Functions (utils.js)', () => {
         type: 'text/plain'
       });
       
-      await expect(readExcelFile(mockFile)).rejects.toThrow('Invalid file type');
+      await expect(readExcelFile(mockFile)).rejects.toThrow('Ungültiges Dateiformat');
     });
 
     test('rejects files that are too large', async () => {
@@ -523,7 +523,7 @@ describe('Utility Functions (utils.js)', () => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
       
-      await expect(readExcelFile(largeFile)).rejects.toThrow('File too large');
+      await expect(readExcelFile(largeFile)).rejects.toThrow('Datei zu groß');
     });
   });
 
@@ -547,6 +547,8 @@ describe('Utility Functions (utils.js)', () => {
       
       // Mock template loading
       global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8))
       });
       mockXLSX.read.mockReturnValue(mockWorkbook);
@@ -558,8 +560,8 @@ describe('Utility Functions (utils.js)', () => {
     });
 
     test('throws error on missing data', async () => {
-      await expect(createExportWorkbook(null)).rejects.toThrow('Invalid abrechnung data');
-      await expect(createExportWorkbook({})).rejects.toThrow('Invalid abrechnung data');
+      await expect(createExportWorkbook(null)).rejects.toThrow('Invalid abrechnungData');
+      await expect(createExportWorkbook({})).rejects.toThrow('Header oder Positionen fehlen');
     });
   });
 

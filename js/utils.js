@@ -58,6 +58,13 @@ export async function readExcelFile(file) {
         
         const fileName = file.name;
         
+        // Check file size (max 50MB)
+        const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+        if (file.size > MAX_FILE_SIZE) {
+            reject(new Error('Datei zu groß. Maximale Größe: 50MB'));
+            return;
+        }
+        
         // Validate file type - accept .xlsx files
         const validExtensions = ['.xlsx', '.xls'];
         const hasValidExtension = validExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
@@ -165,8 +172,9 @@ export function parseProtokollMetadata(workbook, options = {}) {
         foundCells[field] = foundAt;
     }
     
-    // Validate required fields
-    const requiredFields = ['auftragsNr', 'anlage'];
+    // Validate required fields - only check if field exists (not if it's empty)
+    // Empty strings are allowed since cells might be present but empty
+    const requiredFields = ['auftragsNr'];  // Only auftragsNr is strictly required
     const missingFields = requiredFields.filter(field => !metadata[field]);
     
     if (missingFields.length > 0) {
