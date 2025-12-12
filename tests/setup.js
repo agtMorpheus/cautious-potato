@@ -27,6 +27,19 @@ global.localStorage = localStorageMock;
 // Mock sessionStorage
 global.sessionStorage = localStorageMock;
 
+// IMPORTANT: In jsdom environment, window.localStorage needs to be set to the same mock
+// This ensures code using window.localStorage uses our mock
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    writable: true
+  });
+  Object.defineProperty(window, 'sessionStorage', {
+    value: localStorageMock,
+    writable: true
+  });
+}
+
 // Mock XLSX library
 global.XLSX = {
   read: jest.fn(),
@@ -219,7 +232,8 @@ global.window = {
   setTimeout: jest.fn((fn, delay) => setTimeout(fn, delay)),
   clearTimeout: jest.fn(id => clearTimeout(id)),
   setInterval: jest.fn((fn, delay) => setInterval(fn, delay)),
-  clearInterval: jest.fn(id => clearInterval(id))
+  clearInterval: jest.fn(id => clearInterval(id)),
+  scrollTo: jest.fn()
 };
 
 // Mock console methods for cleaner test output
@@ -323,15 +337,27 @@ beforeEach(() => {
   // Reset DOM
   document.body.innerHTML = '';
   
+  // Mock window methods to prevent JSDOM "Not implemented" errors
+  if (typeof window !== 'undefined') {
+    window.scrollTo = jest.fn();
+    window.alert = jest.fn();
+    window.confirm = jest.fn(() => true);
+    window.prompt = jest.fn();
+  }
+  
   // Reset localStorage mock
   localStorageMock.getItem.mockReturnValue(null);
   localStorageMock.setItem.mockClear();
   localStorageMock.removeItem.mockClear();
   localStorageMock.clear.mockClear();
   
-  // Reset XLSX mock
-  global.XLSX.read.mockReturnValue(testUtils.createMockWorkbook());
-  global.XLSX.write.mockReturnValue(new ArrayBuffer(8));
+  // Reset XLSX mock - only if the methods exist (some tests override with custom mocks)
+  if (global.XLSX?.read?.mockReturnValue) {
+    global.XLSX.read.mockReturnValue(testUtils.createMockWorkbook());
+  }
+  if (global.XLSX?.write?.mockReturnValue) {
+    global.XLSX.write.mockReturnValue(new ArrayBuffer(8));
+  }
   
   // Reset fetch mock
   global.fetch.mockResolvedValue({
@@ -341,16 +367,20 @@ beforeEach(() => {
   });
   
   // Reset FileReader mock
-  global.FileReader.mockImplementation(() => ({
-    readAsArrayBuffer: jest.fn(function() {
+  const FileReaderMock = jest.fn(function() {
+    this.readAsArrayBuffer = jest.fn(function() {
       setTimeout(() => {
         this.onload && this.onload({ target: { result: new ArrayBuffer(8) } });
       }, 0);
-    }),
-    onload: null,
-    onerror: null,
-    result: null
-  }));
+    });
+    this.readAsText = jest.fn();
+    this.readAsDataURL = jest.fn();
+    this.onload = null;
+    this.onerror = null;
+    this.result = null;
+    return this;
+  });
+  global.FileReader = FileReaderMock;
 });
 
 afterEach(() => {

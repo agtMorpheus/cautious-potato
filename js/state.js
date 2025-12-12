@@ -159,10 +159,11 @@ export function getState() {
 /**
  * Update application state with partial updates
  * @param {Object} partialUpdates - Partial state updates to merge
- * @param {Object} options - Options { silent: boolean }
+ * @param {Object} options - Options { silent: boolean, persist: boolean }
  * @returns {Object} New state snapshot
  */
-export function setState(partialUpdates, options = { silent: false }) {
+export function setState(partialUpdates, options = {}) {
+  const { silent = false, persist = true } = options;
   const prevState = currentState;
 
   // Shallow-merge top-level keys
@@ -172,13 +173,16 @@ export function setState(partialUpdates, options = { silent: false }) {
     meta: {
       ...prevState.meta,
       ...(partialUpdates.meta || {}),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: Date.now()
     }
   };
 
-  // Persist and notify unless silent
-  if (!options.silent) {
+  // Persist and notify based on options
+  if (persist && !silent) {
     saveStateToStorage();
+  }
+  
+  if (!silent) {
     notifyListeners();
   }
 
