@@ -12,7 +12,29 @@ const mockXLSX = {
     sheet_to_json: jest.fn(),
     json_to_sheet: jest.fn(),
     book_new: jest.fn(),
-    book_append_sheet: jest.fn()
+    book_append_sheet: jest.fn(),
+    encode_cell: jest.fn((cell) => {
+      const col = String.fromCharCode(65 + cell.c);
+      const row = cell.r + 1;
+      return `${col}${row}`;
+    }),
+    decode_cell: jest.fn((address) => {
+      const match = address.match(/^([A-Z]+)(\d+)$/);
+      if (!match) return { c: 0, r: 0 };
+      const col = match[1].charCodeAt(0) - 65;
+      const row = parseInt(match[2]) - 1;
+      return { c: col, r: row };
+    }),
+    encode_range: jest.fn((range) => {
+      return `${mockXLSX.utils.encode_cell(range.s)}:${mockXLSX.utils.encode_cell(range.e)}`;
+    }),
+    decode_range: jest.fn((range) => {
+      const [start, end] = range.split(':');
+      return {
+        s: mockXLSX.utils.decode_cell(start),
+        e: mockXLSX.utils.decode_cell(end)
+      };
+    })
   }
 };
 global.XLSX = mockXLSX;

@@ -414,8 +414,9 @@ export function validateExtractedPositions(positionen) {
             posNrMap.set(pos.posNr, pos.rowIndex || pos.row);
         }
         
-        // Check for invalid Pos.Nr. format using configured pattern
-        if (!POSITION_CONFIG.positionNumberPattern.test(pos.posNr)) {
+        // Check for invalid Pos.Nr. format using strict validation pattern
+        const validationPattern = POSITION_CONFIG.positionNumberValidationPattern || POSITION_CONFIG.positionNumberPattern;
+        if (!validationPattern.test(pos.posNr)) {
             warnings.push(`Invalid position number format: ${pos.posNr} in row ${pos.rowIndex || pos.row} has unexpected format`);
         }
         
