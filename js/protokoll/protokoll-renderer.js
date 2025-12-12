@@ -1015,13 +1015,16 @@ function renderPositionRow(position, index) {
     <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
       <!-- Pos.Nr. -->
       <td class="editable-cell col-sticky-1" data-field="stromkreisNr">
-        <input type="text" 
-               value="${escapeHtml(position.stromkreisNr || '')}" 
-               data-field="position.stromkreisNr"
-               data-pos-nr="${escapeHtml(position.posNr)}"
-               placeholder="01.01.0010"
-               pattern="\\d{2}\\.\\d{2}\\.\\d{4}"
-               class="table-input pos-nr-input">
+        <div class="input-wrapper">
+          <span class="child-indicator">└─</span>
+          <input type="text"
+                 value="${escapeHtml(position.stromkreisNr || '')}"
+                 data-field="position.stromkreisNr"
+                 data-pos-nr="${escapeHtml(position.posNr)}"
+                 placeholder="01.01.0010"
+                 pattern="\\d{2}\\.\\d{2}\\.\\d{4}"
+                 class="table-input pos-nr-input">
+        </div>
       </td>
       
       <!-- Nr. -->
@@ -1122,7 +1125,9 @@ function renderPositionRow(position, index) {
           <option value="B" ${position.überstromschutz?.art === 'B' ? 'selected' : ''}>B</option>
           <option value="C" ${position.überstromschutz?.art === 'C' ? 'selected' : ''}>C</option>
           <option value="D" ${position.überstromschutz?.art === 'D' ? 'selected' : ''}>D</option>
+          <option value="E" ${position.überstromschutz?.art === 'E' ? 'selected' : ''}>E</option>
           <option value="K" ${position.überstromschutz?.art === 'K' ? 'selected' : ''}>K</option>
+          <option value="Z" ${position.überstromschutz?.art === 'Z' ? 'selected' : ''}>Z</option>
         </select>
       </td>
       
@@ -1365,6 +1370,7 @@ export function updatePositionRow(posNr, position) {
   };
 
   updateInput('stromkreisNr', position.stromkreisNr);
+  updateInput('nr', position.nr);
   updateInput('zielbezeichnung', position.zielbezeichnung);
   updateSelect('phaseType', position.phaseType || 'mono');
   updateInput('kabel.typ', position.kabel?.typ);
