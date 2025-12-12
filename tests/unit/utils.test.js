@@ -105,12 +105,12 @@ describe('Utility Functions (utils.js)', () => {
 
     test('throws error on invalid position object', () => {
       const invalidPositions = [{ menge: 5 }]; // Missing posNr
-      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültiges Positionsobjekt: posNr fehlt');
+      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültige Positionsnummer');
     });
 
     test('throws error on non-numeric quantity', () => {
       const invalidPositions = [{ posNr: '01.01.0010', menge: 'five' }];
-      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültiges Positionsobjekt: menge muss eine Zahl sein');
+      expect(() => sumByPosition(invalidPositions)).toThrow('Ungültige Menge für Position');
     });
 
     test('handles large datasets efficiently', () => {
