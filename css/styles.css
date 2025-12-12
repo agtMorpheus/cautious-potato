@@ -687,3 +687,12 @@ select:focus {
 .virtual-list-clickable {
     cursor: pointer;
 }
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+
+[data-theme="dark"] .main-content,
+[data-color-scheme="dark"] .main-content {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
