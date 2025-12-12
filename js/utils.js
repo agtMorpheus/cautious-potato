@@ -172,9 +172,11 @@ export function parseProtokollMetadata(workbook, options = {}) {
         foundCells[field] = foundAt;
     }
     
-    // Validate required fields - only check if field exists (not if it's empty)
-    // Empty strings are allowed since cells might be present but empty
-    const requiredFields = ['auftragsNr'];  // Only auftragsNr is strictly required
+    // Validate required fields
+    // Note: Only auftragsNr is strictly required. Anlage (plant) was removed from
+    // required fields to allow graceful handling of empty cells in templates.
+    // Empty strings are allowed since cells might be present but empty.
+    const requiredFields = ['auftragsNr'];
     const missingFields = requiredFields.filter(field => !metadata[field]);
     
     if (missingFields.length > 0) {
