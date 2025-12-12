@@ -27,6 +27,19 @@ global.localStorage = localStorageMock;
 // Mock sessionStorage
 global.sessionStorage = localStorageMock;
 
+// IMPORTANT: In jsdom environment, window.localStorage needs to be set to the same mock
+// This ensures code using window.localStorage uses our mock
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    writable: true
+  });
+  Object.defineProperty(window, 'sessionStorage', {
+    value: localStorageMock,
+    writable: true
+  });
+}
+
 // Mock XLSX library
 global.XLSX = {
   read: jest.fn(),
