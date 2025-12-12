@@ -9,7 +9,9 @@ import {
   getMigrationStatus,
   clearLocalDataAfterMigration,
   restoreFromBackup,
-  resetMigrationStatus
+  resetMigrationStatus,
+  migrateLocalStorageToBackend,
+  initializeWithMigration
 } from '../../js/migration/migrateToBackend.js';
 
 // Mock the imports
@@ -334,6 +336,147 @@ describe('Migration Module', () => {
       
       const backup = JSON.parse(localStorage.getItem('contract_manager_backup'));
       expect(backup.contracts).toEqual([]);
+    });
+  });
+
+  // ============================================
+  // migrateLocalStorageToBackend Tests
+  // ============================================
+  describe('migrateLocalStorageToBackend()', () => {
+    test('returns success with 0 count when no contracts exist', async () => {
+      getState.mockReturnValue({
+        contracts: {
+          records: []
+        }
+      });
+      
+      const result = await migrateLocalStorageToBackend();
+      
+      expect(result.success).toBe(true);
+      expect(result.migratedCount).toBe(0);
+      expect(localStorage.getItem('contract_manager_migrated')).toBe('true');
+    });
+
+    test('migrates contracts successfully', async () => {
+      const mockContracts = [
+        { id: '1', contractId: 'C001', status: 'open' },
+        { id: '2', contractId: 'C002', status: 'completed' }
+      ];
+      getState.mockReturnValue({
+        contracts: {
+          records: mockContracts
+        }
+      });
+      
+      apiClient.createContract.mockResolvedValue({ id: '1' });
+      
+      const progressCallback = jest.fn();
+      const result = await migrateLocalStorageToBackend({
+        onProgress: progressCallback,
+        batchSize: 10
+      });
+      
+      expect(apiClient.createContract).toHaveBeenCalledTimes(2);
+      expect(result.success).toBe(true);
+      expect(result.migratedCount).toBe(2);
+    });
+
+    test('handles duplicate entry errors gracefully', async () => {
+      getState.mockReturnValue({
+        contracts: {
+          records: [{ id: '1', contractId: 'C001' }]
+        }
+      });
+      
+      const duplicateError = new Error('Duplicate entry');
+      duplicateError.status = 409;
+      apiClient.createContract.mockRejectedValue(duplicateError);
+      
+      const result = await migrateLocalStorageToBackend();
+      
+      expect(result.success).toBe(true);
+      expect(result.migratedCount).toBe(1);
+    });
+
+    test('tracks failed migrations', async () => {
+      getState.mockReturnValue({
+        contracts: {
+          records: [
+            { id: '1', contractId: 'C001' },
+            { id: '2', contractId: 'C002' }
+          ]
+        }
+      });
+      
+      // First call succeeds, second fails
+      apiClient.createContract
+        .mockResolvedValueOnce({ id: '1' })
+        .mockRejectedValueOnce(new Error('API error'));
+      
+      const result = await migrateLocalStorageToBackend();
+      
+      expect(result.success).toBe(false);
+      expect(result.migratedCount).toBe(1);
+      expect(result.failedCount).toBe(1);
+    });
+
+    test('calls progress callback during migration', async () => {
+      getState.mockReturnValue({
+        contracts: {
+          records: [{ id: '1', contractId: 'C001' }]
+        }
+      });
+      
+      apiClient.createContract.mockResolvedValue({ id: '1' });
+      
+      const progressCallback = jest.fn();
+      await migrateLocalStorageToBackend({
+        onProgress: progressCallback,
+        batchSize: 1
+      });
+      
+      expect(progressCallback).toHaveBeenCalled();
+      expect(progressCallback).toHaveBeenCalledWith(expect.objectContaining({
+        processed: expect.any(Number),
+        total: 1,
+        percent: expect.any(Number)
+      }));
+    });
+  });
+
+  // ============================================
+  // initializeWithMigration Tests
+  // ============================================
+  describe('initializeWithMigration()', () => {
+    test('returns null when user is not logged in', async () => {
+      apiClient.getCurrentUser.mockResolvedValue(null);
+      
+      const result = await initializeWithMigration();
+      
+      expect(result).toBeNull();
+    });
+
+    test('returns null when migration already completed', async () => {
+      apiClient.getCurrentUser.mockResolvedValue({ id: '1', username: 'test' });
+      localStorage.setItem('contract_manager_migrated', 'true');
+      
+      const result = await initializeWithMigration();
+      
+      expect(result).toBeNull();
+    });
+
+    test('returns success when no local contracts exist', async () => {
+      apiClient.getCurrentUser.mockResolvedValue({ id: '1', username: 'test' });
+      getState.mockReturnValue({
+        contracts: {
+          records: []
+        }
+      });
+      
+      const result = await initializeWithMigration();
+      
+      expect(result.success).toBe(true);
+      expect(result.migratedCount).toBe(0);
     });
   });
 });

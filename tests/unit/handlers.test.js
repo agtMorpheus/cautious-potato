@@ -679,4 +679,157 @@ describe('Event Handlers Module (handlers.js)', () => {
       expect(document.querySelectorAll('.alert-success').length).toBe(0);
     });
   });
+
+  // ============================================================
+  // setupDragAndDrop Tests
+  // ============================================================
+  describe('setupDragAndDrop()', () => {
+    let dropZone;
+    let fileInput;
+    const { setupDragAndDrop } = require('../../js/handlers.js');
+
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="file-drop-zone"></div>
+        <input type="file" id="file-input" />
+      `;
+      dropZone = document.getElementById('file-drop-zone');
+      fileInput = document.getElementById('file-input');
+    });
+
+    test('handles missing dropZone gracefully', () => {
+      document.body.innerHTML = '<input type="file" id="file-input" />';
+      expect(() => setupDragAndDrop('non-existent', 'file-input')).not.toThrow();
+    });
+
+    test('handles missing fileInput gracefully', () => {
+      document.body.innerHTML = '<div id="file-drop-zone"></div>';
+      expect(() => setupDragAndDrop('file-drop-zone', 'non-existent')).not.toThrow();
+    });
+
+    test('adds drag-over class on dragenter', () => {
+      setupDragAndDrop('file-drop-zone', 'file-input');
+      
+      const dragEvent = new Event('dragenter', { bubbles: true });
+      dragEvent.preventDefault = jest.fn();
+      dragEvent.stopPropagation = jest.fn();
+      dropZone.dispatchEvent(dragEvent);
+      
+      expect(dropZone.classList.contains('drag-over')).toBe(true);
+    });
+
+    test('removes drag-over class on dragleave', () => {
+      setupDragAndDrop('file-drop-zone', 'file-input');
+      
+      // First add the class
+      dropZone.classList.add('drag-over');
+      
+      const dragEvent = new Event('dragleave', { bubbles: true });
+      dragEvent.preventDefault = jest.fn();
+      dragEvent.stopPropagation = jest.fn();
+      dropZone.dispatchEvent(dragEvent);
+      
+      expect(dropZone.classList.contains('drag-over')).toBe(false);
+    });
+  });
+
+  // ============================================================
+  // setupClickAndKeyboard Tests
+  // ============================================================
+  describe('setupClickAndKeyboard()', () => {
+    let dropZone;
+    let fileInput;
+    const { setupClickAndKeyboard } = require('../../js/handlers.js');
+
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="file-drop-zone"></div>
+        <input type="file" id="file-input" />
+      `;
+      dropZone = document.getElementById('file-drop-zone');
+      fileInput = document.getElementById('file-input');
+    });
+
+    test('handles missing dropZone gracefully', () => {
+      document.body.innerHTML = '<input type="file" id="file-input" />';
+      expect(() => setupClickAndKeyboard('non-existent', 'file-input')).not.toThrow();
+    });
+
+    test('handles missing fileInput gracefully', () => {
+      document.body.innerHTML = '<div id="file-drop-zone"></div>';
+      expect(() => setupClickAndKeyboard('file-drop-zone', 'non-existent')).not.toThrow();
+    });
+
+    test('sets tabindex for keyboard navigation', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      expect(dropZone.getAttribute('tabindex')).toBe('0');
+    });
+
+    test('sets role to button', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      expect(dropZone.getAttribute('role')).toBe('button');
+    });
+
+    test('sets default aria-label', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      expect(dropZone.getAttribute('aria-label')).toContain('Datei hochladen');
+    });
+
+    test('preserves existing aria-label', () => {
+      dropZone.setAttribute('aria-label', 'Custom label');
+      
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      expect(dropZone.getAttribute('aria-label')).toBe('Custom label');
+    });
+
+    test('triggers file input click on Enter key', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      fileInput.click = jest.fn();
+      
+      const keyEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+      keyEvent.preventDefault = jest.fn();
+      dropZone.dispatchEvent(keyEvent);
+      
+      expect(fileInput.click).toHaveBeenCalled();
+    });
+
+    test('triggers file input click on Space key', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      fileInput.click = jest.fn();
+      
+      const keyEvent = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+      keyEvent.preventDefault = jest.fn();
+      dropZone.dispatchEvent(keyEvent);
+      
+      expect(fileInput.click).toHaveBeenCalled();
+    });
+
+    test('does not trigger click on other keys', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      fileInput.click = jest.fn();
+      
+      const keyEvent = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+      dropZone.dispatchEvent(keyEvent);
+      
+      expect(fileInput.click).not.toHaveBeenCalled();
+    });
+
+    test('triggers file input click on dropZone click', () => {
+      setupClickAndKeyboard('file-drop-zone', 'file-input');
+      
+      fileInput.click = jest.fn();
+      
+      const clickEvent = new Event('click', { bubbles: true });
+      dropZone.dispatchEvent(clickEvent);
+      
+      expect(fileInput.click).toHaveBeenCalled();
+    });
+  });
 });
