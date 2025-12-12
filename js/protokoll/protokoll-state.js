@@ -482,12 +482,14 @@ export function addPosition(position) {
     zielbezeichnung: position.zielbezeichnung || '',
     // Parent circuit reference for circuit tree hierarchy
     parentCircuitId: position.parentCircuitId || null,
+    // Phase type: mono (single), bi (two-phase), tri (three-phase)
+    phaseType: position.phaseType || 'mono',
     
-    // Kabel/Leitung information
+    // Kabel/Leitung information (keeping kabel for backwards compatibility, adding leitung as alias)
     kabel: {
-      typ: position.kabel?.typ || '',
-      leiterAnzahl: position.kabel?.leiterAnzahl || '',
-      querschnitt: position.kabel?.querschnitt || ''
+      typ: position.kabel?.typ || position.leitung?.typ || '',
+      leiterAnzahl: position.kabel?.leiterAnzahl || position.leitung?.leiterAnzahl || '',
+      querschnitt: position.kabel?.querschnitt || position.leitung?.querschnitt || ''
     },
     
     // Spannung/Frequenz
@@ -510,6 +512,7 @@ export function addPosition(position) {
       ikLPE: position.messwerte?.ikLPE || '',  // Ik (kA) L-PE
       
       // Isolationswiderstand
+      riso: position.messwerte?.riso || '',  // Riso (MΩ) - generic
       risoOhne: position.messwerte?.risoOhne || '',  // Riso (MΩ) ohne Verbraucher
       risoMit: position.messwerte?.risoMit || '',    // Riso (MΩ) mit Verbraucher
       
@@ -535,6 +538,9 @@ export function addPosition(position) {
       bemerkung: position.prüfergebnis?.bemerkung || ''
     }
   };
+  
+  // Add leitung as an alias for kabel for backward compatibility
+  newPosition.leitung = newPosition.kabel;
   
   state.positions.push(newPosition);
   state.formState.positionCount = state.positions.length;

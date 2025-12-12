@@ -36,7 +36,10 @@ global.XLSX = {
     sheet_to_json: jest.fn(),
     json_to_sheet: jest.fn(),
     book_new: jest.fn(),
-    book_append_sheet: jest.fn()
+    book_append_sheet: jest.fn(),
+    decode_range: jest.fn(),
+    decode_cell: jest.fn(),
+    encode_cell: jest.fn()
   }
 };
 
@@ -307,9 +310,13 @@ beforeEach(() => {
   localStorageMock.removeItem.mockClear();
   localStorageMock.clear.mockClear();
   
-  // Reset XLSX mock
-  global.XLSX.read.mockReturnValue(testUtils.createMockWorkbook());
-  global.XLSX.write.mockReturnValue(new ArrayBuffer(8));
+  // Reset XLSX mock - only if the methods exist (some tests override with custom mocks)
+  if (global.XLSX?.read?.mockReturnValue) {
+    global.XLSX.read.mockReturnValue(testUtils.createMockWorkbook());
+  }
+  if (global.XLSX?.write?.mockReturnValue) {
+    global.XLSX.write.mockReturnValue(new ArrayBuffer(8));
+  }
   
   // Reset fetch mock
   global.fetch.mockResolvedValue({
@@ -319,16 +326,20 @@ beforeEach(() => {
   });
   
   // Reset FileReader mock
-  global.FileReader.mockImplementation(() => ({
-    readAsArrayBuffer: jest.fn(function() {
+  const FileReaderMock = jest.fn(function() {
+    this.readAsArrayBuffer = jest.fn(function() {
       setTimeout(() => {
         this.onload && this.onload({ target: { result: new ArrayBuffer(8) } });
       }, 0);
-    }),
-    onload: null,
-    onerror: null,
-    result: null
-  }));
+    });
+    this.readAsText = jest.fn();
+    this.readAsDataURL = jest.fn();
+    this.onload = null;
+    this.onerror = null;
+    this.result = null;
+    return this;
+  });
+  global.FileReader = FileReaderMock;
 });
 
 afterEach(() => {
