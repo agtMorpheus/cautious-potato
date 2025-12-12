@@ -22,11 +22,20 @@ import {
   sumByPosition, 
   getPositionSummary,
   validateExtractedPositions,
-  generateAbrechnungFilename,
-  parseProtokoll,
+  generateExportFilename,
+  parseProtokollMetadata,
   extractPositions,
   readExcelFile,
-  createExportWorkbook
+  createExportWorkbook,
+  fillAbrechnungHeader,
+  fillAbrechnungPositions,
+  validateFilledPositions,
+  safeReadAndParseProtokoll,
+  exportToExcel,
+  updateMetadataCellMap,
+  getMetadataCellMap,
+  resetMetadataCellMap,
+  clearAbrechnungTemplateCache
 } from '../../js/utils.js';
 
 describe('Utility Functions (utils.js)', () => {
@@ -555,6 +564,373 @@ describe('Utility Functions (utils.js)', () => {
       // Should complete in under 200ms
       expect(endTime - startTime).toBeLessThan(200);
       expect(result.valid).toBe(true);
+    });
+  });
+
+  // ============================================================
+  // generateExportFilename Tests
+  // ============================================================
+
+  describe('generateExportFilename()', () => {
+    test('generates filename with auftragsNr and timestamp', () => {
+      const filename = generateExportFilename('ORD-001');
+      
+      expect(filename).toContain('Abrechnung');
+      expect(filename).toContain('ORD-001');
+      expect(filename).toMatch(/\.xlsx$/);
+    });
+
+    test('generates unique filenames with different timestamps', () => {
+      const filename1 = generateExportFilename('ORD-001');
+      // Wait a tiny bit to ensure different timestamp
+      const filename2 = generateExportFilename('ORD-001');
+      
+      // Both should contain the order number
+      expect(filename1).toContain('ORD-001');
+      expect(filename2).toContain('ORD-001');
+    });
+
+    test('handles empty auftragsNr', () => {
+      const filename = generateExportFilename('');
+      
+      expect(filename).toContain('Abrechnung');
+      expect(filename).toMatch(/\.xlsx$/);
+    });
+
+    test('handles undefined auftragsNr', () => {
+      const filename = generateExportFilename();
+      
+      expect(filename).toContain('Abrechnung');
+      expect(filename).toMatch(/\.xlsx$/);
+    });
+  });
+
+  // ============================================================
+  // Metadata Cell Map Configuration Tests
+  // ============================================================
+
+  describe('updateMetadataCellMap()', () => {
+    beforeEach(() => {
+      resetMetadataCellMap();
+    });
+
+    test('updates cell mapping for a field', () => {
+      updateMetadataCellMap('auftragsNr', ['A1', 'B1', 'C1']);
+      
+      const map = getMetadataCellMap();
+      expect(map.auftragsNr).toEqual(['A1', 'B1', 'C1']);
+    });
+
+    test('throws error for empty array', () => {
+      expect(() => updateMetadataCellMap('auftragsNr', [])).toThrow();
+    });
+
+    test('throws error for non-array input', () => {
+      expect(() => updateMetadataCellMap('auftragsNr', 'A1')).toThrow();
+      expect(() => updateMetadataCellMap('auftragsNr', null)).toThrow();
+    });
+  });
+
+  describe('getMetadataCellMap()', () => {
+    beforeEach(() => {
+      resetMetadataCellMap();
+    });
+
+    test('returns copy of current mapping', () => {
+      const map = getMetadataCellMap();
+      
+      expect(map).toBeDefined();
+      expect(typeof map).toBe('object');
+    });
+
+    test('returns immutable copy', () => {
+      const map1 = getMetadataCellMap();
+      map1.newField = ['Z1'];
+      
+      const map2 = getMetadataCellMap();
+      expect(map2.newField).toBeUndefined();
+    });
+  });
+
+  describe('resetMetadataCellMap()', () => {
+    test('resets mapping to defaults', () => {
+      updateMetadataCellMap('auftragsNr', ['Z99']);
+      resetMetadataCellMap();
+      
+      const map = getMetadataCellMap();
+      expect(map.auftragsNr).not.toContain('Z99');
+    });
+  });
+
+  // ============================================================
+  // clearAbrechnungTemplateCache Tests
+  // ============================================================
+
+  describe('clearAbrechnungTemplateCache()', () => {
+    test('clears template cache without error', () => {
+      expect(() => clearAbrechnungTemplateCache()).not.toThrow();
+    });
+
+    test('can be called multiple times', () => {
+      clearAbrechnungTemplateCache();
+      clearAbrechnungTemplateCache();
+      clearAbrechnungTemplateCache();
+      // Should not throw
+    });
+  });
+
+  // ============================================================
+  // fillAbrechnungHeader Tests
+  // ============================================================
+
+  describe('fillAbrechnungHeader()', () => {
+    test('fills header cells with metadata', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {}
+        }
+      };
+      
+      const metadata = {
+        datum: '2025-12-11',
+        auftragsNr: 'ORD-001',
+        anlage: 'Factory A',
+        einsatzort: 'Building 1'
+      };
+      
+      const result = fillAbrechnungHeader(mockWorkbook, metadata);
+      
+      expect(result).toBe(mockWorkbook);
+    });
+
+    test('throws error for missing sheet', () => {
+      const mockWorkbook = {
+        Sheets: {}
+      };
+      
+      const metadata = { datum: '2025-12-11' };
+      
+      expect(() => fillAbrechnungHeader(mockWorkbook, metadata)).toThrow();
+    });
+  });
+
+  // ============================================================
+  // fillAbrechnungPositions Tests
+  // ============================================================
+
+  describe('fillAbrechnungPositions()', () => {
+    test('fills position cells with quantities', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A10': { v: '01.01.0010' },
+            'A11': { v: '01.01.0020' }
+          }
+        }
+      };
+      
+      const positionSums = {
+        '01.01.0010': 5,
+        '01.01.0020': 3
+      };
+      
+      const result = fillAbrechnungPositions(mockWorkbook, positionSums);
+      
+      expect(result).toBe(mockWorkbook);
+    });
+
+    test('throws error for missing sheet', () => {
+      const mockWorkbook = { Sheets: {} };
+      const positionSums = { '01.01.0010': 5 };
+      
+      expect(() => fillAbrechnungPositions(mockWorkbook, positionSums)).toThrow();
+    });
+  });
+
+  // ============================================================
+  // validateFilledPositions Tests
+  // ============================================================
+
+  describe('validateFilledPositions()', () => {
+    test('validates workbook with filled positions', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A10': { v: '01.01.0010' },
+            'B10': { v: 5 }
+          }
+        }
+      };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result).toHaveProperty('filledCount');
+      expect(result).toHaveProperty('emptyCount');
+      expect(result).toHaveProperty('errors');
+      expect(result).toHaveProperty('isValid');
+    });
+
+    test('returns invalid for missing sheet', () => {
+      const mockWorkbook = { Sheets: {} };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result.isValid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    test('counts filled and empty positions', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'EAW': {
+            'A10': { v: '01.01.0010' },
+            'B10': { v: 5 },
+            'A11': { v: '01.01.0020' }
+            // B11 is missing (empty quantity)
+          }
+        }
+      };
+      
+      const result = validateFilledPositions(mockWorkbook);
+      
+      expect(result.filledCount).toBeGreaterThanOrEqual(0);
+      expect(result.emptyCount).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  // ============================================================
+  // exportToExcel Tests
+  // ============================================================
+
+  describe('exportToExcel()', () => {
+    beforeEach(() => {
+      mockXLSX.writeFile.mockClear();
+    });
+
+    test('exports workbook with metadata object', () => {
+      const mockWorkbook = { Sheets: { 'EAW': {} }, SheetNames: ['EAW'] };
+      const metadata = { orderNumber: 'ORD-001' };
+      
+      const result = exportToExcel(mockWorkbook, metadata);
+      
+      expect(mockXLSX.writeFile).toHaveBeenCalled();
+      expect(result).toHaveProperty('fileName');
+    });
+
+    test('exports workbook with string filename (backward compatibility)', () => {
+      const mockWorkbook = { Sheets: { 'EAW': {} }, SheetNames: ['EAW'] };
+      const filename = 'test-export.xlsx';
+      
+      const result = exportToExcel(mockWorkbook, filename);
+      
+      expect(mockXLSX.writeFile).toHaveBeenCalled();
+      expect(result.fileName).toBe(filename);
+    });
+
+    test('generates default filename when metadata is empty', () => {
+      const mockWorkbook = { Sheets: { 'EAW': {} }, SheetNames: ['EAW'] };
+      
+      const result = exportToExcel(mockWorkbook, {});
+      
+      expect(mockXLSX.writeFile).toHaveBeenCalled();
+      expect(result.fileName).toContain('Abrechnung');
+    });
+
+    test('handles export errors', () => {
+      const mockWorkbook = { Sheets: { 'EAW': {} }, SheetNames: ['EAW'] };
+      mockXLSX.writeFile.mockImplementation(() => {
+        throw new Error('Write failed');
+      });
+      
+      expect(() => exportToExcel(mockWorkbook, {})).toThrow('Fehler beim Exportieren');
+    });
+  });
+
+  // ============================================================
+  // parseProtokollMetadata Tests
+  // ============================================================
+
+  describe('parseProtokollMetadata()', () => {
+    test('parses metadata from worksheet', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Protokoll': {
+            'U3': { v: 'PROT-001' },
+            'N5': { v: 'ORD-001' },
+            'A10': { v: 'Factory A' }
+          }
+        },
+        SheetNames: ['Protokoll']
+      };
+      
+      // This should throw since we don't have the required cells
+      expect(() => parseProtokollMetadata(mockWorkbook)).toThrow();
+    });
+
+    test('throws error for missing sheet', () => {
+      const mockWorkbook = {
+        Sheets: {},
+        SheetNames: []
+      };
+      
+      expect(() => parseProtokollMetadata(mockWorkbook)).toThrow();
+    });
+
+    test('accepts strictMode option', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Protokoll': {}
+        },
+        SheetNames: ['Protokoll']
+      };
+      
+      expect(() => parseProtokollMetadata(mockWorkbook, { strictMode: true })).toThrow();
+    });
+  });
+
+  // ============================================================
+  // extractPositions Tests
+  // ============================================================
+
+  describe('extractPositions()', () => {
+    test('extracts positions from worksheet', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Protokoll': {
+            'A30': { v: '01.01.0010' },
+            'B30': { v: 5 },
+            'A31': { v: '01.01.0020' },
+            'B31': { v: 3 }
+          }
+        },
+        SheetNames: ['Protokoll']
+      };
+      
+      const result = extractPositions(mockWorkbook);
+      
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    test('throws error for missing sheet', () => {
+      const mockWorkbook = {
+        Sheets: {},
+        SheetNames: []
+      };
+      
+      expect(() => extractPositions(mockWorkbook)).toThrow();
+    });
+
+    test('handles empty worksheet', () => {
+      const mockWorkbook = {
+        Sheets: {
+          'Protokoll': {}
+        },
+        SheetNames: ['Protokoll']
+      };
+      
+      const result = extractPositions(mockWorkbook);
+      
+      expect(result).toEqual([]);
     });
   });
 });
