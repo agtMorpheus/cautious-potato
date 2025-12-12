@@ -301,7 +301,7 @@ export function addDevice(device) {
  * Update an existing device
  * @param {string} deviceId - Device ID
  * @param {Object} updates - Updated fields
- * @returns {boolean} Success
+ * @returns {Object|boolean} Updated device object or false if not found
  */
 export function updateDevice(deviceId, updates) {
   const index = state.devices.findIndex(d => d.id === deviceId);
@@ -319,10 +319,11 @@ export function updateDevice(deviceId, updates) {
   };
 
   markUnsaved();
-  emit('deviceUpdated', { deviceId, device: getDevice(deviceId) });
+  const updatedDevice = getDevice(deviceId);
+  emit('deviceUpdated', { deviceId, device: updatedDevice });
   saveToLocalStorage();
 
-  return true;
+  return updatedDevice;
 }
 
 /**
@@ -399,6 +400,152 @@ export function setValidationError(fieldName, error) {
 export function clearValidationErrors() {
   state.formState.validationErrors = {};
   emit('validationErrorsCleared', {});
+}
+
+/**
+ * Generic setter for form state fields
+ * @param {string} key - Form state key
+ * @param {*} value - Value to set
+ * @returns {void}
+ */
+export function setFormState(key, value) {
+  if (Object.prototype.hasOwnProperty.call(state.formState, key)) {
+    state.formState[key] = value;
+    emit('formStateChanged', { key, value });
+  } else {
+    console.warn(`Unknown form state key: ${key}`);
+  }
+}
+
+/**
+ * Get filtered devices based on current form state filters
+ * @returns {Array} Array of filtered device objects
+ */
+export function getFilteredDevices() {
+  let devices = state.devices;
+  
+  // Apply type filter
+  if (state.formState.filterType) {
+    devices = devices.filter(d => d.type === state.formState.filterType);
+  }
+  
+  // Apply search term filter
+  if (state.formState.searchTerm) {
+    const term = state.formState.searchTerm.toLowerCase();
+    devices = devices.filter(d => 
+      (d.name && d.name.toLowerCase().includes(term)) ||
+      (d.fabrikat && d.fabrikat.toLowerCase().includes(term)) ||
+      (d.identNr && d.identNr.toLowerCase().includes(term))
+    );
+  }
+  
+  return JSON.parse(JSON.stringify(devices));
+}
+
+/**
+ * Search devices based on current search term
+ * @returns {Array} Array of matching device objects
+ */
+export function searchDevices() {
+  if (!state.formState.searchTerm) {
+    return getDevices();
+  }
+  
+  const term = state.formState.searchTerm.toLowerCase();
+  return JSON.parse(JSON.stringify(
+    state.devices.filter(d => 
+      (d.name && d.name.toLowerCase().includes(term)) ||
+      (d.fabrikat && d.fabrikat.toLowerCase().includes(term)) ||
+      (d.identNr && d.identNr.toLowerCase().includes(term)) ||
+      (d.type && d.type.toLowerCase().includes(term))
+    )
+  ));
+}
+
+/**
+ * Get devices with expired calibration
+ * @returns {Array} Array of devices with expired calibration
+ */
+export function getExpiredDevices() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return JSON.parse(JSON.stringify(
+    state.devices.filter(d => {
+      if (!d.calibrationDate) return false;
+      const calibDate = new Date(d.calibrationDate);
+      return calibDate < today;
+    })
+  ));
+}
+
+/**
+ * Get devices with calibration expiring within specified days
+ * @param {number} days - Number of days to look ahead
+ * @returns {Array} Array of devices expiring soon
+ */
+export function getDevicesExpiringSoon(days = 30) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const futureDate = new Date(today);
+  futureDate.setDate(futureDate.getDate() + days);
+  
+  return JSON.parse(JSON.stringify(
+    state.devices.filter(d => {
+      if (!d.calibrationDate) return false;
+      const calibDate = new Date(d.calibrationDate);
+      // Expiring soon means: not expired yet but within the window
+      return calibDate >= today && calibDate <= futureDate;
+    })
+  ));
+}
+
+/**
+ * Get devices by manufacturer (fabrikat)
+ * @param {string} manufacturer - Manufacturer name
+ * @returns {Array} Array of device objects
+ */
+export function getDevicesByManufacturer(manufacturer) {
+  return JSON.parse(JSON.stringify(
+    state.devices.filter(d => d.fabrikat === manufacturer)
+  ));
+}
+
+/**
+ * Get valid devices formatted for dropdown selection
+ * @returns {Array} Array of {id, label} objects for valid devices only
+ */
+export function getValidDevicesForDropdown() {
+  const validDevices = getValidDevices();
+  return validDevices.map(d => ({
+    id: d.id,
+    label: `${d.name} (${d.type}) - ${d.identNr || 'N/A'}`,
+    name: d.name,
+    type: d.type,
+    fabrikat: d.fabrikat,
+    identNr: d.identNr,
+    calibrationDate: d.calibrationDate,
+    isExpired: isCalibrationExpired(d.calibrationDate)
+  }));
+}
+
+/**
+ * Clear all filters
+ * @returns {void}
+ */
+export function clearFilters() {
+  state.formState.searchTerm = '';
+  state.formState.filterType = '';
+  emit('filtersCleared', {});
+}
+
+/**
+ * Save state to localStorage (alias for forceSave for API consistency)
+ * @returns {void}
+ */
+export function saveState() {
+  forceSave();
 }
 
 // ============================================
@@ -547,8 +694,10 @@ export function emit(eventName, data = {}) {
   }
 
   // Also dispatch browser event for cross-module communication
+  // Convert camelCase to kebab-case for browser events
+  const kebabEventName = eventName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   try {
-    document.dispatchEvent(new CustomEvent(`messgeraet:${eventName}`, {
+    document.dispatchEvent(new CustomEvent(`messgeraet:${kebabEventName}`, {
       detail: data,
       bubbles: true,
       cancelable: false

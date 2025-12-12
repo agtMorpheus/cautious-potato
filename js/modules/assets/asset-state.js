@@ -613,6 +613,78 @@ export function clearValidationErrors() {
 }
 
 /**
+ * Generic setter for form state fields
+ * @param {string} key - Form state key
+ * @param {*} value - Value to set
+ * @returns {void}
+ */
+export function setFormState(key, value) {
+  if (Object.prototype.hasOwnProperty.call(state.formState, key)) {
+    state.formState[key] = value;
+    emit('formStateChanged', { key, value });
+  } else {
+    console.warn(`Unknown form state key: ${key}`);
+  }
+}
+
+/**
+ * Get filtered assets based on current form state filters
+ * @returns {Array} Array of filtered asset objects
+ */
+export function getFilteredAssets() {
+  let assets = state.assets.filter(a => a.active !== false);
+  
+  // Apply status filter
+  if (state.formState.filterStatus) {
+    assets = assets.filter(a => a.status === state.formState.filterStatus);
+  }
+  
+  // Apply plant filter
+  if (state.formState.filterPlant) {
+    assets = assets.filter(a => a.plant === state.formState.filterPlant);
+  }
+  
+  // Apply type filter
+  if (state.formState.filterType) {
+    assets = assets.filter(a => a.type === state.formState.filterType);
+  }
+  
+  // Apply search term filter
+  if (state.formState.searchTerm) {
+    const term = state.formState.searchTerm.toLowerCase();
+    assets = assets.filter(a => 
+      (a.id && a.id.toLowerCase().includes(term)) ||
+      (a.name && a.name.toLowerCase().includes(term)) ||
+      (a.description && a.description.toLowerCase().includes(term)) ||
+      (a.location && a.location.toLowerCase().includes(term)) ||
+      (a.plant && a.plant.toLowerCase().includes(term))
+    );
+  }
+  
+  return JSON.parse(JSON.stringify(assets));
+}
+
+/**
+ * Clear all filters
+ * @returns {void}
+ */
+export function clearFilters() {
+  state.formState.searchTerm = '';
+  state.formState.filterStatus = '';
+  state.formState.filterPlant = '';
+  state.formState.filterType = '';
+  emit('filtersCleared', {});
+}
+
+/**
+ * Save state to localStorage (alias for forceSave for API consistency)
+ * @returns {void}
+ */
+export function saveState() {
+  forceSave();
+}
+
+/**
  * Update import state
  * @param {Object} updates - Import state updates
  * @returns {void}
