@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Import Test</title>
+</head>
+<body>
+    <h1>Module Import Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        async function testImports() {
+            try {
+                log('Testing protokoll-state.js import...');
+                const state = await import('./js/protokoll/protokoll-state.js');
+                log('✓ protokoll-state.js imported successfully', 'success');
+                
+                log('Testing protokoll-handlers.js import...');
+                const handlers = await import('./js/protokoll/protokoll-handlers.js');
+                log('✓ protokoll-handlers.js imported successfully', 'success');
+                
+                log('Testing protokoll-renderer.js import...');
+                const renderer = await import('./js/protokoll/protokoll-renderer.js');
+                log('✓ protokoll-renderer.js imported successfully', 'success');
+                
+                log('Testing state initialization...');
+                state.init();
+                log('✓ State initialized successfully', 'success');
+                
+                log('All modules working correctly!', 'success');
+                
+            } catch (error) {
+                log(`✗ Import failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        testImports();
+    </script>
+</body>
+</html>

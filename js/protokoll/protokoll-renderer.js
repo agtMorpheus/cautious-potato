@@ -49,7 +49,7 @@ const STEP_LABELS = {
  */
 export function init() {
   console.log('Initializing Protokoll Renderer');
-  
+
   const container = document.getElementById(CONTAINER_ID);
   if (!container) {
     console.error(`Container ${CONTAINER_ID} not found`);
@@ -118,7 +118,7 @@ function setupStateSubscriptions() {
  */
 export function renderStep(step) {
   console.log(`Rendering step: ${step}`);
-  
+
   const container = document.getElementById(CONTAINER_ID);
   if (!container) return;
 
@@ -177,14 +177,12 @@ export function renderMetadataForm() {
 
       <fieldset>
         <legend>Prüfprotokoll VDE 0100</legend>
-        <div class="form-row">
+        <div class="form-row four-col">
           ${renderTextField('metadata.protokollNumber', 'Prüfprotokoll Nr.', metadata.protokollNumber, {
-            required: true,
-            placeholder: 'z.B. EDM221020251123'
-          })}
+    required: true,
+    placeholder: 'z.B. EDM221020251123'
+  })}
           ${renderDateField('metadata.datum', 'Datum', metadata.datum, { required: true })}
-        </div>
-        <div class="form-row">
           ${renderTextField('metadata.blatt', 'Blatt', metadata.blatt, { placeholder: '1' })}
           ${renderTextField('metadata.blattVon', 'von', metadata.blattVon, { placeholder: '3' })}
         </div>
@@ -192,49 +190,53 @@ export function renderMetadataForm() {
 
       <fieldset>
         <legend>Auftraggeber</legend>
-        <div class="form-row">
+        <div class="form-row three-col">
           ${renderTextField('metadata.auftraggeber', 'Auftraggeber', metadata.auftraggeber, { required: true })}
           ${renderTextField('metadata.auftragnummer', 'Auftrag Nr.', metadata.auftragnummer)}
+          ${renderTextField('metadata.kundennummer', 'Kunden Nr.', metadata.kundennummer)}
         </div>
-        ${renderTextField('metadata.kundennummer', 'Kunden Nr.', metadata.kundennummer)}
       </fieldset>
 
       <fieldset>
         <legend>Auftragnehmer</legend>
-        ${renderTextField('metadata.auftragnehmer', 'Firma', metadata.auftragnehmer)}
-        ${renderTextField('metadata.auftragnehmerOrt', 'Ort', metadata.auftragnehmerOrt)}
+        <div class="form-row">
+          ${renderTextField('metadata.auftragnehmer', 'Firma', metadata.auftragnehmer)}
+          ${renderTextField('metadata.auftragnehmerOrt', 'Ort', metadata.auftragnehmerOrt)}
+        </div>
       </fieldset>
 
       <fieldset>
         <legend>Kunde / Prüfobjekt</legend>
-        ${renderTextField('metadata.kunde', 'Kunde', metadata.kunde, { placeholder: 'z.B. Volkswagen AG, Werk Wolfsburg' })}
-        ${renderTextField('metadata.kundeOrt', 'Kunde Ort', metadata.kundeOrt, { placeholder: 'z.B. Berliner Ring 2, 38436 Wolfsburg' })}
-        ${renderTextField('metadata.firma', 'Firma', metadata.firma, { placeholder: 'z.B. EAW Wolfsburg' })}
-        ${renderTextField('metadata.firmaOrt', 'Firma Ort', metadata.firmaOrt, { placeholder: 'z.B. Dieselstraße 27, 38446 Wolfsburg' })}
+        <div class="form-row four-col">
+          ${renderTextField('metadata.kunde', 'Kunde', metadata.kunde, { placeholder: 'z.B. Volkswagen AG, Werk Wolfsburg' })}
+          ${renderTextField('metadata.kundeOrt', 'Kunde Ort', metadata.kundeOrt, { placeholder: 'z.B. Berliner Ring 2, 38436 Wolfsburg' })}
+          ${renderTextField('metadata.firma', 'Firma', metadata.firma, { placeholder: 'z.B. EAW Wolfsburg' })}
+          ${renderTextField('metadata.firmaOrt', 'Firma Ort', metadata.firmaOrt, { placeholder: 'z.B. Dieselstraße 27, 38446 Wolfsburg' })}
+        </div>
       </fieldset>
 
       <fieldset>
         <legend>Anlage</legend>
-        ${renderTextField('metadata.facility.anlage', 'Anlage', metadata.facility?.anlage || '', { placeholder: 'z.B. LVUM-Fc34' })}
-        ${renderTextField('metadata.facility.ort', 'Ort', metadata.facility?.ort || '', { placeholder: 'z.B. Halle 3' })}
-        ${renderTextField('metadata.facility.inv', 'INV (Inventar-Nr.)', metadata.facility?.inv || '', { placeholder: 'z.B. E03150AP17000093243' })}
+        <div class="form-row three-col">
+          ${renderTextField('metadata.facility.anlage', 'Anlage', metadata.facility?.anlage || '', { placeholder: 'z.B. LVUM-Fc34' })}
+          ${renderTextField('metadata.facility.ort', 'Ort', metadata.facility?.ort || '', { placeholder: 'z.B. Halle 3' })}
+          ${renderTextField('metadata.facility.inv', 'INV (Inventar-Nr.)', metadata.facility?.inv || '', { placeholder: 'z.B. E03150AP17000093243' })}
+        </div>
       </fieldset>
 
       <fieldset>
         <legend>Prüfen nach</legend>
-        <div class="checkbox-group">
+        <div class="checkbox-group four-col">
           ${renderCheckboxField('metadata.prüfenNach.dinVde0100Gruppe700', metadata.prüfenNach?.dinVde0100Gruppe700, 'DIN VDE 0100 Gruppe 700')}
           ${renderCheckboxField('metadata.prüfenNach.dinVde01000600', metadata.prüfenNach?.dinVde01000600, 'DIN VDE 0100-0600')}
           ${renderCheckboxField('metadata.prüfenNach.dinVde01050100', metadata.prüfenNach?.dinVde01050100, 'DIN VDE 0105-0100')}
-        </div>
-        <div class="checkbox-group" style="margin-top: 0.5rem;">
           ${renderCheckboxField('metadata.dguvV3', metadata.dguvV3, 'DGUV V3')}
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Prüfungsart</legend>
-        <div class="checkbox-group">
+        <div class="checkbox-group four-col">
           ${renderCheckboxField('metadata.neuanlage', metadata.neuanlage, 'Neuanlage')}
           ${renderCheckboxField('metadata.erweiterung', metadata.erweiterung, 'Erweiterung')}
           ${renderCheckboxField('metadata.änderung', metadata.änderung, 'Änderung')}
@@ -245,17 +247,17 @@ export function renderMetadataForm() {
 
       <fieldset>
         <legend>Netz</legend>
-        <div class="form-row">
-          ${renderSelectField('metadata.facility.netzspannung', 'Netzspannung', 
-            ['230 / 400 V', '400 / 230 V', '230V', '400V'], 
-            metadata.facility?.netzspannung || '230 / 400 V'
-          )}
+        <div class="form-row three-col">
+          ${renderSelectField('metadata.facility.netzspannung', 'Netzspannung',
+    ['230 / 400 V', '400 / 230 V', '230V', '400V'],
+    metadata.facility?.netzspannung || '230 / 400 V'
+  )}
           ${renderSelectField('metadata.facility.netzform', 'Netzform',
-            ['TN-C', 'TN-S', 'TN-C-S', 'TT', 'IT'],
-            metadata.facility?.netzform || 'TN-S'
-          )}
+    ['TN-C', 'TN-S', 'TN-C-S', 'TT', 'IT'],
+    metadata.facility?.netzform || 'TN-S'
+  )}
+          ${renderTextField('metadata.facility.netzbetreiber', 'Netzbetreiber', metadata.facility?.netzbetreiber || '')}
         </div>
-        ${renderTextField('metadata.facility.netzbetreiber', 'Netzbetreiber', metadata.facility?.netzbetreiber || '')}
       </fieldset>
 
       <fieldset>
@@ -263,8 +265,8 @@ export function renderMetadataForm() {
         <div class="form-row">
           ${renderTextField('metadata.prüfer.name', 'Name', metadata.prüfer?.name || '', { required: true })}
           ${renderTextField('metadata.prüfer.titel', 'Titel', metadata.prüfer?.titel || '')}
+          ${renderTextField('metadata.prüfer.ort', 'Ort', metadata.prüfer?.ort || '')}
         </div>
-        ${renderTextField('metadata.prüfer.ort', 'Ort', metadata.prüfer?.ort || '')}
       </fieldset>
 
       ${renderFormNavigation('metadata')}
@@ -386,7 +388,7 @@ export function renderMessenForm() {
 
   const messen = state.getMessen();
   const messgeräte = state.getMessgeräte();
-  
+
   // Get available devices from Messgerät module
   let deviceDropdownOptions = '';
   try {
@@ -477,41 +479,7 @@ export function renderPositionsForm() {
         <div class="positions-table-wrapper">
           <table class="positions-table" role="grid" aria-label="Stromkreis-Tabelle">
             <thead>
-              <tr>
-                <th scope="col" rowspan="2">Pos.Nr.</th>
-                <th scope="col" rowspan="2">Nr.</th>
-                <th scope="col" rowspan="2">Zielbezeichnung</th>
-                <th scope="col" colspan="4">Kabel/Leitung</th>
-                <th scope="col" colspan="2">Spannung/Frequenz</th>
-                <th scope="col" colspan="2">Überstrom-Schutz</th>
-                <th scope="col" colspan="3">Impedanzen</th>
-                <th scope="col" colspan="2">Isolationswiderstand</th>
-                <th scope="col" colspan="7">Fehlerstrom-Schutzeinrichtung</th>
-                <th scope="col" rowspan="2">Status</th>
-                <th scope="col" rowspan="2">Aktionen</th>
-              </tr>
-              <tr>
-                <th scope="col">Kabel Typ</th>
-                <th scope="col">Leiter Anzahl</th>
-                <th scope="col">Querschnitt</th>
-                <th scope="col">RPE (max. 1Ω)</th>
-                <th scope="col">Un (V)</th>
-                <th scope="col">fn (Hz)</th>
-                <th scope="col">Art Charakteristik</th>
-                <th scope="col">In (A)</th>
-                <th scope="col">Ik (kA) L-PE</th>
-                <th scope="col">ZS(Ω) L-PE</th>
-                <th scope="col">ZN(Ω) L-N</th>
-                <th scope="col">ohne Verbraucher (MΩ)</th>
-                <th scope="col">mit Verbraucher (MΩ)</th>
-                <th scope="col">GEWISS RCD</th>
-                <th scope="col">In (A)</th>
-                <th scope="col">I∆n (mA)</th>
-                <th scope="col">Imess (mA)</th>
-                <th scope="col">tA (ms)</th>
-                <th scope="col">UL≤50V (V)</th>
-                <th scope="col">Diff. Strom (mA)</th>
-              </tr>
+              ${renderPositionsTableHeader()}
             </thead>
             <tbody id="positionsTableBody">
               ${positions.map((pos, idx) => renderPositionRow(pos, idx)).join('')}
@@ -531,6 +499,65 @@ export function renderPositionsForm() {
   container.innerHTML = html;
   attachFieldListeners();
   attachPositionListeners();
+}
+
+/**
+ * Render the complex header for positions table
+ * @returns {string} HTML for thead
+ */
+function renderPositionsTableHeader() {
+  return `
+    <tr>
+      <th scope="col" rowspan="2" class="col-fixed-left">Pos.</th>
+      <th scope="col" rowspan="2" class="col-sm">Nr.</th>
+      <th scope="col" rowspan="2" class="col-md">Zielbezeichnung</th>
+      <th scope="col" colspan="4" class="group-header">Kabel/Leitung</th>
+      <th scope="col" colspan="2" class="group-header">Spannung/Freq.</th>
+      <th scope="col" colspan="2" class="group-header">Überstrom-Schutz</th>
+      <th scope="col" colspan="3" class="group-header">Impedanzen</th>
+      <th scope="col" colspan="2" class="group-header">Isolationswid.</th>
+      <th scope="col" colspan="7" class="group-header">Fehlerstrom-Schutzeinrichtung (RCD)</th>
+      <th scope="col" rowspan="2" class="col-sm">Status</th>
+      <th scope="col" rowspan="2" class="col-fixed-right">Aktionen</th>
+    </tr>
+    <tr>
+      <th scope="col" class="sub-header" title="Kabel Typ">Typ</th>
+      <th scope="col" class="sub-header" title="Leiter Anzahl">Ad</th>
+      <th scope="col" class="sub-header" title="Querschnitt">mm²</th>
+      <th scope="col" class="sub-header" title="RPE (max. 1Ω)">RPE</th>
+      
+      <th scope="col" class="sub-header" title="Nennspannung (V)">Un</th>
+      <th scope="col" class="sub-header" title="Nennfrequenz (Hz)">fn</th>
+      
+      <th scope="col" class="sub-header" title="Charakteristik">Char</th>
+      <th scope="col" class="sub-header" title="Nennstrom (A)">In</th>
+      
+      <th scope="col" class="sub-header" title="Kurzschlussstrom (kA)">Ik</th>
+      <th scope="col" class="sub-header" title="Schleifenimpedanz L-PE (Ω)">ZS</th>
+      <th scope="col" class="sub-header" title="Netzimpedanz L-N (Ω)">ZN</th>
+      
+      <th scope="col" class="sub-header" title="Riso ohne Verbraucher (MΩ)">Riso -</th>
+      <th scope="col" class="sub-header" title="Riso mit Verbraucher (MΩ)">Riso +</th>
+      
+      <th scope="col" class="sub-header" title="Gehäuse/Typ">Typ</th>
+      <th scope="col" class="sub-header" title="Nennstrom (A)">In</th>
+      <th scope="col" class="sub-header" title="Nennfehlerstrom (mA)">I∆n</th>
+      <th scope="col" class="sub-header" title="Messstrom (mA)">Imess</th>
+      <th scope="col" class="sub-header" title="Auslösezeit (ms)">tA</th>
+      <th scope="col" class="sub-header" title="Berührungsspannung (V)">UL</th>
+      <th scope="col" class="sub-header" title="Differenzstrom (mA)">I∆</th>
+    </tr>
+  `;
+}
+
+
+
+
+
+function renderStatusIcon(status) {
+  if (status === 'passed' || status === 'ok') return '✓';
+  if (status === 'failed' || status === 'error' || status === 'mängel') return '⚠';
+  return '○';
 }
 
 /**
@@ -567,9 +594,9 @@ export function renderResultsForm() {
 
       <fieldset>
         <legend>Nächster Prüfungstermin</legend>
-        ${renderTextField('prüfungsergebnis.nächsterPrüfungstermin', 'Nächster Prüfungstermin', results.nächsterPrüfungstermin, { 
-          placeholder: 'z.B. set./ 2027'
-        })}
+        ${renderTextField('prüfungsergebnis.nächsterPrüfungstermin', 'Nächster Prüfungstermin', results.nächsterPrüfungstermin, {
+    placeholder: 'z.B. set./ 2027'
+  })}
       </fieldset>
 
       <fieldset>
@@ -739,7 +766,7 @@ function renderTextField(fieldPath, label, value, options = {}) {
   const id = fieldPath.replace(/\./g, '-');
   const required = options.required ? 'required aria-required="true"' : '';
   const pattern = options.pattern ? `pattern="${options.pattern}"` : '';
-  
+
   return `
     <div class="form-group">
       <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
@@ -772,7 +799,7 @@ function renderDateField(fieldPath, label, value, options = {}) {
   const id = fieldPath.replace(/\./g, '-');
   const required = options.required ? 'required aria-required="true"' : '';
   const dateValue = value ? value.split('T')[0] : '';
-  
+
   return `
     <div class="form-group">
       <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
@@ -801,7 +828,7 @@ function renderDateField(fieldPath, label, value, options = {}) {
 function renderTextareaField(fieldPath, label, value, options = {}) {
   const id = fieldPath.replace(/\./g, '-');
   const required = options.required ? 'required aria-required="true"' : '';
-  
+
   return `
     <div class="form-group">
       <label for="${id}" class="form-label">${escapeHtml(label)}${options.required ? ' <span class="required" aria-hidden="true">*</span>' : ''}</label>
@@ -828,7 +855,7 @@ function renderTextareaField(fieldPath, label, value, options = {}) {
  */
 function renderSelectField(fieldPath, label, options, selected) {
   const id = fieldPath.replace(/\./g, '-');
-  
+
   return `
     <div class="form-group">
       <label for="${id}" class="form-label">${escapeHtml(label)}</label>
@@ -876,7 +903,7 @@ function renderCheckboxField(fieldId, checked, label) {
  */
 function renderRadioButtonGroup(fieldPath, options, selected) {
   const id = fieldPath.replace(/\./g, '-');
-  
+
   return options.map((opt, idx) => `
     <div class="radio-group-item">
       <input
@@ -904,10 +931,13 @@ function renderInspectionRow(fieldPath, label, value = {}) {
   const id = fieldPath.replace(/\./g, '-');
   const ioChecked = value?.io ? 'checked' : '';
   const nioChecked = value?.nio ? 'checked' : '';
-  
+
+  // Add tooltip for long labels that might be truncated
+  const titleAttr = label.length > 30 ? `title="${escapeHtml(label)}"` : '';
+
   return `
     <div class="inspection-row">
-      <span class="inspection-label">${escapeHtml(label)}</span>
+      <span class="inspection-label" ${titleAttr}>${escapeHtml(label)}</span>
       <span class="inspection-io">
         <input
           type="checkbox"
@@ -962,7 +992,7 @@ function getPhaseTypeLabel(phaseType) {
 function renderPositionRow(position, index) {
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
   const hasParent = position.parentCircuitId ? true : false;
-  
+
   return `
     <tr class="position-row${hasParent ? ' child-circuit' : ''}" data-pos-nr="${escapeHtml(position.posNr)}">
       <!-- Pos.Nr. -->
@@ -1268,7 +1298,7 @@ export function addPositionRow(position) {
   const tempTbody = document.createElement('tbody');
   tempTable.appendChild(tempTbody);
   tempTbody.innerHTML = renderPositionRow(position, tbody.children.length);
-  
+
   const newRow = tempTbody.querySelector('tr');
   if (newRow) {
     tbody.appendChild(newRow);
@@ -1300,7 +1330,7 @@ export function updatePositionRow(posNr, position) {
 
   const status = position.prüfergebnis?.status || 'nicht-geprüft';
   const hasParent = position.parentCircuitId ? true : false;
-  
+
   // Update row class for child circuits
   row.classList.toggle('child-circuit', hasParent);
 
@@ -1358,11 +1388,11 @@ function renderProgressIndicator(currentStep) {
   return `
     <nav class="progress-indicator" aria-label="Formular-Fortschritt">
       ${STEPS.map((step, idx) => {
-        const isActive = step === currentStep;
-        const isCompleted = STEPS.indexOf(step) < STEPS.indexOf(currentStep);
-        const stepLabel = STEP_LABELS[step] || step;
-        
-        return `
+    const isActive = step === currentStep;
+    const isCompleted = STEPS.indexOf(step) < STEPS.indexOf(currentStep);
+    const stepLabel = STEP_LABELS[step] || step;
+
+    return `
           <div class="progress-step ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
                data-step="${step}"
                role="button"
@@ -1373,7 +1403,7 @@ function renderProgressIndicator(currentStep) {
             <span class="step-label">${stepLabel}</span>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </nav>
   `;
 }
@@ -1388,7 +1418,7 @@ export function updateProgressIndicator(currentStep) {
     const stepName = stepEl.getAttribute('data-step');
     stepEl.classList.remove('active', 'completed');
     stepEl.setAttribute('aria-current', 'false');
-    
+
     if (stepName === currentStep) {
       stepEl.classList.add('active');
       stepEl.setAttribute('aria-current', 'step');
@@ -1497,7 +1527,7 @@ export function clearAllFieldErrors() {
  */
 export function displayMessage(type, message) {
   let container = document.getElementById(MESSAGE_CONTAINER_ID);
-  
+
   // Create container if it doesn't exist
   if (!container) {
     container = document.createElement('div');
@@ -1511,7 +1541,7 @@ export function displayMessage(type, message) {
   const div = document.createElement('div');
   div.className = `message message-${type}`;
   div.setAttribute('role', type === 'error' ? 'alert' : 'status');
-  
+
   div.innerHTML = `
     <span class="message-text">${escapeHtml(message)}</span>
     <button type="button" class="message-close" aria-label="Close message">&times;</button>
@@ -1616,7 +1646,7 @@ function attachPositionListeners() {
   // Create click handler for buttons
   // Note: add-child, delete etc are handled by handlers.js
   // We only handle view-parent for scrolling which is UI specific
-  tbody._positionClickHandler = function(e) {
+  tbody._positionClickHandler = function (e) {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
 
@@ -1671,7 +1701,7 @@ function attachDeviceSelectListener() {
       if (!deviceDataAttr) return;
 
       const deviceData = JSON.parse(deviceDataAttr);
-      
+
       // Populate the form fields with device data
       // Note: In the protokoll form:
       // - fabrikat = manufacturer/brand (e.g., "Fluke")

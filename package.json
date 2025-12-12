@@ -5,6 +5,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "serve": "python3 -m http.server 8080",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

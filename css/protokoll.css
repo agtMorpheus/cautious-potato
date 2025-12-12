@@ -406,27 +406,29 @@
 }
 
 /* ============================================
-   INSPECTION TABLE (Besichtigung/Erproben)
+   INSPECTION TABLE (Besichtigung/Erproben) - COMPACT VERSION
    ============================================ */
 
 .inspection-table {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-card);
+  /* Compact styling */
+  font-size: 0.85rem;
 }
 
 .inspection-header {
   display: grid;
-  grid-template-columns: 1fr 80px 80px;
-  gap: var(--space-md);
-  padding: 0.75rem var(--space-lg);
+  grid-template-columns: 1fr 60px 60px;
+  gap: var(--space-sm);
+  padding: 0.5rem var(--space-md);
   background-color: var(--bg-surface);
-  border-bottom: var(--border-width-medium) solid var(--border-base);
+  border-bottom: 1px solid var(--border-base);
   font-family: 'JetBrains Mono', monospace;
-  font-size: var(--font-size-xs);
+  font-size: 0.7rem;
   text-transform: uppercase;
   font-weight: 600;
   color: var(--text-secondary);
@@ -439,12 +441,14 @@
 
 .inspection-row {
   display: grid;
-  grid-template-columns: 1fr 80px 80px;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
+  grid-template-columns: 1fr 60px 60px;
+  gap: var(--space-sm);
+  padding: 0.4rem var(--space-md);
   border-bottom: 1px solid var(--border-light);
   align-items: center;
   transition: background 0.2s;
+  /* Compact row height */
+  min-height: 2.2rem;
 }
 
 .inspection-row:last-child {
@@ -456,9 +460,14 @@
 }
 
 .inspection-label {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-main);
   font-weight: 500;
+  line-height: 1.3;
+  /* Prevent text wrapping for better compactness */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inspection-io,
@@ -469,10 +478,12 @@
 }
 
 .inspection-checkbox {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
   cursor: pointer;
   accent-color: var(--primary-main);
+  /* Compact checkbox styling */
+  margin: 0;
 }
 
 /* ============================================
@@ -553,6 +564,472 @@
 }
 
 /* ============================================
+   COMPACT INSPECTION ENHANCEMENTS
+   ============================================ */
+
+/* Compact fieldset styling for inspection sections */
+.besichtigung-form fieldset,
+.erproben-form fieldset {
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+/* Reduce legend spacing for compact view */
+.besichtigung-form legend,
+.erproben-form legend {
+  margin-bottom: var(--space-xs);
+}
+
+.besichtigung-form .fieldset-description,
+.erproben-form .fieldset-description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-md);
+  line-height: 1.4;
+}
+
+/* Compact inspection table wrapper */
+.inspection-table {
+  margin-bottom: var(--space-md);
+}
+
+/* Two-column layout for desktop to save vertical space */
+@media (min-width: 1200px) {
+
+  .besichtigung-form .inspection-table,
+  .erproben-form .inspection-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: none;
+    background: transparent;
+  }
+
+  .besichtigung-form .inspection-header,
+  .erproben-form .inspection-header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 60px 60px;
+    border: 1px solid var(--border-base);
+    border-bottom: none;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .besichtigung-form .inspection-row,
+  .erproben-form .inspection-row {
+    border: 1px solid var(--border-base);
+    border-top: none;
+    background: var(--bg-card);
+  }
+
+  .besichtigung-form .inspection-row:nth-child(2),
+  .erproben-form .inspection-row:nth-child(2) {
+    border-top: 1px solid var(--border-base);
+  }
+
+  .besichtigung-form .inspection-row:nth-child(even),
+  .erproben-form .inspection-row:nth-child(even) {
+    border-left: none;
+  }
+
+  .besichtigung-form .inspection-row:nth-last-child(-n+2),
+  .erproben-form .inspection-row:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--border-base);
+  }
+
+  .besichtigung-form .inspection-row:last-child,
+  .erproben-form .inspection-row:last-child {
+    border-radius: 0 0 var(--radius-md) 0;
+  }
+
+  .besichtigung-form .inspection-row:nth-last-child(2),
+  .erproben-form .inspection-row:nth-last-child(2) {
+    border-radius: 0 0 0 var(--radius-md);
+  }
+}
+
+/* Tooltip for truncated labels on hover */
+.inspection-label[title] {
+  cursor: help;
+}
+
+/* Visual feedback for checked items */
+.inspection-row:has(.inspection-checkbox:checked) {
+  background-color: var(--bg-hover);
+  border-left: 3px solid var(--primary-main);
+}
+
+.inspection-row:has(.inspection-checkbox:checked) .inspection-label {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Compact checkbox group styling for inspection forms */
+.besichtigung-form .checkbox-group,
+.erproben-form .checkbox-group {
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.besichtigung-form .checkbox-group-item,
+.erproben-form .checkbox-group-item {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   METADATA FORM UNIFIED LAYOUT
+   ============================================ */
+
+/* Desktop unified form layout - removes card islands for better form flow */
+@media (min-width: 1024px) {
+  .protokoll-form.metadata-form {
+    display: block;
+    max-width: 1600px;
+    margin: 0 auto;
+    counter-reset: section-counter;
+  }
+}
+
+/* Ultra-wide 4-column optimization */
+@media (min-width: 1400px) {
+  .protokoll-form.metadata-form {
+    max-width: 1800px;
+  }
+
+  .protokoll-form.metadata-form .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md) var(--space-lg);
+  }
+
+  .protokoll-form.metadata-form .checkbox-group {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-sm) var(--space-md);
+  }
+}
+
+  /* Remove card-like styling for unified form appearance */
+  .protokoll-form.metadata-form fieldset {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: var(--space-lg) 0 !important;
+    margin-bottom: var(--space-xl) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    /* Add subtle bottom border for section separation */
+    border-bottom: 1px solid var(--border-light) !important;
+    position: relative;
+  }
+
+  /* Remove border from last fieldset */
+  .protokoll-form.metadata-form fieldset:last-of-type {
+    border-bottom: none;
+  }
+
+  /* Enhanced legend styling for unified form */
+  .protokoll-form.metadata-form legend {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 0 var(--space-md) 0 !important;
+    margin-bottom: var(--space-lg) !important;
+    width: 100% !important;
+    /* Add subtle underline for section identification */
+    border-bottom: 2px solid var(--primary-main) !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+  }
+
+  /* Add section numbering */
+  .protokoll-form.metadata-form legend::before {
+    content: counter(section-counter);
+    counter-increment: section-counter;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--primary-main);
+    color: var(--text-inverse);
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-right: var(--space-md);
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  /* Multi-column form fields within sections - 4-column layout */
+  .protokoll-form.metadata-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  /* Specific column layouts for different field types */
+  .protokoll-form.metadata-form .form-row.four-col {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+  }
+
+  .protokoll-form.metadata-form .form-row.three-col {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md) var(--space-lg);
+  }
+
+  .protokoll-form.metadata-form .form-row.two-col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg) var(--space-xl);
+  }
+
+  /* Enhanced form group spacing */
+  .protokoll-form.metadata-form .form-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  /* Checkbox groups in horizontal layout - 4-column support */
+  .protokoll-form.metadata-form .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-sm) var(--space-md);
+    margin: var(--space-md) 0;
+  }
+
+  /* Specific checkbox layouts */
+  .protokoll-form.metadata-form .checkbox-group.four-col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .protokoll-form.metadata-form .checkbox-group.three-col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Large tablet adjustments - 3-column fallback */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .protokoll-form.metadata-form .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-md) var(--space-lg);
+  }
+
+  .protokoll-form.metadata-form .form-row.four-col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .protokoll-form.metadata-form .checkbox-group {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+
+  .protokoll-form.metadata-form .checkbox-group.four-col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet and mobile responsive adjustments */
+@media (max-width: 1023px) {
+  .protokoll-form.metadata-form {
+    display: block !important;
+    max-width: none;
+  }
+
+  .protokoll-form.metadata-form fieldset {
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-xl) !important;
+    background-color: var(--bg-glass) !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: var(--shadow-md) !important;
+    margin-bottom: var(--space-xl) !important;
+  }
+
+  .protokoll-form.metadata-form legend {
+    font-size: 1.1rem !important;
+    color: var(--primary-main) !important;
+    background: var(--bg-body) !important;
+    border: 1px solid var(--border-base) !important;
+    border-radius: 4px !important;
+    padding: 0 var(--space-md) !important;
+  }
+
+  .protokoll-form.metadata-form legend::before {
+    display: none !important;
+  }
+
+  .protokoll-form.metadata-form .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: var(--space-lg) !important;
+  }
+}
+
+/* Form flow enhancements for desktop */
+@media (min-width: 1024px) {
+
+  /* Subtle section transitions */
+  .protokoll-form.metadata-form fieldset::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--primary-main), transparent 50%, var(--primary-main));
+    opacity: 0.3;
+  }
+
+  /* Enhanced focus flow for form inputs */
+  .protokoll-form.metadata-form .form-input:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    background-color: var(--bg-card);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Improved checkbox group styling */
+  .protokoll-form.metadata-form .checkbox-group-item {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    transition: all 0.2s ease;
+  }
+
+  .protokoll-form.metadata-form .checkbox-group-item:hover {
+    border-color: var(--primary-main);
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+  }
+
+  /* Section-specific legend colors for better organization */
+  .protokoll-form.metadata-form fieldset:nth-of-type(1) legend::before {
+    background: var(--primary-main);
+  }
+
+  .protokoll-form.metadata-form fieldset:nth-of-type(2) legend::before,
+  .protokoll-form.metadata-form fieldset:nth-of-type(3) legend::before {
+    background: var(--c-info);
+  }
+
+  .protokoll-form.metadata-form fieldset:nth-of-type(4) legend::before,
+  .protokoll-form.metadata-form fieldset:nth-of-type(5) legend::before {
+    background: var(--c-success);
+  }
+
+  .protokoll-form.metadata-form fieldset:nth-of-type(6) legend::before,
+  .protokoll-form.metadata-form fieldset:nth-of-type(7) legend::before {
+    background: var(--c-warning);
+  }
+
+  .protokoll-form.metadata-form fieldset:nth-of-type(8) legend::before,
+  .protokoll-form.metadata-form fieldset:nth-of-type(9) legend::before {
+    background: var(--c-danger);
+  }
+}
+
+/* Enhanced card styling for metadata form */
+.metadata-form fieldset {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  /* Subtle animation for layout changes */
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* 3-column specific enhancements */
+@media (min-width: 1200px) {
+  .metadata-form fieldset {
+    /* Slightly more compact padding for 3-column layout */
+    padding: var(--space-lg);
+    /* Enhanced shadow for better card separation */
+    box-shadow: var(--shadow-md), 0 0 0 1px rgba(var(--primary-rgb), 0.1);
+  }
+
+  .metadata-form fieldset:hover {
+    /* More pronounced hover effect for 3-column */
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(var(--primary-rgb), 0.2);
+  }
+
+  /* Column-specific visual enhancements */
+  .metadata-form fieldset:nth-child(3n+2) {
+    /* First column - slightly different background */
+    background-color: var(--bg-glass);
+  }
+
+  .metadata-form fieldset:nth-child(3n+3) {
+    /* Second column */
+    background-color: var(--bg-glass);
+  }
+
+  .metadata-form fieldset:nth-child(3n+4) {
+    /* Third column */
+    background-color: var(--bg-glass);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metadata-form fieldset:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-highlight);
+}
+
+/* Category indicators for better visual organization */
+.metadata-form fieldset::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-main), transparent);
+  opacity: 0.6;
+}
+
+/* Small tablet layout - single column but more compact */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .metadata-form fieldset {
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+}
+
+/* Ultra-wide screen optimization */
+@media (min-width: 1600px) {
+  .metadata-form {
+    /* Slightly wider gaps on very large screens */
+    gap: var(--space-lg) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .metadata-form fieldset {
+    /* More generous padding on ultra-wide screens */
+    padding: var(--space-xl);
+  }
+}
+
+/* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 
@@ -565,31 +1042,64 @@
     padding: 1.25rem;
   }
 
-  .progress-indicator {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-sm);
+  /* Reset 2-column layout on mobile */
+  .metadata-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-lg) !important;
   }
 
-  .progress-step {
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-
-  .positions-table th,
-  .positions-table td {
-    padding: 0.75rem;
-  }
-
-  .review-dl {
-    grid-template-columns: 1fr;
-    gap: var(--space-xs);
+  .metadata-form fieldset {
     margin-bottom: var(--space-md);
   }
+}
 
-  .review-dl dt {
-    margin-top: 0.75rem;
-  }
+.progress-indicator {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-sm);
+}
+
+.progress-step {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.positions-table th,
+.positions-table td {
+  padding: 0.75rem;
+}
+
+.review-dl {
+  grid-template-columns: 1fr;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.review-dl dt {
+  margin-top: 0.75rem;
+}
+
+/* Mobile inspection table adjustments */
+.inspection-header {
+  grid-template-columns: 1fr 50px 50px;
+  padding: 0.4rem var(--space-sm);
+  font-size: 0.65rem;
+}
+
+.inspection-row {
+  grid-template-columns: 1fr 50px 50px;
+  padding: 0.3rem var(--space-sm);
+  min-height: 2rem;
+}
+
+.inspection-label {
+  font-size: 0.8rem;
+}
+
+.inspection-checkbox {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 /* ============================================
@@ -599,19 +1109,20 @@
 .positions-table-wrapper {
   overflow-x: auto;
   overflow-y: visible;
+  /* Allow dropdowns to overflow if needed */
   border-radius: var(--radius-lg, 8px);
   border: 1px solid var(--border-glass);
   background: var(--bg-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  /* Enhanced horizontal scrolling for wide measurement table */
   width: 100%;
   max-width: 100%;
-  /* Smooth scrolling */
   scroll-behavior: smooth;
-  /* Custom scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: var(--primary-main) var(--bg-surface);
+  position: relative;
+  /* Ensure z-context for sticky columns */
+  isolation: isolate;
 }
 
 /* Webkit scrollbar styling */
@@ -630,38 +1141,230 @@
   border: 2px solid var(--bg-surface);
 }
 
-.positions-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
+.positions-table {
+  width: max-content;
+  /* Allow table to grow based on content */
+  min-width: 100%;
+  border-collapse: separate;
+  /* Required for sticky headers/columns */
+  border-spacing: 0;
+  font-size: 0.85rem;
+  color: var(--text-main);
 }
 
-.positions-table {
-  width: 100%;
-  min-width: 2000px; /* Reduced minimum width for better zoom */
-  border-collapse: collapse;
-  font-size: var(--font-size-xs); /* Reduced font size for more compact view */
-  color: var(--text-primary);
-  /* Compact table styling */
-  table-layout: fixed;
+/* Headers */
+.positions-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg-surface);
 }
 
 .positions-table th {
   background: var(--bg-surface);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   font-weight: 600;
-  padding: 0.5rem 0.375rem; /* Reduced padding for compact view */
-  text-align: left;
+  padding: 0.5rem 0.5rem;
+  text-align: center;
   border-bottom: 1px solid var(--border-glass);
+  border-right: 1px solid var(--border-light);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem; /* Smaller font size */
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.positions-table th.group-header {
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-card);
+  /* Slightly different for groups */
+}
+
+.positions-table th.sub-header {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: none;
+}
+
+/* Cells */
+.positions-table td {
+  padding: 0;
+  /* Cells contain inputs, remove padding */
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-glass);
+  vertical-align: middle;
+}
+
+.positions-table tr:hover td {
+  background-color: var(--bg-hover);
+}
+
+/* Sticky Columns */
+.col-fixed-left {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--bg-surface);
+  border-right: 2px solid var(--border-base);
+}
+
+.col-fixed-right {
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  background: var(--bg-surface);
+  border-left: 2px solid var(--border-base);
+}
+
+/* Sticky headers for fixed columns need higher z-index */
+.positions-table thead th.col-fixed-left,
+.positions-table thead th.col-fixed-right {
+  z-index: 30;
+  background: var(--bg-surface);
+}
+
+/* Row Hover on sticky columns */
+.positions-table tr:hover .col-fixed-left,
+.positions-table tr:hover .col-fixed-right {
+  background-color: var(--bg-hover);
+}
+
+/* cell specific widths */
+.cell-index {
+  text-align: center;
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  width: 50px;
+  min-width: 50px;
+}
+
+.cell-nr {
+  width: 60px;
+  min-width: 60px;
+}
+
+.cell-target {
+  min-width: 180px;
+}
+
+.cell-status {
+  width: 60px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.cell-actions {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Input Styling */
+.table-input {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  padding: 0.4rem 0.5rem;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-main);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.table-input:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-highlight);
+}
+
+.cell-target .table-input {
+  text-align: left;
+}
+
+.table-input:focus {
+  outline: none;
+  border-color: var(--primary-main);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+  color: var(--text-main);
+  z-index: 2;
+  position: relative;
+}
+
+.table-input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* Input wrappers */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+
+/* Child Indicator */
+.child-indicator {
+  color: var(--text-muted);
+  margin-right: 0.25rem;
+  font-family: monospace;
+}
+
+/* Status Indicator */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.2rem;
+}
+
+.status-passed {
+  color: var(--c-success);
+}
+
+.status-failed,
+.status-mängel {
+  color: var(--c-danger);
+}
+
+.status-open {
+  color: var(--text-muted);
+}
+
+/* Buttons in table */
+.cell-actions {
+  padding: 0.25rem;
+}
+
+.cell-actions .btn-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 0.9rem;
+}
+
+.positions-table th {
+  font-size: 0.7rem;
+  /* Smaller font size */
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap;
+  /* Prevent text wrapping */
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .positions-table td {
-  padding: 0.375rem 0.25rem; /* Reduced padding for compact view */
+  padding: 0.375rem 0.25rem;
+  /* Reduced padding for compact view */
   border-bottom: 1px solid var(--border-glass);
   vertical-align: middle;
   white-space: nowrap;
@@ -877,55 +1580,65 @@
   color: rgba(255, 255, 255, 0.5);
   color: var(--text-muted);
 }
+
 /* Compact column widths for measurement table */
-.positions-table thead tr:first-child th:nth-child(1),  /* Pos.Nr. */
+.positions-table thead tr:first-child th:nth-child(1),
+/* Pos.Nr. */
 .positions-table td:nth-child(1) {
   min-width: 100px;
   width: 100px;
 }
 
-.positions-table thead tr:first-child th:nth-child(2),  /* Nr. */
+.positions-table thead tr:first-child th:nth-child(2),
+/* Nr. */
 .positions-table td:nth-child(2) {
   min-width: 50px;
   width: 50px;
 }
 
-.positions-table thead tr:first-child th:nth-child(3),  /* Zielbezeichnung */
+.positions-table thead tr:first-child th:nth-child(3),
+/* Zielbezeichnung */
 .positions-table td:nth-child(3) {
   min-width: 150px;
   width: 150px;
 }
 
 /* Kabel/Leitung columns */
-.positions-table th:nth-child(4),  /* Kabel Typ */
+.positions-table th:nth-child(4),
+/* Kabel Typ */
 .positions-table td:nth-child(4),
-.positions-table th:nth-child(6),  /* Querschnitt */
+.positions-table th:nth-child(6),
+/* Querschnitt */
 .positions-table td:nth-child(6) {
   min-width: 80px;
   width: 80px;
 }
 
-.positions-table th:nth-child(5),  /* Leiter Anzahl */
+.positions-table th:nth-child(5),
+/* Leiter Anzahl */
 .positions-table td:nth-child(5) {
   min-width: 60px;
   width: 60px;
 }
 
 /* Measurement columns - compact width */
-.positions-table th:nth-child(n+7):nth-child(-n+23),  /* Measurement columns */
+.positions-table th:nth-child(n+7):nth-child(-n+23),
+/* Measurement columns */
 .positions-table td:nth-child(n+7):nth-child(-n+23) {
   min-width: 70px;
   width: 70px;
 }
 
 /* Status and Actions columns */
-.positions-table th:nth-child(24),  /* Status */
+.positions-table th:nth-child(24),
+/* Status */
 .positions-table td:nth-child(24) {
   min-width: 100px;
   width: 100px;
 }
 
-.positions-table th:nth-child(25),  /* Aktionen */
+.positions-table th:nth-child(25),
+/* Aktionen */
 .positions-table td:nth-child(25) {
   min-width: 120px;
   width: 120px;
@@ -934,10 +1647,14 @@
 /* Compact input styling for measurement table */
 .positions-table .table-input,
 .positions-table .table-select {
-  font-size: 0.7rem; /* Smaller font for compact view */
-  padding: 0.2rem 0.3rem; /* Reduced padding */
-  min-height: 24px; /* Smaller height */
-  border-radius: 3px; /* Smaller border radius */
+  font-size: 0.7rem;
+  /* Smaller font for compact view */
+  padding: 0.2rem 0.3rem;
+  /* Reduced padding */
+  min-height: 24px;
+  /* Smaller height */
+  border-radius: 3px;
+  /* Smaller border radius */
 }
 
 /* Header grouping styles */
@@ -968,12 +1685,14 @@
 
 .positions-table thead tr:first-child th:nth-child(2),
 .positions-table td:nth-child(2) {
-  left: 100px; /* Updated for compact width */
+  left: 100px;
+  /* Updated for compact width */
 }
 
 .positions-table thead tr:first-child th:nth-child(3),
 .positions-table td:nth-child(3) {
-  left: 150px; /* Updated for compact width */
+  left: 150px;
+  /* Updated for compact width */
 }
 
 /* Sticky actions column */
@@ -986,6 +1705,7 @@
   border-left: 1px solid var(--border-base);
   box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
 }
+
 /* Scroll indicators for better UX */
 .positions-section {
   position: relative;
@@ -1007,28 +1727,30 @@
 /* Enhanced mobile responsiveness */
 @media (max-width: 768px) {
   .positions-table {
-    min-width: 1800px; /* Reduced for mobile */
-    font-size: 0.65rem; /* Even smaller on mobile */
+    min-width: 1800px;
+    /* Reduced for mobile */
+    font-size: 0.65rem;
+    /* Even smaller on mobile */
   }
-  
+
   .positions-table th,
   .positions-table td {
     padding: 0.25rem 0.15rem;
   }
-  
+
   .positions-table .table-input,
   .positions-table .table-select {
     font-size: 0.65rem;
     padding: 0.15rem 0.2rem;
     min-height: 20px;
   }
-  
+
   /* Adjust sticky column positions for mobile */
   .positions-table thead tr:first-child th:nth-child(2),
   .positions-table td:nth-child(2) {
     left: 80px;
   }
-  
+
   .positions-table thead tr:first-child th:nth-child(3),
   .positions-table td:nth-child(3) {
     left: 120px;
@@ -1041,7 +1763,7 @@
     min-width: 1900px;
     font-size: 0.68rem;
   }
-  
+
   .positions-table th,
   .positions-table td {
     padding: 0.3rem 0.2rem;
@@ -1062,6 +1784,7 @@
 .positions-table tr:hover .table-select {
   background: var(--bg-input-hover, var(--bg-hover));
 }
+
 /* Scroll position indicator */
 .positions-table-wrapper {
   position: relative;
@@ -1089,10 +1812,10 @@
   content: "";
   position: absolute;
   top: 0;
-  left: 300px; /* After sticky columns */
+  left: 300px;
+  /* After sticky columns */
   width: 20px;
   height: 100%;
   background: linear-gradient(to right, var(--bg-card) 0%, transparent 100%);
   pointer-events: none;
   z-index: 5;
-}
