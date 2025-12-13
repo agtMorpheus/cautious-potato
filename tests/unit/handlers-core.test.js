@@ -237,7 +237,7 @@ describe('Event Handlers Core Logic', () => {
 
       await handleGenerateAbrechnung();
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
       expect(utils.createExportWorkbook).not.toHaveBeenCalled();
     });
 
@@ -269,7 +269,7 @@ describe('Event Handlers Core Logic', () => {
           generate: expect.objectContaining({ status: 'error' })
         })
       }));
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
     });
   });
 
@@ -296,7 +296,7 @@ describe('Event Handlers Core Logic', () => {
 
       await handleExportAbrechnung();
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
       expect(utilsExcel.createAndExportAbrechnungExcelJS).not.toHaveBeenCalled();
     });
 
@@ -322,7 +322,7 @@ describe('Event Handlers Core Logic', () => {
           export: expect.objectContaining({ status: 'error' })
         })
       }));
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
     });
   });
 
@@ -341,7 +341,7 @@ describe('Event Handlers Core Logic', () => {
     test('should error if no data provided', async () => {
       await handleExportProtokoll(null);
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
       expect(utilsProtokoll.createAndExportProtokoll).not.toHaveBeenCalled();
     });
 
@@ -350,7 +350,7 @@ describe('Event Handlers Core Logic', () => {
 
       await handleExportProtokoll(validProtokollData);
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
       expect(utilsProtokoll.createAndExportProtokoll).not.toHaveBeenCalled();
     });
 
@@ -367,7 +367,7 @@ describe('Event Handlers Core Logic', () => {
 
       expect(utilsProtokoll.validateProtokollData).toHaveBeenCalledWith(validProtokollData);
       expect(utilsProtokoll.createAndExportProtokoll).toHaveBeenCalled();
-      expect(document.querySelector('.alert-success')).not.toBeNull();
+      expect(document.querySelector('.toast--success')).not.toBeNull();
     });
 
     test('should handle export exception', async () => {
@@ -379,7 +379,7 @@ describe('Event Handlers Core Logic', () => {
         expect(e.message).toBe('Write failed');
       }
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
     });
   });
 });

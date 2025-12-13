@@ -121,55 +121,67 @@ describe('Event Handlers Module (handlers.js)', () => {
   });
 
   describe('showErrorAlert()', () => {
-    test('creates error alert in container', () => {
+    test('creates error toast in container', () => {
       showErrorAlert('Error', 'Something went wrong');
       
       const container = document.getElementById('alert-container');
-      const alerts = container.querySelectorAll('.alert-error');
-      expect(alerts).toHaveLength(1);
+      const toasts = container.querySelectorAll('.toast--error');
+      expect(toasts).toHaveLength(1);
     });
 
     test('sets correct title and message', () => {
       showErrorAlert('Test Error', 'This is a test message');
       
-      const alert = document.querySelector('.alert-error');
-      expect(alert.innerHTML).toContain('Test Error');
-      expect(alert.innerHTML).toContain('This is a test message');
+      const toast = document.querySelector('.toast--error');
+      expect(toast.innerHTML).toContain('Test Error');
+      expect(toast.innerHTML).toContain('This is a test message');
     });
 
     test('escapes HTML in title and message', () => {
       showErrorAlert('<script>bad</script>', '<img onerror="alert()">');
       
-      const alert = document.querySelector('.alert-error');
-      expect(alert.innerHTML).not.toContain('<script>');
-      expect(alert.innerHTML).toContain('&lt;script&gt;');
+      const toast = document.querySelector('.toast--error');
+      expect(toast.innerHTML).not.toContain('<script>');
+      expect(toast.innerHTML).toContain('&lt;script&gt;');
     });
 
     test('has close button', () => {
       showErrorAlert('Error', 'Message');
       
-      const closeBtn = document.querySelector('.alert-close');
+      const closeBtn = document.querySelector('.toast__close');
       expect(closeBtn).not.toBeNull();
     });
 
-    test('close button removes alert', () => {
+    test('close button removes toast', () => {
       showErrorAlert('Error', 'Message');
       
-      const closeBtn = document.querySelector('.alert-close');
+      const closeBtn = document.querySelector('.toast__close');
+
       closeBtn.click();
       
-      const alerts = document.querySelectorAll('.alert-error');
-      expect(alerts).toHaveLength(0);
+      const toast = document.querySelector('.toast--error');
+      // Toast has animation
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      // Simulate animation end
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--error')).toBeNull();
     });
 
     test('auto-dismisses after 8 seconds', () => {
       showErrorAlert('Error', 'Message');
       
-      expect(document.querySelectorAll('.alert-error')).toHaveLength(1);
+      const toast = document.querySelector('.toast--error');
+      expect(toast).not.toBeNull();
       
       jest.advanceTimersByTime(8000);
       
-      expect(document.querySelectorAll('.alert-error')).toHaveLength(0);
+      // Toast has animation
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      // Simulate animation end
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--error')).toBeNull();
     });
 
     test('logs error to console', () => {
@@ -189,54 +201,66 @@ describe('Event Handlers Module (handlers.js)', () => {
   });
 
   describe('showSuccessAlert()', () => {
-    test('creates success alert in container', () => {
+    test('creates success toast in container', () => {
       showSuccessAlert('Success', 'Operation completed');
       
       const container = document.getElementById('alert-container');
-      const alerts = container.querySelectorAll('.alert-success');
-      expect(alerts).toHaveLength(1);
+      const toasts = container.querySelectorAll('.toast--success');
+      expect(toasts).toHaveLength(1);
     });
 
     test('sets correct title and message', () => {
       showSuccessAlert('Test Success', 'This is a success message');
       
-      const alert = document.querySelector('.alert-success');
-      expect(alert.innerHTML).toContain('Test Success');
-      expect(alert.innerHTML).toContain('This is a success message');
+      const toast = document.querySelector('.toast--success');
+      expect(toast.innerHTML).toContain('Test Success');
+      expect(toast.innerHTML).toContain('This is a success message');
     });
 
     test('escapes HTML in title and message', () => {
       showSuccessAlert('<script>bad</script>', '<img onerror="alert()">');
       
-      const alert = document.querySelector('.alert-success');
-      expect(alert.innerHTML).not.toContain('<script>');
+      const toast = document.querySelector('.toast--success');
+      expect(toast.innerHTML).not.toContain('<script>');
     });
 
     test('has close button', () => {
       showSuccessAlert('Success', 'Message');
       
-      const closeBtn = document.querySelector('.alert-close');
+      const closeBtn = document.querySelector('.toast__close');
       expect(closeBtn).not.toBeNull();
     });
 
-    test('close button removes alert', () => {
+    test('close button removes toast', () => {
       showSuccessAlert('Success', 'Message');
       
-      const closeBtn = document.querySelector('.alert-close');
+      const closeBtn = document.querySelector('.toast__close');
+
       closeBtn.click();
       
-      const alerts = document.querySelectorAll('.alert-success');
-      expect(alerts).toHaveLength(0);
+      const toast = document.querySelector('.toast--success');
+      // Toast has animation
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      // Simulate animation end
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--success')).toBeNull();
     });
 
     test('auto-dismisses after 5 seconds', () => {
       showSuccessAlert('Success', 'Message');
       
-      expect(document.querySelectorAll('.alert-success')).toHaveLength(1);
+      const toast = document.querySelector('.toast--success');
+      expect(toast).not.toBeNull();
       
       jest.advanceTimersByTime(5000);
       
-      expect(document.querySelectorAll('.alert-success')).toHaveLength(0);
+      // Toast has animation
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      // Simulate animation end
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--success')).toBeNull();
     });
 
     test('logs to console', () => {
@@ -253,16 +277,17 @@ describe('Event Handlers Module (handlers.js)', () => {
   });
 
   describe('clearErrorAlerts()', () => {
-    test('removes all alerts from container', () => {
+    test('removes all toasts from container', () => {
       showErrorAlert('Error 1', 'Message 1');
       showErrorAlert('Error 2', 'Message 2');
       showSuccessAlert('Success', 'Message');
       
-      expect(document.querySelectorAll('.alert')).toHaveLength(3);
+      // Queries for any class starting with toast
+      expect(document.querySelectorAll('.toast')).toHaveLength(3);
       
       clearErrorAlerts();
       
-      expect(document.querySelectorAll('.alert')).toHaveLength(0);
+      expect(document.querySelectorAll('.toast')).toHaveLength(0);
     });
 
     test('handles empty container', () => {
@@ -497,7 +522,7 @@ describe('Event Handlers Module (handlers.js)', () => {
       
       await handleResetApplication();
       
-      const alerts = document.querySelectorAll('.alert');
+      const alerts = document.querySelectorAll('.toast');
       expect(alerts).toHaveLength(0);
     });
 
@@ -508,7 +533,7 @@ describe('Event Handlers Module (handlers.js)', () => {
 
       await handleResetApplication();
 
-      expect(document.querySelector('.alert-error')).not.toBeNull();
+      expect(document.querySelector('.toast--error')).not.toBeNull();
     });
   });
 
@@ -583,25 +608,25 @@ describe('Event Handlers Module (handlers.js)', () => {
     test('error alerts have correct ARIA role', () => {
       showErrorAlert('Error', 'Message');
       
-      const alert = document.querySelector('.alert-error');
-      expect(alert).not.toBeNull();
+      const toast = document.querySelector('.toast--error');
+      expect(toast).not.toBeNull();
       // Check either the property or the attribute
-      expect(alert.role || alert.getAttribute('role')).toBe('alert');
+      expect(toast.role || toast.getAttribute('role')).toBe('alert');
     });
 
     test('success alerts have correct ARIA role', () => {
       showSuccessAlert('Success', 'Message');
       
-      const alert = document.querySelector('.alert-success');
-      expect(alert).not.toBeNull();
+      const toast = document.querySelector('.toast--success');
+      expect(toast).not.toBeNull();
       // Check either the property or the attribute
-      expect(alert.role || alert.getAttribute('role')).toBe('status');
+      expect(toast.role || toast.getAttribute('role')).toBe('status');
     });
 
     test('close button has aria-label', () => {
       showErrorAlert('Error', 'Message');
       
-      const closeBtn = document.querySelector('.alert-close');
+      const closeBtn = document.querySelector('.toast__close');
       expect(closeBtn).not.toBeNull();
       expect(closeBtn.getAttribute('aria-label')).toBe('Close alert');
     });
@@ -631,7 +656,7 @@ describe('Event Handlers Module (handlers.js)', () => {
       
       expect(() => showErrorAlert('Long Error', longMessage)).not.toThrow();
       
-      const alert = document.querySelector('.alert-error');
+      const alert = document.querySelector('.toast--error');
       expect(alert).toBeDefined();
     });
 
@@ -642,41 +667,49 @@ describe('Event Handlers Module (handlers.js)', () => {
       expect(() => clearErrorAlerts()).not.toThrow();
     });
 
-    test('multiple alerts display correctly', () => {
+    test('multiple toasts display correctly', () => {
       showErrorAlert('Error 1', 'First error');
       showErrorAlert('Error 2', 'Second error');
       showSuccessAlert('Success', 'Operation completed');
       
-      const alerts = document.querySelectorAll('.alert');
-      expect(alerts.length).toBe(3);
+      const toasts = document.querySelectorAll('.toast');
+      expect(toasts.length).toBe(3);
     });
 
-    test('alert auto-dismiss timing is correct for errors', () => {
+    test('toast auto-dismiss timing is correct for errors', () => {
       showErrorAlert('Error', 'Message');
       
-      expect(document.querySelectorAll('.alert-error').length).toBe(1);
+      const toast = document.querySelector('.toast--error');
+      expect(toast).not.toBeNull();
       
       // Just before 8 seconds
       jest.advanceTimersByTime(7999);
-      expect(document.querySelectorAll('.alert-error').length).toBe(1);
+      expect(toast.classList.contains('toast--removing')).toBe(false);
       
       // At 8 seconds
       jest.advanceTimersByTime(1);
-      expect(document.querySelectorAll('.alert-error').length).toBe(0);
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--error')).toBeNull();
     });
 
-    test('alert auto-dismiss timing is correct for success', () => {
+    test('toast auto-dismiss timing is correct for success', () => {
       showSuccessAlert('Success', 'Message');
       
-      expect(document.querySelectorAll('.alert-success').length).toBe(1);
+      const toast = document.querySelector('.toast--success');
+      expect(toast).not.toBeNull();
       
       // Just before 5 seconds
       jest.advanceTimersByTime(4999);
-      expect(document.querySelectorAll('.alert-success').length).toBe(1);
+      expect(toast.classList.contains('toast--removing')).toBe(false);
       
       // At 5 seconds
       jest.advanceTimersByTime(1);
-      expect(document.querySelectorAll('.alert-success').length).toBe(0);
+      expect(toast.classList.contains('toast--removing')).toBe(true);
+
+      toast.dispatchEvent(new Event('animationend'));
+      expect(document.querySelector('.toast--success')).toBeNull();
     });
   });
 
