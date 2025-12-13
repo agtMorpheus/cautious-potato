@@ -559,27 +559,34 @@ export function showErrorAlert(title, message) {
     }
     
     const alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-error';
+    alertElement.className = 'toast toast--error';
     alertElement.role = 'alert';
     alertElement.innerHTML = `
-        <div class="alert-header">
-            <strong>${escapeHtml(title)}</strong>
-            <button class="alert-close" aria-label="Close alert">&times;</button>
+        <div class="toast__icon">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
         </div>
-        <div class="alert-body">
-            ${escapeHtml(message)}
+        <div class="toast__content">
+            <h4 class="toast__title">${escapeHtml(title)}</h4>
+            <p class="toast__message">${escapeHtml(message)}</p>
         </div>
+        <button class="toast__close" aria-label="Close alert">&times;</button>
     `;
     
     // Close button handler
-    alertElement.querySelector('.alert-close').addEventListener('click', () => {
-        alertElement.remove();
-    });
+    const closeBtn = alertElement.querySelector('.toast__close');
+    const removeToast = () => {
+        alertElement.classList.add('toast--removing');
+        alertElement.addEventListener('animationend', () => alertElement.remove());
+    };
+
+    closeBtn.addEventListener('click', removeToast);
     
     // Auto-dismiss after 8 seconds
     setTimeout(() => {
         if (alertElement.parentElement) {
-            alertElement.remove();
+            removeToast();
         }
     }, 8000);
     
@@ -602,27 +609,34 @@ export function showSuccessAlert(title, message) {
     }
     
     const alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-success';
+    alertElement.className = 'toast toast--success';
     alertElement.role = 'status';
     alertElement.innerHTML = `
-        <div class="alert-header">
-            <strong>${escapeHtml(title)}</strong>
-            <button class="alert-close" aria-label="Close alert">&times;</button>
+        <div class="toast__icon">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
         </div>
-        <div class="alert-body">
-            ${escapeHtml(message)}
+        <div class="toast__content">
+            <h4 class="toast__title">${escapeHtml(title)}</h4>
+            <p class="toast__message">${escapeHtml(message)}</p>
         </div>
+        <button class="toast__close" aria-label="Close alert">&times;</button>
     `;
     
     // Close button handler
-    alertElement.querySelector('.alert-close').addEventListener('click', () => {
-        alertElement.remove();
-    });
+    const closeBtn = alertElement.querySelector('.toast__close');
+    const removeToast = () => {
+        alertElement.classList.add('toast--removing');
+        alertElement.addEventListener('animationend', () => alertElement.remove());
+    };
+
+    closeBtn.addEventListener('click', removeToast);
     
     // Auto-dismiss after 5 seconds
     setTimeout(() => {
         if (alertElement.parentElement) {
-            alertElement.remove();
+            removeToast();
         }
     }, 5000);
     
