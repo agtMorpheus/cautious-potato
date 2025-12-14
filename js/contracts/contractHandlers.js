@@ -574,6 +574,7 @@ export function initializeContractEventListeners() {
     window._highlightPreviewRow = highlightPreviewRow;
     window._handleContractStatusChange = handleContractStatusChange;
     window._handleContractWorkerChange = handleContractWorkerChange;
+    window._handleContractSubviewChange = handleContractSubviewChange;
 
     // Sub-nav tab handlers
     const subNavButtons = document.querySelectorAll('.sub-nav-btn');
