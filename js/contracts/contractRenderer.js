@@ -490,8 +490,21 @@ export function renderContractList(contractState) {
                 </svg>
                 <p>Keine Verträge vorhanden</p>
                 <p class="text-muted">Importieren Sie eine Excel-Datei, um Verträge anzuzeigen.</p>
+                <button id="contract-empty-import-btn" type="button" class="btn btn--primary btn--sm" style="margin-top: 1rem;">
+                    Jetzt importieren
+                </button>
             </div>
         `;
+
+        // Attach event listener to avoid CSP issues with inline handlers
+        const importBtn = document.getElementById('contract-empty-import-btn');
+        if (importBtn) {
+            importBtn.addEventListener('click', () => {
+                if (window._handleContractSubviewChange) {
+                    window._handleContractSubviewChange('import');
+                }
+            });
+        }
         return;
     }
 
