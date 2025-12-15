@@ -880,21 +880,25 @@
                         </div>
                         <div class="card-body">
                             <!-- HR Navigation Tabs -->
-                            <nav class="hr-header__nav" style="margin-bottom: 1.5rem;">
-                                <button class="hr-nav-btn active" data-hr-tab="employees" title="Manage employees">
-                                    <span class="hr-nav-icon">👥</span>
+                            <nav class="hr-header__nav" style="margin-bottom: 1.5rem;" role="tablist" aria-label="HR Sections">
+                                <button class="hr-nav-btn active" data-hr-tab="employees" title="Manage employees"
+                                    role="tab" aria-selected="true" aria-controls="hr-employees-tab" id="hr-tab-btn-employees">
+                                    <span class="hr-nav-icon" aria-hidden="true">👥</span>
                                     <span class="hr-nav-label">Employees</span>
                                 </button>
-                                <button class="hr-nav-btn" data-hr-tab="attendance" title="Track attendance">
-                                    <span class="hr-nav-icon">📋</span>
+                                <button class="hr-nav-btn" data-hr-tab="attendance" title="Track attendance"
+                                    role="tab" aria-selected="false" aria-controls="hr-attendance-tab" id="hr-tab-btn-attendance">
+                                    <span class="hr-nav-icon" aria-hidden="true">📋</span>
                                     <span class="hr-nav-label">Attendance</span>
                                 </button>
-                                <button class="hr-nav-btn" data-hr-tab="schedule" title="Manage schedules">
-                                    <span class="hr-nav-icon">⏰</span>
+                                <button class="hr-nav-btn" data-hr-tab="schedule" title="Manage schedules"
+                                    role="tab" aria-selected="false" aria-controls="hr-schedule-tab" id="hr-tab-btn-schedule">
+                                    <span class="hr-nav-icon" aria-hidden="true">⏰</span>
                                     <span class="hr-nav-label">Schedule</span>
                                 </button>
-                                <button class="hr-nav-btn" data-hr-tab="vacation" title="Plan vacation">
-                                    <span class="hr-nav-icon">🏖️</span>
+                                <button class="hr-nav-btn" data-hr-tab="vacation" title="Plan vacation"
+                                    role="tab" aria-selected="false" aria-controls="hr-vacation-tab" id="hr-tab-btn-vacation">
+                                    <span class="hr-nav-icon" aria-hidden="true">🏖️</span>
                                     <span class="hr-nav-label">Vacation</span>
                                 </button>
                             </nav>
@@ -902,7 +906,7 @@
                             <!-- HR Tab Content -->
                             <div id="hr-tab-content">
                                 <!-- Employees Tab -->
-                                <div id="hr-employees-tab" class="hr-tab hr-tab--active">
+                                <div id="hr-employees-tab" class="hr-tab hr-tab--active" role="tabpanel" aria-labelledby="hr-tab-btn-employees" tabindex="0">
                                     <div class="hr-tab__header">
                                         <h4>Employee Management</h4>
                                         <button class="btn btn--primary" id="hr-add-employee-btn">
@@ -953,7 +957,7 @@
                                 </div>
 
                                 <!-- Attendance Tab -->
-                                <div id="hr-attendance-tab" class="hr-tab">
+                                <div id="hr-attendance-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-attendance" tabindex="0">
                                     <div class="hr-tab__header">
                                         <h4>Attendance Management</h4>
                                         <button class="btn btn--primary" id="hr-record-attendance-btn">
@@ -983,7 +987,7 @@
                                 </div>
 
                                 <!-- Schedule Tab -->
-                                <div id="hr-schedule-tab" class="hr-tab">
+                                <div id="hr-schedule-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-schedule" tabindex="0">
                                     <div class="hr-tab__header">
                                         <h4>Schedule Management</h4>
                                         <div style="display: flex; gap: 8px;">
@@ -1016,7 +1020,7 @@
                                 </div>
 
                                 <!-- Vacation Tab -->
-                                <div id="hr-vacation-tab" class="hr-tab">
+                                <div id="hr-vacation-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-vacation" tabindex="0">
                                     <div class="hr-tab__header">
                                         <h4>Vacation Planning</h4>
                                         <button class="btn btn--primary" id="hr-request-vacation-btn">

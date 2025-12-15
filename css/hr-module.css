@@ -340,3 +340,12 @@
 [data-color-scheme="dark"] .hr-modal__content {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
+/* ==================== HR Tabs Visibility ==================== */
+.hr-tab {
+  display: none;
+  animation: fadeIn 0.2s ease-out; /* Using fallback if var not available */
+}
+
+.hr-tab--active {
+  display: block;
+}

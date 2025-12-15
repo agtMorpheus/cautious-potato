@@ -104,7 +104,9 @@ function switchTab(tabName) {
   
   // Update nav button states
   document.querySelectorAll('.hr-nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.hrTab === tabName);
+    const isActive = btn.dataset.hrTab === tabName;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
   });
   
   // Update tab visibility

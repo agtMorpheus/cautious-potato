@@ -87,49 +87,53 @@ describe('HR Main Module', () => {
   const setupDOM = () => {
     document.body.innerHTML = `
       <!-- Navigation -->
-      <button class="hr-nav-btn" data-tab="employees" id="nav-employees">Employees</button>
-      <button class="hr-nav-btn" data-tab="attendance" id="nav-attendance">Attendance</button>
-      <button class="hr-nav-btn" data-tab="schedule" id="nav-schedule">Schedule</button>
-      <button class="hr-nav-btn" data-tab="vacation" id="nav-vacation">Vacation</button>
+      <nav class="hr-header__nav" role="tablist">
+          <button class="hr-nav-btn active" data-hr-tab="employees" id="hr-tab-btn-employees" role="tab" aria-selected="true" aria-controls="hr-employees-tab">Employees</button>
+          <button class="hr-nav-btn" data-hr-tab="attendance" id="hr-tab-btn-attendance" role="tab" aria-selected="false" aria-controls="hr-attendance-tab">Attendance</button>
+          <button class="hr-nav-btn" data-hr-tab="schedule" id="hr-tab-btn-schedule" role="tab" aria-selected="false" aria-controls="hr-schedule-tab">Schedule</button>
+          <button class="hr-nav-btn" data-hr-tab="vacation" id="hr-tab-btn-vacation" role="tab" aria-selected="false" aria-controls="hr-vacation-tab">Vacation</button>
+      </nav>
 
       <!-- Tabs -->
-      <div id="employees-tab" class="hr-tab">
-        <div id="employee-stats-container"></div>
-        <div id="employee-list-container"></div>
-        <div id="employees-empty" class="hidden"></div>
-      </div>
-      <div id="attendance-tab" class="hr-tab">
-        <div id="attendance-calendar-container"></div>
-        <div id="attendance-stats-container"></div>
-        <select id="attendance-employee-filter"></select>
-      </div>
-      <div id="schedule-tab" class="hr-tab">
-        <div id="schedule-grid-container"></div>
-        <div id="pending-approvals-container"></div>
-        <select id="schedule-employee-select"></select>
-        <input id="week-start-date" />
-      </div>
-      <div id="vacation-tab" class="hr-tab">
-        <div id="vacation-calendar-container"></div>
-        <div id="vacation-requests-container"></div>
-        <div id="vacation-balance-container"></div>
+      <div id="hr-tab-content">
+          <div id="hr-employees-tab" class="hr-tab hr-tab--active" role="tabpanel" aria-labelledby="hr-tab-btn-employees">
+            <div id="hr-employee-stats-container"></div>
+            <div id="hr-employee-list-container"></div>
+            <div id="hr-employees-empty" class="hidden"></div>
+          </div>
+          <div id="hr-attendance-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-attendance">
+            <div id="hr-attendance-calendar-container"></div>
+            <div id="hr-attendance-stats-container"></div>
+            <select id="hr-attendance-employee-filter"></select>
+          </div>
+          <div id="hr-schedule-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-schedule">
+            <div id="hr-schedule-grid-container"></div>
+            <div id="hr-pending-approvals-container"></div>
+            <select id="hr-schedule-employee-select"></select>
+            <input id="hr-week-start-date" />
+          </div>
+          <div id="hr-vacation-tab" class="hr-tab" role="tabpanel" aria-labelledby="hr-tab-btn-vacation">
+            <div id="hr-vacation-calendar-container"></div>
+            <div id="hr-vacation-requests-container"></div>
+            <div id="hr-vacation-balance-container"></div>
+          </div>
       </div>
 
       <!-- Actions -->
-      <button id="add-employee-btn">Add Employee</button>
-      <button id="add-employee-empty">Add Employee Empty</button>
-      <button id="record-attendance-btn">Record Attendance</button>
-      <button id="create-schedule-btn">Create Schedule</button>
-      <button id="request-vacation-btn">Request Vacation</button>
-      <button id="export-btn">Export</button>
+      <button id="hr-add-employee-btn">Add Employee</button>
+      <button id="hr-add-employee-empty">Add Employee Empty</button>
+      <button id="hr-record-attendance-btn">Record Attendance</button>
+      <button id="hr-create-schedule-btn">Create Schedule</button>
+      <button id="hr-request-vacation-btn">Request Vacation</button>
+      <button id="hr-export-btn">Export</button>
 
       <!-- Filters -->
-      <input id="employee-search" />
-      <select id="department-filter"></select>
-      <select id="status-filter"></select>
+      <input id="hr-employee-search" />
+      <select id="hr-department-filter"></select>
+      <select id="hr-status-filter"></select>
 
       <!-- Modals -->
-      <div id="employee-modal" class="hr-modal hidden">
+      <div id="employee-modal" class="hr-modal hidden" aria-hidden="true">
         <h2 id="employee-modal-title"></h2>
         <div id="employee-form-container">
           <form id="hr-employee-form">
@@ -138,11 +142,11 @@ describe('HR Main Module', () => {
             <button type="button" data-action="cancel">Cancel</button>
           </form>
         </div>
-        <button class="hr-modal__close">X</button>
+        <button class="modal__close">X</button>
         <div class="hr-modal__overlay"></div>
       </div>
 
-      <div id="attendance-modal" class="hr-modal hidden">
+      <div id="attendance-modal" class="hr-modal hidden" aria-hidden="true">
         <div id="attendance-form-container">
           <form id="hr-attendance-form">
             <input name="employeeId" value="emp-1" />
@@ -152,7 +156,7 @@ describe('HR Main Module', () => {
         </div>
       </div>
 
-      <div id="schedule-modal" class="hr-modal hidden">
+      <div id="schedule-modal" class="hr-modal hidden" aria-hidden="true">
         <div id="schedule-form-container">
             <form id="hr-schedule-form">
                 <input name="planned_0" value="8" />
@@ -163,7 +167,7 @@ describe('HR Main Module', () => {
         </div>
       </div>
 
-      <div id="vacation-modal" class="hr-modal hidden">
+      <div id="vacation-modal" class="hr-modal hidden" aria-hidden="true">
         <div id="vacation-form-container">
             <form id="hr-vacation-form">
                 <button type="submit">Submit</button>
@@ -238,10 +242,11 @@ describe('HR Main Module', () => {
       expect(hrState.setActiveTab).toHaveBeenCalledWith('attendance');
       expect(attendanceRenderer.renderAttendanceCalendar).toHaveBeenCalled();
 
-      const navBtn = document.getElementById('nav-attendance');
+      const navBtn = document.getElementById('hr-tab-btn-attendance');
       expect(navBtn.classList.contains('active')).toBe(true);
+      expect(navBtn.getAttribute('aria-selected')).toBe('true'); // Palette addition
 
-      const tab = document.getElementById('attendance-tab');
+      const tab = document.getElementById('hr-attendance-tab');
       expect(tab.classList.contains('hr-tab--active')).toBe(true);
     });
 
@@ -263,16 +268,16 @@ describe('HR Main Module', () => {
     test('openModal shows modal', () => {
       openModal('employee-modal');
       const modal = document.getElementById('employee-modal');
-      expect(modal.classList.contains('hidden')).toBe(false);
+      expect(modal.classList.contains('is-open')).toBe(true);
       expect(modal.getAttribute('aria-hidden')).toBe('false');
     });
 
     test('closeModal hides modal', () => {
       const modal = document.getElementById('employee-modal');
-      modal.classList.remove('hidden');
+      modal.classList.add('is-open');
 
       closeModal('employee-modal');
-      expect(modal.classList.contains('hidden')).toBe(true);
+      expect(modal.classList.contains('is-open')).toBe(false);
       expect(modal.getAttribute('aria-hidden')).toBe('true');
     });
   });
@@ -312,7 +317,7 @@ describe('HR Main Module', () => {
           initializeHrDashboard();
 
           // Trigger open modal
-          const addBtn = document.getElementById('add-employee-btn');
+          const addBtn = document.getElementById('hr-add-employee-btn');
           addBtn.click();
 
           const form = document.getElementById('hr-employee-form');
@@ -337,7 +342,7 @@ describe('HR Main Module', () => {
       test('Attendance form submission', () => {
           initializeHrDashboard();
 
-          const btn = document.getElementById('record-attendance-btn');
+          const btn = document.getElementById('hr-record-attendance-btn');
           btn.click();
 
           const form = document.getElementById('hr-attendance-form');
@@ -351,11 +356,11 @@ describe('HR Main Module', () => {
           switchTab('schedule'); // Populate select
 
           // Select employee first
-          const select = document.getElementById('schedule-employee-select');
+          const select = document.getElementById('hr-schedule-employee-select');
           select.value = 'emp-1';
           select.dispatchEvent(new Event('change'));
 
-          const btn = document.getElementById('create-schedule-btn');
+          const btn = document.getElementById('hr-create-schedule-btn');
           btn.click();
 
           const form = document.getElementById('hr-schedule-form');
@@ -367,7 +372,7 @@ describe('HR Main Module', () => {
       test('Vacation form submission', () => {
           initializeHrDashboard();
 
-          const btn = document.getElementById('request-vacation-btn');
+          const btn = document.getElementById('hr-request-vacation-btn');
           btn.click();
 
           const form = document.getElementById('hr-vacation-form');
@@ -381,7 +386,7 @@ describe('HR Main Module', () => {
       test('Nav buttons switch tabs', () => {
           initializeHrDashboard();
 
-          const btn = document.getElementById('nav-attendance');
+          const btn = document.getElementById('hr-tab-btn-attendance');
           btn.click();
 
           expect(hrState.setActiveTab).toHaveBeenCalledWith('attendance');
@@ -390,7 +395,7 @@ describe('HR Main Module', () => {
       test('Search filter updates state', () => {
           initializeHrDashboard();
 
-          const input = document.getElementById('employee-search');
+          const input = document.getElementById('hr-employee-search');
           input.value = 'SearchTerm';
           input.dispatchEvent(new Event('input'));
 
@@ -400,7 +405,7 @@ describe('HR Main Module', () => {
       test('Export button triggers export', () => {
           initializeHrDashboard();
 
-          const btn = document.getElementById('export-btn');
+          const btn = document.getElementById('hr-export-btn');
           btn.click();
 
           expect(hrHandlers.handleExportHrData).toHaveBeenCalled();
