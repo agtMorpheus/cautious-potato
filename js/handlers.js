@@ -544,47 +544,99 @@ export async function handleResetApplication() {
 // ==================== Phase 4.4: UI Helper Functions ====================
 
 /**
+ * Ensure the toast container exists and is styled correctly
+ * @returns {HTMLElement} The toast container
+ */
+function ensureToastContainer() {
+    let container = document.getElementById('alert-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'alert-container';
+        // Fixed positioning to stack toasts
+        container.style.cssText = 'position: fixed; top: var(--space-20); right: var(--space-20); z-index: 1000; display: flex; flex-direction: column; gap: var(--space-12); pointer-events: none;';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * Create and show a toast notification
+ * @param {string} type - 'success' or 'error'
+ * @param {string} title - Title text
+ * @param {string} message - Message text
+ * @param {number} duration - Auto-dismiss duration in ms
+ */
+function showToast(type, title, message, duration) {
+    const container = ensureToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    // Override fixed position from CSS to allow stacking in flex container
+    toast.style.position = 'relative';
+    toast.style.top = 'auto';
+    toast.style.right = 'auto';
+    toast.style.pointerEvents = 'auto';
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+    const iconSvg = type === 'success'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+
+    toast.innerHTML = `
+        <div class="toast__icon">${iconSvg}</div>
+        <div class="toast__content">
+            <div class="toast__title">${escapeHtml(title)}</div>
+            <div class="toast__message">${escapeHtml(message)}</div>
+        </div>
+        <button class="toast__close" aria-label="Close notification">&times;</button>
+    `;
+    
+    // Close handler
+    const closeBtn = toast.querySelector('.toast__close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            removeToast(toast);
+        });
+    }
+    
+    // Auto-dismiss
+    setTimeout(() => {
+        if (toast.parentElement) {
+            removeToast(toast);
+        }
+    }, duration);
+
+    container.appendChild(toast);
+}
+
+function removeToast(toast) {
+    toast.classList.add('toast--removing');
+
+    const removeHandler = () => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    };
+
+    toast.addEventListener('animationend', removeHandler);
+    
+    // Fallback if animation doesn't run
+    setTimeout(() => {
+         if (toast.parentElement) {
+            toast.remove();
+        }
+    }, 400);
+}
+
+/**
  * Display an error alert to the user - Phase 4.4
  * @param {string} title - Alert title
  * @param {string} message - Alert message
  * @returns {void}
  */
 export function showErrorAlert(title, message) {
-    const alertContainer = document.querySelector('#alert-container');
-    
-    if (!alertContainer) {
-        console.warn('Alert container not found. Falling back to alert()');
-        alert(`${title}: ${message}`);
-        return;
-    }
-    
-    const alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-error';
-    alertElement.role = 'alert';
-    alertElement.innerHTML = `
-        <div class="alert-header">
-            <strong>${escapeHtml(title)}</strong>
-            <button class="alert-close" aria-label="Close alert">&times;</button>
-        </div>
-        <div class="alert-body">
-            ${escapeHtml(message)}
-        </div>
-    `;
-    
-    // Close button handler
-    alertElement.querySelector('.alert-close').addEventListener('click', () => {
-        alertElement.remove();
-    });
-    
-    // Auto-dismiss after 8 seconds
-    setTimeout(() => {
-        if (alertElement.parentElement) {
-            alertElement.remove();
-        }
-    }, 8000);
-    
-    alertContainer.appendChild(alertElement);
     console.error(`${title}: ${message}`);
+    showToast('error', title, message, 8000);
 }
 
 /**
@@ -594,40 +646,8 @@ export function showErrorAlert(title, message) {
  * @returns {void}
  */
 export function showSuccessAlert(title, message) {
-    const alertContainer = document.querySelector('#alert-container');
-    
-    if (!alertContainer) {
-        console.log(`${title}: ${message}`);
-        return;
-    }
-    
-    const alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-success';
-    alertElement.role = 'status';
-    alertElement.innerHTML = `
-        <div class="alert-header">
-            <strong>${escapeHtml(title)}</strong>
-            <button class="alert-close" aria-label="Close alert">&times;</button>
-        </div>
-        <div class="alert-body">
-            ${escapeHtml(message)}
-        </div>
-    `;
-    
-    // Close button handler
-    alertElement.querySelector('.alert-close').addEventListener('click', () => {
-        alertElement.remove();
-    });
-    
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-        if (alertElement.parentElement) {
-            alertElement.remove();
-        }
-    }, 5000);
-    
-    alertContainer.appendChild(alertElement);
     console.log(`${title}: ${message}`);
+    showToast('success', title, message, 5000);
 }
 
 /**
